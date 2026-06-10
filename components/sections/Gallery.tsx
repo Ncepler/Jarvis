@@ -281,9 +281,13 @@ export function Gallery() {
     [projects.length, step, x],
   );
 
+  // where focus was when the preview opened — restored on close (a11y §10)
+  const lastTrigger = useRef<HTMLElement | null>(null);
+
   const openProject = useCallback(
     (project: Project) => {
       if (canHover) {
+        lastTrigger.current = document.activeElement as HTMLElement | null;
         setExpandedSlug(project.slug);
       } else if (project.url) {
         // mobile: never iframes — straight to the real site
@@ -322,7 +326,10 @@ export function Gallery() {
   };
 
   const expanded = projects.find((p) => p.slug === expandedSlug) ?? null;
-  const close = useCallback(() => setExpandedSlug(null), []);
+  const close = useCallback(() => {
+    setExpandedSlug(null);
+    lastTrigger.current?.focus();
+  }, []);
 
   return (
     <section id="work" className="overflow-hidden border-t border-line py-24 md:py-40">
@@ -351,12 +358,7 @@ export function Gallery() {
                 isActive
                 hidden={false}
                 reduced
-                onSelect={() =>
-                  canHover
-                    ? setExpandedSlug(p.slug)
-                    : p.url &&
-                      window.open(p.url, "_blank", "noopener,noreferrer")
-                }
+                onSelect={() => openProject(p)}
               />
             </div>
           ))}
