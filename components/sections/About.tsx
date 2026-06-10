@@ -12,8 +12,8 @@ export function About() {
           <p className="mt-16 max-w-xl text-lg leading-relaxed">
           We&apos;re a small web studio on {SITE.region.replace(", NY", "")}.
           We build sites for local businesses — flower shops, landscapers,
-          contractors — that look like they cost 10x what they did. The work
-          above is the pitch
+          contractors — and we care way too much about how they look. The
+          work above is the pitch
           {isTBD(SITE.instagram) ? (
             "."
           ) : (
