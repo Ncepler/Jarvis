@@ -1,13 +1,25 @@
-import { Logo } from "@/components/Logo";
-import { SITE } from "@/lib/site";
+import { Footer } from "@/components/Footer";
+import { SmoothScroll } from "@/components/SmoothScroll";
+import { About } from "@/components/sections/About";
+import { AllSites } from "@/components/sections/AllSites";
+import { Contact } from "@/components/sections/Contact";
+import { Gallery } from "@/components/sections/Gallery";
+import { Hero } from "@/components/sections/Hero";
+import { Services } from "@/components/sections/Services";
 
-// Scaffold placeholder — the real page shell lands in build step 2.
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-8">
-      <Logo size={36} />
-      <h1 className="font-display text-display">{SITE.name}</h1>
-      <p className="text-muted">{SITE.region}</p>
-    </main>
+    <>
+      <SmoothScroll />
+      <main>
+        <Hero />
+        <Services />
+        <Gallery />
+        <AllSites />
+        <About />
+        <Contact />
+      </main>
+      <Footer />
+    </>
   );
 }

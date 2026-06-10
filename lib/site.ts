@@ -6,3 +6,7 @@ export const SITE = {
   instagram: "INSTAGRAM_URL_TBD",
   region: "Long Island, NY",
 } as const;
+
+// True while a SITE value is still a placeholder — components use this to
+// avoid rendering broken links/strings before the brand exists.
+export const isTBD = (value: string) => value.endsWith("_TBD");
