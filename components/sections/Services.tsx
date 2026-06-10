@@ -1,7 +1,8 @@
 "use client";
 
 import { motion, useInView, useReducedMotion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useCanHover } from "@/lib/hooks";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -25,14 +26,6 @@ const PATHS = [
     copy: "The full treatment. We scope it together.",
   },
 ] as const;
-
-function useCanHover() {
-  const [canHover, setCanHover] = useState(true);
-  useEffect(() => {
-    setCanHover(window.matchMedia("(hover: hover)").matches);
-  }, []);
-  return canHover;
-}
 
 function PathCard({ path }: { path: (typeof PATHS)[number] }) {
   const reduced = useReducedMotion();
