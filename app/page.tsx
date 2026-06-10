@@ -1,4 +1,5 @@
 import { Footer } from "@/components/Footer";
+import { PinnedLogo } from "@/components/PinnedLogo";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { About } from "@/components/sections/About";
 import { AllSites } from "@/components/sections/AllSites";
@@ -11,6 +12,7 @@ export default function Home() {
   return (
     <>
       <SmoothScroll />
+      <PinnedLogo />
       <main>
         <Hero />
         <Services />
