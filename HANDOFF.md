@@ -13,16 +13,17 @@
   - PinnedLogo (IntersectionObserver on `#work`, watermark-weight, hidden <640px)
 
 ## In progress
-- Nothing half-finished. v1 UI per CLAUDE.md §6 is code-complete in static review: reduced-motion gating audited (Lenis init gated, gallery flat row + crossfade, services instant expand, hero CSS animations off, video no-autoplay), a11y audited (gallery arrows/Enter/Esc, focus into expanded view AND back to trigger on close, global :focus-visible, aria labels), SEO title/description stubbed with TODO(name).
+- Nothing half-finished. v1 UI per CLAUDE.md §6 is code-complete: reduced-motion gating audited, a11y audited (gallery arrows/Enter/Esc, focus in + back on close, :focus-visible, aria labels), SEO stubbed with TODO(name), scroll-reveal motion pass done (`components/Reveal.tsx` on all section headings, services stagger, all-sites rows).
 
 ## Next up (ordered) — everything here needs Noah or the live deploy
-1. Verify ALL features on live + phone-width + reduced-motion in a real browser — nothing is verified beyond builds + a curl of the live URL
-2. Iframe embed test with 2–3 REAL urls (riskiest assumption; current projects data is empty placeholders that render "In the works")
-3. Perf pass against §9 budget (needs deployed URL)
-4. Form backend once Noah decides (mailto fallback in place meanwhile)
-5. Fill `lib/projects.ts` as real style demos deploy (url, screenshot, embeddable verified manually)
+1. Verify ALL features on live + phone-width + reduced-motion in a real browser — nothing is verified beyond builds + curl
+2. Perf pass against §9 budget (needs deployed URL; note: 6 placeholder cards now load remote thum.io screenshots)
+3. Form backend once Noah decides (mailto fallback in place meanwhile)
+4. **Replace placeholder portfolio entries** in `lib/projects.ts` (Nike/Adidas/Apple/Patagonia/Terminal/Relats — Noah requested 2026-06-10 as stand-ins; MUST be swapped for real style demos before any prospect sees the site). Real entries need: url, own 16:10 webp screenshot in /public/work/, embeddable verified by header check, isStyleDemo flags (placeholders are all false, so the contact form's style select is currently hidden — it returns when real demos with isStyleDemo:true land)
 
 ## Gotchas & decisions
+- **Iframe embed test DONE (2026-06-10)** — the riskiest assumption is retired. Header check (`x-frame-options` / CSP `frame-ancestors`): nike, adidas, apple, stripe, linear, igloo.inc, lusion, area17 all BLOCK framing; patagonia, terminal-industries, relats ALLOW. Default `embeddable:false` confirmed correct; always verify per-site before flipping.
+- **Placeholder screenshots come from thum.io** (`image.thum.io` in next.config remotePatterns). WordPress mshots was tried first but 403s datacenter IPs (incl. Vercel's image optimizer). Both the remotePattern and the `shot()` helper in lib/projects.ts go away with the placeholders.
 - **Vercel 404 root cause (fixed 2026-06-10):** project was imported while main only had CLAUDE.md, so Vercel locked framework preset to "Other" → builds failed with `No Output Directory named "public"`. Fixed by `vercel.json` pinning `"framework": "nextjs"` — don't delete that file.
 - **Vercel Deployment Protection was ON by default** (401/SSO wall for anonymous visitors) — disabled 2026-06-10 via API (`ssoProtection: null`). If a new Vercel project is ever created, check this setting again.
 - Push gate is CLEARED — first deploy proven end-to-end; normal push-per-feature from now on.
