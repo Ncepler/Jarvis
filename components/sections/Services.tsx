@@ -2,6 +2,7 @@
 
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { useRef, useState } from "react";
+import { Reveal } from "@/components/Reveal";
 import { useCanHover } from "@/lib/hooks";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -108,10 +109,14 @@ export function Services() {
       className="border-t border-line px-6 py-24 md:px-10 md:py-40"
     >
       <div className="mx-auto max-w-6xl">
-        <h2 className="font-display text-title">Three ways in</h2>
+        <Reveal>
+          <h2 className="font-display text-title">Three ways in</h2>
+        </Reveal>
         <div className="mt-16 grid items-start gap-6 md:grid-cols-3">
-          {PATHS.map((path) => (
-            <PathCard key={path.key} path={path} />
+          {PATHS.map((path, i) => (
+            <Reveal key={path.key} delay={i * 0.09}>
+              <PathCard path={path} />
+            </Reveal>
           ))}
         </div>
       </div>

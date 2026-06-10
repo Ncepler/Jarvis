@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Reveal } from "@/components/Reveal";
 import { styleDemos } from "@/lib/projects";
 import { SITE, isTBD } from "@/lib/site";
 
@@ -70,11 +71,16 @@ export function Contact() {
       className="border-t border-line px-6 py-24 md:px-10 md:py-40"
     >
       <div className="mx-auto max-w-6xl">
-        <h2 className="font-display text-title">Start a project</h2>
-        <p className="mt-4 max-w-md text-muted">
-          Tell us about your business. We reply within a day.
-        </p>
+        <Reveal>
+          <h2 className="font-display text-title">Start a project</h2>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <p className="mt-4 max-w-md text-muted">
+            Tell us about your business. We reply within a day.
+          </p>
+        </Reveal>
 
+        <Reveal delay={0.18}>
         {status === "sent" ? (
           <p className="mt-16 max-w-md text-lg">
             Got it — we&apos;ll reply within a day.
@@ -181,6 +187,7 @@ export function Contact() {
             </button>
           </form>
         )}
+        </Reveal>
       </div>
     </section>
   );

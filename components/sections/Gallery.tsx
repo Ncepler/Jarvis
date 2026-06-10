@@ -11,6 +11,7 @@ import {
   type MotionValue,
 } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Reveal } from "@/components/Reveal";
 import { useCanHover } from "@/lib/hooks";
 import { orderedProjects, type Project } from "@/lib/projects";
 
@@ -334,10 +335,14 @@ export function Gallery() {
   return (
     <section id="work" className="overflow-hidden border-t border-line py-24 md:py-40">
       <div className="mx-auto max-w-6xl px-6 md:px-10">
-        <h2 className="font-display text-title">The work</h2>
-        <p className="mt-4 max-w-md text-muted">
-          Styles we build from, and the sites that came out of them.
-        </p>
+        <Reveal>
+          <h2 className="font-display text-title">The work</h2>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <p className="mt-4 max-w-md text-muted">
+            Styles we build from, and the sites that came out of them.
+          </p>
+        </Reveal>
       </div>
 
       {reduced ? (

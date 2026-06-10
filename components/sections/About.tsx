@@ -1,11 +1,15 @@
+import { Reveal } from "@/components/Reveal";
 import { SITE, isTBD } from "@/lib/site";
 
 export function About() {
   return (
     <section id="about" className="border-t border-line px-6 py-24 md:px-10 md:py-40">
       <div className="mx-auto max-w-6xl">
-        <h2 className="font-display text-title">About</h2>
-        <p className="mt-16 max-w-xl text-lg leading-relaxed">
+        <Reveal>
+          <h2 className="font-display text-title">About</h2>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <p className="mt-16 max-w-xl text-lg leading-relaxed">
           We&apos;re a small web studio on {SITE.region.replace(", NY", "")}.
           We build sites for local businesses — flower shops, landscapers,
           contractors — that look like they cost 10x what they did. The work
@@ -26,7 +30,8 @@ export function About() {
               .
             </>
           )}
-        </p>
+          </p>
+        </Reveal>
       </div>
     </section>
   );
