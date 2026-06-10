@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0b0b0c;
+  --color-ink: #f4f2ed;
+  --color-muted: #8a8782;
+  --color-line: rgba(244, 242, 237, 0.12);
+  /* --color-accent: undecided until the brand exists — monochrome until then */
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --text-display: clamp(3.5rem, 9vw, 9rem);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.03em;
+  --text-title: clamp(2rem, 5vw, 4rem);
+  --text-title--line-height: 1.1;
+  --text-title--letter-spacing: -0.02em;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-instrument-serif);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
