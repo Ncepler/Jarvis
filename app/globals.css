@@ -1,10 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0b0b0c;
+  /* lifted from #0b0b0c on Noah's call (2026-06-10, "too dark") —
+     still cinematic, just not crushed black */
+  --color-bg: #161618;
+  --color-surface: #1f1f22;
   --color-ink: #f4f2ed;
-  --color-muted: #8a8782;
-  --color-line: rgba(244, 242, 237, 0.12);
+  --color-muted: #a6a29b;
+  --color-line: rgba(244, 242, 237, 0.18);
   /* --color-accent: undecided until the brand exists — monochrome until then */
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);

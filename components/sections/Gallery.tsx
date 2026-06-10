@@ -6,6 +6,7 @@ import {
   animate,
   motion,
   useMotionValue,
+  useMotionValueEvent,
   useReducedMotion,
   useTransform,
   type MotionValue,
@@ -71,7 +72,7 @@ function GalleryCard({
       type="button"
       layoutId={reduced ? undefined : `gallery-${project.slug}`}
       aria-label={`${project.name}, ${project.priceLabel}`}
-      className="relative shrink-0 cursor-pointer overflow-hidden border border-line"
+      className="relative shrink-0 cursor-pointer overflow-hidden border border-line bg-surface"
       style={
         reduced
           ? { width }
@@ -80,7 +81,7 @@ function GalleryCard({
       onTap={() => onSelect(index)}
     >
       <div className="relative aspect-[16/10]">
-        <CardFace project={project} sizes="(max-width: 768px) 72vw, 400px" />
+        <CardFace project={project} sizes="(max-width: 768px) 78vw, 860px" />
       </div>
       {/* name + price tag slide in a beat after the card settles */}
       <motion.div
@@ -251,11 +252,19 @@ export function Gallery() {
   const [active, setActive] = useState(0);
   const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
 
-  const cardW = Math.min(containerW * 0.72, 400) || 340;
+  const cardW = Math.min(containerW * 0.78, 860) || 340;
   const step = cardW + GAP;
   const sidePad = Math.max((containerW - cardW) / 2, 24);
 
   const x = useMotionValue(0);
+
+  // which card is nearest center RIGHT NOW — tracks continuously during the
+  // drag (not just on snap) so the backdrop and labels follow the scroll
+  const [centerIdx, setCenterIdx] = useState(0);
+  useMotionValueEvent(x, "change", (v) => {
+    const i = Math.max(0, Math.min(projects.length - 1, Math.round(-v / step)));
+    if (i !== centerIdx) setCenterIdx(i);
+  });
 
   useEffect(() => {
     const el = regionRef.current;
@@ -332,9 +341,42 @@ export function Gallery() {
     lastTrigger.current?.focus();
   }, []);
 
+  const backdrop = projects[centerIdx];
+
   return (
-    <section id="work" className="overflow-hidden border-t border-line py-24 md:py-40">
-      <div className="mx-auto max-w-6xl px-6 md:px-10">
+    <section
+      id="work"
+      className="relative overflow-hidden border-t border-line py-24 md:py-40"
+    >
+      {/* the active site's homepage fills the screen behind the row,
+          crossfading as cards pass through center */}
+      {!reduced && (
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={backdrop.slug}
+              className="absolute inset-0"
+              initial={{ opacity: 0, scale: 1.06 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: EASE }}
+            >
+              {backdrop.screenshot && (
+                <Image
+                  src={backdrop.screenshot}
+                  alt=""
+                  fill
+                  sizes="100vw"
+                  className="object-cover object-top opacity-25"
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+          <div className="absolute inset-0 bg-linear-to-b from-bg via-bg/40 to-bg" />
+        </div>
+      )}
+
+      <div className="relative mx-auto max-w-6xl px-6 md:px-10">
         <Reveal>
           <h2 className="font-display text-title">The work</h2>
         </Reveal>
@@ -374,7 +416,7 @@ export function Gallery() {
           tabIndex={0}
           role="group"
           aria-label="Portfolio gallery. Drag or use arrow keys to browse, Enter to open."
-          className="mt-16"
+          className="relative mt-16"
           onKeyDown={onKeyDown}
         >
           <motion.div
@@ -403,7 +445,7 @@ export function Gallery() {
                 x={x}
                 step={step}
                 width={cardW}
-                isActive={i === active}
+                isActive={i === centerIdx}
                 hidden={expandedSlug === p.slug}
                 reduced={false}
                 onSelect={onSelect}
