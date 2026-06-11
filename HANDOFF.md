@@ -1,5 +1,11 @@
 # HANDOFF — updated 2026-06-11 (second session of the day)
 
+## Latest: demo upgrade pass (commit 6a954cd)
+Noah: demos "too blocky, need more, I'm selling these." All six rebuilt per the skills:
+- `components/demos/shared.tsx` — demo-only motion kit: `Rise` (Motion whileInView scroll reveal) + `Marquee` (pure-CSS seamless ticker, two copies translating -50%, linear). Both reduced-motion aware. Demos stay self-contained otherwise.
+- Each demo now has: scroll-staggered section reveals, a ticker, hover lifts/row slides (Tailwind v4 hover: is already hover-capable-only), organic/asymmetric layout instead of identical card grids (impeccable ban), and a signature piece — lawncare drifting clouds + rotated scene + "Mowing since sunrise" badge; powerwash self-wiping before/after (animated clip-path) + angled section edges + numbered service rows; florist falling petals + three different offering shapes; bakery rotating "BAKED FRESH DAILY" stamp (SVG textPath); barber ghost "Sharp." outline behind hero + spinning pole; landscaping three arched garden panels + serif materials ticker + pull quote explicitly labeled "sample quote for this demo" (integrity rule: no fake testimonials presented as real).
+- Perf watch: every demo mounts 2-3× (card thumb, backdrop, panel) and now carries reveals + tickers. Build is clean; REAL phone check still pending.
+
 ## Current state
 - Deployed: https://jarvis-nceplers-projects.vercel.app — push to main auto-deploys
 - Builds clean: yes (build + tsc + lint pass)
