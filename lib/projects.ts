@@ -1,14 +1,18 @@
 // ── ADDING A SITE TO THE GALLERY ────────────────────────────────────────
-// 1. Add an entry to `projects` below (copy any existing one).
-// 2. Get the homepage code in, either way works:
-//      a. run:  node scripts/mirror.mjs <slug> <url>
-//      b. or create public/previews/<slug>.html yourself and paste the
-//         homepage's full HTML into it (view-source on the live page),
-//         then add <base href="https://the-site.com/"> right after <head>.
-// 3. Set `preview: "/previews/<slug>.html"` on the entry. Done — the
-//    gallery iframes that file, interactive, on desktop and mobile.
-// If `preview` is empty the panel falls back to a live iframe of `url`
-// (desktop only, needs embeddable:true), then to `screenshotFull`.
+// Best way — physically integrated (our own builds):
+//   1. Drop the homepage as a React component in components/demos/
+//      (see LawnCareDemo.tsx — self-contained, all colors local).
+//   2. Register it under the project's slug in components/demos/index.ts.
+//   3. Add an entry to `projects` below. The gallery renders the real
+//      component inline — card thumbnail, backdrop, and open panel.
+// Fallback — mirrored HTML (third-party / not-yet-ported sites):
+//   1. Run  node scripts/mirror.mjs <slug> <url>  (or create
+//      public/previews/<slug>.html, paste the page's view-source HTML,
+//      add <base href="https://the-site.com/"> right after <head>).
+//   2. Set `preview: "/previews/<slug>.html"` on the entry. The panel
+//      shows it seamlessly (auto-height, page-scroll, no inner tab).
+// If both are absent: live iframe of `url` (desktop, embeddable:true),
+// then `screenshotFull`.
 
 export type Project = {
   slug: string; // also used as the contact form's style reference (style_slug)
@@ -40,6 +44,20 @@ const fullShot = (url: string) =>
 // / CSP frame-ancestors): nike, allbirds, apple block framing; patagonia,
 // terminal-industries, relats allow it.
 export const projects: Project[] = [
+  {
+    // our own style demo — rendered inline from components/demos (no iframe)
+    slug: "demo-lawncare",
+    name: "Lawn care",
+    url: "",
+    screenshot: "",
+    screenshotFull: "",
+    preview: "",
+    tier: "template",
+    priceLabel: "~$300 · template",
+    order: 0,
+    embeddable: false,
+    isStyleDemo: true,
+  },
   {
     slug: "ph-nike",
     name: "Nike",

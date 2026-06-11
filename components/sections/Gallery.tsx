@@ -12,15 +12,57 @@ import {
   type MotionValue,
 } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { demos } from "@/components/demos";
 import { Reveal } from "@/components/Reveal";
 import { useCanHover } from "@/lib/hooks";
 import { orderedProjects, type Project } from "@/lib/projects";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const GAP = 24;
+const DEMO_DESIGN_W = 1280; // inline demos are laid out at this width, then scaled
+
+// The real demo component scaled down to fit a container — a live
+// thumbnail, not a screenshot.
+function DemoScaled({
+  slug,
+  width,
+}: {
+  slug: string;
+  width: number;
+}) {
+  const Demo = demos[slug];
+  if (!Demo || width <= 0) return null;
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 overflow-hidden"
+    >
+      <div
+        style={{
+          width: DEMO_DESIGN_W,
+          transform: `scale(${width / DEMO_DESIGN_W})`,
+          transformOrigin: "top left",
+        }}
+      >
+        <Demo />
+      </div>
+    </div>
+  );
+}
 
 // What the card shows in the row.
-function CardFace({ project, sizes }: { project: Project; sizes: string }) {
+function CardFace({
+  project,
+  width,
+  sizes,
+}: {
+  project: Project;
+  width: number;
+  sizes: string;
+}) {
+  if (demos[project.slug]) {
+    return <DemoScaled slug={project.slug} width={width} />;
+  }
   if (!project.screenshot) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-surface">
@@ -35,6 +77,66 @@ function CardFace({ project, sizes }: { project: Project; sizes: string }) {
       fill
       sizes={sizes}
       className="object-cover"
+    />
+  );
+}
+
+// Same-origin mirrored pages: size the iframe to its full content height so
+// it reads as one continuous page — the visitor scrolls OUR page and flows
+// straight through the demo, no inner scrollbar, no tab-in-a-tab. The
+// cross-origin live fallback can't be measured and stays a fixed window.
+function AutoFrame({ src, title }: { src: string; title: string }) {
+  const ref = useRef<HTMLIFrameElement>(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    const frame = ref.current;
+    if (!frame) return;
+    let ro: ResizeObserver | null = null;
+    const measure = () => {
+      try {
+        const doc = frame.contentDocument;
+        if (!doc) return;
+        const h = Math.max(
+          doc.documentElement?.scrollHeight ?? 0,
+          doc.body?.scrollHeight ?? 0,
+        );
+        if (h > 200) setHeight(h);
+      } catch {
+        // cross-origin — keep the fixed-height fallback
+      }
+    };
+    const onLoad = () => {
+      measure();
+      try {
+        const body = frame.contentDocument?.body;
+        if (body) {
+          ro = new ResizeObserver(measure);
+          ro.observe(body);
+        }
+      } catch {
+        // cross-origin
+      }
+    };
+    frame.addEventListener("load", onLoad);
+    if (frame.contentDocument?.readyState === "complete") onLoad();
+    return () => {
+      frame.removeEventListener("load", onLoad);
+      ro?.disconnect();
+    };
+  }, [src]);
+
+  return (
+    <iframe
+      ref={ref}
+      src={src}
+      title={title}
+      // mirrored copies run the original site's scripts — sandbox without
+      // allow-top-navigation so frame-busting can't hijack our page
+      sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+      scrolling={height ? "no" : "yes"}
+      className="block w-full border-0"
+      style={{ height: height || "85vh" }}
     />
   );
 }
@@ -77,7 +179,11 @@ function GalleryCard({
       onTap={() => onSelect(index)}
     >
       <div className="relative aspect-[16/10]">
-        <CardFace project={project} sizes="(max-width: 768px) 72vw, 480px" />
+        <CardFace
+          project={project}
+          width={width}
+          sizes="(max-width: 768px) 72vw, 480px"
+        />
       </div>
       {/* name + price tag slide in a beat after the card settles */}
       <motion.div
@@ -99,11 +205,11 @@ function GalleryCard({
   );
 }
 
-// The selected card's homepage, inline below the row — scroll down and the
-// exact page is right there. Preferred source is the mirrored copy in
-// /public/previews (our origin, so framing can't be blocked — works on
-// mobile too); falls back to a live iframe of the real URL on desktop when
-// the site allows framing, then to the full-length capture.
+// The selected card's homepage, full-bleed below the row, physically part
+// of this page. Source order: registered demo component (rendered inline,
+// no iframe at all) → mirrored copy from /public/previews in a seamless
+// auto-height frame → live iframe of the real URL (desktop, embeddable
+// sites only) → full-length capture.
 function HomepagePanel({
   project,
   reduced,
@@ -131,6 +237,7 @@ function HomepagePanel({
     return () => window.removeEventListener("keydown", onKey);
   }, [project.slug, reduced, onClose]);
 
+  const Demo = demos[project.slug];
   const frameSrc =
     project.preview ||
     (canHover && project.embeddable && project.url ? project.url : "");
@@ -144,13 +251,14 @@ function HomepagePanel({
       ref={ref}
       role="region"
       aria-label={`${project.name} homepage`}
-      className="mx-auto mt-12 w-[min(96vw,1400px)] scroll-mt-6"
+      className="mt-12 w-full scroll-mt-6"
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, transition: { duration: 0.2 } }}
       transition={reduced ? { duration: 0.2 } : { duration: 0.6, ease: EASE }}
     >
-      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 border border-b-0 border-line bg-surface px-5 py-4">
+      <div className="border-y border-line bg-surface">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-baseline gap-x-6 gap-y-2 px-6 py-4 md:px-10">
         <motion.span
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -210,18 +318,15 @@ function HomepagePanel({
             Close
           </motion.button>
         </span>
+        </div>
       </div>
 
-      <div className="overflow-hidden border border-line bg-surface">
-        {frameSrc ? (
-          <iframe
-            src={frameSrc}
-            title={`Homepage of ${project.name}`}
-            // mirrored copies run the original site's scripts — sandbox
-            // without allow-top-navigation so frame-busting can't hijack us
-            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-            className="h-[85vh] w-full border-0"
-          />
+      <div className="border-b border-line bg-surface">
+        {Demo ? (
+          // our own build — the homepage IS part of this page, no iframe
+          <Demo />
+        ) : frameSrc ? (
+          <AutoFrame src={frameSrc} title={`Homepage of ${project.name}`} />
         ) : project.screenshotFull ? (
           // full-page capture has an unknown intrinsic height, which next/image requires
           // eslint-disable-next-line @next/next/no-img-element
@@ -352,7 +457,7 @@ export function Gallery() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.8, ease: EASE }}
             >
-              {backdrop.screenshot && (
+              {backdrop.screenshot ? (
                 <Image
                   src={backdrop.screenshot}
                   alt=""
@@ -360,6 +465,10 @@ export function Gallery() {
                   sizes="100vw"
                   className="object-cover object-top opacity-25"
                 />
+              ) : (
+                <div className="absolute inset-0 opacity-25">
+                  <DemoScaled slug={backdrop.slug} width={containerW} />
+                </div>
               )}
             </motion.div>
           </AnimatePresence>
