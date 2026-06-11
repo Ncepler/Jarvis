@@ -321,26 +321,30 @@ function HomepagePanel({
         </div>
       </div>
 
-      <div className="border-b border-line bg-surface">
-        {Demo ? (
-          // our own build — the homepage IS part of this page, no iframe
-          <Demo />
-        ) : frameSrc ? (
-          <AutoFrame src={frameSrc} title={`Homepage of ${project.name}`} />
-        ) : project.screenshotFull ? (
-          // full-page capture has an unknown intrinsic height, which next/image requires
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={project.screenshotFull}
-            alt={`Full homepage of ${project.name}`}
-            className="w-full"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex h-[40vh] items-center justify-center text-sm text-muted">
-            In the works
-          </div>
-        )}
+      {/* slim gutter of our own bg + hairline around the homepage — a quiet
+          reminder you're browsing it from inside this site (Noah 2026-06-11) */}
+      <div className="border-b border-line bg-bg p-3 md:px-6 md:py-5">
+        <div className="overflow-hidden border border-line">
+          {Demo ? (
+            // our own build — the homepage IS part of this page, no iframe
+            <Demo />
+          ) : frameSrc ? (
+            <AutoFrame src={frameSrc} title={`Homepage of ${project.name}`} />
+          ) : project.screenshotFull ? (
+            // full-page capture has an unknown intrinsic height, which next/image requires
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={project.screenshotFull}
+              alt={`Full homepage of ${project.name}`}
+              className="w-full"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-[40vh] items-center justify-center text-sm text-muted">
+              In the works
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );

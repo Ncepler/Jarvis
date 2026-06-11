@@ -28,24 +28,50 @@ export type Project = {
   isStyleDemo: boolean; // true = our own template demo, not a client site
 };
 
-// real capture of a live site via thum.io — placeholder imagery only,
-// swapped out with our own 16:10 webp captures per CLAUDE.md §7
-// (mshots was tried first but 403s datacenter IPs, incl. Vercel's)
-const shot = (url: string) =>
-  `https://image.thum.io/get/width/1280/crop/800/${url}`;
-const fullShot = (url: string) =>
-  `https://image.thum.io/get/fullpage/width/1200/${url}`;
-
-// ── PLACEHOLDERS (Noah, 2026-06-10) ─────────────────────────────────────
-// These are NOT our builds — well-known sites standing in so the gallery
-// can be designed and demoed before our own style demos are deployed.
-// Replace every entry before this site is shown to a single prospect.
-// `embeddable` values verified by header check 2026-06-10 (X-Frame-Options
-// / CSP frame-ancestors): nike, allbirds, apple block framing; patagonia,
-// terminal-industries, relats allow it.
+// All entries are our own style demos rendered inline from components/demos
+// (sample brands, clearly fictional — see each demo file). `url` stays empty
+// until a demo is deployed somewhere on its own.
 export const projects: Project[] = [
   {
-    // our own style demo — rendered inline from components/demos (no iframe)
+    slug: "demo-landscaping",
+    name: "Landscaping",
+    url: "",
+    screenshot: "",
+    screenshotFull: "",
+    preview: "",
+    tier: "flagship",
+    priceLabel: "let's talk",
+    order: 0,
+    embeddable: false,
+    isStyleDemo: true,
+  },
+  {
+    slug: "demo-powerwash",
+    name: "Power washing",
+    url: "",
+    screenshot: "",
+    screenshotFull: "",
+    preview: "",
+    tier: "template",
+    priceLabel: "~$300 · template",
+    order: 1,
+    embeddable: false,
+    isStyleDemo: true,
+  },
+  {
+    slug: "demo-florist",
+    name: "Flower shop",
+    url: "",
+    screenshot: "",
+    screenshotFull: "",
+    preview: "",
+    tier: "custom",
+    priceLabel: "custom from $500",
+    order: 2,
+    embeddable: false,
+    isStyleDemo: true,
+  },
+  {
     slug: "demo-lawncare",
     name: "Lawn care",
     url: "",
@@ -54,89 +80,35 @@ export const projects: Project[] = [
     preview: "",
     tier: "template",
     priceLabel: "~$300 · template",
-    order: 0,
+    order: 3,
     embeddable: false,
     isStyleDemo: true,
   },
   {
-    slug: "ph-nike",
-    name: "Nike",
-    url: "https://www.nike.com",
-    screenshot: shot("https://www.nike.com"),
-    screenshotFull: fullShot("https://www.nike.com"),
-    preview: "/previews/ph-nike.html",
-    tier: "flagship",
-    priceLabel: "let's talk",
-    order: 1,
-    embeddable: false,
-    isStyleDemo: false,
-  },
-  {
-    slug: "ph-terminal",
-    name: "Terminal Industries",
-    url: "https://terminal-industries.com",
-    screenshot: shot("https://terminal-industries.com"),
-    screenshotFull: fullShot("https://terminal-industries.com"),
-    preview: "/previews/ph-terminal.html",
-    tier: "custom",
-    priceLabel: "custom from $500",
-    order: 2,
-    embeddable: true,
-    isStyleDemo: false,
-  },
-  {
-    slug: "ph-patagonia",
-    name: "Patagonia",
-    url: "https://www.patagonia.com",
-    screenshot: shot("https://www.patagonia.com"),
-    screenshotFull: fullShot("https://www.patagonia.com"),
-    // patagonia serves a bot wall to scripted fetches — no usable mirror;
-    // it allows framing, so the panel falls back to the live iframe
+    slug: "demo-bakery",
+    name: "Bakery",
+    url: "",
+    screenshot: "",
+    screenshotFull: "",
     preview: "",
-    tier: "custom",
-    priceLabel: "custom from $500",
-    order: 3,
-    embeddable: true,
-    isStyleDemo: false,
-  },
-  {
-    slug: "ph-relats",
-    name: "Relats",
-    url: "https://relats.com",
-    screenshot: shot("https://relats.com"),
-    screenshotFull: fullShot("https://relats.com"),
-    preview: "/previews/ph-relats.html",
     tier: "template",
     priceLabel: "~$300 · template",
     order: 4,
-    embeddable: true,
-    isStyleDemo: false,
+    embeddable: false,
+    isStyleDemo: true,
   },
   {
-    slug: "ph-allbirds",
-    name: "Allbirds",
-    url: "https://www.allbirds.com",
-    screenshot: shot("https://www.allbirds.com"),
-    screenshotFull: fullShot("https://www.allbirds.com"),
-    preview: "/previews/ph-allbirds.html",
-    tier: "template",
-    priceLabel: "~$300 · template",
+    slug: "demo-barber",
+    name: "Barbershop",
+    url: "",
+    screenshot: "",
+    screenshotFull: "",
+    preview: "",
+    tier: "custom",
+    priceLabel: "custom from $500",
     order: 5,
     embeddable: false,
-    isStyleDemo: false,
-  },
-  {
-    slug: "ph-apple",
-    name: "Apple",
-    url: "https://www.apple.com",
-    screenshot: shot("https://www.apple.com"),
-    screenshotFull: fullShot("https://www.apple.com"),
-    preview: "/previews/ph-apple.html",
-    tier: "flagship",
-    priceLabel: "let's talk",
-    order: 6,
-    embeddable: false,
-    isStyleDemo: false,
+    isStyleDemo: true,
   },
 ];
 
