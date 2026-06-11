@@ -2,6 +2,8 @@
 // sample brand for the demo, not a client. Self-contained: every color is
 // local, nothing leaks into the studio site's theme.
 
+import { Marquee, Rise } from "./shared";
+
 const ink = "text-[#0e2233]";
 const muted = "text-[#56707f]";
 
@@ -39,6 +41,40 @@ function HouseWash() {
   );
 }
 
+// before/after that wipes itself — the clean layer's clip-path travels
+// across and back on a slow loop
+function WipeReveal() {
+  return (
+    <div className="relative h-52 overflow-hidden md:h-72">
+      <style>{`
+        @keyframes pw-wipe {
+          0%, 8% { clip-path: inset(0 86% 0 0); }
+          46%, 58% { clip-path: inset(0 10% 0 0); }
+          92%, 100% { clip-path: inset(0 86% 0 0); }
+        }
+        .pw-wipe { animation: pw-wipe 7s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .pw-wipe { animation: none; clip-path: inset(0 50% 0 0); }
+        }
+      `}</style>
+      {/* before: grimy */}
+      <div className="absolute inset-0 bg-[#7a8289]">
+        <div aria-hidden="true" className="absolute left-[12%] top-[30%] h-16 w-24 rounded-full bg-[#5f666c] opacity-70" />
+        <div aria-hidden="true" className="absolute right-[18%] top-[55%] h-12 w-32 rounded-full bg-[#646b71] opacity-70" />
+        <div aria-hidden="true" className="absolute left-[40%] bottom-[12%] h-10 w-20 rounded-full bg-[#585f65] opacity-60" />
+      </div>
+      {/* after: clean, wiping over it */}
+      <div className="pw-wipe absolute inset-0 border-r-4 border-[#1b9fd8] bg-[#dfe9ef]" />
+      <span className="absolute left-4 top-4 text-xs font-semibold uppercase tracking-widest text-white/90">
+        Before
+      </span>
+      <span className={`absolute right-4 top-4 text-xs font-semibold uppercase tracking-widest ${ink}`}>
+        After
+      </span>
+    </div>
+  );
+}
+
 const services = [
   {
     name: "House soft wash",
@@ -57,9 +93,11 @@ const services = [
   },
 ];
 
+const towns = ["Sayville", "Patchogue", "Bayport", "Blue Point", "Oakdale", "Bohemia", "Holbrook"];
+
 export function PowerWashDemo() {
   return (
-    <div className={`bg-white ${ink} antialiased`}>
+    <div className={`overflow-hidden bg-white ${ink} antialiased`}>
       {/* nav */}
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 md:px-10">
         <span className="text-lg font-bold uppercase tracking-tight">
@@ -76,105 +114,122 @@ export function PowerWashDemo() {
         </nav>
       </header>
 
-      {/* hero */}
-      <section className="bg-[#0e2233] text-white">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-16 md:grid-cols-2 md:px-10 md:py-24">
+      {/* hero — angled bottom edge instead of a straight block */}
+      <section className="bg-[#0e2233] text-white [clip-path:polygon(0_0,100%_0,100%_94%,0_100%)]">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 pb-20 pt-16 md:grid-cols-2 md:px-10 md:pb-28 md:pt-24">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-[#1b9fd8]">
-              Power washing · Suffolk County
-            </p>
-            <h1 className="mt-4 text-5xl font-bold uppercase leading-[0.95] tracking-tight md:text-7xl">
-              Like the day
-              <br />
-              it was built.
-            </h1>
-            <p className="mt-6 max-w-md text-lg text-white/70">
-              Houses, driveways, decks, and fences, washed back to new in one
-              visit. Flat quotes, no surprises.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <a
-                href="#wash-quote"
-                className="bg-[#1b9fd8] px-7 py-3.5 font-semibold uppercase tracking-wide text-[#0e2233] transition-colors duration-200 hover:bg-white"
-              >
-                Get a free quote
-              </a>
-              <span className="text-sm text-white/60">Most quotes same day</span>
-            </div>
+            <Rise>
+              <p className="text-sm font-semibold uppercase tracking-widest text-[#1b9fd8]">
+                Power washing · Suffolk County
+              </p>
+              <h1 className="mt-4 text-5xl font-bold uppercase leading-[0.95] tracking-tight md:text-7xl">
+                Like the day
+                <br />
+                it was built.
+              </h1>
+            </Rise>
+            <Rise delay={0.12}>
+              <p className="mt-6 max-w-md text-lg text-white/70">
+                Houses, driveways, decks, and fences, washed back to new in one
+                visit. Flat quotes, no surprises.
+              </p>
+              <div className="mt-8 flex flex-wrap items-center gap-4">
+                <a
+                  href="#wash-quote"
+                  className="bg-[#1b9fd8] px-7 py-3.5 font-semibold uppercase tracking-wide text-[#0e2233] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white"
+                >
+                  Get a free quote
+                </a>
+                <span className="text-sm text-white/60">Most quotes same day</span>
+              </div>
+            </Rise>
           </div>
-          <div className="h-64 md:h-80">
+          <Rise delay={0.15} className="h-64 md:h-80">
             <HouseWash />
-          </div>
+          </Rise>
         </div>
       </section>
 
-      {/* stat strip */}
-      <div className="border-b border-[#0e2233]/10 bg-[#eef5f9]">
-        <p className={`mx-auto flex max-w-6xl flex-wrap justify-center gap-x-10 gap-y-1 px-6 py-4 text-sm font-medium md:px-10 ${ink}`}>
-          <span>Fully insured</span>
-          <span>Flat quotes, no hourly meter</span>
-          <span>Soft wash safe for siding</span>
-          <span>Done in one visit</span>
-        </p>
+      {/* town ticker */}
+      <div className="border-b border-[#0e2233]/10 py-3.5">
+        <Marquee label="Towns we serve" duration={28} className={`text-sm font-semibold uppercase tracking-wide ${ink}`}>
+          {towns.map((t) => (
+            <span key={t} className="inline-flex items-center">
+              <span className="px-6">{t}</span>
+              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#1b9fd8]" />
+            </span>
+          ))}
+        </Marquee>
       </div>
 
-      {/* services */}
+      {/* services — oversized numbered rows, not a card grid */}
       <section className="mx-auto max-w-6xl px-6 py-16 md:px-10 md:py-24">
-        <h2 className="text-3xl font-bold uppercase tracking-tight md:text-4xl">
-          What we wash
-        </h2>
-        <div className="mt-10 grid gap-px overflow-hidden border border-[#0e2233]/10 bg-[#0e2233]/10 md:grid-cols-3">
-          {services.map((s) => (
-            <div key={s.name} className="bg-white p-7">
-              <h3 className="text-lg font-bold">{s.name}</h3>
-              <p className={`mt-3 text-sm leading-relaxed ${muted}`}>{s.copy}</p>
-              <p className="mt-6 text-sm font-bold text-[#1b9fd8]">{s.price}</p>
-            </div>
+        <Rise>
+          <h2 className="text-3xl font-bold uppercase tracking-tight md:text-4xl">
+            What we wash
+          </h2>
+        </Rise>
+        <div className="mt-10">
+          {services.map((s, i) => (
+            <Rise key={s.name} delay={i * 0.08}>
+              <div className="group grid items-baseline gap-2 border-t border-[#0e2233]/10 py-8 last:border-b md:grid-cols-[80px_1.2fr_2fr_auto] md:gap-6">
+                <span className="text-4xl font-bold text-[#1b9fd8]/30 transition-colors duration-300 group-hover:text-[#1b9fd8] md:text-5xl">
+                  0{i + 1}
+                </span>
+                <h3 className="text-xl font-bold transition-transform duration-300 md:group-hover:translate-x-2">
+                  {s.name}
+                </h3>
+                <p className={`max-w-md text-sm leading-relaxed ${muted}`}>{s.copy}</p>
+                <p className="text-sm font-bold text-[#1b9fd8]">{s.price}</p>
+              </div>
+            </Rise>
           ))}
         </div>
       </section>
 
       {/* before / after */}
-      <section className="border-t border-[#0e2233]/10 bg-[#eef5f9]">
+      <section className="bg-[#eef5f9]">
         <div className="mx-auto max-w-6xl px-6 py-16 md:px-10 md:py-24">
-          <h2 className="text-3xl font-bold uppercase tracking-tight md:text-4xl">
-            The difference is not subtle
-          </h2>
-          <div className="mt-10 grid overflow-hidden md:grid-cols-2">
-            <div className="flex h-48 items-center justify-center bg-[#7a8289] md:h-64">
-              <span className="text-sm font-semibold uppercase tracking-widest text-white/80">
-                Before
-              </span>
+          <Rise>
+            <h2 className="text-3xl font-bold uppercase tracking-tight md:text-4xl">
+              The difference is not subtle
+            </h2>
+          </Rise>
+          <Rise delay={0.1}>
+            <div className="mt-10 overflow-hidden">
+              <WipeReveal />
             </div>
-            <div className="flex h-48 items-center justify-center bg-[#dfe9ef] md:h-64">
-              <span className={`text-sm font-semibold uppercase tracking-widest ${ink}`}>
-                After
-              </span>
-            </div>
-          </div>
-          <p className={`mt-6 max-w-md text-sm ${muted}`}>
-            Same driveway, two hours apart. Send a photo of yours and we&apos;ll
-            tell you exactly what it&apos;ll cost.
-          </p>
+            <p className={`mt-6 max-w-md text-sm ${muted}`}>
+              Same driveway, two hours apart. Send a photo of yours and
+              we&apos;ll tell you exactly what it&apos;ll cost.
+            </p>
+          </Rise>
         </div>
       </section>
 
-      {/* quote band */}
-      <section id="wash-quote" className="bg-[#0e2233] text-white">
-        <div className="mx-auto max-w-6xl px-6 py-16 text-center md:px-10 md:py-24">
-          <h2 className="text-4xl font-bold uppercase tracking-tight md:text-5xl">
-            Text a photo. <span className="text-[#1b9fd8]">Get a price.</span>
-          </h2>
-          <p className="mx-auto mt-5 max-w-md text-white/70">
-            Send a picture of the house or driveway to (631) 555-0192. We
-            reply with a flat quote, usually the same day.
-          </p>
-          <a
-            href="#wash-quote"
-            className="mt-8 inline-block bg-[#1b9fd8] px-8 py-4 font-semibold uppercase tracking-wide text-[#0e2233] transition-colors duration-200 hover:bg-white"
-          >
-            Text us a photo
-          </a>
+      {/* quote band — angled top edge */}
+      <section
+        id="wash-quote"
+        className="bg-[#0e2233] text-white [clip-path:polygon(0_6%,100%_0,100%_100%,0_100%)]"
+      >
+        <div className="mx-auto max-w-6xl px-6 pb-16 pt-24 text-center md:px-10 md:pb-24 md:pt-32">
+          <Rise>
+            <h2 className="text-4xl font-bold uppercase tracking-tight md:text-5xl">
+              Text a photo. <span className="text-[#1b9fd8]">Get a price.</span>
+            </h2>
+          </Rise>
+          <Rise delay={0.1}>
+            <p className="mx-auto mt-5 max-w-md text-white/70">
+              Send a picture of the house or driveway to (631) 555-0192. We
+              reply with a flat quote, usually the same day.
+            </p>
+            <a
+              href="#wash-quote"
+              className="mt-8 inline-block bg-[#1b9fd8] px-8 py-4 font-semibold uppercase tracking-wide text-[#0e2233] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white"
+            >
+              Text us a photo
+            </a>
+          </Rise>
         </div>
       </section>
 
