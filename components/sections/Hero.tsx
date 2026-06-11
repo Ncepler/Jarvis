@@ -5,17 +5,9 @@ import { HeroVideo } from "./HeroVideo";
 export function Hero() {
   return (
     <section className="relative flex min-h-svh flex-col overflow-hidden">
+      {/* one flat color behind the name, nothing else (Noah 2026-06-11) —
+          the video slot stays wired for whenever a clip exists */}
       <HeroVideo />
-
-      {/* single ambient layer — slow drifting glow, nothing else */}
-      <div
-        aria-hidden="true"
-        className="ambient pointer-events-none absolute -inset-[20%]"
-        style={{
-          background:
-            "radial-gradient(closest-side at 50% 45%, rgba(244, 242, 237, 0.05), transparent 70%)",
-        }}
-      />
 
       <header className="rise-in relative flex items-center justify-between px-6 py-6 md:px-10">
         <Logo size={28} />
@@ -42,7 +34,7 @@ export function Hero() {
         </p>
         <a
           href="#work"
-          className="rise-in mt-10 text-sm text-muted transition-colors duration-200 hover:text-ink"
+          className="rise-in mt-10 text-sm text-accent transition-colors duration-200 hover:text-ink"
           style={{ animationDelay: "360ms" }}
         >
           See the work
@@ -52,7 +44,7 @@ export function Hero() {
       <div className="relative flex justify-center pb-10">
         <span
           aria-hidden="true"
-          className="scroll-cue block h-14 w-px bg-line"
+          className="scroll-cue block h-14 w-px bg-accent/50"
         />
       </div>
     </section>

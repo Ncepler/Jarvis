@@ -11,10 +11,23 @@ function GardenPlan() {
     <svg viewBox="0 0 400 300" className="h-full w-full" aria-hidden="true">
       <rect x="0" y="0" width="400" height="300" fill="#3c4434" />
       <path d="M40 260 Q 140 200 200 220 T 380 180" stroke="#ece7df" strokeWidth="2" fill="none" opacity="0.6" />
-      <circle cx="90" cy="110" r="38" fill="#5a6b4d" />
-      <circle cx="150" cy="80" r="22" fill="#6e8059" />
-      <circle cx="290" cy="120" r="48" fill="#4c5a41" />
-      <circle cx="330" cy="220" r="26" fill="#6e8059" />
+      <style>{`
+        @keyframes land-breathe {
+          to { transform: scale(1.05); }
+        }
+        .land-breathe {
+          transform-box: fill-box;
+          transform-origin: center;
+          animation: land-breathe 7s ease-in-out infinite alternate;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .land-breathe { animation: none; }
+        }
+      `}</style>
+      <circle className="land-breathe" cx="90" cy="110" r="38" fill="#5a6b4d" />
+      <circle className="land-breathe" style={{ animationDelay: "1.4s" }} cx="150" cy="80" r="22" fill="#6e8059" />
+      <circle className="land-breathe" style={{ animationDelay: "2.8s" }} cx="290" cy="120" r="48" fill="#4c5a41" />
+      <circle className="land-breathe" style={{ animationDelay: "0.7s" }} cx="330" cy="220" r="26" fill="#6e8059" />
       <rect x="180" y="140" width="70" height="70" fill="none" stroke="#ece7df" strokeWidth="2" opacity="0.7" />
     </svg>
   );
@@ -30,7 +43,7 @@ const work = [
 const practice = [
   {
     name: "Design",
-    copy: "A measured plan for the whole property — plantings, stone, lighting, grading — before anything is dug.",
+    copy: "A measured plan for the whole property (plantings, stone, lighting, grading) before anything is dug.",
   },
   {
     name: "Build",
@@ -73,8 +86,8 @@ export function LandscapingDemo() {
           <GardenPlan />
         </div>
         <p className={`mt-6 max-w-lg text-lg ${muted}`}>
-          We design and build the whole property — stone, plantings, lighting,
-          water — and then we keep it. One studio, one crew, one standard.
+          We design and build the whole property: stone, plantings, lighting,
+          water. Then we keep it. One studio, one crew, one standard.
         </p>
       </section>
 
@@ -118,7 +131,7 @@ export function LandscapingDemo() {
         </h2>
         <p className={`mx-auto mt-5 max-w-md ${muted}`}>
           Consultations run about an hour. You&apos;ll leave with a clear sense
-          of what the land wants to be — whether or not you build with us.
+          of what the land wants to be, whether or not you build with us.
         </p>
         <a
           href="#land-consult"

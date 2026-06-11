@@ -11,8 +11,8 @@ export function About() {
         <Reveal delay={0.1}>
           <p className="mt-16 max-w-xl text-lg leading-relaxed">
           We&apos;re a small web studio on {SITE.region.replace(", NY", "")}.
-          We build sites for local businesses — flower shops, landscapers,
-          contractors — and we care way too much about how they look. The
+          We build sites for local businesses: flower shops, landscapers,
+          contractors. We care way too much about how they look, and the
           work above is the pitch
           {isTBD(SITE.instagram) ? (
             "."

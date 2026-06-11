@@ -13,8 +13,21 @@ function Loaf() {
       <ellipse cx="150" cy="120" rx="110" ry="62" fill="#d9a868" />
       <path d="M90 100 Q 150 70 210 100" stroke="#f4e3c8" strokeWidth="5" fill="none" />
       <path d="M100 125 Q 150 98 200 125" stroke="#f4e3c8" strokeWidth="5" fill="none" />
-      {/* steam */}
-      <path d="M120 52 q 6 -12 0 -22 M150 46 q 6 -12 0 -22 M180 52 q 6 -12 0 -22" stroke="#c9b8a0" strokeWidth="3" fill="none" strokeLinecap="round" />
+      {/* steam — rises and fades on a loop */}
+      <style>{`
+        @keyframes bake-steam {
+          from { transform: translateY(6px); opacity: 0.25; }
+          60% { opacity: 1; }
+          to { transform: translateY(-8px); opacity: 0; }
+        }
+        .bake-steam { animation: bake-steam 2.8s ease-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .bake-steam { animation: none; }
+        }
+      `}</style>
+      <path className="bake-steam" d="M120 52 q 6 -12 0 -22" stroke="#c9b8a0" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path className="bake-steam" style={{ animationDelay: "0.9s" }} d="M150 46 q 6 -12 0 -22" stroke="#c9b8a0" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path className="bake-steam" style={{ animationDelay: "1.7s" }} d="M180 52 q 6 -12 0 -22" stroke="#c9b8a0" strokeWidth="3" fill="none" strokeLinecap="round" />
     </svg>
   );
 }
@@ -61,7 +74,7 @@ export function BakeryDemo() {
             <span className="text-[#b9854c]">Gone by noon.</span>
           </h1>
           <p className={`mt-6 max-w-md text-lg ${muted}`}>
-            Sourdough, morning buns, and one very good cookie — baked in small
+            Sourdough, morning buns, and one very good cookie, baked in small
             batches every morning. When the case is empty, that&apos;s the day.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -86,7 +99,7 @@ export function BakeryDemo() {
             The daily case
           </h2>
           <p className={`mt-3 max-w-md text-sm ${muted}`}>
-            What&apos;s here most days. Follow the morning post for specials —
+            What&apos;s here most days. Follow the morning post for specials,
             and for the bad news when the buns sell out.
           </p>
           <ul className="mt-10 grid gap-x-12 md:grid-cols-2">

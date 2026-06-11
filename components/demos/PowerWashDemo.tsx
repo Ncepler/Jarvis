@@ -19,11 +19,22 @@ function HouseWash() {
       <rect x="180" y="190" width="44" height="80" fill="#0e2233" />
       <rect x="100" y="165" width="50" height="40" fill="#9fc6dc" />
       <rect x="250" y="165" width="50" height="40" fill="#9fc6dc" />
-      {/* the clean sweep */}
+      {/* the clean sweep — the wand works back and forth over the edge */}
       <rect x="70" y="140" width="110" height="130" fill="#b7d8e8" opacity="0.5" />
-      <line x1="180" y1="140" x2="180" y2="270" stroke="#1b9fd8" strokeWidth="3" />
-      <circle cx="180" cy="120" r="6" fill="#1b9fd8" />
-      <path d="M180 120 L150 145 M180 120 L165 150 M180 120 L180 152" stroke="#1b9fd8" strokeWidth="2" fill="none" />
+      <g className="pw-wand">
+        <style>{`
+          @keyframes pw-sweep {
+            to { transform: translateX(-26px); }
+          }
+          .pw-wand { animation: pw-sweep 3.2s ease-in-out infinite alternate; }
+          @media (prefers-reduced-motion: reduce) {
+            .pw-wand { animation: none; }
+          }
+        `}</style>
+        <line x1="180" y1="140" x2="180" y2="270" stroke="#1b9fd8" strokeWidth="3" />
+        <circle cx="180" cy="120" r="6" fill="#1b9fd8" />
+        <path d="M180 120 L150 145 M180 120 L165 150 M180 120 L180 152" stroke="#1b9fd8" strokeWidth="2" fill="none" />
+      </g>
     </svg>
   );
 }
@@ -31,7 +42,7 @@ function HouseWash() {
 const services = [
   {
     name: "House soft wash",
-    copy: "Siding, trim, and gutters — low pressure, no stripped paint. Most homes done in a morning.",
+    copy: "Siding, trim, and gutters. Low pressure, no stripped paint. Most homes done in a morning.",
     price: "from $250",
   },
   {
@@ -41,7 +52,7 @@ const services = [
   },
   {
     name: "Decks, fences & patios",
-    copy: "Wood and vinyl, cleaned and brightened — ready for staining or just for summer.",
+    copy: "Wood and vinyl, cleaned and brightened, ready for staining or just for summer.",
     price: "from $175",
   },
 ];
@@ -78,7 +89,7 @@ export function PowerWashDemo() {
               it was built.
             </h1>
             <p className="mt-6 max-w-md text-lg text-white/70">
-              Houses, driveways, decks, and fences — washed back to new in one
+              Houses, driveways, decks, and fences, washed back to new in one
               visit. Flat quotes, no surprises.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -101,7 +112,7 @@ export function PowerWashDemo() {
       <div className="border-b border-[#0e2233]/10 bg-[#eef5f9]">
         <p className={`mx-auto flex max-w-6xl flex-wrap justify-center gap-x-10 gap-y-1 px-6 py-4 text-sm font-medium md:px-10 ${ink}`}>
           <span>Fully insured</span>
-          <span>Flat quotes — no hourly meter</span>
+          <span>Flat quotes, no hourly meter</span>
           <span>Soft wash safe for siding</span>
           <span>Done in one visit</span>
         </p>
@@ -155,7 +166,7 @@ export function PowerWashDemo() {
             Text a photo. <span className="text-[#1b9fd8]">Get a price.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-md text-white/70">
-            Send a picture of the house or driveway to (631) 555-0192 — we
+            Send a picture of the house or driveway to (631) 555-0192. We
             reply with a flat quote, usually the same day.
           </p>
           <a

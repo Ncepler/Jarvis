@@ -76,14 +76,14 @@ export function Contact() {
         </Reveal>
         <Reveal delay={0.1}>
           <p className="mt-4 max-w-md text-muted">
-            Tell us about your business. We reply within a day.
+            Tell us about the business. A couple sentences is plenty.
           </p>
         </Reveal>
 
         <Reveal delay={0.18}>
         {status === "sent" ? (
           <p className="mt-16 max-w-md text-lg">
-            Got it — we&apos;ll reply within a day.
+            Got it. We&apos;ll be in touch.
           </p>
         ) : (
           <form
@@ -122,7 +122,7 @@ export function Contact() {
                     key={opt.value}
                     className={`cursor-pointer border px-4 py-2 text-sm transition-colors duration-200 ${
                       path === opt.value
-                        ? "border-ink text-ink"
+                        ? "border-accent text-ink"
                         : "border-line text-muted hover:text-ink"
                     }`}
                   >
@@ -174,14 +174,14 @@ export function Contact() {
 
             {status === "error" && (
               <p className="text-sm text-muted">
-                The form isn&apos;t wired up yet — we&apos;re still setting up
-                the inbox. Check back soon.
+                The form isn&apos;t wired up yet. We&apos;re still setting up
+                the inbox; check back soon.
               </p>
             )}
 
             <button
               type="submit"
-              className="justify-self-start border border-ink px-6 py-3 text-sm transition-colors duration-200 hover:bg-ink hover:text-bg"
+              className="press justify-self-start cursor-pointer border border-ink px-6 py-3 text-sm transition-colors duration-200 hover:bg-ink hover:text-bg"
             >
               Send it
             </button>

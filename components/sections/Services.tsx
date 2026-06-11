@@ -66,7 +66,7 @@ function PathCard({ path }: { path: (typeof PATHS)[number] }) {
         onBlur={() => canHover && setHovered(false)}
       >
         <span className="text-lg">{path.title}</span>
-        <span className="shrink-0 text-sm text-muted">{path.price}</span>
+        <span className="shrink-0 text-sm text-accent">{path.price}</span>
       </button>
 
       <motion.div
@@ -92,7 +92,7 @@ function PathCard({ path }: { path: (typeof PATHS)[number] }) {
           <a
             href="#contact"
             tabIndex={expanded ? 0 : -1}
-            className="mt-8 inline-block text-sm transition-colors duration-200 hover:text-muted"
+            className="mt-8 inline-block text-sm transition-colors duration-200 hover:text-accent"
           >
             Start a project →
           </a>

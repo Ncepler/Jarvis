@@ -7,7 +7,23 @@ const muted = "text-[#8a6b72]";
 // loose stem arrangement — abstract blooms
 function Stems() {
   return (
-    <svg viewBox="0 0 300 340" className="h-full w-full" aria-hidden="true">
+    <svg
+      viewBox="0 0 300 340"
+      className="florist-stems h-full w-full"
+      aria-hidden="true"
+    >
+      <style>{`
+        @keyframes florist-sway {
+          to { transform: rotate(1.6deg); }
+        }
+        .florist-stems {
+          transform-origin: 50% 100%;
+          animation: florist-sway 5.5s ease-in-out infinite alternate;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .florist-stems { animation: none; }
+        }
+      `}</style>
       <path d="M150 330 C 150 240 130 200 105 150" stroke="#5d7556" strokeWidth="3" fill="none" />
       <path d="M150 330 C 150 250 165 210 190 130" stroke="#5d7556" strokeWidth="3" fill="none" />
       <path d="M150 330 C 150 260 148 220 150 180" stroke="#5d7556" strokeWidth="3" fill="none" />
@@ -112,7 +128,7 @@ export function FloristDemo() {
             </h2>
             <p className="mt-5 text-[#faf5ef]/70">
               The best dates book a season out. Tell us the venue and the
-              month, and we&apos;ll bring ideas to a first call — no
+              month, and we&apos;ll bring ideas to a first call. No
               commitment, no mood-board fee.
             </p>
             <a

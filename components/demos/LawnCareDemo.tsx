@@ -8,7 +8,20 @@ const muted = "text-[#5c6b5e]";
 
 function Sun() {
   return (
-    <svg viewBox="0 0 100 100" className="h-16 w-16 md:h-24 md:w-24" aria-hidden="true">
+    <svg
+      viewBox="0 0 100 100"
+      className="lawn-sun h-16 w-16 md:h-24 md:w-24"
+      aria-hidden="true"
+    >
+      <style>{`
+        @keyframes lawn-sun-drift {
+          to { transform: translateY(7px); }
+        }
+        .lawn-sun { animation: lawn-sun-drift 6s ease-in-out infinite alternate; }
+        @media (prefers-reduced-motion: reduce) {
+          .lawn-sun { animation: none; }
+        }
+      `}</style>
       <circle cx="50" cy="50" r="34" fill="#f3d27a" />
     </svg>
   );
@@ -84,7 +97,7 @@ export function LawnCareDemo() {
           </h1>
           <p className={`mt-6 max-w-md text-lg ${muted}`}>
             Weekly mowing, cleanups, and edging for homes on the South Shore.
-            No contracts, no voicemail tag — text a photo, get a price.
+            No contracts, no voicemail tag. Text a photo, get a price.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a
@@ -158,7 +171,7 @@ export function LawnCareDemo() {
             <em className="font-display font-normal text-[#f3d27a]">tonight.</em>
           </h2>
           <p className="mx-auto mt-5 max-w-md text-[#f4f5ef]/70">
-            Text a photo of your yard to (516) 555-0148 or tap below — we reply
+            Text a photo of your yard to (516) 555-0148 or tap below; we reply
             the same day with a real price.
           </p>
           <a

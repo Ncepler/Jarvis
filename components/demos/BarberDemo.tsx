@@ -4,23 +4,33 @@
 const ink = "text-[#e8e2d6]";
 const muted = "text-[#9a917f]";
 
-// barber pole, flattened to stripes
+// barber pole — the stripes actually turn (Noah 2026-06-11). Pure CSS:
+// a striped strip taller than the pole translates by exactly one stripe
+// period and loops. Linear, constant, off the main thread.
 function Pole() {
   return (
-    <svg viewBox="0 0 120 320" className="h-full w-auto" aria-hidden="true">
-      <rect x="30" y="20" width="60" height="280" rx="30" fill="#e8e2d6" />
-      {[0, 1, 2, 3, 4].map((i) => (
-        <rect
-          key={i}
-          x="22"
-          y={48 + i * 52}
-          width="76"
-          height="18"
-          fill={i % 2 ? "#1d1a16" : "#b08d4f"}
-          transform={`rotate(-18 60 ${57 + i * 52})`}
+    <div aria-hidden="true" className="flex flex-col items-center gap-1">
+      <style>{`
+        @keyframes barber-turn {
+          to { transform: translateY(-79.2px); }
+        }
+        .barber-stripes { animation: barber-turn 2.4s linear infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .barber-stripes { animation: none; }
+        }
+      `}</style>
+      <div className="h-4 w-8 rounded-t-full bg-[#b08d4f]" />
+      <div className="relative h-56 w-14 overflow-hidden rounded-full border-2 border-[#b08d4f]/60 md:h-72">
+        <div
+          className="barber-stripes absolute inset-x-0 -top-24 h-[calc(100%+12rem)]"
+          style={{
+            background:
+              "repeating-linear-gradient(45deg, #e8e2d6 0 14px, #b08d4f 14px 28px, #e8e2d6 28px 42px, #2e2820 42px 56px)",
+          }}
         />
-      ))}
-    </svg>
+      </div>
+      <div className="h-4 w-8 rounded-b-full bg-[#b08d4f]" />
+    </div>
   );
 }
 
@@ -30,7 +40,7 @@ const prices = [
   ["Beard trim & line-up", "$20"],
   ["Hot towel shave", "$45"],
   ["Kids (12 & under)", "$25"],
-  ["The works — cut, shave, towel", "$70"],
+  ["The works: cut, shave, towel", "$70"],
 ];
 
 export function BarberDemo() {
@@ -64,7 +74,7 @@ export function BarberDemo() {
             Every time.
           </h1>
           <p className={`mt-6 max-w-md text-lg ${muted}`}>
-            Four chairs, no rush, no upsell. Book online or walk in — either
+            Four chairs, no rush, no upsell. Book online or walk in; either
             way you leave sharp.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -114,7 +124,7 @@ export function BarberDemo() {
             Your chair&apos;s <span className="text-[#b08d4f]">waiting.</span>
           </h2>
           <p className={`mx-auto mt-5 max-w-md ${muted}`}>
-            Book online in under a minute, or just come by — 311 Main St,
+            Book online in under a minute, or just come by: 311 Main St,
             Patchogue. If the pole&apos;s spinning, we&apos;re cutting.
           </p>
           <a

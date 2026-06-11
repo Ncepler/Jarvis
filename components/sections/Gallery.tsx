@@ -148,7 +148,6 @@ function GalleryCard({
   step,
   width,
   isActive,
-  isOpen,
   reduced,
   onSelect,
 }: {
@@ -158,7 +157,6 @@ function GalleryCard({
   step: number;
   width: number;
   isActive: boolean;
-  isOpen: boolean;
   reduced: boolean;
   onSelect: (index: number) => void;
 }) {
@@ -173,7 +171,6 @@ function GalleryCard({
     <motion.button
       type="button"
       aria-label={`${project.name}, ${project.priceLabel}`}
-      aria-expanded={isOpen}
       className="relative shrink-0 cursor-pointer overflow-hidden border border-line bg-surface"
       style={reduced ? { width } : { width, scale, opacity }}
       onTap={() => onSelect(index)}
@@ -197,7 +194,7 @@ function GalleryCard({
         }}
       >
         <span className="text-sm">{project.name}</span>
-        <span className="shrink-0 text-xs text-muted">
+        <span className="shrink-0 text-xs text-accent">
           {project.priceLabel}
         </span>
       </motion.div>
@@ -205,38 +202,22 @@ function GalleryCard({
   );
 }
 
-// The selected card's homepage, full-bleed below the row, physically part
-// of this page. Source order: registered demo component (rendered inline,
-// no iframe at all) → mirrored copy from /public/previews in a seamless
-// auto-height frame → live iframe of the real URL (desktop, embeddable
-// sites only) → full-length capture.
+// The centered card's homepage, below the row, physically part of this page.
+// No clicking required: whichever card sits in the center is the site shown
+// here (Noah 2026-06-11). The panel unfolds downward from the row — origin
+// top, rise + settle — so it reads as growing out of the active card.
+// Source order: registered demo component (inline, no iframe) → mirrored
+// copy in a seamless auto-height frame → live iframe (desktop, embeddable)
+// → full-length capture.
 function HomepagePanel({
   project,
   reduced,
   canHover,
-  onClose,
 }: {
   project: Project;
   reduced: boolean;
   canHover: boolean;
-  onClose: () => void;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    ref.current?.scrollIntoView({
-      behavior: reduced ? "auto" : "smooth",
-      block: "start",
-    });
-    closeRef.current?.focus({ preventScroll: true });
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [project.slug, reduced, onClose]);
-
   const Demo = demos[project.slug];
   const frameSrc =
     project.preview ||
@@ -244,80 +225,69 @@ function HomepagePanel({
   const stagger = (i: number) =>
     reduced
       ? { duration: 0.15 }
-      : { duration: 0.4, delay: 0.3 + i * 0.08, ease: EASE };
+      : { duration: 0.4, delay: 0.25 + i * 0.07, ease: EASE };
 
   return (
     <motion.div
-      ref={ref}
       role="region"
       aria-label={`${project.name} homepage`}
-      className="mt-12 w-full scroll-mt-6"
-      initial={reduced ? { opacity: 0 } : { opacity: 0, y: 32 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, transition: { duration: 0.2 } }}
-      transition={reduced ? { duration: 0.2 } : { duration: 0.6, ease: EASE }}
+      className="w-full"
+      style={{ transformOrigin: "top center" }}
+      initial={reduced ? { opacity: 0 } : { opacity: 0, y: -24, scale: 0.975 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      // exits faster than enters — the next site is what matters
+      exit={{ opacity: 0, transition: { duration: 0.16 } }}
+      transition={reduced ? { duration: 0.2 } : { duration: 0.55, ease: EASE }}
     >
       <div className="border-y border-line bg-surface">
         <div className="mx-auto flex max-w-6xl flex-wrap items-baseline gap-x-6 gap-y-2 px-6 py-4 md:px-10">
-        <motion.span
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={stagger(0)}
-        >
-          {project.name}
-        </motion.span>
-        <motion.span
-          className="text-sm text-muted"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={stagger(1)}
-        >
-          {project.priceLabel}
-        </motion.span>
-
-        <span className="ml-auto flex items-baseline gap-6">
-          {project.url && (
-            <motion.a
-              href={project.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm transition-colors duration-200 hover:text-muted"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={stagger(2)}
-            >
-              View live →
-            </motion.a>
-          )}
-          {project.isStyleDemo && (
-            <motion.a
-              href="#contact"
-              className="text-sm transition-colors duration-200 hover:text-muted"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={stagger(3)}
-              onClick={() => {
-                window.dispatchEvent(
-                  new CustomEvent("preselect-style", { detail: project.slug }),
-                );
-                onClose();
-              }}
-            >
-              Start with this style →
-            </motion.a>
-          )}
-          <motion.button
-            ref={closeRef}
-            type="button"
-            onClick={onClose}
-            className="text-sm text-muted transition-colors duration-200 hover:text-ink"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={stagger(4)}
+          <motion.span
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={stagger(0)}
           >
-            Close
-          </motion.button>
-        </span>
+            {project.name}
+          </motion.span>
+          <motion.span
+            className="text-sm text-accent"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={stagger(1)}
+          >
+            {project.priceLabel}
+          </motion.span>
+
+          <span className="ml-auto flex items-baseline gap-6">
+            {project.url && (
+              <motion.a
+                href={project.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm transition-colors duration-200 hover:text-accent"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={stagger(2)}
+              >
+                View live →
+              </motion.a>
+            )}
+            {project.isStyleDemo && (
+              <motion.a
+                href="#contact"
+                className="text-sm text-accent transition-colors duration-200 hover:text-ink"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={stagger(3)}
+                onClick={() => {
+                  window.dispatchEvent(
+                    new CustomEvent("preselect-style", { detail: project.slug }),
+                  );
+                }}
+              >
+                Start with this style →
+              </motion.a>
+            )}
+          </span>
         </div>
       </div>
 
@@ -356,9 +326,11 @@ export function Gallery() {
   const projects = orderedProjects;
 
   const regionRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [containerW, setContainerW] = useState(0);
   const [active, setActive] = useState(0);
-  const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
+  // reduced-motion mode has no coverflow center — taps pick the panel site
+  const [selected, setSelected] = useState(0);
 
   const cardW = Math.min(containerW * 0.72, 480) || 340;
   const step = cardW + GAP;
@@ -373,6 +345,14 @@ export function Gallery() {
     const i = Math.max(0, Math.min(projects.length - 1, Math.round(-v / step)));
     if (i !== centerIdx) setCenterIdx(i);
   });
+
+  // the panel follows the center with a short settle delay, so flinging
+  // across the row doesn't mount and unmount every homepage in between
+  const [panelIdx, setPanelIdx] = useState(0);
+  useEffect(() => {
+    const t = setTimeout(() => setPanelIdx(centerIdx), 160);
+    return () => clearTimeout(t);
+  }, [centerIdx]);
 
   useEffect(() => {
     const el = regionRef.current;
@@ -399,13 +379,12 @@ export function Gallery() {
     [projects.length, step, x],
   );
 
-  // where focus was when the preview opened — restored on close (a11y §10)
-  const lastTrigger = useRef<HTMLElement | null>(null);
-
-  const toggleProject = useCallback((project: Project) => {
-    lastTrigger.current = document.activeElement as HTMLElement | null;
-    setExpandedSlug((s) => (s === project.slug ? null : project.slug));
-  }, []);
+  const showPanel = useCallback(() => {
+    panelRef.current?.scrollIntoView({
+      behavior: reduced ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [reduced]);
 
   // a pointer-up at the end of a drag also lands on a card — ignore it
   const dragging = useRef(false);
@@ -416,10 +395,10 @@ export function Gallery() {
       if (index !== active) {
         snapTo(index);
       } else {
-        toggleProject(projects[index]);
+        showPanel();
       }
     },
-    [active, snapTo, toggleProject, projects],
+    [active, snapTo, showPanel],
   );
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -431,17 +410,12 @@ export function Gallery() {
       snapTo(active + 1);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      toggleProject(projects[active]);
+      showPanel();
     }
   };
 
-  const expanded = projects.find((p) => p.slug === expandedSlug) ?? null;
-  const close = useCallback(() => {
-    setExpandedSlug(null);
-    lastTrigger.current?.focus();
-  }, []);
-
   const backdrop = projects[centerIdx];
+  const panelProject = projects[reduced ? selected : panelIdx];
 
   return (
     <section
@@ -486,7 +460,8 @@ export function Gallery() {
         </Reveal>
         <Reveal delay={0.1}>
           <p className="mt-4 max-w-md text-muted">
-            Styles we build from, and the sites that came out of them.
+            Styles we build from, and the sites that came out of them. The one
+            in the middle is open below.
           </p>
         </Reveal>
       </div>
@@ -506,10 +481,9 @@ export function Gallery() {
                 x={x}
                 step={step}
                 width={cardW}
-                isActive
-                isOpen={expandedSlug === p.slug}
+                isActive={selected === i}
                 reduced
-                onSelect={() => toggleProject(p)}
+                onSelect={() => setSelected(i)}
               />
             </div>
           ))}
@@ -519,7 +493,7 @@ export function Gallery() {
           ref={regionRef}
           tabIndex={0}
           role="group"
-          aria-label="Portfolio gallery. Drag or use arrow keys to browse, Enter to open."
+          aria-label="Portfolio gallery. Drag or use arrow keys to browse; the centered site opens below."
           className="relative mt-16"
           onKeyDown={onKeyDown}
         >
@@ -550,7 +524,6 @@ export function Gallery() {
                 step={step}
                 width={cardW}
                 isActive={i === centerIdx}
-                isOpen={expandedSlug === p.slug}
                 reduced={false}
                 onSelect={onSelect}
               />
@@ -559,17 +532,14 @@ export function Gallery() {
         </div>
       )}
 
-      <div className="relative">
-        <AnimatePresence mode="wait">
-          {expanded && (
-            <HomepagePanel
-              key={expanded.slug}
-              project={expanded}
-              reduced={reduced}
-              canHover={canHover}
-              onClose={close}
-            />
-          )}
+      <div ref={panelRef} className="relative mt-12 scroll-mt-6">
+        <AnimatePresence mode="wait" initial={false}>
+          <HomepagePanel
+            key={panelProject.slug}
+            project={panelProject}
+            reduced={reduced}
+            canHover={canHover}
+          />
         </AnimatePresence>
       </div>
     </section>
