@@ -160,16 +160,16 @@ Behavior (this is a signature pattern, get it right):
 - **Mobile: no hover.** Trigger the expanded state on tap or scroll-into-view instead.
 
 ### 6.3 Gallery — "Previous Websites Built" (the centerpiece)
-A horizontal, draggable card row where the active card expands into a live preview of the real site.
+A horizontal, draggable card row; clicking the active card opens the site's actual homepage in a panel directly below the row. (Noah 2026-06-11: this replaced the original morph-expand-with-live-iframe spec.)
 
 - **Row:** drag/swipe with momentum (Lenis-feel easing). Coverflow depth: center card forward, full opacity, crisp; neighbors scaled ~0.88, dimmed ~0.45, pushed back. Snap to center.
-- **Expand:** clicking the active card morphs it (Motion `layoutId` — the SAME element grows, never a swap) into a large preview, ~`min(92vw, 1200px)`.
-- **Inside the expanded card (desktop):** a live `<iframe>` of the actual site, scaled down, interactive — visitors can scroll/hover the real thing. Lazy-mount the iframe only on expand; never preload all of them.
-- **`embeddable` flag:** some sites block framing (X-Frame-Options/CSP). Each project has `embeddable: boolean`. If false → show the screenshot + "view live" button instead, even on desktop. **Test embedding with 2–3 real URLs as one of the first gallery tasks — this is the riskiest assumption in the whole build.**
-- **Mobile:** no live iframes at all. Screenshot card; tap opens the real site in a new tab.
-- **Staggered text:** business name, tier tag, and "view live →" slide in a beat after the card settles.
+- **Homepage panel:** clicking the active card opens an inline panel under the row (`~min(96vw, 1400px)`) and scrolls it into view. Inside is the project's REAL homepage — interactive, served from a mirrored copy of its code.
+- **Mirrored previews:** each project's homepage HTML lives in `public/previews/<slug>.html` (`preview` field), captured via `node scripts/mirror.mjs <slug> <url>` or pasted in by hand with a `<base href>` tag. Because we serve it from our own origin, X-Frame-Options can't block it. The iframe is sandboxed without `allow-top-navigation` so the copied site's scripts can't frame-bust. Lazy-mount only on open; never preload.
+- **Fallbacks:** if `preview` is empty → live iframe of `url` (desktop only, requires `embeddable: true`, verified per-site by header check) → `screenshotFull` capture.
+- **Mobile:** the mirrored preview iframe shows on mobile too (Noah's call, 2026-06-11). The live-URL iframe fallback stays desktop-only.
+- **Staggered text:** business name, tier tag, and "view live →" slide in a beat after the panel settles.
 - **Price tag:** the active card shows its tier as a small clear element ON the card ("~$300 · template" / "custom from $500" / "let's talk"). Ranges and tiers only — never an exact past price.
-- One card expanded at a time. Esc / outside click / close button collapses it (reverse morph).
+- One panel open at a time. Esc / close button collapses it; focus returns to the card.
 - **The gallery doubles as the "pick a style" intake step.** On cards where `isStyleDemo: true`, the expanded state includes a "start with this style →" button that scrolls to the contact form and pre-selects that style (pass the project `slug`). This is how a browsing prospect becomes a lead without retyping anything.
 - Lazy-load off-screen card images. Card order comes from the data file's `order` field — Noah controls the anchoring strategy (most impressive-but-affordable first, flagship at #1–2, include one cheap-looking-great one).
 
@@ -206,6 +206,8 @@ export type Project = {
   name: string;            // business or style name shown on the card
   url: string;             // live site
   screenshot: string;      // /public/work/<slug>.webp — 16:10, supplied by Noah
+  screenshotFull: string;  // full-length homepage capture, last-resort fallback
+  preview: string;         // /previews/<slug>.html — mirrored homepage code (see §6.3)
   tier: "template" | "custom" | "flagship";
   priceLabel: string;      // "~$300 · template" | "custom from $500" | "let's talk"
   order: number;           // card position; lower = earlier

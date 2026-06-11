@@ -1,8 +1,22 @@
+// ── ADDING A SITE TO THE GALLERY ────────────────────────────────────────
+// 1. Add an entry to `projects` below (copy any existing one).
+// 2. Get the homepage code in, either way works:
+//      a. run:  node scripts/mirror.mjs <slug> <url>
+//      b. or create public/previews/<slug>.html yourself and paste the
+//         homepage's full HTML into it (view-source on the live page),
+//         then add <base href="https://the-site.com/"> right after <head>.
+// 3. Set `preview: "/previews/<slug>.html"` on the entry. Done — the
+//    gallery iframes that file, interactive, on desktop and mobile.
+// If `preview` is empty the panel falls back to a live iframe of `url`
+// (desktop only, needs embeddable:true), then to `screenshotFull`.
+
 export type Project = {
   slug: string; // also used as the contact form's style reference (style_slug)
   name: string; // business or style name shown on the card
   url: string; // live site — empty until the demo is deployed
   screenshot: string; // /public/work/<slug>.webp — 16:10, supplied by Noah
+  screenshotFull: string; // full-length homepage capture, last-resort fallback
+  preview: string; // /previews/<slug>.html — mirrored homepage served from our origin
   tier: "template" | "custom" | "flagship";
   priceLabel: string;
   order: number; // card position; lower = earlier
@@ -15,13 +29,15 @@ export type Project = {
 // (mshots was tried first but 403s datacenter IPs, incl. Vercel's)
 const shot = (url: string) =>
   `https://image.thum.io/get/width/1280/crop/800/${url}`;
+const fullShot = (url: string) =>
+  `https://image.thum.io/get/fullpage/width/1200/${url}`;
 
 // ── PLACEHOLDERS (Noah, 2026-06-10) ─────────────────────────────────────
 // These are NOT our builds — well-known sites standing in so the gallery
 // can be designed and demoed before our own style demos are deployed.
 // Replace every entry before this site is shown to a single prospect.
 // `embeddable` values verified by header check 2026-06-10 (X-Frame-Options
-// / CSP frame-ancestors): nike, adidas, apple block framing; patagonia,
+// / CSP frame-ancestors): nike, allbirds, apple block framing; patagonia,
 // terminal-industries, relats allow it.
 export const projects: Project[] = [
   {
@@ -29,6 +45,8 @@ export const projects: Project[] = [
     name: "Nike",
     url: "https://www.nike.com",
     screenshot: shot("https://www.nike.com"),
+    screenshotFull: fullShot("https://www.nike.com"),
+    preview: "/previews/ph-nike.html",
     tier: "flagship",
     priceLabel: "let's talk",
     order: 1,
@@ -40,6 +58,8 @@ export const projects: Project[] = [
     name: "Terminal Industries",
     url: "https://terminal-industries.com",
     screenshot: shot("https://terminal-industries.com"),
+    screenshotFull: fullShot("https://terminal-industries.com"),
+    preview: "/previews/ph-terminal.html",
     tier: "custom",
     priceLabel: "custom from $500",
     order: 2,
@@ -51,6 +71,10 @@ export const projects: Project[] = [
     name: "Patagonia",
     url: "https://www.patagonia.com",
     screenshot: shot("https://www.patagonia.com"),
+    screenshotFull: fullShot("https://www.patagonia.com"),
+    // patagonia serves a bot wall to scripted fetches — no usable mirror;
+    // it allows framing, so the panel falls back to the live iframe
+    preview: "",
     tier: "custom",
     priceLabel: "custom from $500",
     order: 3,
@@ -62,6 +86,8 @@ export const projects: Project[] = [
     name: "Relats",
     url: "https://relats.com",
     screenshot: shot("https://relats.com"),
+    screenshotFull: fullShot("https://relats.com"),
+    preview: "/previews/ph-relats.html",
     tier: "template",
     priceLabel: "~$300 · template",
     order: 4,
@@ -69,10 +95,12 @@ export const projects: Project[] = [
     isStyleDemo: false,
   },
   {
-    slug: "ph-adidas",
-    name: "Adidas",
-    url: "https://www.adidas.com",
-    screenshot: shot("https://www.adidas.com"),
+    slug: "ph-allbirds",
+    name: "Allbirds",
+    url: "https://www.allbirds.com",
+    screenshot: shot("https://www.allbirds.com"),
+    screenshotFull: fullShot("https://www.allbirds.com"),
+    preview: "/previews/ph-allbirds.html",
     tier: "template",
     priceLabel: "~$300 · template",
     order: 5,
@@ -84,6 +112,8 @@ export const projects: Project[] = [
     name: "Apple",
     url: "https://www.apple.com",
     screenshot: shot("https://www.apple.com"),
+    screenshotFull: fullShot("https://www.apple.com"),
+    preview: "/previews/ph-apple.html",
     tier: "flagship",
     priceLabel: "let's talk",
     order: 6,

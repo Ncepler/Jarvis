@@ -19,11 +19,11 @@ import { orderedProjects, type Project } from "@/lib/projects";
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const GAP = 24;
 
-// What the card shows in the row and in the expanded preview's poster slot.
+// What the card shows in the row.
 function CardFace({ project, sizes }: { project: Project; sizes: string }) {
   if (!project.screenshot) {
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-bg">
+      <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-surface">
         <span className="text-sm text-muted">In the works</span>
       </div>
     );
@@ -46,7 +46,7 @@ function GalleryCard({
   step,
   width,
   isActive,
-  hidden,
+  isOpen,
   reduced,
   onSelect,
 }: {
@@ -56,7 +56,7 @@ function GalleryCard({
   step: number;
   width: number;
   isActive: boolean;
-  hidden: boolean;
+  isOpen: boolean;
   reduced: boolean;
   onSelect: (index: number) => void;
 }) {
@@ -70,18 +70,14 @@ function GalleryCard({
   return (
     <motion.button
       type="button"
-      layoutId={reduced ? undefined : `gallery-${project.slug}`}
       aria-label={`${project.name}, ${project.priceLabel}`}
+      aria-expanded={isOpen}
       className="relative shrink-0 cursor-pointer overflow-hidden border border-line bg-surface"
-      style={
-        reduced
-          ? { width }
-          : { width, scale, opacity, visibility: hidden ? "hidden" : undefined }
-      }
+      style={reduced ? { width } : { width, scale, opacity }}
       onTap={() => onSelect(index)}
     >
       <div className="relative aspect-[16/10]">
-        <CardFace project={project} sizes="(max-width: 768px) 78vw, 860px" />
+        <CardFace project={project} sizes="(max-width: 768px) 72vw, 480px" />
       </div>
       {/* name + price tag slide in a beat after the card settles */}
       <motion.div
@@ -103,7 +99,12 @@ function GalleryCard({
   );
 }
 
-function ExpandedCard({
+// The selected card's homepage, inline below the row — scroll down and the
+// exact page is right there. Preferred source is the mirrored copy in
+// /public/previews (our origin, so framing can't be blocked — works on
+// mobile too); falls back to a live iframe of the real URL on desktop when
+// the site allows framing, then to the full-length capture.
+function HomepagePanel({
   project,
   reduced,
   canHover,
@@ -114,130 +115,128 @@ function ExpandedCard({
   canHover: boolean;
   onClose: () => void;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    closeRef.current?.focus();
+    ref.current?.scrollIntoView({
+      behavior: reduced ? "auto" : "smooth",
+      block: "start",
+    });
+    closeRef.current?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [project.slug, reduced, onClose]);
 
-  const showIframe = canHover && project.embeddable && project.url;
+  const frameSrc =
+    project.preview ||
+    (canHover && project.embeddable && project.url ? project.url : "");
   const stagger = (i: number) =>
     reduced
       ? { duration: 0.15 }
-      : { duration: 0.4, delay: 0.45 + i * 0.08, ease: EASE };
+      : { duration: 0.4, delay: 0.3 + i * 0.08, ease: EASE };
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-bg/85 p-4 md:p-8"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      onClick={onClose}
+      ref={ref}
+      role="region"
+      aria-label={`${project.name} homepage`}
+      className="mx-auto mt-12 w-[min(96vw,1400px)] scroll-mt-6"
+      initial={reduced ? { opacity: 0 } : { opacity: 0, y: 32 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, transition: { duration: 0.2 } }}
+      transition={reduced ? { duration: 0.2 } : { duration: 0.6, ease: EASE }}
     >
-      <motion.div
-        layoutId={reduced ? undefined : `gallery-${project.slug}`}
-        {...(reduced
-          ? {
-              initial: { opacity: 0 },
-              animate: { opacity: 1 },
-              exit: { opacity: 0 },
-            }
-          : {})}
-        transition={reduced ? { duration: 0.2 } : { duration: 0.6, ease: EASE }}
-        className="w-[min(92vw,1200px)] overflow-hidden border border-line bg-bg"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-label={project.name}
-      >
-        <div className="relative aspect-[16/10] overflow-hidden">
-          {showIframe ? (
-            // live, interactive, scaled-down view of the real site —
-            // mounted only while expanded
-            <iframe
-              src={project.url}
-              title={`Live preview of ${project.name}`}
-              className="h-[200%] w-[200%] origin-top-left scale-50 border-0"
-            />
-          ) : (
-            <CardFace project={project} sizes="92vw" />
-          )}
-        </div>
+      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 border border-b-0 border-line bg-surface px-5 py-4">
+        <motion.span
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={stagger(0)}
+        >
+          {project.name}
+        </motion.span>
+        <motion.span
+          className="text-sm text-muted"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={stagger(1)}
+        >
+          {project.priceLabel}
+        </motion.span>
 
-        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 border-t border-line px-5 py-4">
-          <motion.span
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={stagger(0)}
-          >
-            {project.name}
-          </motion.span>
-          <motion.span
-            className="text-sm text-muted"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={stagger(1)}
-          >
-            {project.priceLabel}
-          </motion.span>
-
-          <span className="ml-auto flex items-baseline gap-6">
-            {project.url && (
-              <motion.a
-                href={project.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm transition-colors duration-200 hover:text-muted"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={stagger(2)}
-              >
-                View live →
-              </motion.a>
-            )}
-            {project.isStyleDemo && (
-              <motion.a
-                href="#contact"
-                className="text-sm transition-colors duration-200 hover:text-muted"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={stagger(3)}
-                onClick={() => {
-                  window.dispatchEvent(
-                    new CustomEvent("preselect-style", {
-                      detail: project.slug,
-                    }),
-                  );
-                  onClose();
-                }}
-              >
-                Start with this style →
-              </motion.a>
-            )}
-            <motion.button
-              ref={closeRef}
-              type="button"
-              onClick={onClose}
-              className="text-sm text-muted transition-colors duration-200 hover:text-ink"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={stagger(4)}
+        <span className="ml-auto flex items-baseline gap-6">
+          {project.url && (
+            <motion.a
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm transition-colors duration-200 hover:text-muted"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={stagger(2)}
             >
-              Close
-            </motion.button>
-          </span>
-        </div>
-      </motion.div>
+              View live →
+            </motion.a>
+          )}
+          {project.isStyleDemo && (
+            <motion.a
+              href="#contact"
+              className="text-sm transition-colors duration-200 hover:text-muted"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={stagger(3)}
+              onClick={() => {
+                window.dispatchEvent(
+                  new CustomEvent("preselect-style", { detail: project.slug }),
+                );
+                onClose();
+              }}
+            >
+              Start with this style →
+            </motion.a>
+          )}
+          <motion.button
+            ref={closeRef}
+            type="button"
+            onClick={onClose}
+            className="text-sm text-muted transition-colors duration-200 hover:text-ink"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={stagger(4)}
+          >
+            Close
+          </motion.button>
+        </span>
+      </div>
+
+      <div className="overflow-hidden border border-line bg-surface">
+        {frameSrc ? (
+          <iframe
+            src={frameSrc}
+            title={`Homepage of ${project.name}`}
+            // mirrored copies run the original site's scripts — sandbox
+            // without allow-top-navigation so frame-busting can't hijack us
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+            className="h-[85vh] w-full border-0"
+          />
+        ) : project.screenshotFull ? (
+          // full-page capture has an unknown intrinsic height, which next/image requires
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={project.screenshotFull}
+            alt={`Full homepage of ${project.name}`}
+            className="w-full"
+            loading="lazy"
+          />
+        ) : (
+          <div className="flex h-[40vh] items-center justify-center text-sm text-muted">
+            In the works
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 }
@@ -252,7 +251,7 @@ export function Gallery() {
   const [active, setActive] = useState(0);
   const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
 
-  const cardW = Math.min(containerW * 0.78, 860) || 340;
+  const cardW = Math.min(containerW * 0.72, 480) || 340;
   const step = cardW + GAP;
   const sidePad = Math.max((containerW - cardW) / 2, 24);
 
@@ -294,18 +293,10 @@ export function Gallery() {
   // where focus was when the preview opened — restored on close (a11y §10)
   const lastTrigger = useRef<HTMLElement | null>(null);
 
-  const openProject = useCallback(
-    (project: Project) => {
-      if (canHover) {
-        lastTrigger.current = document.activeElement as HTMLElement | null;
-        setExpandedSlug(project.slug);
-      } else if (project.url) {
-        // mobile: never iframes — straight to the real site
-        window.open(project.url, "_blank", "noopener,noreferrer");
-      }
-    },
-    [canHover],
-  );
+  const toggleProject = useCallback((project: Project) => {
+    lastTrigger.current = document.activeElement as HTMLElement | null;
+    setExpandedSlug((s) => (s === project.slug ? null : project.slug));
+  }, []);
 
   // a pointer-up at the end of a drag also lands on a card — ignore it
   const dragging = useRef(false);
@@ -316,10 +307,10 @@ export function Gallery() {
       if (index !== active) {
         snapTo(index);
       } else {
-        openProject(projects[index]);
+        toggleProject(projects[index]);
       }
     },
-    [active, snapTo, openProject, projects],
+    [active, snapTo, toggleProject, projects],
   );
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -331,7 +322,7 @@ export function Gallery() {
       snapTo(active + 1);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      openProject(projects[active]);
+      toggleProject(projects[active]);
     }
   };
 
@@ -391,7 +382,7 @@ export function Gallery() {
         // reduced motion: flat scrollable row, no coverflow, no drag physics
         <div
           ref={regionRef}
-          className="mt-16 flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 pb-4 md:px-10"
+          className="relative mt-16 flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 pb-4 md:px-10"
           aria-label="Portfolio gallery"
         >
           {projects.map((p, i) => (
@@ -403,9 +394,9 @@ export function Gallery() {
                 step={step}
                 width={cardW}
                 isActive
-                hidden={false}
+                isOpen={expandedSlug === p.slug}
                 reduced
-                onSelect={() => openProject(p)}
+                onSelect={() => toggleProject(p)}
               />
             </div>
           ))}
@@ -446,7 +437,7 @@ export function Gallery() {
                 step={step}
                 width={cardW}
                 isActive={i === centerIdx}
-                hidden={expandedSlug === p.slug}
+                isOpen={expandedSlug === p.slug}
                 reduced={false}
                 onSelect={onSelect}
               />
@@ -455,16 +446,19 @@ export function Gallery() {
         </div>
       )}
 
-      <AnimatePresence>
-        {expanded && (
-          <ExpandedCard
-            project={expanded}
-            reduced={reduced}
-            canHover={canHover}
-            onClose={close}
-          />
-        )}
-      </AnimatePresence>
+      <div className="relative">
+        <AnimatePresence mode="wait">
+          {expanded && (
+            <HomepagePanel
+              key={expanded.slug}
+              project={expanded}
+              reduced={reduced}
+              canHover={canHover}
+              onClose={close}
+            />
+          )}
+        </AnimatePresence>
+      </div>
     </section>
   );
 }
