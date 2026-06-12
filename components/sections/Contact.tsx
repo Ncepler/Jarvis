@@ -304,13 +304,18 @@ export function Contact({ hasBackend }: { hasBackend: boolean }) {
 
               {error && <p className="text-sm text-muted">{error}</p>}
 
-              <div className="flex flex-wrap items-baseline gap-5">
-                <button type="submit" disabled={busy} className={submitClass}>
-                  Send it
-                </button>
-                <span className="text-sm text-muted">
-                  {COPY.contact.nearSubmit}
-                </span>
+              <div className="grid gap-4">
+                <div className="flex flex-wrap items-baseline gap-5">
+                  <button type="submit" disabled={busy} className={submitClass}>
+                    Send it
+                  </button>
+                  <span className="text-sm text-muted">
+                    {COPY.contact.nearSubmit}
+                  </span>
+                </div>
+                {/* the same risk-reversal sentence as under the tier grid —
+                    identical on purpose, it's the scam-killer (audit 2026-06-12) */}
+                <p className="text-sm text-muted">{COPY.services.riskReversal}</p>
               </div>
             </form>
           )}
