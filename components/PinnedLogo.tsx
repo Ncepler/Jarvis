@@ -60,7 +60,14 @@ export function PinnedLogo() {
   const layoutId = reduced ? undefined : "founder-card";
 
   return (
-    <div className="fixed bottom-6 left-6 z-40 hidden sm:block">
+    // visibility lives on this plain wrapper, NOT the motion.button below —
+    // the layoutId morph writes an inline opacity that overrides any
+    // class-based opacity on the button itself
+    <div
+      className={`fixed bottom-6 left-6 z-40 hidden transition-opacity duration-300 sm:block ${
+        visible ? "opacity-100" : "pointer-events-none opacity-0"
+      }`}
+    >
       <AnimatePresence initial={false} mode={reduced ? "wait" : "popLayout"}>
         {open ? (
           <motion.div
@@ -138,9 +145,7 @@ export function PinnedLogo() {
             type="button"
             aria-label={`About ${SITE.founder}`}
             onClick={() => setOpen(true)}
-            className={`block cursor-pointer text-ink/35 transition-[opacity,color] duration-300 hover:text-ink/70 ${
-              visible ? "opacity-100" : "pointer-events-none opacity-0"
-            }`}
+            className="block cursor-pointer text-ink/35 transition-colors duration-300 hover:text-ink/70"
             initial={reduced ? { opacity: 0 } : undefined}
             animate={reduced ? { opacity: 1 } : undefined}
             exit={reduced ? { opacity: 0 } : undefined}
