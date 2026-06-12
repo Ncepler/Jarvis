@@ -5,7 +5,7 @@
 "use client";
 
 import { useInView } from "motion/react";
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Marquee, Rise } from "./shared";
 
 const ink = "text-[#0e2233]";
@@ -17,15 +17,65 @@ const muted = "text-[#56707f]";
 // components/sections/HeroVideo.tsx for the pattern).
 const HERO_VIDEO: { src: string; poster: string } | null = null;
 
-// Holds the dirty state until the hero is actually on screen, then lets the
-// CSS transition wash it clean. Mount-time playback finished before anyone
-// scrolled down to the gallery, so nobody ever saw it.
+// The hero loads genuinely dirty — grime blobs over a sepia tint — then a
+// spray wedge sweeps left to right and cuts the dirty layer away in its wake.
+// Gated on useInView (once), not mount: mount-time playback finished before
+// anyone scrolled down to the gallery, so nobody ever saw it. Plays once;
+// the overlay unmounts after the sweep so the backdrop-filter stops costing.
+const DIRT_BLOBS = [
+  { left: "4%", top: "12%", w: 220, h: 130, c: "rgba(70,55,40,0.55)", blur: 5 },
+  { left: "18%", top: "55%", w: 280, h: 160, c: "rgba(62,52,44,0.5)", blur: 6 },
+  { left: "31%", top: "8%", w: 140, h: 90, c: "rgba(80,66,50,0.45)", blur: 3 },
+  { left: "42%", top: "38%", w: 300, h: 170, c: "rgba(58,50,45,0.6)", blur: 6 },
+  { left: "55%", top: "70%", w: 180, h: 110, c: "rgba(75,60,42,0.5)", blur: 4 },
+  { left: "63%", top: "16%", w: 240, h: 140, c: "rgba(66,58,50,0.55)", blur: 5 },
+  { left: "76%", top: "48%", w: 200, h: 130, c: "rgba(72,56,40,0.45)", blur: 4 },
+  { left: "86%", top: "10%", w: 120, h: 80, c: "rgba(82,70,55,0.4)", blur: 2 },
+  { left: "9%", top: "80%", w: 160, h: 90, c: "rgba(60,52,46,0.5)", blur: 4 },
+  { left: "48%", top: "2%", w: 100, h: 60, c: "rgba(78,64,48,0.4)", blur: 3 },
+  { left: "70%", top: "82%", w: 240, h: 120, c: "rgba(64,54,44,0.55)", blur: 5 },
+  { left: "90%", top: "62%", w: 150, h: 100, c: "rgba(74,60,46,0.45)", blur: 3 },
+];
+
 function WashReveal({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.35 });
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    if (!inView) return;
+    // 0.8s hold + 2.5s sweep + slack, then drop the overlay for good
+    const t = setTimeout(() => setDone(true), 3600);
+    return () => clearTimeout(t);
+  }, [inView]);
+
   return (
-    <div ref={ref} className={`pw-hero${inView ? " pw-hero-clean" : ""}`}>
+    <div ref={ref} className={`relative${inView ? " pw-washed" : ""}`}>
       {children}
+      {!done && (
+        <>
+          {/* the dirty layer — clip-path cuts it away behind the wedge */}
+          <div aria-hidden="true" className="pw-dirt absolute inset-0 z-10">
+            {DIRT_BLOBS.map((b, i) => (
+              <div
+                key={i}
+                className="absolute rounded-full"
+                style={{
+                  left: b.left,
+                  top: b.top,
+                  width: b.w,
+                  height: b.h,
+                  background: `radial-gradient(ellipse at center, ${b.c}, transparent 70%)`,
+                  filter: `blur(${b.blur}px)`,
+                }}
+              />
+            ))}
+          </div>
+          {/* the spray wedge riding the leading edge of the reveal */}
+          <div aria-hidden="true" className="pw-wedge-wrap pointer-events-none absolute inset-0 z-10">
+            <div className="pw-wedge" />
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -138,29 +188,52 @@ export function PowerWashDemo() {
       </header>
 
       {/* hero — the signature move for this niche: the page itself gets
-          washed. Everything starts dirty (blurred, desaturated, dim), holds
-          a beat while the wash footage runs, then cleans into focus. One-shot
-          CSS keyframes so it stays smooth off the main thread; reduced
-          motion shows the hero sharp from the start. */}
+          power-washed. It loads filthy (dirt blobs + sepia tint over
+          everything), holds 0.8s, then a spray wedge sweeps left to right
+          over ~2.5s with the dirty layer clipped away in its wake. Both
+          clip-path and transform are cheap, off the main thread. Near-linear
+          travel (a real wand moves steadily), eased only at the ends.
+          Reduced motion never shows the overlay at all. */}
       <section className="relative overflow-hidden bg-[#0e2233] text-white [clip-path:polygon(0_0,100%_0,100%_94%,0_100%)]">
         <style>{`
-          .pw-hero {
-            filter: blur(13px) saturate(0.55) brightness(0.8);
-            transform: scale(1.04);
-            transition:
-              filter 2.8s cubic-bezier(0.16, 1, 0.3, 1) 0.9s,
-              transform 2.8s cubic-bezier(0.16, 1, 0.3, 1) 0.9s;
+          .pw-dirt {
+            backdrop-filter: sepia(0.5) brightness(0.85) contrast(0.9);
+            -webkit-backdrop-filter: sepia(0.5) brightness(0.85) contrast(0.9);
+            /* dirty region: left edge at X% (top) / X-8% (bottom), X: 0 → 110.
+               Same point count both states so it interpolates. */
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, -8% 100%);
           }
-          .pw-hero-clean {
-            filter: blur(0) saturate(1) brightness(1);
-            transform: scale(1);
+          .pw-wedge-wrap {
+            transform: translateX(-30%);
+          }
+          .pw-wedge {
+            position: absolute;
+            top: -6%;
+            left: 0;
+            height: 116%;
+            width: 22%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0.08) 78%, transparent);
+            clip-path: polygon(42% 0%, 100% 100%, 0% 100%);
+            filter: blur(8px);
+            transform: rotate(12deg);
+            transform-origin: 50% 0%;
+          }
+          .pw-washed .pw-dirt {
+            clip-path: polygon(110% 0%, 100% 0%, 100% 100%, 102% 100%);
+            transition: clip-path 2.5s cubic-bezier(0.3, 0.05, 0.7, 0.95) 0.8s;
+          }
+          .pw-washed .pw-wedge-wrap {
+            transform: translateX(112%);
+            transition: transform 2.5s cubic-bezier(0.3, 0.05, 0.7, 0.95) 0.8s;
+          }
+          @media (max-width: 640px) {
+            .pw-washed .pw-dirt { transition-duration: 2s; }
+            .pw-washed .pw-wedge-wrap { transition-duration: 2s; }
           }
           @media (prefers-reduced-motion: reduce) {
-            .pw-hero { filter: none; transform: none; transition: none; }
+            .pw-dirt, .pw-wedge-wrap { display: none; }
           }
         `}</style>
-        {/* scale(1.04) hides the soft edge fringe the blur would otherwise
-            leak past the section bounds */}
         <WashReveal>
           {/* full-bleed wash footage behind the headline; a stylized scene
               stands in until the clip exists */}
