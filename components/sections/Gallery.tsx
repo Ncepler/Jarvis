@@ -411,10 +411,20 @@ export function Gallery() {
     } else if (e.key === "Enter") {
       e.preventDefault();
       showPanel();
+    } else if (e.key === "Escape") {
+      // the panel has no closed state anymore — Esc brings the row back
+      e.preventDefault();
+      regionRef.current?.scrollIntoView({
+        behavior: reduced ? "auto" : "smooth",
+        block: "center",
+      });
     }
   };
 
-  const backdrop = projects[centerIdx];
+  // the backdrop follows the settled index (not the live drag index) so a
+  // fling across the row doesn't mount every demo in between — and it always
+  // matches the panel below
+  const backdrop = projects[panelIdx];
   const panelProject = projects[reduced ? selected : panelIdx];
 
   return (
@@ -423,9 +433,14 @@ export function Gallery() {
       className="relative overflow-hidden border-t border-line py-24 md:py-40"
     >
       {/* the active site's homepage fills the screen behind the row,
-          crossfading as cards pass through center */}
+          crossfading as cards settle in the center. Clipped to the first
+          screenful — past that the open panel shows the same homepage for
+          real, and a dimmed copy bleeding behind it reads as a duplicate */}
       {!reduced && (
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-svh overflow-hidden"
+        >
           <AnimatePresence initial={false}>
             <motion.div
               key={backdrop.slug}
