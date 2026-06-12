@@ -1,5 +1,5 @@
 import { Logo } from "@/components/Logo";
-import { SITE } from "@/lib/site";
+import { COPY, SITE } from "@/lib/site";
 import { HeroVideo } from "./HeroVideo";
 
 export function Hero() {
@@ -30,12 +30,18 @@ export function Hero() {
           className="rise-in mt-6 max-w-md text-lg text-muted"
           style={{ animationDelay: "240ms" }}
         >
-          Websites for local businesses that look like they cost 10x more.
+          {COPY.hero.positioning}
+        </p>
+        <p
+          className="rise-in mt-3 max-w-md text-sm text-muted"
+          style={{ animationDelay: "320ms" }}
+        >
+          {COPY.hero.outcome}
         </p>
         <a
           href="#work"
           className="rise-in mt-10 text-sm text-accent transition-colors duration-200 hover:text-ink"
-          style={{ animationDelay: "360ms" }}
+          style={{ animationDelay: "420ms" }}
         >
           See the work
         </a>

@@ -4,6 +4,7 @@ import { motion, useInView, useReducedMotion } from "motion/react";
 import { useRef, useState } from "react";
 import { Reveal } from "@/components/Reveal";
 import { useCanHover } from "@/lib/hooks";
+import { COPY } from "@/lib/site";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -12,19 +13,19 @@ const PATHS = [
     key: "style",
     title: "Pick a style",
     price: "~$300",
-    copy: "Choose a ready-made style and we fit it to your business. Live in about a week.",
+    copy: COPY.services.paths.style,
   },
   {
     key: "custom",
     title: "Custom build",
     price: "from $500",
-    copy: "Designed from scratch around how your business actually works.",
+    copy: COPY.services.paths.custom,
   },
   {
     key: "flagship",
     title: "Flagship",
     price: "let's talk",
-    copy: "The full treatment. We scope it together.",
+    copy: COPY.services.paths.flagship,
   },
 ] as const;
 
@@ -112,6 +113,9 @@ export function Services() {
         <Reveal>
           <h2 className="font-display text-title">Three ways in</h2>
         </Reveal>
+        <Reveal delay={0.1}>
+          <p className="mt-4 max-w-md text-muted">{COPY.services.bridge}</p>
+        </Reveal>
         <div className="mt-16 grid items-start gap-6 md:grid-cols-3">
           {PATHS.map((path, i) => (
             <Reveal key={path.key} delay={i * 0.09}>
@@ -119,6 +123,12 @@ export function Services() {
             </Reveal>
           ))}
         </div>
+        {/* the scam-killer, stated plainly where the prices are */}
+        <Reveal delay={0.1}>
+          <p className="mt-12 max-w-md text-lg">
+            {COPY.services.riskReversal}
+          </p>
+        </Reveal>
       </div>
     </section>
   );

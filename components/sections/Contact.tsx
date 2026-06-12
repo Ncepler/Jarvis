@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Reveal } from "@/components/Reveal";
 import { styleDemos } from "@/lib/projects";
-import { SITE, isTBD } from "@/lib/site";
+import { COPY, SITE, isTBD } from "@/lib/site";
 
 const PATH_OPTIONS = [
   { value: "style", label: "Pick a style" },
@@ -75,16 +75,15 @@ export function Contact() {
           <h2 className="font-display text-title">Start a project</h2>
         </Reveal>
         <Reveal delay={0.1}>
-          <p className="mt-4 max-w-md text-muted">
-            Tell us about the business. A couple sentences is plenty.
+          <p className="mt-4 max-w-md text-muted">{COPY.contact.sub}</p>
+          <p className="mt-3 max-w-md text-sm text-muted">
+            {COPY.contact.reassurance}
           </p>
         </Reveal>
 
         <Reveal delay={0.18}>
         {status === "sent" ? (
-          <p className="mt-16 max-w-md text-lg">
-            Got it. We&apos;ll be in touch.
-          </p>
+          <p className="mt-16 max-w-md text-lg">{COPY.contact.success}</p>
         ) : (
           <form
             onSubmit={onSubmit}
@@ -179,12 +178,17 @@ export function Contact() {
               </p>
             )}
 
-            <button
-              type="submit"
-              className="press justify-self-start cursor-pointer border border-ink px-6 py-3 text-sm transition-colors duration-200 hover:bg-ink hover:text-bg"
-            >
-              Send it
-            </button>
+            <div className="flex flex-wrap items-baseline gap-5">
+              <button
+                type="submit"
+                className="press cursor-pointer border border-ink px-6 py-3 text-sm transition-colors duration-200 hover:bg-ink hover:text-bg"
+              >
+                Send it
+              </button>
+              <span className="text-sm text-muted">
+                {COPY.contact.nearSubmit}
+              </span>
+            </div>
           </form>
         )}
         </Reveal>
