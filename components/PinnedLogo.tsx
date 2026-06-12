@@ -20,9 +20,13 @@ export function PinnedLogo() {
   useEffect(() => {
     const gallery = document.getElementById("work");
     if (!gallery) return;
+    // threshold 0 + shrunken root, NOT threshold 0.2: the section's height
+    // changes with the open panel, and once 20% of it exceeds a screenful
+    // the 0.2 crossing never fires again — the logo got stuck visible over
+    // other sections
     const observer = new IntersectionObserver(
       ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0.2 },
+      { rootMargin: "-20% 0px", threshold: 0 },
     );
     observer.observe(gallery);
     return () => observer.disconnect();
