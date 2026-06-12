@@ -11,6 +11,11 @@ import { HowItWorks } from "@/components/sections/HowItWorks";
 import { Services } from "@/components/sections/Services";
 
 export default function Home() {
+  // decided server-side so the service role key never reaches the client;
+  // without both vars the form falls back to single-step mailto (§6.7)
+  const hasBackend = Boolean(
+    process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY,
+  );
   return (
     <>
       <SmoothScroll />
@@ -23,7 +28,7 @@ export default function Home() {
         <AllSites />
         <About />
         <Faq />
-        <Contact />
+        <Contact hasBackend={hasBackend} />
       </main>
       <Footer />
     </>

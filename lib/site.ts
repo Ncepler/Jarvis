@@ -78,9 +78,13 @@ export const COPY = {
     ],
   },
   contact: {
-    sub: "Tell us about the business. A couple sentences is plenty.",
+    sub: "Tell us about the business.",
     reassurance: "No obligation, and you'll hear back within a day.",
     nearSubmit: "Nothing to pay today.",
-    success: "Got it. We'll be in touch.",
+    step2Intro:
+      "Two more questions if you've got 30 seconds — or skip, we'll ask later.",
+    success:
+      "Got it — we'll reply within a day. Have your logo and a few photos handy.",
+    errorSave: "That didn't send. Give it another try in a minute.",
   },
 } as const;
