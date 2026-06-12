@@ -1,5 +1,25 @@
 # HANDOFF — updated 2026-06-12
 
+## Copy/persuasion pass (v2)
+Noah: site read like a portfolio, not a sales page; fix "is this a scam /
+what do I do / what's in it for me" with the fewest words, nothing
+fabricated (zero clients exist). Done, all copy centralized in `COPY` in
+lib/site.ts (components import it; edit copy there only):
+- Risk reversal ("Half up front. The other half when you're happy with it,
+  not before.") under the tier grid + "Nothing to pay today." beside the
+  contact submit.
+- New HowItWorks section (5 numbered rows) after Services; new Faq section
+  (5 flat Q&As, no accordion) before Contact.
+- Hero outcome line, tier-card outcome copy, services bridge line, About
+  rewritten (3 short ¶: local, agencies-charge-thousands, pay-when-happy),
+  contact reassurance ("you'll hear back within a day" — Noah explicitly
+  requested despite earlier banning "we reply within a day" in the success
+  message; success message stays "Got it. We'll be in touch.").
+- PENDING NOAH: (a) yearly-fee copy (~$200/yr) drafted both ways, he picks
+  WITH or WITHOUT (shipped WITHOUT); (b) verify FAQ "Do I own the site?"
+  answer matches his real hosting/domain setup; (c) he may revise any COPY
+  strings, they're his brand voice.
+
 ## Fix-up (commit d8f90c4)
 Noah reported the wash reveal "didn't get pushed" — it HAD deployed, but the
 blur→clean played on MOUNT, so it always finished before anyone scrolled to
