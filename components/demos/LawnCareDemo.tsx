@@ -81,7 +81,7 @@ const services = [
 
 const steps = [
   ["Text us a photo", "Send a picture of the yard and your address. That's the whole form."],
-  ["Get a price that night", "A real quote, not an estimate window. No visit needed."],
+  ["Get a price that night", "A firm number for your exact yard. No visit needed."],
   ["We put you on the route", "Same crew, same day each week. Skip or cancel by text anytime."],
 ];
 

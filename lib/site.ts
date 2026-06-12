@@ -26,8 +26,7 @@ export const COPY = {
   services: {
     bridge:
       "Live in about a week. All we need from you is a logo, a few photos, and your hours.",
-    riskReversal:
-      "Half up front. The other half when you're happy with it, not before.",
+    riskReversal: "Half up front. The rest when you're happy with it.",
     paths: {
       style:
         "Pick a style from the work below and we fit it to your business. A week later, you're the company with the nice website.",
@@ -74,14 +73,13 @@ export const COPY = {
       },
       {
         q: "What do you need from me?",
-        a: "A logo if you have one, a few photos, your hours, and your towns. We handle the rest, including the words.",
+        a: "Send your logo, photos, and hours. We write everything else.",
       },
     ],
   },
   contact: {
     sub: "Tell us about the business. A couple sentences is plenty.",
-    reassurance:
-      "Takes two minutes. No obligation, and you'll hear back within a day.",
+    reassurance: "No obligation, and you'll hear back within a day.",
     nearSubmit: "Nothing to pay today.",
     success: "Got it. We'll be in touch.",
   },

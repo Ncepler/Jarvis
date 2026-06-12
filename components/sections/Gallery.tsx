@@ -475,8 +475,8 @@ export function Gallery() {
         </Reveal>
         <Reveal delay={0.1}>
           <p className="mt-4 max-w-md text-muted">
-            Styles we build from, and the sites that came out of them. The one
-            in the middle is open below.
+            Styles we build from, and the sites that came out of them. Drag
+            through and step inside one.
           </p>
         </Reveal>
       </div>

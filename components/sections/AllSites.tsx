@@ -6,7 +6,7 @@ export function AllSites() {
     <section id="sites" className="border-t border-line px-6 py-24 md:px-10 md:py-40">
       <div className="mx-auto max-w-6xl">
         <Reveal>
-          <h2 className="font-display text-title">The full list</h2>
+          <h2 className="font-display text-title">Every site</h2>
         </Reveal>
         <ul className="mt-16">
           {orderedProjects.map((p, i) => (

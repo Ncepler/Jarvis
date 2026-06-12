@@ -49,7 +49,7 @@ const practice = [
   },
   {
     name: "Build",
-    copy: "Our own crews, not subs. Masonry, carpentry, irrigation, and planting held to the drawing.",
+    copy: "Every crew on site is ours. Masonry, carpentry, irrigation, and planting held to the drawing.",
   },
   {
     name: "Care",

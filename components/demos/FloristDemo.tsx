@@ -59,7 +59,7 @@ const offerings = [
   },
   {
     name: "Weddings & events",
-    copy: "From two table arrangements to the whole room. We design around your venue, not a catalog.",
+    copy: "From two table arrangements to the whole room, designed around your venue.",
     price: "by consultation",
     shape: "rounded-full",
     tone: "bg-[#e9d2cd]",
@@ -190,8 +190,8 @@ export function FloristDemo() {
             <Rise delay={0.1}>
               <p className="mt-5 text-[#faf5ef]/70">
                 The best dates book a season out. Tell us the venue and the
-                month, and we&apos;ll bring ideas to a first call. No
-                commitment, no mood-board fee.
+                month, and we&apos;ll bring ideas to a first call. The call
+                costs nothing.
               </p>
               <a
                 href="#florist-order"
