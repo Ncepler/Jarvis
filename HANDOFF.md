@@ -58,6 +58,10 @@ absent (superseded by panel-follows-center).
 3. Brand name still blocks lib/site.ts, OG image, domain.
 
 ## Gotchas & decisions
+- **Version stamp (Noah 2026-06-12, standing rule):** `lib/version.ts` shows
+  small in the footer. Bump it by 1 in EVERY pushed change, and the session's
+  last message to Noah must state the new version ("version: vN") so he can
+  check the live footer to confirm the deploy landed.
 - §6.3 morph-expand + Esc-close spec superseded 2026-06-11 (panel always
   open, follows center). §6.4 "not a button" overridden (founder card).
   Don't update CLAUDE.md without Noah asking.

@@ -1,4 +1,5 @@
 import { SITE, isTBD } from "@/lib/site";
+import { VERSION } from "@/lib/version";
 
 export function Footer() {
   return (
@@ -24,6 +25,7 @@ export function Footer() {
           </a>
         )}
         <span>{SITE.region}</span>
+        <span>{VERSION}</span>
       </span>
     </footer>
   );
