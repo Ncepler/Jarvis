@@ -1,6 +1,14 @@
 # HANDOFF — updated 2026-06-12
 
-## Latest: audit-and-fix pass (commits 81f0eaa, c25e543)
+## Fix-up (commit d8f90c4)
+Noah reported the wash reveal "didn't get pushed" — it HAD deployed, but the
+blur→clean played on MOUNT, so it always finished before anyone scrolled to
+the gallery and looked like no change. Now `WashReveal` (useInView, once,
+amount 0.35) holds the dirty state until the hero is on screen, then a CSS
+transition (0.9s hold, 2.8s clean) washes it in. Keyframes → transition so
+it's interruptible. Same reduced-motion gate.
+
+## Audit-and-fix pass (commits 81f0eaa, c25e543)
 Noah asked for a §6 compliance audit, two fixes, and the quality passes. All done, pushed, verified live (curl-level; real-browser checks below still pending).
 
 - **Power-wash demo got its signature hero**: the whole hero starts dirty
