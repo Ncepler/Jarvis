@@ -7,6 +7,12 @@ import { Marquee, Rise } from "./shared";
 const ink = "text-[#0e2233]";
 const muted = "text-[#56707f]";
 
+// TODO(asset): full-bleed pressure-washing clip behind the hero, supplied
+// later. When it lands, move the <video> into a small client component so
+// autoplay can be gated behind prefers-reduced-motion (see
+// components/sections/HeroVideo.tsx for the pattern).
+const HERO_VIDEO: { src: string; poster: string } | null = null;
+
 // stylized house front getting washed — flat shapes, no imagery
 function HouseWash() {
   return (
@@ -114,39 +120,74 @@ export function PowerWashDemo() {
         </nav>
       </header>
 
-      {/* hero — angled bottom edge instead of a straight block */}
-      <section className="bg-[#0e2233] text-white [clip-path:polygon(0_0,100%_0,100%_94%,0_100%)]">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 pb-20 pt-16 md:grid-cols-2 md:px-10 md:pb-28 md:pt-24">
-          <div>
-            <Rise>
-              <p className="text-sm font-semibold uppercase tracking-widest text-[#1b9fd8]">
-                Power washing · Suffolk County
-              </p>
-              <h1 className="mt-4 text-5xl font-bold uppercase leading-[0.95] tracking-tight md:text-7xl">
-                Like the day
-                <br />
-                it was built.
-              </h1>
-            </Rise>
-            <Rise delay={0.12}>
-              <p className="mt-6 max-w-md text-lg text-white/70">
-                Houses, driveways, decks, and fences, washed back to new in one
-                visit. Flat quotes, no surprises.
-              </p>
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <a
-                  href="#wash-quote"
-                  className="bg-[#1b9fd8] px-7 py-3.5 font-semibold uppercase tracking-wide text-[#0e2233] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white"
-                >
-                  Get a free quote
-                </a>
-                <span className="text-sm text-white/60">Most quotes same day</span>
-              </div>
-            </Rise>
+      {/* hero — the signature move for this niche: the page itself gets
+          washed. Everything starts dirty (blurred, desaturated, dim), holds
+          a beat while the wash footage runs, then cleans into focus. One-shot
+          CSS keyframes so it stays smooth off the main thread; reduced
+          motion shows the hero sharp from the start. */}
+      <section className="relative overflow-hidden bg-[#0e2233] text-white [clip-path:polygon(0_0,100%_0,100%_94%,0_100%)]">
+        <style>{`
+          @keyframes pw-clean {
+            0%, 26% { filter: blur(13px) saturate(0.55) brightness(0.8); transform: scale(1.04); }
+            100% { filter: blur(0) saturate(1) brightness(1); transform: scale(1); }
+          }
+          .pw-clean { animation: pw-clean 3.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+          @media (prefers-reduced-motion: reduce) {
+            .pw-clean { animation: none; }
+          }
+        `}</style>
+        {/* scale(1.04) hides the soft edge fringe the blur would otherwise
+            leak past the section bounds */}
+        <div className="pw-clean">
+          {/* full-bleed wash footage behind the headline; a stylized scene
+              stands in until the clip exists */}
+          <div className="absolute inset-0" aria-hidden="true">
+            {HERO_VIDEO ? (
+              <video
+                className="absolute inset-0 h-full w-full object-cover"
+                src={HERO_VIDEO.src}
+                poster={HERO_VIDEO.poster}
+                muted
+                loop
+                playsInline
+                preload="none"
+                autoPlay
+              />
+            ) : (
+              <>
+                <div className="absolute inset-0 bg-[radial-gradient(90%_70%_at_75%_15%,rgba(27,159,216,0.35),transparent_60%)]" />
+                <div className="absolute -right-12 bottom-0 h-[88%] w-[58%] opacity-50">
+                  <HouseWash />
+                </div>
+              </>
+            )}
+            {/* keeps the headline readable over whatever plays behind it */}
+            <div className="absolute inset-0 bg-linear-to-r from-[#0e2233] via-[#0e2233]/70 to-[#0e2233]/15" />
           </div>
-          <Rise delay={0.15} className="h-64 md:h-80">
-            <HouseWash />
-          </Rise>
+
+          <div className="relative mx-auto flex min-h-[540px] max-w-6xl flex-col justify-center px-6 py-24 md:min-h-[640px] md:px-10">
+            <p className="text-sm font-semibold uppercase tracking-widest text-[#1b9fd8]">
+              Power washing · Suffolk County
+            </p>
+            <h1 className="mt-4 text-5xl font-bold uppercase leading-[0.95] tracking-tight md:text-7xl lg:text-8xl">
+              Like the day
+              <br />
+              it was built.
+            </h1>
+            <p className="mt-6 max-w-md text-lg text-white/75">
+              Houses, driveways, decks, and fences, washed back to new in one
+              visit. Flat quotes, no surprises.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-4">
+              <a
+                href="#wash-quote"
+                className="bg-[#1b9fd8] px-7 py-3.5 font-semibold uppercase tracking-wide text-[#0e2233] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white"
+              >
+                Get a free quote
+              </a>
+              <span className="text-sm text-white/60">Most quotes same day</span>
+            </div>
+          </div>
         </div>
       </section>
 
