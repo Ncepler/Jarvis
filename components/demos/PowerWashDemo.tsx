@@ -2,6 +2,10 @@
 // sample brand for the demo, not a client. Self-contained: every color is
 // local, nothing leaks into the studio site's theme.
 
+"use client";
+
+import { useInView } from "motion/react";
+import { useRef, type ReactNode } from "react";
 import { Marquee, Rise } from "./shared";
 
 const ink = "text-[#0e2233]";
@@ -12,6 +16,19 @@ const muted = "text-[#56707f]";
 // autoplay can be gated behind prefers-reduced-motion (see
 // components/sections/HeroVideo.tsx for the pattern).
 const HERO_VIDEO: { src: string; poster: string } | null = null;
+
+// Holds the dirty state until the hero is actually on screen, then lets the
+// CSS transition wash it clean. Mount-time playback finished before anyone
+// scrolled down to the gallery, so nobody ever saw it.
+function WashReveal({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.35 });
+  return (
+    <div ref={ref} className={`pw-hero${inView ? " pw-hero-clean" : ""}`}>
+      {children}
+    </div>
+  );
+}
 
 // stylized house front getting washed — flat shapes, no imagery
 function HouseWash() {
@@ -127,18 +144,24 @@ export function PowerWashDemo() {
           motion shows the hero sharp from the start. */}
       <section className="relative overflow-hidden bg-[#0e2233] text-white [clip-path:polygon(0_0,100%_0,100%_94%,0_100%)]">
         <style>{`
-          @keyframes pw-clean {
-            0%, 26% { filter: blur(13px) saturate(0.55) brightness(0.8); transform: scale(1.04); }
-            100% { filter: blur(0) saturate(1) brightness(1); transform: scale(1); }
+          .pw-hero {
+            filter: blur(13px) saturate(0.55) brightness(0.8);
+            transform: scale(1.04);
+            transition:
+              filter 2.8s cubic-bezier(0.16, 1, 0.3, 1) 0.9s,
+              transform 2.8s cubic-bezier(0.16, 1, 0.3, 1) 0.9s;
           }
-          .pw-clean { animation: pw-clean 3.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+          .pw-hero-clean {
+            filter: blur(0) saturate(1) brightness(1);
+            transform: scale(1);
+          }
           @media (prefers-reduced-motion: reduce) {
-            .pw-clean { animation: none; }
+            .pw-hero { filter: none; transform: none; transition: none; }
           }
         `}</style>
         {/* scale(1.04) hides the soft edge fringe the blur would otherwise
             leak past the section bounds */}
-        <div className="pw-clean">
+        <WashReveal>
           {/* full-bleed wash footage behind the headline; a stylized scene
               stands in until the clip exists */}
           <div className="absolute inset-0" aria-hidden="true">
@@ -188,7 +211,7 @@ export function PowerWashDemo() {
               <span className="text-sm text-white/60">Most quotes same day</span>
             </div>
           </div>
-        </div>
+        </WashReveal>
       </section>
 
       {/* town ticker */}
