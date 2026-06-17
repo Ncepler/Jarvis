@@ -24,6 +24,13 @@ const cV: Token = { id: "cV", char: "V", core: true };
 const cA: Token = { id: "cA", char: "A", core: true };
 const cL: Token = { id: "cL", char: "L", core: true };
 
+// The final VALIS → VILAS step is a real position swap: A and I trade slots.
+// Keep them (and the static S) as persistent nodes across both phases — same
+// ids — so they FLIP-travel instead of crossfading, and the A and I can spin
+// past each other (see `spinFor`) for the circular switch.
+const swapI: Token = { id: "swapI", char: "I", core: false };
+const swapS: Token = { id: "swapS", char: "S", core: false };
+
 const h = (p: number, i: number, char: string): Token => ({
   id: `h${p}-${i}`,
   char,
@@ -46,10 +53,9 @@ function buildPhases(tour: TourWord[]): Token[][] {
       ...after.map((c, i) => h(p, 50 + i, c)),
     ]);
   });
-  const b = 2 + tour.length;
   phases.push([cV, cA, cL]); // VAL again
-  phases.push([cV, cA, cL, h(b + 1, 0, "I"), h(b + 1, 1, "S")]); // VALIS
-  phases.push([cV, h(b + 2, 0, "I"), cL, cA, h(b + 2, 1, "S")]); // VILAS
+  phases.push([cV, cA, cL, swapI, swapS]); // VALIS  — A·I in source order
+  phases.push([cV, swapI, cL, cA, swapS]); // VILAS — A & I swap slots (spin)
   return phases;
 }
 
@@ -58,6 +64,10 @@ const LAST = PHASES.length - 1;
 // ms a phase holds before advancing (index = the phase being left). Slow, with a
 // full ~1.3s beat on each tour word so each one actually lands before it moves.
 const HOLDS = [1000, 1000, 1300, 1300, 1300, 1000, 1000];
+
+// Seconds for a letter to travel between slots (the VAL slide-in + every
+// rearrange) — long and unhurried.
+const TRAVEL = 1.1;
 
 const prefersReduced = () =>
   typeof window !== "undefined" &&
@@ -78,6 +88,12 @@ export function VilasReveal({
   const rowRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const dotted = SITE.domain.slice(SITE.domain.indexOf("."));
+
+  // On the final VALIS → VILAS swap, the A and I rotate a full turn (opposite
+  // directions) as they trade slots — a circular switch that lands upright.
+  // Quiet (0) in every other phase, so only the swap spins.
+  const spinFor = (id: string) =>
+    phase !== LAST ? 0 : id === "cA" ? 360 : id === "swapI" ? -360 : 0;
 
   // Hide the post-reveal copy before first paint so the animation starts clean.
   useLayoutEffect(() => {
@@ -145,7 +161,7 @@ export function VilasReveal({
       timers.push(
         setTimeout(() => {
           if (!cancelled) setResolved(true);
-        }, acc + 450 * k),
+        }, acc + 1200 * k), // wait out the swap spin before the copy fades in
       );
     };
 
@@ -187,12 +203,17 @@ export function VilasReveal({
                   <motion.span
                     key={t.id}
                     layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0, rotate: 0 }}
+                    animate={{ opacity: 1, rotate: spinFor(t.id) }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.7, ease: EASE }}
+                    transition={{
+                      opacity: { duration: 0.7, ease: EASE },
+                      // The slide / rearrange + the swap spin share the slow beat.
+                      layout: { duration: TRAVEL, ease: EASE },
+                      rotate: { duration: TRAVEL, ease: EASE },
+                    }}
                     className="inline-block"
-                    style={{ fontWeight: 500 }}
+                    style={{ fontWeight: 500, transformOrigin: "center" }}
                   >
                     {t.char}
                   </motion.span>

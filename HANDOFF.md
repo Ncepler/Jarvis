@@ -1,7 +1,8 @@
-# HANDOFF — updated 2026-06-17 (v11)
+# HANDOFF — updated 2026-06-17 (v12)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v11.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v12.
+- **Reveal motion (v12):** travel/slide between slots is now `TRAVEL = 1.1s` (slower VAL slide-in + every rearrange). Final VALIS→VILAS is a real position swap — `swapI`/`swapS` are persistent nodes across both phases so A & I FLIP-travel instead of crossfading, and A (+360°) / I (−360°) spin a full turn past each other (`spinFor`), landing upright. Resolved copy (.studio/tagline/CTA) now waits 1200ms so the spin finishes first. JUDGMENT CALL: full 360° (not 180°) so the final wordmark lands upright — a literal 180° would leave A & I upside-down at rest. Change the two numbers in `spinFor` if you actually want them inverted.
 - **Accent RESOLVED → warm amber-gold `#E8A24A`** (Noah, 2026-06-17). `--color-accent` in `globals.css` set; `--color-muted` is `#6F6F69`. CLAUDE.md §5 tokens updated to match. Still exactly one accent, used sparingly (CTA / hover / focus ring).
 - **Reveal retuned (v11):** every letter now uniform — same size, weight 500, ink colour, opacity 1 (dropped the 700/300 bright-vs-dim split). V·A·L persist by motion alone. Paced slower: each tour word holds ~1.3s, pivots ~1s, transitions 0.7s (`HOLDS` const), mobile trim eased to `k=0.85`.
 - **Brand RESOLVED → Vilas** (VEE-las, from "visual"), domain `vilas.studio`, wordmark "Vilas Studio". `lib/site.ts` now has `BRAND = "Vilas"`, `name = "${BRAND} Studio"` (the only place "Studio" is written), `brand`/`domain` filled. `tagline`/`email`/`instagram`/`founder` still `*_TBD`.
