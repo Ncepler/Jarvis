@@ -117,16 +117,16 @@ References: **terminal-industries.com, igloo.inc, relats.com**. Study the restra
 
 ```
 --color-bg:    #0B0B0C   /* monochrome field (Vilas, 2026-06-17) */
---color-ink:   #EDEBE3   /* warm off-white */
---color-muted: #a8a396
+--color-ink:   #EDEBE3   /* warm off-white — text, wordmark */
+--color-muted: #6F6F69   /* dim text, captions, secondary UI, helper letters */
 --color-line:  rgba(237, 235, 227, 0.18)
---color-accent: #EDEBE3  /* NEUTRAL == ink for now. Name is locked so ONE accent is allowed, but Noah hasn't picked the colour. Swap this ONE line when he does — every accent usage flips at once. Still no acid-green/purple placeholder. */
+--color-accent: #E8A24A  /* warm amber-gold — the ONE accent (Noah, 2026-06-17). At most one or two things per screen: a CTA, a hover/active state, a focus ring. Never a fill or large area. Exactly one accent — no second colour. Swap this ONE line to retint every accent usage at once. */
 ```
 
 **Typography:** Vilas runs four faces (perf tradeoff, revisit/consolidate in Stage 2):
 - Body/UI: **Inter**.
 - Section titles: **Instrument Serif** (`--font-display`) — unchanged.
-- Wordmark/reveal: **Space Grotesk** variable (`--font-wordmark`) — 300 for dim helpers, 700 for the bright V·A·L core.
+- Wordmark/reveal: **Space Grotesk** variable (`--font-wordmark`) — uniform weight 500; every letter in the reveal is the same size, weight, and colour (Noah, 2026-06-17). (Was 300/700 dim-vs-bright; the V·A·L now persist by motion alone, not by weight/opacity.)
 - Utility/mono: **Space Mono** (`--font-mono`) — ".studio" + small labels.
 - Display scale stays big: hero wordmark `clamp(3.5rem, 13vw, 10rem)`, section titles `clamp(2rem, 5vw, 4rem)`, tight tracking on display sizes.
 
@@ -154,11 +154,11 @@ One long landing page, in this order: Hero → Services → Gallery → All Site
 - Scroll cue at the bottom (subtle, animated once).
 
 #### 6.1.1 Opening reveal — `components/hero/VilasReveal.tsx` (Stage 0, built 2026-06-17)
-The signature opening. The brand's **V·A·L stay bold + bright the whole time** as three *persistent* nodes; every other letter is dim (opacity .48) + weight 300 and fades in/out around them. Sequence: VILAS → VAL → VAL**id** (prefix) → in**VAL**uable (infix) → appro**VAL** (suffix) → VAL → VAL**IS** → VILAS → ".studio" fades in beneath.
+The signature opening. The brand's **V·A·L are three *persistent* nodes that travel** through the words; every letter renders identically (same size, weight 500, ink colour, opacity 1) — the only distinction is that the core three stay while the others fade in/out around them (Noah, 2026-06-17 — was a bold/bright-vs-dim contrast). Sequence: VILAS → VAL → VAL**id** (prefix) → in**VAL**uable (infix) → appro**VAL** (suffix) → VAL → VAL**IS** → VILAS → ".studio" fades in beneath. Paced slow — each tour word holds ~1.3s, pivots ~1s, letter transitions 0.7s (`HOLDS` const).
 - **Tech:** Motion (`layout` + `AnimatePresence mode="popLayout"`) — the FLIP travel of the three core nodes, *not* GSAP. (Deviation from the original brief's "GSAP timeline" — chosen because Motion's `layout` literally keeps the same DOM nodes; GSAP is installed and reserved for Stage 1.) Core ids `cV/cA/cL` are constant across phases so React preserves the elements and they travel; helpers are keyed per-phase so they fade.
 - **Tour words are config-driven** (`TOUR` at the top of the file): valid / invaluable / approval. Swap freely; each just needs "VAL" at its `coreAt` index.
 - **Scale-to-fit:** the whole word scales (transform on a wrapper, measured per phase) so long words never overflow at 360px. Transform-only — no layout shift; siblings sit below the unscaled box.
-- **No-JS / SSR / reduced-motion** render the resolved VILAS + .studio + tagline statically (no flash). Any click/tap/scroll/keydown jumps to resolved. Plays once, in-flow (never gates the page), shortened on mobile (`k=0.6`).
+- **No-JS / SSR / reduced-motion** render the resolved VILAS + .studio + tagline statically (no flash). Any click/tap/scroll/keydown jumps to resolved. Plays once, in-flow (never gates the page), trimmed slightly on mobile (`k=0.85`).
 
 ### 6.2 Services — the three paths (Animated Product Card pattern)
 Three tiles matching the intake choice:

@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
 @theme {
-  /* Vilas: monochrome until an accent is chosen (Noah 2026-06-17). */
+  /* Vilas colour tokens (Noah 2026-06-17). Monochrome does ~95% of the work;
+     --accent is the ONE colour — at most one or two things per screen (a CTA,
+     a hover/active state, a focus ring), never a fill or large area. */
   --color-bg: #0b0b0c;
   --color-surface: #161618;
   --color-ink: #edebe3;
-  --color-muted: #a8a396;
+  --color-muted: #6f6f69;
   --color-line: rgba(237, 235, 227, 0.18);
-  /* NEUTRAL placeholder == ink. ONE line to swap when the brand colour lands;
-     every accent usage flips at once. */
-  --color-accent: #edebe3;
+  /* warm amber-gold — the single accent. Exactly one; no second colour. */
+  --color-accent: #e8a24a;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 

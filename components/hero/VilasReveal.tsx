@@ -4,7 +4,7 @@ import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
 
-type Token = { id: string; char: string; core: boolean };
+type Token = { id: string; char: string; core: boolean; bright?: boolean };
 type TourWord = { word: string; coreAt: number };
 
 // Config-driven tour: the brand's V·A·L hides inside three words for what a
@@ -55,7 +55,9 @@ function buildPhases(tour: TourWord[]): Token[][] {
 
 const PHASES = buildPhases(TOUR);
 const LAST = PHASES.length - 1;
-const HOLDS = [700, 600, 650, 900, 800, 550, 700]; // ms before advancing phase 0..LAST-1
+// ms a phase holds before advancing (index = the phase being left). Slow, with a
+// full ~1.3s beat on each tour word so each one actually lands before it moves.
+const HOLDS = [1000, 1000, 1300, 1300, 1300, 1000, 1000];
 
 const prefersReduced = () =>
   typeof window !== "undefined" &&
@@ -130,7 +132,7 @@ export function VilasReveal({
         /* Font Loading API unavailable — proceed anyway */
       }
       if (cancelled) return;
-      const k = window.innerWidth < 640 ? 0.6 : 1; // shorten on mobile
+      const k = window.innerWidth < 640 ? 0.85 : 1; // trim slightly on mobile
       let acc = 0;
       for (let p = 1; p <= LAST; p++) {
         acc += HOLDS[p - 1] * k;
@@ -186,11 +188,11 @@ export function VilasReveal({
                     key={t.id}
                     layout
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: t.core ? 1 : 0.48 }}
+                    animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, ease: EASE }}
+                    transition={{ duration: 0.7, ease: EASE }}
                     className="inline-block"
-                    style={{ fontWeight: t.core ? 700 : 300 }}
+                    style={{ fontWeight: 500 }}
                   >
                     {t.char}
                   </motion.span>

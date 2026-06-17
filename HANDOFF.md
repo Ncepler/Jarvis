@@ -1,7 +1,9 @@
-# HANDOFF — updated 2026-06-17 (v10)
+# HANDOFF — updated 2026-06-17 (v11)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v10.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v11.
+- **Accent RESOLVED → warm amber-gold `#E8A24A`** (Noah, 2026-06-17). `--color-accent` in `globals.css` set; `--color-muted` is `#6F6F69`. CLAUDE.md §5 tokens updated to match. Still exactly one accent, used sparingly (CTA / hover / focus ring).
+- **Reveal retuned (v11):** every letter now uniform — same size, weight 500, ink colour, opacity 1 (dropped the 700/300 bright-vs-dim split). V·A·L persist by motion alone. Paced slower: each tour word holds ~1.3s, pivots ~1s, transitions 0.7s (`HOLDS` const), mobile trim eased to `k=0.85`.
 - **Brand RESOLVED → Vilas** (VEE-las, from "visual"), domain `vilas.studio`, wordmark "Vilas Studio". `lib/site.ts` now has `BRAND = "Vilas"`, `name = "${BRAND} Studio"` (the only place "Studio" is written), `brand`/`domain` filled. `tagline`/`email`/`instagram`/`founder` still `*_TBD`.
 - **Stage 0 shipped — opening reveal + minimal hero:**
   - `components/hero/VilasReveal.tsx`: V·A·L are 3 persistent Motion nodes
@@ -32,10 +34,9 @@
 1. Noah: real-browser pass on the live URL — reveal feel (VAL travel, long-word
    scaling, .studio fade), the skip-on-interaction, mobile width, reduced
    motion. Codespace has no browser; logic verified but not visually.
-2. Noah: pick the single accent colour → swap the one `--color-accent` line.
-3. Noah: SUPABASE_SERVICE_ROLE_KEY into Vercel + .env.local (form is mailto
+2. Noah: SUPABASE_SERVICE_ROLE_KEY into Vercel + .env.local (form is mailto
    fallback until then — unchanged from before).
-4. Still TBD before launch: tagline, email, instagram, founder → lib/site.ts;
+3. Still TBD before launch: tagline, email, instagram, founder → lib/site.ts;
    real OG image + favicon (name exists now, so unblocked); attach vilas.studio
    domain in Vercel.
 5. Stage 1 (NOT now): R3F signature object + inertial Lenis + the accent.
@@ -60,6 +61,6 @@
   into .env.local AND Vercel, then redeploy. Free tier pauses ~1wk idle.
 
 ## Blocked on Noah
-- Accent colour pick; SUPABASE_SERVICE_ROLE_KEY; tagline/email/instagram/founder
+- SUPABASE_SERVICE_ROLE_KEY; tagline/email/instagram/founder
 - Phone + real-browser pass on the live URL (reveal, reduced motion)
 - Pressure-washing hero clip for the power-wash demo (slot still ready)
