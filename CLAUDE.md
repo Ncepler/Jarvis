@@ -18,19 +18,22 @@ The site has two jobs:
 
 ---
 
-## 2. Brand name — placeholder rules (important)
+## 2. Brand name — RESOLVED 2026-06-17: **Vilas** (placeholder rules still apply to the rest)
 
-The business name is **not decided yet**. Never hardcode a name anywhere.
+The name is **Vilas** (VEE-las, from "visual"), domain **vilas.studio**, wordmark "Vilas Studio". `lib/site.ts` now holds `BRAND = "Vilas"`; `SITE.name = "${BRAND} Studio"` is the ONE place "Studio" is written, and the hero's ".studio" line derives from `SITE.domain`. **Still never hardcode "Studio" elsewhere.** `tagline`, `email`, `instagram`, `founder` remain `*_TBD` — placeholder discipline below still governs them.
 
 - All brand strings live in **one file**: `lib/site.ts`
 
 ```ts
+const BRAND = "Vilas";
 export const SITE = {
-  name: "STUDIO_NAME_TBD",        // the FULL brand, e.g. "Word Studio" — swapped once, later
-  domain: "DOMAIN_TBD",           // may be a .studio or a compound .com — don't assume
+  brand: BRAND,                   // bare word the wordmark reveal is built from
+  name: `${BRAND} Studio`,        // full wordmark + SEO name — only place "Studio" is written
+  domain: "vilas.studio",
   tagline: "TAGLINE_TBD",
   email: "CONTACT_EMAIL_TBD",
   instagram: "INSTAGRAM_URL_TBD",
+  founder: "FOUNDER_NAME_TBD",
   region: "Long Island, NY",
 } as const;
 ```
@@ -113,16 +116,19 @@ References: **terminal-industries.com, igloo.inc, relats.com**. Study the restra
 **Tokens** (define in `@theme`, use everywhere, no one-off hex values):
 
 ```
---color-bg:    #0B0B0C   /* near-black, hair of warmth */
---color-ink:   #F4F2ED   /* warm off-white */
---color-muted: #8A8782
---color-line:  rgba(244, 242, 237, 0.12)
---color-accent: → undecided until the brand exists. Until then the site is monochrome (ink on bg). Do NOT add a placeholder acid-green/purple accent — that's the generic AI-site look. When the name lands, the accent gets chosen with it.
+--color-bg:    #0B0B0C   /* monochrome field (Vilas, 2026-06-17) */
+--color-ink:   #EDEBE3   /* warm off-white */
+--color-muted: #a8a396
+--color-line:  rgba(237, 235, 227, 0.18)
+--color-accent: #EDEBE3  /* NEUTRAL == ink for now. Name is locked so ONE accent is allowed, but Noah hasn't picked the colour. Swap this ONE line when he does — every accent usage flips at once. Still no acid-green/purple placeholder. */
 ```
 
-**Typography:** two faces max via `next/font`, zero layout shift.
-- Body/UI: Inter or Geist.
-- Display: one characterful face used with restraint — pick from Space Grotesk or a sharp serif like Instrument Serif, commit early, log the choice in HANDOFF. Display scale is big: hero `clamp(3.5rem, 9vw, 9rem)`, section titles `clamp(2rem, 5vw, 4rem)`, tight tracking on display sizes.
+**Typography:** Vilas runs four faces (perf tradeoff, revisit/consolidate in Stage 2):
+- Body/UI: **Inter**.
+- Section titles: **Instrument Serif** (`--font-display`) — unchanged.
+- Wordmark/reveal: **Space Grotesk** variable (`--font-wordmark`) — 300 for dim helpers, 700 for the bright V·A·L core.
+- Utility/mono: **Space Mono** (`--font-mono`) — ".studio" + small labels.
+- Display scale stays big: hero wordmark `clamp(3.5rem, 13vw, 10rem)`, section titles `clamp(2rem, 5vw, 4rem)`, tight tracking on display sizes.
 
 **Motion principles:**
 - Transform + opacity only. Nothing bounces. Ease: `cubic-bezier(0.16, 1, 0.3, 1)`.
@@ -142,10 +148,17 @@ References: **terminal-industries.com, igloo.inc, relats.com**. Study the restra
 One long landing page, in this order: Hero → Services → Gallery → All Sites → About → Contact. Plus `/api/lead` route handler.
 
 ### 6.1 Hero
-- Full viewport, dark, type-led. `SITE.name` placeholder huge, one-line positioning under it.
+- Full viewport, dark, type-led. The wordmark is huge and centered, one quiet positioning line + one CTA ("See the work" → `#work`). Everything around the reveal stays silent.
 - One subtle ambient layer max (slow gradient drift, grain, or canvas noise — pick one). No 3D, no particles in v1.
 - Build an **optional background-video slot**: muted, looped, `playsinline`, poster frame, `preload="none"`, lazy. Noah will supply an ambient clip later — build the slot, don't block on the asset.
 - Scroll cue at the bottom (subtle, animated once).
+
+#### 6.1.1 Opening reveal — `components/hero/VilasReveal.tsx` (Stage 0, built 2026-06-17)
+The signature opening. The brand's **V·A·L stay bold + bright the whole time** as three *persistent* nodes; every other letter is dim (opacity .48) + weight 300 and fades in/out around them. Sequence: VILAS → VAL → VAL**id** (prefix) → in**VAL**uable (infix) → appro**VAL** (suffix) → VAL → VAL**IS** → VILAS → ".studio" fades in beneath.
+- **Tech:** Motion (`layout` + `AnimatePresence mode="popLayout"`) — the FLIP travel of the three core nodes, *not* GSAP. (Deviation from the original brief's "GSAP timeline" — chosen because Motion's `layout` literally keeps the same DOM nodes; GSAP is installed and reserved for Stage 1.) Core ids `cV/cA/cL` are constant across phases so React preserves the elements and they travel; helpers are keyed per-phase so they fade.
+- **Tour words are config-driven** (`TOUR` at the top of the file): valid / invaluable / approval. Swap freely; each just needs "VAL" at its `coreAt` index.
+- **Scale-to-fit:** the whole word scales (transform on a wrapper, measured per phase) so long words never overflow at 360px. Transform-only — no layout shift; siblings sit below the unscaled box.
+- **No-JS / SSR / reduced-motion** render the resolved VILAS + .studio + tagline statically (no flash). Any click/tap/scroll/keydown jumps to resolved. Plays once, in-flow (never gates the page), shortened on mobile (`k=0.6`).
 
 ### 6.2 Services — the three paths (Animated Product Card pattern)
 Three tiles matching the intake choice:

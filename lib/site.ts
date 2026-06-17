@@ -1,7 +1,14 @@
+// Brand resolved 2026-06-17: "Vilas" (VEE-las), from "visual". Domain
+// vilas.studio. BRAND is the one source of the brand word; the "Studio"
+// descriptor and the ".studio" line both derive from here / the domain —
+// never write "Studio" anywhere else (it would double up).
+const BRAND = "Vilas";
+
 export const SITE = {
-  name: "STUDIO_NAME_TBD", // the FULL brand, e.g. "Word Studio" — swapped once, later
+  brand: BRAND, // the bare word the wordmark reveal is built from
+  name: `${BRAND} Studio`, // full wordmark + SEO name — the ONLY place "Studio" is written
   founder: "FOUNDER_NAME_TBD", // Noah's display name on the business card
-  domain: "DOMAIN_TBD", // may be a .studio or a compound .com — don't assume
+  domain: "vilas.studio",
   tagline: "TAGLINE_TBD",
   email: "CONTACT_EMAIL_TBD",
   instagram: "INSTAGRAM_URL_TBD",

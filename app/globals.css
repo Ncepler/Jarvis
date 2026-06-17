@@ -1,16 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  /* neutrals tinted toward the accent hue (Noah 2026-06-11, "slightly bland"):
-     same lightness as the old #161618/#1f1f22, hue pulled warm */
-  --color-bg: oklch(21.5% 0.006 75);
-  --color-surface: oklch(25% 0.008 75);
-  --color-ink: #f4f2ed;
+  /* Vilas: monochrome until an accent is chosen (Noah 2026-06-17). */
+  --color-bg: #0b0b0c;
+  --color-surface: #161618;
+  --color-ink: #edebe3;
   --color-muted: #a8a396;
-  --color-line: rgba(244, 242, 237, 0.18);
-  /* muted brass — restrained accent, ≤10% of any view. Revisit when the
-     brand name lands; it may shift with the name. */
-  --color-accent: oklch(78% 0.07 75);
+  --color-line: rgba(237, 235, 227, 0.18);
+  /* NEUTRAL placeholder == ink. ONE line to swap when the brand colour lands;
+     every accent usage flips at once. */
+  --color-accent: #edebe3;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -25,6 +24,8 @@
 @theme inline {
   --font-sans: var(--font-inter);
   --font-display: var(--font-instrument-serif);
+  --font-wordmark: var(--font-grotesk);
+  --font-mono: var(--font-space-mono);
 }
 
 body {
