@@ -1,7 +1,8 @@
-# HANDOFF — updated 2026-06-17 (v12)
+# HANDOFF — updated 2026-06-17 (v13)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v12.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v13.
+- **Palette moved off pure black/white → warm colour (Noah, 2026-06-17, v13).** `globals.css` `@theme`: bg `#17120D` (espresso), surface `#241C15`, ink `#F2ECE0` (cream), muted `#998C7E` (taupe), line `#34291F`, accent `#E89A3C` (amber-gold, primary), **NEW** accent-2 `#6F8FB3` (slate blue, secondary). Two accents max; accent = primary action/emphasis, accent-2 = links + active states; never big fills. CLAUDE.md §5 tokens + discipline note updated to match. Demos (`components/demos/*`) keep their OWN hardcoded colours — untouched by design. Applied accent-2 to genuine link hovers: Footer, PinnedLogo socials, About inline link. Everything else's accent usage unchanged.
 - **Reveal motion (v12):** travel/slide between slots is now `TRAVEL = 1.1s` (slower VAL slide-in + every rearrange). Final VALIS→VILAS is a real position swap — `swapI`/`swapS` are persistent nodes across both phases so A & I FLIP-travel instead of crossfading, and A (+360°) / I (−360°) spin a full turn past each other (`spinFor`), landing upright. Resolved copy (.studio/tagline/CTA) now waits 1200ms so the spin finishes first. JUDGMENT CALL: full 360° (not 180°) so the final wordmark lands upright — a literal 180° would leave A & I upside-down at rest. Change the two numbers in `spinFor` if you actually want them inverted.
 - **Accent RESOLVED → warm amber-gold `#E8A24A`** (Noah, 2026-06-17). `--color-accent` in `globals.css` set; `--color-muted` is `#6F6F69`. CLAUDE.md §5 tokens updated to match. Still exactly one accent, used sparingly (CTA / hover / focus ring).
 - **Reveal retuned (v11):** every letter now uniform — same size, weight 500, ink colour, opacity 1 (dropped the 700/300 bright-vs-dim split). V·A·L persist by motion alone. Paced slower: each tour word holds ~1.3s, pivots ~1s, transitions 0.7s (`HOLDS` const), mobile trim eased to `k=0.85`.

@@ -120,7 +120,7 @@ export function PinnedLogo() {
               {!isTBD(SITE.email) && (
                 <a
                   href={`mailto:${SITE.email}`}
-                  className="transition-colors duration-200 hover:text-accent"
+                  className="transition-colors duration-200 hover:text-accent-2"
                 >
                   {SITE.email}
                 </a>
@@ -130,7 +130,7 @@ export function PinnedLogo() {
                   href={SITE.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="transition-colors duration-200 hover:text-accent"
+                  className="transition-colors duration-200 hover:text-accent-2"
                 >
                   Instagram
                 </a>

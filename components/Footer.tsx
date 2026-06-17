@@ -9,7 +9,7 @@ export function Footer() {
         {!isTBD(SITE.email) && (
           <a
             href={`mailto:${SITE.email}`}
-            className="transition-colors duration-200 hover:text-ink"
+            className="transition-colors duration-200 hover:text-accent-2"
           >
             {SITE.email}
           </a>
@@ -19,7 +19,7 @@ export function Footer() {
             href={SITE.instagram}
             target="_blank"
             rel="noopener noreferrer"
-            className="transition-colors duration-200 hover:text-ink"
+            className="transition-colors duration-200 hover:text-accent-2"
           >
             Instagram
           </a>

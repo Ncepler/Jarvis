@@ -116,12 +116,16 @@ References: **terminal-industries.com, igloo.inc, relats.com**. Study the restra
 **Tokens** (define in `@theme`, use everywhere, no one-off hex values):
 
 ```
---color-bg:    #0B0B0C   /* monochrome field (Vilas, 2026-06-17) */
---color-ink:   #EDEBE3   /* warm off-white — text, wordmark */
---color-muted: #6F6F69   /* dim text, captions, secondary UI, helper letters */
---color-line:  rgba(237, 235, 227, 0.18)
---color-accent: #E8A24A  /* warm amber-gold — the ONE accent (Noah, 2026-06-17). At most one or two things per screen: a CTA, a hover/active state, a focus ring. Never a fill or large area. Exactly one accent — no second colour. Swap this ONE line to retint every accent usage at once. */
+--color-bg:      #17120D  /* warm espresso — base background (NOT black) */
+--color-surface: #241C15  /* raised panels, cards */
+--color-ink:     #F2ECE0  /* warm cream — primary text + wordmark */
+--color-muted:   #998C7E  /* warm taupe — captions, secondary text */
+--color-line:    #34291F  /* hairline borders / dividers */
+--color-accent:  #E89A3C  /* amber-gold — primary: CTAs, highlights */
+--color-accent-2:#6F8FB3  /* soft slate blue — secondary: links, active states */
 ```
+
+Discipline (Noah, 2026-06-17 — palette moved off pure black/white into warm colour): structure runs *entirely* on bg / surface / ink / muted / line — the page reads warm and rich, never loud. **Two accents max.** `--color-accent` = primary action / emphasis (CTAs, highlights, focus ring); `--color-accent-2` = links + active states. Each appears on only a few elements per screen — never a big fill. Cream-on-espresso body text must stay AA. No third colour, no one-off hex.
 
 **Typography:** Vilas runs four faces (perf tradeoff, revisit/consolidate in Stage 2):
 - Body/UI: **Inter**.

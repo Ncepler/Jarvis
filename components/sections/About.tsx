@@ -23,7 +23,7 @@ export function About() {
                     href={SITE.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline decoration-line underline-offset-4 transition-colors duration-200 hover:text-muted"
+                    className="underline decoration-line underline-offset-4 transition-colors duration-200 hover:text-accent-2 hover:decoration-accent-2"
                   >
                     Instagram
                   </a>
