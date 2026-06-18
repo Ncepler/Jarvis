@@ -76,7 +76,7 @@ export function PinnedLogo() {
             layoutId={layoutId}
             role="dialog"
             aria-label={`Business card of ${SITE.founder}`}
-            className="flex w-[300px] min-h-[180px] flex-col border border-line bg-surface p-5 shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
+            className="flex w-[300px] min-h-[180px] flex-col border border-line bg-surface p-5 shadow-[0_12px_40px_rgba(20,53,57,0.14)]"
             initial={reduced ? { opacity: 0 } : undefined}
             animate={reduced ? { opacity: 1 } : undefined}
             exit={reduced ? { opacity: 0 } : undefined}

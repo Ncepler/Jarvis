@@ -1,18 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  /* Vilas colour tokens (Noah 2026-06-17). Warm, rich, NOT pure black/white.
-     Structure runs entirely on bg / surface / ink / muted / line — keep it
-     quiet. Two accents max, each on only a few elements per screen, never as a
-     big fill: --accent = primary action / emphasis, --accent-2 = links +
-     active states. Cream-on-espresso body text stays AA. */
-  --color-bg: #17120d; /* warm espresso — base background */
-  --color-surface: #241c15; /* raised panels, cards */
-  --color-ink: #f2ece0; /* warm cream — primary text + wordmark */
-  --color-muted: #998c7e; /* warm taupe — captions, secondary text */
-  --color-line: #34291f; /* hairline borders / dividers */
-  --color-accent: #e89a3c; /* amber-gold — primary: CTAs, highlights */
-  --color-accent-2: #6f8fb3; /* soft slate blue — secondary: links, active */
+  /* Vilas colour tokens (Noah 2026-06-18). Cool, fresh, "iced" — LIGHT, never
+     black/white. Structure runs entirely on bg / surface / ink / muted / line —
+     the page reads clearly cool and tinted, never neutral. Two accents max,
+     each on only a few elements per screen, never as a big fill: --accent =
+     primary action / links / active states, --accent-2 = the occasional second
+     emphasis. Body text = ink (deep teal). NB: muted on bg is ~3.9:1 — keep it
+     to secondary/caption text, not long body. Only the demos keep their own
+     palettes (components/demos/*). */
+  --color-bg: #e9f1f0; /* pale ice — base background (cool, tinted, never white) */
+  --color-surface: #ffffff; /* raised panels, cards, inputs */
+  --color-ink: #143539; /* deep teal-ink — primary text + wordmark (never #000) */
+  --color-muted: #5f7c7e; /* muted teal-grey — captions, secondary text */
+  --color-line: #cddfdc; /* cool hairline borders / dividers */
+  --color-accent: #0c8c8c; /* teal — primary: actions, links, active states */
+  --color-accent-2: #2456c9; /* blue — secondary emphasis, used sparingly */
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 

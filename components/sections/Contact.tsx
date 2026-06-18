@@ -17,7 +17,7 @@ const inputClass =
   "w-full border-b border-line bg-transparent pb-2 pt-1 text-ink transition-colors duration-200 placeholder:text-muted/60 focus:border-ink focus:outline-none";
 
 const submitClass =
-  "press cursor-pointer border border-ink px-6 py-3 text-sm transition-colors duration-200 hover:bg-ink hover:text-bg disabled:cursor-default disabled:opacity-50";
+  "press cursor-pointer border border-accent bg-accent px-6 py-3 text-sm text-white transition-colors duration-200 hover:bg-accent/90 disabled:cursor-default disabled:opacity-50";
 
 // Two-step intake. Step 1 alone writes a complete lead row — step 2 is a
 // bonus that updates the same row, and skipping it is a first-class path.
@@ -176,7 +176,7 @@ export function Contact({ hasBackend }: { hasBackend: boolean }) {
                     type="checkbox"
                     checked={colorsUnsure}
                     onChange={(e) => setColorsUnsure(e.target.checked)}
-                    className="size-4 accent-ink"
+                    className="size-4 accent-accent"
                   />
                   Not sure yet
                 </label>

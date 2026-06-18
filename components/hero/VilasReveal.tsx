@@ -95,6 +95,14 @@ export function VilasReveal({
   const spinFor = (id: string) =>
     phase !== LAST ? 0 : id === "cA" ? 360 : id === "swapI" ? -360 : 0;
 
+  // The three core nodes flash --accent while they tour the words (phases 1..6),
+  // then settle to --ink on the final VILAS — so the *resolved* name stays
+  // uniform (motion-only distinction, v11), the accent only lives in transit.
+  const colorFor = (t: Token) =>
+    t.core && phase >= 1 && phase <= LAST - 1
+      ? "var(--color-accent)"
+      : "var(--color-ink)";
+
   // Hide the post-reveal copy before first paint so the animation starts clean.
   useLayoutEffect(() => {
     if (!prefersReduced()) setResolved(false);
@@ -204,13 +212,18 @@ export function VilasReveal({
                     key={t.id}
                     layout
                     initial={{ opacity: 0, rotate: 0 }}
-                    animate={{ opacity: 1, rotate: spinFor(t.id) }}
+                    animate={{
+                      opacity: 1,
+                      rotate: spinFor(t.id),
+                      color: colorFor(t),
+                    }}
                     exit={{ opacity: 0 }}
                     transition={{
                       opacity: { duration: 0.7, ease: EASE },
                       // The slide / rearrange + the swap spin share the slow beat.
                       layout: { duration: TRAVEL, ease: EASE },
                       rotate: { duration: TRAVEL, ease: EASE },
+                      color: { duration: 0.7, ease: EASE },
                     }}
                     className="inline-block"
                     style={{ fontWeight: 500, transformOrigin: "center" }}
@@ -243,7 +256,7 @@ export function VilasReveal({
         </p>
         <a
           href={ctaHref}
-          className="press mt-8 inline-block text-sm text-ink underline decoration-line underline-offset-8 transition-colors hover:decoration-ink"
+          className="press mt-8 inline-block text-sm text-accent underline decoration-accent/40 underline-offset-8 transition-colors hover:decoration-accent"
         >
           {ctaLabel}
         </a>
