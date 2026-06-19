@@ -43,7 +43,7 @@ const NAME = "Tide Line Power Washing";
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
 // Put your hero photo in /public (e.g. /public/demos/powerwash-hero.jpg), then
 // set the path below. Leave "" to show the labeled placeholder instead.
-const firstPowerWashImage = "/previews/firstPowerWashImage.jpg";
+const firstPowerWashImage = "/previews/firstPowerWashImage.webp";
 
 const SERVICES = [
   { title: "House soft wash", copy: "Siding, trim, and gutters. Low pressure, no stripped paint. Most homes done in a morning." },

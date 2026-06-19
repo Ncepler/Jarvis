@@ -26,7 +26,7 @@ const NAME = "Stone & Sage Landscapes";
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
 // Put your hero photo in /public (e.g. /public/demos/landscaping-hero.jpg), then
 // set the path below. Leave "" to show the labeled placeholder instead.
-const firstLandscapingImage = "/previews/firstLandscapingImage.jpg";
+const firstLandscapingImage = "/previews/firstLandscapingImage.webp";
 
 const SERVICES = [
   { title: "Design", copy: "A measured plan for the whole property — plantings, stone, lighting, grading — before anything is dug." },

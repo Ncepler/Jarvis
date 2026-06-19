@@ -44,7 +44,7 @@ const NAME = "Standard Barber Co.";
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
 // Put your hero photo in /public (e.g. /public/demos/barber-hero.jpg), then
 // set the path below. Leave "" to show the labeled placeholder instead.
-const firstBarberImage = "/previews/firstBarberImage.jpg";
+const firstBarberImage = "/previews/firstBarberImage.webp";
 
 const SERVICES = [
   { title: "Haircut — $35", copy: "Scissor or clipper, your call. No rush, no upsell — you leave looking like you, sharper." },

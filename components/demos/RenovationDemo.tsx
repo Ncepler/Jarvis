@@ -27,7 +27,7 @@ const NAME = "Maple & Main Renovation Co.";
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
 // Put your hero photo in /public (e.g. /public/demos/renovation-hero.jpg), then
 // set the path below. Leave "" to show the labeled placeholder instead.
-const firstRenovationImage = "/previews/firstRenovationImage.jpg";
+const firstRenovationImage = "/previews/firstRenovationImage.webp";
 
 const SERVICES = [
   { title: "Kitchens", copy: "Full gut to finish — cabinets, counters, tile, lighting. We handle the whole room, not just the pretty part." },
