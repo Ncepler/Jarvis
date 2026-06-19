@@ -217,20 +217,30 @@ function GalleryCard({
       onHoverEnd={() => setHovered(false)}
       onTap={() => onSelect(index)}
     >
+      {/* layoutId lives on the OUTER media box so it can FLIP-morph into the
+          open demo panel; the hover lift/sharpen rides an INNER element so its
+          transform never fights the layout animation */}
       <motion.div
-        className="relative aspect-[16/10]"
-        initial={false}
-        animate={{
-          scale: lift ? 1.035 : 1,
-          filter: lift ? "saturate(1.08) contrast(1.05)" : "saturate(1) contrast(1)",
-        }}
-        transition={{ type: "spring", stiffness: 260, damping: 28 }}
+        layoutId={reduced ? undefined : `demo-${project.slug}`}
+        className="relative aspect-[16/10] overflow-hidden"
       >
-        <CardFace
-          project={project}
-          width={width}
-          sizes="(max-width: 768px) 72vw, 480px"
-        />
+        <motion.div
+          className="absolute inset-0"
+          initial={false}
+          animate={{
+            scale: lift ? 1.04 : 1,
+            filter: lift
+              ? "saturate(1.08) contrast(1.05)"
+              : "saturate(1) contrast(1)",
+          }}
+          transition={{ type: "spring", stiffness: 260, damping: 28 }}
+        >
+          <CardFace
+            project={project}
+            width={width}
+            sizes="(max-width: 768px) 72vw, 480px"
+          />
+        </motion.div>
       </motion.div>
       {/* category, name + price, caption — slide in a beat after the card
           settles into the center (Axel "Recent work" anatomy) */}
@@ -259,21 +269,22 @@ function GalleryCard({
   );
 }
 
-// The centered card's homepage, below the row, physically part of this page.
-// No clicking required: whichever card sits in the center is the site shown
-// here (Noah 2026-06-11). The panel unfolds downward from the row — origin
-// top, rise + settle — so it reads as growing out of the active card.
-// Source order: registered demo component (inline, no iframe) → mirrored
-// copy in a seamless auto-height frame → live iframe (desktop, embeddable)
-// → full-length capture.
+// The opened card's homepage. Clicking the centered card morphs that card's
+// media box (shared `layoutId`) into this panel — the card literally expands
+// into the live, interactive demo (brief #1, supersedes the 2026-06-11
+// always-on panel). It stays physically in the page flow (no floating window,
+// §6.3): the visitor scrolls our page straight through it. Source order:
+// registered demo (inline, no iframe) → mirrored copy → live iframe → capture.
 function HomepagePanel({
   project,
   reduced,
   canHover,
+  onClose,
 }: {
   project: Project;
   reduced: boolean;
   canHover: boolean;
+  onClose: () => void;
 }) {
   const Demo = demos[project.slug];
   const frameSrc =
@@ -282,26 +293,34 @@ function HomepagePanel({
   const stagger = (i: number) =>
     reduced
       ? { duration: 0.15 }
-      : { duration: 0.4, delay: 0.25 + i * 0.07, ease: EASE };
+      : { duration: 0.4, delay: 0.3 + i * 0.07, ease: EASE };
 
   return (
+    // opacity only on the wrapper — the morph itself rides the layoutId box
+    // below, so no transform here that would fight the FLIP
     <motion.div
       role="region"
       aria-label={`${project.name} homepage`}
       className="w-full"
-      style={{ transformOrigin: "top center" }}
-      initial={reduced ? { opacity: 0 } : { opacity: 0, y: -24, scale: 0.975 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      // exits faster than enters — the next site is what matters
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       exit={{ opacity: 0, transition: { duration: 0.16 } }}
-      transition={reduced ? { duration: 0.2 } : { duration: 0.55, ease: EASE }}
+      transition={reduced ? { duration: 0.2 } : { duration: 0.4, ease: EASE }}
     >
       <div className="border-y border-line bg-surface">
         <div className="mx-auto flex max-w-6xl flex-wrap items-baseline gap-x-6 gap-y-2 px-6 py-4 md:px-10">
           <motion.span
+            className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={stagger(0)}
+          >
+            {project.category}
+          </motion.span>
+          <motion.span
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={stagger(1)}
           >
             {project.name}
           </motion.span>
@@ -309,7 +328,7 @@ function HomepagePanel({
             className="text-sm text-accent"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={stagger(1)}
+            transition={stagger(2)}
           >
             {project.priceLabel}
           </motion.span>
@@ -323,7 +342,7 @@ function HomepagePanel({
                 className="text-sm transition-colors duration-200 hover:text-accent"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={stagger(2)}
+                transition={stagger(3)}
               >
                 View live →
               </motion.a>
@@ -334,7 +353,7 @@ function HomepagePanel({
                 className="text-sm text-accent transition-colors duration-200 hover:text-ink"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={stagger(3)}
+                transition={stagger(4)}
                 onClick={() => {
                   window.dispatchEvent(
                     new CustomEvent("preselect-style", { detail: project.slug }),
@@ -344,6 +363,16 @@ function HomepagePanel({
                 Start with this style →
               </motion.a>
             )}
+            <motion.button
+              type="button"
+              onClick={onClose}
+              className="press cursor-pointer text-sm text-muted transition-colors duration-200 hover:text-ink"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={stagger(5)}
+            >
+              Close ✕
+            </motion.button>
           </span>
         </div>
       </div>
@@ -351,7 +380,11 @@ function HomepagePanel({
       {/* slim gutter of our own bg + hairline around the homepage — a quiet
           reminder you're browsing it from inside this site (Noah 2026-06-11) */}
       <div className="border-b border-line bg-bg p-3 md:px-6 md:py-5">
-        <div className="overflow-hidden border border-line">
+        <motion.div
+          layoutId={reduced ? undefined : `demo-${project.slug}`}
+          className="overflow-hidden border border-line bg-surface"
+          transition={{ duration: 0.5, ease: EASE }}
+        >
           {Demo ? (
             // our own build — the homepage IS part of this page, no iframe
             <Demo />
@@ -371,7 +404,7 @@ function HomepagePanel({
               In the works
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );
@@ -386,8 +419,9 @@ export function Gallery() {
   const panelRef = useRef<HTMLDivElement>(null);
   const [containerW, setContainerW] = useState(0);
   const [active, setActive] = useState(0);
-  // reduced-motion mode has no coverflow center — taps pick the panel site
-  const [selected, setSelected] = useState(0);
+  // which card has been opened into its full demo (null = row only, the
+  // thumbnails are live mini-previews until you step inside one)
+  const [openSlug, setOpenSlug] = useState<string | null>(null);
 
   const cardW = Math.min(containerW * 0.72, 480) || 340;
   const step = cardW + GAP;
@@ -441,12 +475,30 @@ export function Gallery() {
     [projects.length, step, x],
   );
 
-  const showPanel = useCallback(() => {
-    panelRef.current?.scrollIntoView({
-      behavior: reduced ? "auto" : "smooth",
-      block: "start",
-    });
-  }, [reduced]);
+  // open the centered card INTO its live demo (the layoutId morph), then bring
+  // the panel into view if it isn't already. block:"nearest" + a short delay
+  // keeps the smooth-scroll from fighting the FLIP measurement.
+  const openCard = useCallback(
+    (index: number) => {
+      const p = projects[index];
+      if (!p) return;
+      setOpenSlug(p.slug);
+      window.setTimeout(
+        () =>
+          panelRef.current?.scrollIntoView({
+            behavior: reduced ? "auto" : "smooth",
+            block: "nearest",
+          }),
+        reduced ? 0 : 90,
+      );
+    },
+    [projects, reduced],
+  );
+
+  const closeCard = useCallback(() => {
+    setOpenSlug(null);
+    regionRef.current?.focus();
+  }, []);
 
   // a pointer-up at the end of a drag also lands on a card — ignore it
   const dragging = useRef(false);
@@ -454,13 +506,11 @@ export function Gallery() {
   const onSelect = useCallback(
     (index: number) => {
       if (dragging.current) return;
-      if (index !== active) {
-        snapTo(index);
-      } else {
-        showPanel();
-      }
+      // a side card centers first; the centered card steps inside
+      if (index !== active) snapTo(index);
+      else openCard(index);
     },
-    [active, snapTo, showPanel],
+    [active, snapTo, openCard],
   );
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -472,22 +522,17 @@ export function Gallery() {
       snapTo(active + 1);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      showPanel();
-    } else if (e.key === "Escape") {
-      // the panel has no closed state anymore — Esc brings the row back
+      openCard(active);
+    } else if (e.key === "Escape" && openSlug) {
       e.preventDefault();
-      regionRef.current?.scrollIntoView({
-        behavior: reduced ? "auto" : "smooth",
-        block: "center",
-      });
+      closeCard();
     }
   };
 
-  // the backdrop follows the settled index (not the live drag index) so a
-  // fling across the row doesn't mount every demo in between — and it always
-  // matches the panel below
+  // the ambient backdrop follows the settled center index (not the live drag
+  // index) so a fling across the row doesn't mount every demo in between
   const backdrop = projects[panelIdx];
-  const panelProject = projects[reduced ? selected : panelIdx];
+  const openProject = projects.find((p) => p.slug === openSlug) ?? null;
 
   return (
     <section
@@ -560,9 +605,9 @@ export function Gallery() {
                 x={x}
                 step={step}
                 width={cardW}
-                isActive={selected === i}
+                isActive
                 reduced
-                onSelect={() => setSelected(i)}
+                onSelect={() => openCard(i)}
               />
             </div>
           ))}
@@ -593,6 +638,7 @@ export function Gallery() {
             dragMomentum={false}
             onDragStart={() => {
               dragging.current = true;
+              setOpenSlug(null); // browsing the row closes the open demo
             }}
             onDragEnd={(_, info) => {
               const predicted = -(x.get() + info.velocity.x * 0.25);
@@ -619,14 +665,31 @@ export function Gallery() {
         </div>
       )}
 
+      {/* no mode="wait": the panel must mount on the SAME commit as the card
+          click so Motion can FLIP the shared layoutId box into it */}
       <div ref={panelRef} className="relative mt-12 scroll-mt-6">
-        <AnimatePresence mode="wait" initial={false}>
-          <HomepagePanel
-            key={panelProject.slug}
-            project={panelProject}
-            reduced={reduced}
-            canHover={canHover}
-          />
+        <AnimatePresence initial={false}>
+          {openProject ? (
+            <HomepagePanel
+              key={openProject.slug}
+              project={openProject}
+              reduced={reduced}
+              canHover={canHover}
+              onClose={closeCard}
+            />
+          ) : (
+            <motion.p
+              key="hint"
+              className="px-6 text-center text-sm text-muted md:px-10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.12 } }}
+            >
+              {canHover
+                ? "Click the centered card to step inside."
+                : "Tap a card to step inside."}
+            </motion.p>
+          )}
         </AnimatePresence>
       </div>
 
