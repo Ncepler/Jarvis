@@ -1,4 +1,4 @@
-# HANDOFF — updated 2026-06-19 (v15)
+# HANDOFF — updated 2026-06-19 (v16)
 
 ## Current state
 - Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v15. First Load JS 184 kB.
@@ -13,16 +13,15 @@
   - `Footer.tsx` — Navigate / What we do / Contact columns.
   - `Services.tsx` / `HowItWorks.tsx` — big 0N numerals; Services keeps the hover-expand product-card pattern.
   - `lib/projects.ts` — `Project` gained `category` + `caption`.
-- **PALETTE IS CONFUSED — needs Noah's call (see Blocked).** `globals.css` is currently the **iced/light** palette (v14, 2026-06-18). CLAUDE.md §5's token block still lists the **warm espresso** values (never updated in v14). The Stage-1 goal text said "dark cinematic palette already set." Three different stories. I changed NOTHING about the palette and built everything on tokens, so whichever Noah picks, the new sections inherit it. FullBleed is the one intentionally dark band regardless (bg-ink), which gives the page a cinematic beat even in the light palette.
+- **PALETTE RESOLVED → iced/light (Noah, 2026-06-19).** `globals.css` stays as-is; CLAUDE.md §5 token block reconciled to match (was stale warm-espresso). The page reads light; the single dark cinematic beat is the FullBleed band (`bg-ink`). Everything is token-driven, so a future swap is still one file.
 
 ## In progress
 - Nothing half-finished. Stage 1 is complete and pushed.
 
 ## Next up (ordered)
 1. **Noah: real-browser pass on the live URL.** Codespace has no browser — all motion logic is verified by build/types only, not visually. Specifically eyeball: the "step inside →" cursor over the gallery (desktop), marquee drift + scroll nudge, mask-reveal headers, FullBleed parallax, FAQ accordion, mobile widths, and reduced-motion (everything degrades to static/flat).
-2. **Noah: resolve the palette** (see Blocked) — then reconcile CLAUDE.md §5 tokens to match `globals.css`.
-3. Noah: SUPABASE_SERVICE_ROLE_KEY into Vercel + .env.local (form is mailto fallback until then).
-4. Still TBD before launch: tagline, email, instagram, founder → `lib/site.ts`; real OG image + favicon; attach vilas.studio domain in Vercel.
+2. Noah: SUPABASE_SERVICE_ROLE_KEY into Vercel + .env.local (form is mailto fallback until then).
+3. Still TBD before launch: tagline, email, instagram, founder → `lib/site.ts`; real OG image + favicon; attach vilas.studio domain in Vercel.
 
 ## Gotchas & decisions
 - **Version stamp (standing rule):** bump `lib/version.ts` every push; last message of session states "version: vN".
@@ -35,7 +34,6 @@
 - Project "studio-site", ref `wbrftodyvnjxxncfnvvt`, us-east-1, free tier. `leads` table + RLS deny-all; `/api/lead` plain fetch → PostgREST. `.env.local` has SUPABASE_URL, SERVICE_ROLE_KEY blank — Noah pastes the key into .env.local AND Vercel, then redeploy. Free tier pauses ~1wk idle.
 
 ## Blocked on Noah
-- **Palette decision:** iced/light (current code) vs warm espresso (old §5) vs dark cinematic (goal text). Pick one; I'll align tokens + §5 in one pass.
 - SUPABASE_SERVICE_ROLE_KEY; tagline/email/instagram/founder.
 - Real-browser + phone pass on the live URL (motion, reduced-motion).
 - Ambient hero/power-wash video clips (slots still ready).

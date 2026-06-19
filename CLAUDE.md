@@ -111,21 +111,21 @@ Rules: commit working code **before** updating the handoff, so "done" means "pus
 
 References: **terminal-industries.com, igloo.inc, relats.com**. Study the restraint — few colors, huge type, motion as the luxury. This site should feel like a small studio that charges 10x what it actually does.
 
-**Deliberate contrast:** the final brand name will likely be warm/friendly while the site stays dark and cinematic. That mismatch is intentional — warm name kills the cold-email scam vibe, expensive-looking site carries the premium signal. Do not soften the visual direction to "match" a friendly name.
+**Deliberate contrast:** the final brand name will likely be warm/friendly while the site stays cool, fresh, and restrained. That mismatch is intentional — the friendly name kills the cold-email scam vibe, the expensive-looking site carries the premium signal. The one cinematic *dark* beat is the mid-page FullBleed band (`bg-ink`); the rest of the page reads light. Do not soften the visual direction to "match" a friendly name.
 
-**Tokens** (define in `@theme`, use everywhere, no one-off hex values):
+**Tokens** (define in `@theme`, use everywhere, no one-off hex values). Palette = **iced/light** (Noah, confirmed 2026-06-19; this block now matches `globals.css`. NB the page is LIGHT — never black/white):
 
 ```
---color-bg:      #17120D  /* warm espresso — base background (NOT black) */
---color-surface: #241C15  /* raised panels, cards */
---color-ink:     #F2ECE0  /* warm cream — primary text + wordmark */
---color-muted:   #998C7E  /* warm taupe — captions, secondary text */
---color-line:    #34291F  /* hairline borders / dividers */
---color-accent:  #E89A3C  /* amber-gold — primary: CTAs, highlights */
---color-accent-2:#6F8FB3  /* soft slate blue — secondary: links, active states */
+--color-bg:      #e9f1f0  /* pale ice — base background (cool, tinted, never white) */
+--color-surface: #ffffff  /* raised panels, cards, inputs */
+--color-ink:     #143539  /* deep teal-ink — primary text + wordmark (never #000) */
+--color-muted:   #5f7c7e  /* muted teal-grey — captions, secondary text */
+--color-line:    #cddfdc  /* cool hairline borders / dividers */
+--color-accent:  #0c8c8c  /* teal — primary: actions, links, active states */
+--color-accent-2:#2456c9  /* blue — secondary emphasis, used sparingly */
 ```
 
-Discipline (Noah, 2026-06-17 — palette moved off pure black/white into warm colour): structure runs *entirely* on bg / surface / ink / muted / line — the page reads warm and rich, never loud. **Two accents max.** `--color-accent` = primary action / emphasis (CTAs, highlights, focus ring); `--color-accent-2` = links + active states. Each appears on only a few elements per screen — never a big fill. Cream-on-espresso body text must stay AA. No third colour, no one-off hex.
+Discipline (Noah, 2026-06-19 — iced/light palette confirmed): structure runs *entirely* on bg / surface / ink / muted / line — the page reads cool and tinted, never loud. **Two accents max.** `--color-accent` = primary action / links / active states; `--color-accent-2` = the occasional second emphasis. Each appears on only a few elements per screen — never a big fill. Body text = ink (deep teal); `muted` on `bg` is ~3.9:1, so keep it to secondary/caption text, not long body. No third colour, no one-off hex. Only the demos (`components/demos/*`) keep their own palettes.
 
 **Typography:** Vilas runs four faces (perf tradeoff, revisit/consolidate in Stage 2):
 - Body/UI: **Inter**.
