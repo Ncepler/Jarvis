@@ -66,7 +66,7 @@ export const COPY = {
   why: [
     {
       title: "Long Island local",
-      body: "We're down the road, not in another time zone. Meet in person if you want to.",
+      body: "We're down the road. Same roads, same time zone, real meetings if you want them.",
     },
     {
       title: "One flat price",
