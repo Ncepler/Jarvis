@@ -1,13 +1,17 @@
 import { Reveal } from "@/components/Reveal";
+import { SectionHeading } from "@/components/SectionHeading";
+import { COPY } from "@/lib/site";
 import { orderedProjects } from "@/lib/projects";
 
 export function AllSites() {
   return (
     <section id="sites" className="border-t border-line px-6 py-24 md:px-10 md:py-40">
       <div className="mx-auto max-w-6xl">
-        <Reveal>
-          <h2 className="font-display text-title">Every site</h2>
-        </Reveal>
+        <SectionHeading
+          eyebrow="The index"
+          a={COPY.headings.sites.a}
+          b={COPY.headings.sites.b}
+        />
         <ul className="mt-16">
           {orderedProjects.map((p, i) => (
             <Reveal key={p.slug} delay={Math.min(i * 0.06, 0.3)}>

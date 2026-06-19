@@ -8,18 +8,53 @@ import {
   useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
+  useSpring,
   useTransform,
   type MotionValue,
 } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { demos } from "@/components/demos";
+import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
 import { useCanHover } from "@/lib/hooks";
+import { COPY } from "@/lib/site";
 import { orderedProjects, type Project } from "@/lib/projects";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const GAP = 24;
 const DEMO_DESIGN_W = 1280; // inline demos are laid out at this width, then scaled
+
+// The Lusion-style cursor label: a "step inside →" pill that trails the
+// pointer with spring inertia while it's over the draggable row. Hover-only,
+// motion-only — touch taps the card and reduced motion never mounts this.
+function StepInsideCursor({
+  x,
+  y,
+  visible,
+}: {
+  x: MotionValue<number>;
+  y: MotionValue<number>;
+  visible: boolean;
+}) {
+  const sx = useSpring(x, { stiffness: 500, damping: 40, mass: 0.4 });
+  const sy = useSpring(y, { stiffness: 500, damping: 40, mass: 0.4 });
+  return (
+    <motion.div
+      aria-hidden="true"
+      className="pointer-events-none fixed left-0 top-0 z-50 hidden md:block"
+      style={{ x: sx, y: sy }}
+    >
+      <motion.span
+        className="block -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-accent px-4 py-2 font-mono text-xs tracking-wide text-white shadow-[0_8px_30px_rgba(20,53,57,0.25)]"
+        initial={false}
+        animate={{ opacity: visible ? 1 : 0, scale: visible ? 1 : 0.6 }}
+        transition={{ duration: 0.22, ease: EASE }}
+      >
+        step inside →
+      </motion.span>
+    </motion.div>
+  );
+}
 
 // The real demo component scaled down to fit a container — a live
 // thumbnail, not a screenshot.
@@ -167,24 +202,40 @@ function GalleryCard({
   const scale = useTransform(offset, [0, 1], [1, 0.88]);
   const opacity = useTransform(offset, [0, 1], [1, 0.45]);
 
+  // hovering the centered card lifts + sharpens it with inertia — the Lusion
+  // "the live one comes forward" beat. Neighbours stay quiet.
+  const [hovered, setHovered] = useState(false);
+  const lift = hovered && isActive && !reduced;
+
   return (
     <motion.button
       type="button"
-      aria-label={`${project.name}, ${project.priceLabel}`}
+      aria-label={`${project.name}, ${project.category}, ${project.priceLabel}`}
       className="relative shrink-0 cursor-pointer overflow-hidden border border-line bg-surface"
       style={reduced ? { width } : { width, scale, opacity }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
       onTap={() => onSelect(index)}
     >
-      <div className="relative aspect-[16/10]">
+      <motion.div
+        className="relative aspect-[16/10]"
+        initial={false}
+        animate={{
+          scale: lift ? 1.035 : 1,
+          filter: lift ? "saturate(1.08) contrast(1.05)" : "saturate(1) contrast(1)",
+        }}
+        transition={{ type: "spring", stiffness: 260, damping: 28 }}
+      >
         <CardFace
           project={project}
           width={width}
           sizes="(max-width: 768px) 72vw, 480px"
         />
-      </div>
-      {/* name + price tag slide in a beat after the card settles */}
+      </motion.div>
+      {/* category, name + price, caption — slide in a beat after the card
+          settles into the center (Axel "Recent work" anatomy) */}
       <motion.div
-        className="flex items-baseline justify-between gap-3 border-t border-line px-4 py-3 text-left"
+        className="border-t border-line px-4 py-3 text-left"
         initial={false}
         animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 6 }}
         transition={{
@@ -193,10 +244,16 @@ function GalleryCard({
           ease: EASE,
         }}
       >
-        <span className="text-sm">{project.name}</span>
-        <span className="shrink-0 text-xs text-accent">
-          {project.priceLabel}
+        <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
+          {project.category}
         </span>
+        <span className="mt-1.5 flex items-baseline justify-between gap-3">
+          <span className="text-sm">{project.name}</span>
+          <span className="shrink-0 text-xs text-accent">
+            {project.priceLabel}
+          </span>
+        </span>
+        <span className="mt-1 block text-xs text-muted">{project.caption}</span>
       </motion.div>
     </motion.button>
   );
@@ -338,6 +395,11 @@ export function Gallery() {
 
   const x = useMotionValue(0);
 
+  // raw pointer position for the trailing "step inside →" cursor label
+  const cursorX = useMotionValue(0);
+  const cursorY = useMotionValue(0);
+  const [cursorOn, setCursorOn] = useState(false);
+
   // which card is nearest center RIGHT NOW — tracks continuously during the
   // drag (not just on snap) so the backdrop and labels follow the scroll
   const [centerIdx, setCenterIdx] = useState(0);
@@ -470,11 +532,13 @@ export function Gallery() {
       )}
 
       <div className="relative mx-auto max-w-6xl px-6 md:px-10">
-        <Reveal>
-          <h2 className="font-display text-title">The work</h2>
-        </Reveal>
+        <SectionHeading
+          eyebrow="The work"
+          a={COPY.headings.gallery.a}
+          b={COPY.headings.gallery.b}
+        />
         <Reveal delay={0.1}>
-          <p className="mt-4 max-w-md text-muted">
+          <p className="mt-6 max-w-md text-muted">
             Styles we build from, and the sites that came out of them. Drag
             through and step inside one.
           </p>
@@ -509,8 +573,16 @@ export function Gallery() {
           tabIndex={0}
           role="group"
           aria-label="Portfolio gallery. Drag or use arrow keys to browse; the centered site opens below."
-          className="relative mt-16"
+          className={`relative mt-16 ${canHover ? "md:cursor-none" : ""}`}
           onKeyDown={onKeyDown}
+          onPointerMove={(e) => {
+            cursorX.set(e.clientX);
+            cursorY.set(e.clientY);
+          }}
+          onPointerEnter={(e) => {
+            if (e.pointerType === "mouse") setCursorOn(true);
+          }}
+          onPointerLeave={() => setCursorOn(false)}
         >
           <motion.div
             className="flex items-start"
@@ -557,6 +629,10 @@ export function Gallery() {
           />
         </AnimatePresence>
       </div>
+
+      {canHover && !reduced && (
+        <StepInsideCursor x={cursorX} y={cursorY} visible={cursorOn} />
+      )}
     </section>
   );
 }

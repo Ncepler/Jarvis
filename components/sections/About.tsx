@@ -1,13 +1,16 @@
 import { Reveal } from "@/components/Reveal";
+import { SectionHeading } from "@/components/SectionHeading";
 import { COPY, SITE, isTBD } from "@/lib/site";
 
 export function About() {
   return (
     <section id="about" className="border-t border-line px-6 py-24 md:px-10 md:py-40">
       <div className="mx-auto max-w-6xl">
-        <Reveal>
-          <h2 className="font-display text-title">About</h2>
-        </Reveal>
+        <SectionHeading
+          eyebrow="About"
+          a={COPY.headings.about.a}
+          b={COPY.headings.about.b}
+        />
         <Reveal delay={0.1}>
           <div className="mt-16 grid max-w-xl gap-6 text-lg leading-relaxed">
             <p>{COPY.about.p1}</p>

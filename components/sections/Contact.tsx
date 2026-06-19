@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Reveal } from "@/components/Reveal";
+import { SectionHeading } from "@/components/SectionHeading";
 import { styleDemos } from "@/lib/projects";
 import { COPY, SITE, isTBD } from "@/lib/site";
 
@@ -140,11 +141,13 @@ export function Contact({ hasBackend }: { hasBackend: boolean }) {
       className="border-t border-line px-6 py-24 md:px-10 md:py-40"
     >
       <div className="mx-auto max-w-6xl">
-        <Reveal>
-          <h2 className="font-display text-title">Start a project</h2>
-        </Reveal>
+        <SectionHeading
+          eyebrow="Contact"
+          a={COPY.headings.contact.a}
+          b={COPY.headings.contact.b}
+        />
         <Reveal delay={0.1}>
-          <p className="mt-4 max-w-md text-muted">{COPY.contact.sub}</p>
+          <p className="mt-6 max-w-md text-muted">{COPY.contact.sub}</p>
           <p className="mt-3 max-w-md text-sm text-muted">
             {COPY.contact.reassurance}
           </p>

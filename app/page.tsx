@@ -1,14 +1,18 @@
 import { Footer } from "@/components/Footer";
+import { Marquee } from "@/components/Marquee";
 import { PinnedLogo } from "@/components/PinnedLogo";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { About } from "@/components/sections/About";
 import { AllSites } from "@/components/sections/AllSites";
+import { ClosingCta } from "@/components/sections/ClosingCta";
 import { Contact } from "@/components/sections/Contact";
 import { Faq } from "@/components/sections/Faq";
+import { FullBleed } from "@/components/sections/FullBleed";
 import { Gallery } from "@/components/sections/Gallery";
 import { Hero } from "@/components/sections/Hero";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { Services } from "@/components/sections/Services";
+import { ValueProps } from "@/components/sections/ValueProps";
 
 export default function Home() {
   // decided server-side so the service role key never reaches the client;
@@ -22,12 +26,16 @@ export default function Home() {
       <PinnedLogo />
       <main>
         <Hero />
+        <Marquee />
         <Services />
-        <HowItWorks />
         <Gallery />
+        <FullBleed />
+        <HowItWorks />
+        <ValueProps />
         <AllSites />
         <About />
         <Faq />
+        <ClosingCta />
         <Contact hasBackend={hasBackend} />
       </main>
       <Footer />

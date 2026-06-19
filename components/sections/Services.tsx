@@ -3,6 +3,7 @@
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { useRef, useState } from "react";
 import { Reveal } from "@/components/Reveal";
+import { SectionHeading } from "@/components/SectionHeading";
 import { useCanHover } from "@/lib/hooks";
 import { COPY } from "@/lib/site";
 
@@ -29,7 +30,7 @@ const PATHS = [
   },
 ] as const;
 
-function PathCard({ path }: { path: (typeof PATHS)[number] }) {
+function PathCard({ path, n }: { path: (typeof PATHS)[number]; n: number }) {
   const reduced = useReducedMotion();
   const canHover = useCanHover();
   const ref = useRef<HTMLDivElement>(null);
@@ -58,10 +59,17 @@ function PathCard({ path }: { path: (typeof PATHS)[number] }) {
         }
       />
 
+      <span
+        aria-hidden="true"
+        className="block font-display text-5xl leading-none text-muted/40 tabular-nums"
+      >
+        0{n}
+      </span>
+
       <button
         type="button"
         aria-expanded={expanded}
-        className="flex w-full items-baseline justify-between gap-4 text-left"
+        className="mt-6 flex w-full items-baseline justify-between gap-4 text-left"
         onClick={() => !canHover && setTapped((t) => !(t ?? inView))}
         onFocus={() => canHover && setHovered(true)}
         onBlur={() => canHover && setHovered(false)}
@@ -110,16 +118,18 @@ export function Services() {
       className="border-t border-line px-6 py-24 md:px-10 md:py-40"
     >
       <div className="mx-auto max-w-6xl">
-        <Reveal>
-          <h2 className="font-display text-title">Three ways in</h2>
-        </Reveal>
+        <SectionHeading
+          eyebrow="What you get"
+          a={COPY.headings.services.a}
+          b={COPY.headings.services.b}
+        />
         <Reveal delay={0.1}>
-          <p className="mt-4 max-w-md text-muted">{COPY.services.bridge}</p>
+          <p className="mt-6 max-w-md text-muted">{COPY.services.bridge}</p>
         </Reveal>
         <div className="mt-16 grid items-start gap-6 md:grid-cols-3">
           {PATHS.map((path, i) => (
             <Reveal key={path.key} delay={i * 0.09}>
-              <PathCard path={path} />
+              <PathCard path={path} n={i + 1} />
             </Reveal>
           ))}
         </div>

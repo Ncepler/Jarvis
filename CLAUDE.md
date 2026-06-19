@@ -149,7 +149,18 @@ Discipline (Noah, 2026-06-17 — palette moved off pure black/white into warm co
 
 ## 6. Pages & sections (single page + a couple of routes)
 
-One long landing page, in this order: Hero → Services → Gallery → All Sites → About → Contact. Plus `/api/lead` route handler.
+One long landing page. Order as of **Stage 1 (2026-06-19)**: Hero → **Marquee** → Services → Gallery → **FullBleed** → HowItWorks → **ValueProps** → All Sites → About → Faq → **ClosingCta** → Contact → Footer. Plus `/api/lead` route handler. (Bolded sections are the Stage-1 additions; see §6.8.)
+
+#### 6.8 Stage 1 — editorial + motion pass (2026-06-19)
+Goal: read a clear tier above the templates we sell (Axel's/Sallem's skeleton × Lusion motion). What changed, all token-driven so the palette swap doesn't touch them:
+- **Two-line oversized section headers throughout** — `components/SectionHeading.tsx` (`a` bright line, `b` muted line, optional `eyebrow`). Each line mask-reveals (slides up from an `overflow-hidden` mask) on scroll; reduced-motion renders flat. Headers live in `COPY.headings`. This replaced the one-line `<h2>` in Services/Gallery/HowItWorks/ValueProps/AllSites/About/Faq/Contact.
+- **Service marquee** — `components/Marquee.tsx`. Slow auto-drift loop of `COPY.marquee` niches, bullet-separated; scroll velocity bends speed/direction (canonical Motion `useVelocity`→`useSpring`→`useAnimationFrame` + `wrap`). Reduced motion → static wrapping row.
+- **Gallery elevation** (`components/sections/Gallery.tsx`): cards now carry `category` + `caption` (from `lib/projects.ts`, Axel "Recent work" anatomy). Hovering the centered card lifts + sharpens it (spring scale + saturate/contrast filter). A trailing **"step inside →" cursor** (`StepInsideCursor`, spring inertia) follows the pointer over the row; hover-only (`md:cursor-none` on the row), never on touch/reduced. **NOTE:** the brief asked for `layoutId` expand-into-demo; kept the proven panel-below model (§6.3, Noah 2026-06-11) and added the Lusion *feel* on top instead of re-architecting.
+- **FullBleed** (`components/sections/FullBleed.tsx`): the one full-bleed break. We do NOT fabricate a screenshot (§7) — the "still" is the brand reveal motif (ghosted oversized `VAL`, parallax on scroll) on a **dark `bg-ink` band** (deliberate cinematic inversion of the light field), one line (`COPY.fullBleed`) + one CTA → `#work`.
+- **ValueProps** (`components/sections/ValueProps.tsx`): numbered 01–04 honest differentiators (`COPY.why`). No stats, no client counts.
+- **Faq** is now a numbered accordion (Q01–, one open at a time) — `components/sections/Faq.tsx`.
+- **ClosingCta** (`components/sections/ClosingCta.tsx`): final oversized two-line CTA band (`COPY.closing`) → `#contact`, sits just above the form.
+- **Footer** restructured into Navigate / What we do / Contact columns (still TBD-aware on email/Instagram).
 
 ### 6.1 Hero
 - Full viewport, dark, type-led. The wordmark is huge and centered, one quiet positioning line + one CTA ("See the work" → `#work`). Everything around the reveal stays silent.

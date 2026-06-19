@@ -17,6 +17,8 @@
 export type Project = {
   slug: string; // also used as the contact form's style reference (style_slug)
   name: string; // business or style name shown on the card
+  category: string; // small tag above the card title (Axel "Recent work" style)
+  caption: string; // one-line description under the card title
   url: string; // live site — empty until the demo is deployed
   screenshot: string; // /public/work/<slug>.webp — 16:10, supplied by Noah
   screenshotFull: string; // full-length homepage capture, last-resort fallback
@@ -35,6 +37,8 @@ export const projects: Project[] = [
   {
     slug: "demo-landscaping",
     name: "Landscaping",
+    category: "Landscaping",
+    caption: "A design-build studio shown at full flagship scale.",
     url: "",
     screenshot: "",
     screenshotFull: "",
@@ -48,6 +52,8 @@ export const projects: Project[] = [
   {
     slug: "demo-powerwash",
     name: "Power washing",
+    category: "Power washing",
+    caption: "Before and after up top, booking right behind it.",
     url: "",
     screenshot: "",
     screenshotFull: "",
@@ -61,6 +67,8 @@ export const projects: Project[] = [
   {
     slug: "demo-florist",
     name: "Flower shop",
+    category: "Florist",
+    caption: "Seasonal and shoppable, built to feel handmade.",
     url: "",
     screenshot: "",
     screenshotFull: "",
@@ -74,6 +82,8 @@ export const projects: Project[] = [
   {
     slug: "demo-lawncare",
     name: "Lawn care",
+    category: "Lawn care",
+    caption: "A quote-first layout for steady route work.",
     url: "",
     screenshot: "",
     screenshotFull: "",
@@ -87,6 +97,8 @@ export const projects: Project[] = [
   {
     slug: "demo-bakery",
     name: "Bakery",
+    category: "Bakery",
+    caption: "Menu and hours that get people through the door.",
     url: "",
     screenshot: "",
     screenshotFull: "",
@@ -100,6 +112,8 @@ export const projects: Project[] = [
   {
     slug: "demo-barber",
     name: "Barbershop",
+    category: "Barbershop",
+    caption: "Book a chair in two taps, day or night.",
     url: "",
     screenshot: "",
     screenshotFull: "",

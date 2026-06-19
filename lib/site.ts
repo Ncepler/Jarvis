@@ -24,11 +24,68 @@ export const isTBD = (value: string) => value.endsWith("_TBD");
 // a wary visitor from a cold email needs "is this safe", "what do I do",
 // and "what does this get me" answered, with no fabricated proof.
 export const COPY = {
+  // Two-line oversized section headers (Axel-style: "Hired for the work. /
+  // Remembered for the care."). `a` is the bright lead line, `b` the muted
+  // second line. One reusable SectionHeading renders both with a per-line
+  // mask reveal.
+  headings: {
+    services: { a: "Three ways in.", b: "Pick the one that fits." },
+    gallery: { a: "Sites we built.", b: "Step inside one." },
+    process: { a: "How it works.", b: "Five steps, about a week." },
+    why: { a: "Why people", b: "pick us." },
+    sites: { a: "Every site,", b: "one tap away." },
+    about: { a: "A small studio.", b: "On your island." },
+    faq: { a: "Fair questions.", b: "Straight answers." },
+    contact: { a: "Start a project.", b: "It takes two minutes." },
+  },
   hero: {
     positioning:
       "Websites for local businesses that look like they cost 10x more.",
     outcome:
       "People Google you before they hire you. What they find decides who gets the call.",
+  },
+  // The niches we build for, fed into the looping service marquee under the
+  // hero. Plain nouns, no claims.
+  marquee: [
+    "Florists",
+    "Landscapers",
+    "Power washing",
+    "Lawn care",
+    "Bakeries",
+    "Barbershops",
+    "Contractors",
+    "Pet groomers",
+  ],
+  // Mid-page full-bleed break: one line over a full-width moment, one CTA.
+  fullBleed: {
+    line: "People decide in five seconds. Give them something good to look at.",
+    cta: "See the work",
+  },
+  // The honest differentiators, numbered 01–04. No invented stats, no client
+  // counts — every line is true on day one.
+  why: [
+    {
+      title: "Long Island local",
+      body: "We're down the road, not in another time zone. Meet in person if you want to.",
+    },
+    {
+      title: "One flat price",
+      body: "Agreed up front, half to start. No retainers, no surprise invoices later.",
+    },
+    {
+      title: "Live in about two weeks",
+      body: "Pick a style and it's about a week. Custom runs a little longer; we give you a real date.",
+    },
+    {
+      title: "One person, start to finish",
+      body: "No account managers. Whoever builds your site is who you talk to.",
+    },
+  ],
+  // Final CTA band before the form.
+  closing: {
+    a: "Let's build the site",
+    b: "that gets you the call.",
+    cta: "Start a project",
   },
   services: {
     bridge:
