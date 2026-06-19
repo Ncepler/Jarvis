@@ -1,7 +1,7 @@
 # HANDOFF — updated 2026-06-19 (v16)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v15. First Load JS 184 kB.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v16. First Load JS 184 kB.
 - **Stage 1 shipped (2026-06-19): editorial + Lusion-motion pass.** Goal = read a clear tier above the templates we sell (Axel's / Sallem's structure × Lusion craft). New page order: Hero → Marquee → Services → Gallery → FullBleed → HowItWorks → ValueProps → AllSites → About → Faq → ClosingCta → Contact → Footer. All new work is token-driven (bg/surface/ink/muted/line/accent), so it survives any palette swap untouched. Full detail in CLAUDE.md §6.8.
   - `components/SectionHeading.tsx` — two-line oversized headers w/ per-line mask reveal, used in every section. Copy in `COPY.headings`.
   - `components/Marquee.tsx` — niche marquee, scroll-velocity nudged, reduced-motion → static wrap.
