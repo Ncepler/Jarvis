@@ -1,7 +1,8 @@
-# HANDOFF — updated 2026-06-19 (v17)
+# HANDOFF — updated 2026-06-19 (v18)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v17. First Load JS 184 kB. Page also smoke-tested via `next dev` + curl: HTTP 200, zero runtime/hydration error markers, all new sections present in SSR HTML.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v18. First Load JS 184 kB.
+- **Visually verified via headless Chromium (Playwright, one-off — not added to deps).** Captured + inspected: desktop full page, mobile (390px) full page, and the gallery **card→demo `layoutId` morph open state**. Confirmed: composition reads clean/editorial/airy; two-line mask headers, marquee, numbered sections, dark FullBleed band, FAQ accordion, closing band, structured footer all render; mobile stacks correctly; **the morph works — clicking the centered card expands it into the full live landscaping demo inline, with the Close ✕ / View live / Start-with-this-style header.** Remaining unverifiable bit = live animation *timing/feel* (morph smoothness, cursor tracking, marquee drift) — static frames can't show motion; still wants Noah's eyes, but layout/structure/interaction are now confirmed, not just typed.
 - **Stage 1 shipped (2026-06-19): editorial + Lusion-motion pass.** Goal = read a clear tier above the templates we sell (Axel's / Sallem's structure × Lusion craft). New page order: Hero → Marquee → Services → Gallery → FullBleed → HowItWorks → ValueProps → AllSites → About → Faq → ClosingCta → Contact → Footer. All new work is token-driven (bg/surface/ink/muted/line/accent), so it survives any palette swap untouched. Full detail in CLAUDE.md §6.8.
   - `components/SectionHeading.tsx` — two-line oversized headers w/ per-line mask reveal, used in every section. Copy in `COPY.headings`.
   - `components/Marquee.tsx` — niche marquee, scroll-velocity nudged, reduced-motion → static wrap.
@@ -19,7 +20,7 @@
 - Nothing half-finished. Stage 1 is complete and pushed.
 
 ## Next up (ordered)
-1. **Noah: real-browser pass on the live URL.** Codespace has no browser — motion is verified by build/types + a dev-server SSR smoke test, but not visually/interactively. Specifically eyeball: the gallery **card→demo `layoutId` morph** (tall-box FLIP feel + the scroll-into-view on open), the "step inside →" cursor, marquee drift + scroll nudge, mask-reveal headers, FullBleed parallax, FAQ accordion, mobile tap-to-open, and reduced-motion (everything degrades to static/flat).
+1. **Noah: confirm the live motion *feel* on the URL.** Structure + the gallery morph are now confirmed via headless screenshots (desktop/mobile/open). What screenshots can't show is animation timing: judge the morph smoothness (it FLIPs a tall full-homepage box), the "step inside →" cursor tracking, marquee drift + scroll nudge, mask-reveal cadence, FullBleed parallax. All degrade to static/flat under reduced-motion.
 2. Noah: SUPABASE_SERVICE_ROLE_KEY into Vercel + .env.local (form is mailto fallback until then).
 3. Still TBD before launch: tagline, email, instagram, founder → `lib/site.ts`; real OG image + favicon; attach vilas.studio domain in Vercel.
 
