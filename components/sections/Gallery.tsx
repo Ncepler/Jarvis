@@ -45,7 +45,7 @@ function StepInsideCursor({
       style={{ x: sx, y: sy }}
     >
       <motion.span
-        className="block -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-accent px-4 py-2 font-mono text-xs tracking-wide text-white shadow-[0_8px_30px_rgba(20,53,57,0.25)]"
+        className="block -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-accent px-4 py-2 font-mono text-xs tracking-wide text-white shadow-[0_8px_30px_rgba(31,26,20,0.25)]"
         initial={false}
         animate={{ opacity: visible ? 1 : 0, scale: visible ? 1 : 0.6 }}
         transition={{ duration: 0.22, ease: EASE }}

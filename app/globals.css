@@ -1,21 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  /* Vilas colour tokens (Noah 2026-06-18). Cool, fresh, "iced" — LIGHT, never
-     black/white. Structure runs entirely on bg / surface / ink / muted / line —
-     the page reads clearly cool and tinted, never neutral. Two accents max,
-     each on only a few elements per screen, never as a big fill: --accent =
-     primary action / links / active states, --accent-2 = the occasional second
-     emphasis. Body text = ink (deep teal). NB: muted on bg is ~3.9:1 — keep it
-     to secondary/caption text, not long body. Only the demos keep their own
-     palettes (components/demos/*). */
-  --color-bg: #e9f1f0; /* pale ice — base background (cool, tinted, never white) */
-  --color-surface: #ffffff; /* raised panels, cards, inputs */
-  --color-ink: #143539; /* deep teal-ink — primary text + wordmark (never #000) */
-  --color-muted: #5f7c7e; /* muted teal-grey — captions, secondary text */
-  --color-line: #cddfdc; /* cool hairline borders / dividers */
-  --color-accent: #0c8c8c; /* teal — primary: actions, links, active states */
-  --color-accent-2: #2456c9; /* blue — secondary emphasis, used sparingly */
+  /* Vilas colour tokens (Noah 2026-06-19). Warm "bone/cream" — LIGHT, never
+     black/white and never cold/blue. Structure runs entirely on bg / surface /
+     ink / muted / line — the page reads warm and paper-like, never loud. Two
+     accents max, each on only a few elements per screen, never as a big fill:
+     --accent = primary action / links / active states (deep bronze, NOT bright
+     amber and NOT pink terracotta — avoids the generic cream-site look),
+     --accent-2 = the occasional second emphasis. On accent-filled buttons use
+     surface (#F6F1E8) text. Body text = ink (deep warm espresso, ~14:1 on bg).
+     muted passes AA on bg. Only the demos keep their own dark palettes
+     (components/demos/*). */
+  --color-bg: #efe9dd; /* bone — base background (warm, paper, never white) */
+  --color-surface: #f6f1e8; /* raised panels, cards, inputs */
+  --color-ink: #1f1a14; /* deep warm espresso — primary text + wordmark (never #000) */
+  --color-muted: #5f574a; /* warm taupe — captions, secondary text (AA on bone) */
+  --color-line: #d9d0c1; /* warm hairline borders / dividers */
+  --color-accent: #8a5a2b; /* deep bronze/caramel — primary: actions, links, active states */
+  --color-accent-2: #4a5d43; /* muted forest — secondary emphasis, used sparingly */
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 

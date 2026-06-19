@@ -5,6 +5,7 @@ import { FloristDemo } from "./FloristDemo";
 import { LandscapingDemo } from "./LandscapingDemo";
 import { LawnCareDemo } from "./LawnCareDemo";
 import { PowerWashDemo } from "./PowerWashDemo";
+import { RenovationDemo } from "./RenovationDemo";
 
 // slug → inline homepage component. An entry here renders the homepage
 // PHYSICALLY inside the gallery (card thumbnail, backdrop, and the open
@@ -12,6 +13,7 @@ import { PowerWashDemo } from "./PowerWashDemo";
 // drop the homepage component in this folder, register it, add the
 // matching project in lib/projects.ts.
 export const demos: Record<string, ComponentType> = {
+  "demo-renovation": RenovationDemo,
   "demo-landscaping": LandscapingDemo,
   "demo-powerwash": PowerWashDemo,
   "demo-florist": FloristDemo,

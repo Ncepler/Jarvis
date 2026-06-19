@@ -113,25 +113,26 @@ References: **terminal-industries.com, igloo.inc, relats.com**. Study the restra
 
 **Deliberate contrast:** the final brand name will likely be warm/friendly while the site stays cool, fresh, and restrained. That mismatch is intentional — the friendly name kills the cold-email scam vibe, the expensive-looking site carries the premium signal. The one cinematic *dark* beat is the mid-page FullBleed band (`bg-ink`); the rest of the page reads light. Do not soften the visual direction to "match" a friendly name.
 
-**Tokens** (define in `@theme`, use everywhere, no one-off hex values). Palette = **iced/light** (Noah, confirmed 2026-06-19; this block now matches `globals.css`. NB the page is LIGHT — never black/white):
+**Tokens** (define in `@theme`, use everywhere, no one-off hex values). Palette = **bone/cream** (Noah, confirmed 2026-06-19 — superseded the iced/teal block; this matches `globals.css`. NB the page is LIGHT and WARM — never black/white, never cold/blue):
 
 ```
---color-bg:      #e9f1f0  /* pale ice — base background (cool, tinted, never white) */
---color-surface: #ffffff  /* raised panels, cards, inputs */
---color-ink:     #143539  /* deep teal-ink — primary text + wordmark (never #000) */
---color-muted:   #5f7c7e  /* muted teal-grey — captions, secondary text */
---color-line:    #cddfdc  /* cool hairline borders / dividers */
---color-accent:  #0c8c8c  /* teal — primary: actions, links, active states */
---color-accent-2:#2456c9  /* blue — secondary emphasis, used sparingly */
+--color-bg:      #efe9dd  /* bone — base background (warm, paper, never white) */
+--color-surface: #f6f1e8  /* raised panels, cards, inputs */
+--color-ink:     #1f1a14  /* deep warm espresso — primary text + wordmark (~14:1 on bg, never #000) */
+--color-muted:   #5f574a  /* warm taupe — captions, secondary text (passes AA on bone) */
+--color-line:    #d9d0c1  /* warm hairline borders / dividers */
+--color-accent:  #8a5a2b  /* deep bronze/caramel — primary: actions, links, active states */
+--color-accent-2:#4a5d43  /* muted forest — secondary emphasis, used sparingly */
 ```
 
-Discipline (Noah, 2026-06-19 — iced/light palette confirmed): structure runs *entirely* on bg / surface / ink / muted / line — the page reads cool and tinted, never loud. **Two accents max.** `--color-accent` = primary action / links / active states; `--color-accent-2` = the occasional second emphasis. Each appears on only a few elements per screen — never a big fill. Body text = ink (deep teal); `muted` on `bg` is ~3.9:1, so keep it to secondary/caption text, not long body. No third colour, no one-off hex. Only the demos (`components/demos/*`) keep their own palettes.
+Discipline (Noah, 2026-06-19 — bone/cream palette confirmed): structure runs *entirely* on bg / surface / ink / muted / line — the page reads warm and paper-like, never loud. **Two accents max.** `--color-accent` = primary action / links / active states (deep bronze — NOT bright amber, NOT pink terracotta, to dodge the generic cream-site look); `--color-accent-2` = the occasional second emphasis. Each appears on only a few elements per screen — never a big fill; on accent-filled buttons use light (surface/white) text. Body text = ink (deep warm espresso). No third colour, no one-off hex. Only the demos (`components/demos/*`) keep their own dark palette — see §6.9.
 
 **Typography:** Vilas runs four faces (perf tradeoff, revisit/consolidate in Stage 2):
 - Body/UI: **Inter**.
 - Section titles: **Instrument Serif** (`--font-display`) — unchanged.
 - Wordmark/reveal: **Space Grotesk** variable (`--font-wordmark`) — uniform weight 500; every letter in the reveal is the same size, weight, and colour (Noah, 2026-06-17). (Was 300/700 dim-vs-bright; the V·A·L now persist by motion alone, not by weight/opacity.)
 - Utility/mono: **Space Mono** (`--font-mono`) — ".studio" + small labels.
+- Demo sites only: **Inter Tight** (`--font-tight`) — the neutral grotesque for the dark contractor demos (§6.9). Never used on the studio site; never use the studio's serif on a demo.
 - Display scale stays big: hero wordmark `clamp(3.5rem, 13vw, 10rem)`, section titles `clamp(2rem, 5vw, 4rem)`, tight tracking on display sizes.
 
 **Motion principles:**
@@ -162,6 +163,14 @@ Goal: read a clear tier above the templates we sell (Axel's/Sallem's skeleton ×
 - **Faq** is now a numbered accordion (Q01–, one open at a time) — `components/sections/Faq.tsx`.
 - **ClosingCta** (`components/sections/ClosingCta.tsx`): final oversized two-line CTA band (`COPY.closing`) → `#contact`, sits just above the form.
 - **Footer** restructured into Navigate / What we do / Contact columns (still TBD-aware on email/Instagram).
+
+#### 6.9 Demo design system — the "Axel's / Sallem" look (2026-06-19)
+The gallery demos no longer use decorative geometric shapes — they were restyled to a **dark, full-bleed, photographic, editorial system** so they read like real hired-contractor sites instead of abstract AI pages. **The spec is `.claude/skills/local-service-design-system/SKILL.md` — read it before touching any demo, and follow its prescribed values; do not improvise demo visuals.** Key rules:
+- **Demos are DARK** (`#0B0B0C` base, `#F2EFE9` headlines) and use a **neutral grotesque (Inter Tight, `--font-tight`)** — NEVER the bone palette, NEVER the studio's serif. This deliberately supersedes any earlier "don't touch demo palettes" note.
+- **Zero decorative shapes** (no circles/blobs/cut-diagonals/SVG decoration). Real photo / full-bleed / editorial only. Where photos don't exist yet, use **labeled placeholders at the correct aspect ratio** (`components/demos/system.tsx` `<Media>`) — NO stock, NO AI images committed; Noah drops real photos in later.
+- **One accent per niche, ~2× a screen** (from the SKILL §9 table). Big two-line headers, uppercase eyebrows with an accent tick, numbered sections, 1px hairlines, sharp radii.
+- **Shared primitives live in `components/demos/system.tsx`** (`DemoShell`, `DemoHeader`, `DemoHero`, `DemoMarquee`, `Intro`, `ServiceCards`, `FullBleedBreak`, `WorkGrid`, `ValueProps`, `Faq`, `Contact`, `CtaBand`, `DemoFooter`). Each demo file just composes them + its niche copy/accent. Section order = SKILL §6 blueprint. **No reviews wall, no invented stats** (honesty rules, §7 + SKILL §11/§12).
+- All 7 demos (renovation + the original 6) follow this; **renovation (`RenovationDemo.tsx`, "Maple & Main Renovation Co.") is the reference build** — match its quality.
 
 ### 6.1 Hero
 - Full viewport, dark, type-led. The wordmark is huge and centered, one quiet positioning line + one CTA ("See the work" → `#work`). Everything around the reveal stays silent.

@@ -1,190 +1,156 @@
-// Style demo: a barbershop homepage. "Standard Barber Co." is a sample
-// brand for the demo, not a client. Self-contained: every color is local.
+// Style demo — a barbershop homepage in the dark, photographic, editorial
+// "Axel's / Sallem" system (see
+// .claude/skills/local-service-design-system/SKILL.md). "Standard Barber Co."
+// is a sample brand for the demo, not a client.
 
-import { Marquee, Rise } from "./shared";
+import {
+  Contact,
+  CtaBand,
+  DemoFooter,
+  DemoHeader,
+  DemoHero,
+  DemoMarquee,
+  DemoShell,
+  Faq,
+  FullBleedBreak,
+  Intro,
+  ServiceCards,
+  ValueProps,
+  WorkGrid,
+} from "./system";
 
-const ink = "text-[#e8e2d6]";
-const muted = "text-[#9a917f]";
+const ACCENT = "#B23A3A"; // classic chair red
+const PHONE = "(631) 555-0185";
+const NAME = "Standard Barber Co.";
 
-// barber pole — the stripes actually turn (Noah 2026-06-11). Pure CSS:
-// a striped strip taller than the pole translates by exactly one stripe
-// period and loops. Linear, constant, off the main thread.
-function Pole() {
-  return (
-    <div aria-hidden="true" className="flex flex-col items-center gap-1">
-      <style>{`
-        @keyframes barber-turn {
-          to { transform: translateY(-79.2px); }
-        }
-        .barber-stripes { animation: barber-turn 2.4s linear infinite; }
-        @media (prefers-reduced-motion: reduce) {
-          .barber-stripes { animation: none; }
-        }
-      `}</style>
-      <div className="h-4 w-8 rounded-t-full bg-[#b08d4f]" />
-      <div className="relative h-56 w-14 overflow-hidden rounded-full border-2 border-[#b08d4f]/60 md:h-72">
-        <div
-          className="barber-stripes absolute inset-x-0 -top-24 h-[calc(100%+12rem)]"
-          style={{
-            background:
-              "repeating-linear-gradient(45deg, #e8e2d6 0 14px, #b08d4f 14px 28px, #e8e2d6 28px 42px, #2e2820 42px 56px)",
-          }}
-        />
-      </div>
-      <div className="h-4 w-8 rounded-b-full bg-[#b08d4f]" />
-    </div>
-  );
-}
+const SERVICES = [
+  { title: "Haircut — $35", copy: "Scissor or clipper, your call. No rush, no upsell — you leave looking like you, sharper." },
+  { title: "Skin fade — $40", copy: "Clean taper down to the skin, blended right and finished by hand." },
+  { title: "Beard & line-up — $20", copy: "Trimmed, shaped, and lined up so it actually looks intentional." },
+  { title: "Hot-towel shave — $45", copy: "Straight razor, hot towel, the full ritual. Worth booking a few extra minutes for." },
+];
 
-const prices = [
-  ["Haircut", "$35"],
-  ["Skin fade", "$40"],
-  ["Beard trim & line-up", "$20"],
-  ["Hot towel shave", "$45"],
-  ["Kids (12 & under)", "$25"],
-  ["The works: cut, shave, towel", "$70"],
+const WORK = [
+  { tag: "Cut", caption: "Classic scissor cut, side part" },
+  { tag: "Fade", caption: "Low skin fade, textured top" },
+  { tag: "Beard", caption: "Full beard shape & line-up" },
+  { tag: "Shave", caption: "Hot-towel straight-razor shave" },
+  { tag: "Kids", caption: "First-cut, kept easy" },
+  { tag: "Shop", caption: "Four chairs, mid-afternoon" },
+];
+
+const PROPS = [
+  { title: "Four chairs, no rush", copy: "We take the time the cut needs. You're not getting hustled out for the next head." },
+  { title: "No upsell", copy: "You asked for a haircut, you get a haircut. We're not selling you a shelf of product." },
+  { title: "Walk in or book", copy: "Book online in under a minute, or just come by. If the pole's spinning, we're cutting." },
+  { title: "Same barbers", copy: "The same hands every time, so your cut comes out the same every time." },
+  { title: "Cash or card", copy: "Whatever's easy. Rebook on your way out and the next one's already on the calendar." },
+];
+
+const FAQ = [
+  { q: "Do I need an appointment?", a: "No — walk-ins are always welcome. But booking online takes under a minute and skips the wait." },
+  { q: "What are your hours?", a: "Tue–Sat, 9am to 7pm. If the pole out front is spinning, we're open and cutting." },
+  { q: "Do you cut kids' hair?", a: "We do — kids 12 and under are $25, and we keep it quick and easy for the first-timers." },
+  { q: "How much is a cut?", a: "Haircut $35, skin fade $40, beard line-up $20, hot-towel shave $45. The works — cut, shave, towel — is $70." },
+  { q: "Cash or card?", a: "Either. And if you rebook on the way out, your next chair's already on the calendar." },
 ];
 
 export function BarberDemo() {
   return (
-    <div className={`overflow-hidden bg-[#1d1a16] ${ink} antialiased`}>
-      {/* nav */}
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 md:px-10">
-        <span className="text-lg font-bold uppercase tracking-[0.2em]">
-          Standard Barber Co.
-        </span>
-        <nav className="flex items-center gap-6">
-          <span className={`hidden text-sm sm:block ${muted}`}>Walk-ins welcome</span>
-          <a
-            href="#barber-book"
-            className="border border-[#b08d4f] px-5 py-2.5 text-sm font-medium uppercase tracking-wide text-[#b08d4f] transition-colors duration-200 hover:bg-[#b08d4f] hover:text-[#1d1a16]"
-          >
-            Book a chair
-          </a>
-        </nav>
-      </header>
-
-      {/* hero — a ghost of the word behind everything */}
-      <section className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 pb-16 pt-10 md:grid-cols-[1.4fr_1fr] md:px-10 md:pb-24 md:pt-16">
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-2 left-0 select-none text-[26vw] font-bold uppercase leading-none tracking-tight text-transparent md:text-[11rem]"
-          style={{ WebkitTextStroke: "1px rgba(232, 226, 214, 0.08)" }}
-        >
-          Sharp.
-        </span>
-        <div className="relative">
-          <Rise>
-            <p className="text-sm font-medium uppercase tracking-[0.3em] text-[#b08d4f]">
-              Barbershop · Patchogue
-            </p>
-            <h1 className="mt-5 text-5xl font-bold uppercase leading-[0.95] tracking-tight md:text-7xl">
-              A good cut.
-              <br />
-              Every time.
-            </h1>
-          </Rise>
-          <Rise delay={0.12}>
-            <p className={`mt-6 max-w-md text-lg ${muted}`}>
-              Four chairs, no rush, no upsell. Book online or walk in; either
-              way you leave sharp.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <a
-                href="#barber-book"
-                className="bg-[#b08d4f] px-7 py-3.5 font-medium uppercase tracking-wide text-[#1d1a16] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#e8e2d6]"
-              >
-                Book a chair
-              </a>
-              <span className={`text-sm ${muted}`}>Tue–Sat · 9–7</span>
-            </div>
-          </Rise>
-        </div>
-        <Rise delay={0.15} className="relative flex h-64 items-center justify-center md:h-80">
-          <Pole />
-        </Rise>
-      </section>
-
-      {/* walk-ins ticker */}
-      <div className="border-y border-[#e8e2d6]/10 py-3.5">
-        <Marquee
-          label="Walk-ins welcome"
-          duration={26}
-          className="text-sm font-bold uppercase tracking-[0.25em] text-[#b08d4f]"
-        >
-          {["Walk-ins welcome", "Tue–Sat 9–7", "311 Main St", "Cash or card"].map((t) => (
-            <span key={t} className="inline-flex items-center">
-              <span className="px-8">{t}</span>
-              <span aria-hidden="true" className="h-1 w-1 rotate-45 bg-[#b08d4f]" />
-            </span>
-          ))}
-        </Marquee>
-      </div>
-
-      {/* price list */}
-      <section className="bg-[#241f1a]">
-        <div className="mx-auto max-w-6xl px-6 py-16 md:px-10 md:py-24">
-          <Rise>
-            <h2 className="text-3xl font-bold uppercase tracking-tight md:text-4xl">
-              The list
-            </h2>
-          </Rise>
-          <ul className="mt-10 max-w-2xl">
-            {prices.map(([name, price], i) => (
-              <Rise key={name} delay={Math.min(i * 0.05, 0.25)}>
-                <li className="group flex items-baseline gap-4 border-b border-[#e8e2d6]/10 py-4">
-                  <span className="transition-transform duration-300 md:group-hover:translate-x-2">
-                    {name}
-                  </span>
-                  <span className="flex-1 border-b border-dotted border-[#e8e2d6]/25 transition-colors duration-300 group-hover:border-[#b08d4f]/60" />
-                  <span className="font-medium text-[#b08d4f]">{price}</span>
-                </li>
-              </Rise>
-            ))}
-          </ul>
-          <Rise delay={0.2}>
-            <p className={`mt-6 text-sm ${muted}`}>
-              Cash or card. Rebook on your way out and the next one&apos;s
-              already on the calendar.
-            </p>
-          </Rise>
-        </div>
-      </section>
-
-      {/* book band */}
-      <section id="barber-book" className="border-t border-[#e8e2d6]/10">
-        <div className="mx-auto max-w-6xl px-6 py-16 text-center md:px-10 md:py-24">
-          <Rise>
-            <h2 className="text-4xl font-bold uppercase tracking-tight md:text-5xl">
-              Your chair&apos;s <span className="text-[#b08d4f]">waiting.</span>
-            </h2>
-          </Rise>
-          <Rise delay={0.1}>
-            <p className={`mx-auto mt-5 max-w-md ${muted}`}>
-              Book online in under a minute, or just come by: 311 Main St,
-              Patchogue. If the pole&apos;s spinning, we&apos;re cutting.
-            </p>
-            <a
-              href="#barber-book"
-              className="mt-8 inline-block bg-[#b08d4f] px-8 py-4 font-medium uppercase tracking-wide text-[#1d1a16] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#e8e2d6]"
-            >
-              Book a chair
-            </a>
-          </Rise>
-        </div>
-      </section>
-
-      {/* footer */}
-      <footer className="border-t border-[#e8e2d6]/10">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-8 md:px-10">
-          <span className="text-sm font-bold uppercase tracking-[0.2em]">
-            Standard Barber Co.
-          </span>
-          <span className={`text-sm ${muted}`}>
-            311 Main St, Patchogue, NY · Tue–Sat 9–7
-          </span>
-        </div>
-      </footer>
-    </div>
+    <DemoShell accent={ACCENT}>
+      <DemoHeader name={NAME} phone={PHONE} quoteLabel="Book a chair" />
+      <DemoHero
+        eyebrow="Barbershop · Patchogue"
+        line1="A good cut."
+        line2="Every time."
+        sub="Four chairs, no rush, no upsell. Book online or walk in; either way you leave sharp."
+        primaryCta="Book a chair"
+        phone={PHONE}
+        mediaLabel="HERO VIDEO — the shop floor (16:9)"
+      />
+      <DemoMarquee terms={["Cuts", "Fades", "Beards", "Shaves", "Kids"]} />
+      <Intro
+        eyebrow="Who we are"
+        line1="Old-school chair."
+        line2="No nonsense."
+        paragraphs={[
+          "No app trying to upsell you pomade, no rotating stranger who's never seen your hairline. Just a good cut from the same barbers.",
+          "Standard runs four chairs in Patchogue. Book online in a minute or walk in — if the pole's spinning, we're cutting.",
+        ]}
+        badges={[
+          ["Cuts to shaves", "Full menu"],
+          ["Walk-in or book", "Either works"],
+          ["Same barbers", "Consistent"],
+          ["Cash or card", "Easy"],
+        ]}
+      />
+      <ServiceCards
+        eyebrow="The list"
+        line1="Four services."
+        line2="Done sharp."
+        services={SERVICES}
+        thumbPrefix="LOOK"
+      />
+      <FullBleedBreak
+        eyebrow="The chair"
+        line1="No rush."
+        line2="No upsell."
+        paragraph="We take the time the cut needs and send you out looking like you, sharper. Rebook on your way out and the next one's already on the calendar."
+        checklist={[
+          "Walk-ins always welcome",
+          "Book online in under a minute",
+          "Same barbers every visit",
+          "Cash or card",
+        ]}
+        cta="Book a chair"
+        mediaLabel="THE SHOP — chairs & details (16:9)"
+      />
+      <WorkGrid
+        eyebrow="Recent work"
+        line1="The work,"
+        line2="on the wall."
+        items={WORK}
+      />
+      <ValueProps
+        eyebrow="Why this chair"
+        line1="Reasons people"
+        line2="keep coming back."
+        props={PROPS}
+      />
+      <Faq
+        eyebrow="Questions"
+        line1="The stuff"
+        line2="people ask."
+        items={FAQ}
+      />
+      <Contact
+        eyebrow="Book or visit"
+        line1="Your chair's"
+        line2="waiting."
+        copy="Book online in under a minute, call, or just come by: 311 Main St, Patchogue. If the pole's spinning, we're cutting."
+        phone={PHONE}
+        email="hello@standardbarber.demo"
+        location="311 Main St, Patchogue, NY"
+        serviceLabel="What you're booking"
+        serviceOptions={["Haircut", "Skin fade", "Beard & line-up", "Hot-towel shave", "The works", "Kids"]}
+      />
+      <CtaBand
+        line1="Need a cut?"
+        line2="Grab a chair."
+        cta="Book a chair"
+        phone={PHONE}
+      />
+      <DemoFooter
+        name={NAME}
+        descriptor="A four-chair barbershop — cuts, fades, beards, and hot-towel shaves."
+        area="311 Main St, Patchogue, Long Island"
+        services={["Haircut", "Skin fade", "Beard & line-up", "Hot-towel shave"]}
+        phone={PHONE}
+        email="hello@standardbarber.demo"
+        location="311 Main St, Patchogue, NY"
+        hours="Tue–Sat, 9am–7pm"
+        strip="Walk-ins Welcome · Cash or Card · Same Barbers"
+      />
+    </DemoShell>
   );
 }

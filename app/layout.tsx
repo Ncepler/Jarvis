@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import {
   Inter,
+  Inter_Tight,
   Instrument_Serif,
   Space_Grotesk,
   Space_Mono,
@@ -28,6 +29,15 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-grotesk",
 });
 
+// Demo sites only — a neutral grotesque for the dark Axel's/Sallem-style
+// contractor demos (components/demos/*). Kept separate from the Vilas brand
+// faces so the demos never read like the studio's own wordmark.
+const interTight = Inter_Tight({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-tight",
+});
+
 // Utility/mono — ".studio" and small UI labels.
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -50,7 +60,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${instrumentSerif.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
+      className={`${inter.variable} ${interTight.variable} ${instrumentSerif.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
     >
       <body>{children}</body>
     </html>

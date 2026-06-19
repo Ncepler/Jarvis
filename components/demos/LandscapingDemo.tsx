@@ -1,214 +1,159 @@
-// Style demo: an upscale landscape design/build homepage — the flagship-tier
-// look. "Stone & Sage Landscapes" is a sample brand for the demo, not a
-// client. Self-contained: every color is local.
+// Style demo — a landscape design/build homepage in the dark, photographic,
+// editorial "Axel's / Sallem" system (see
+// .claude/skills/local-service-design-system/SKILL.md). "Stone & Sage
+// Landscapes" is a sample brand for the demo, not a client.
 
-import { Marquee, Rise } from "./shared";
+import {
+  Contact,
+  CtaBand,
+  DemoFooter,
+  DemoHeader,
+  DemoHero,
+  DemoMarquee,
+  DemoShell,
+  Faq,
+  FullBleedBreak,
+  Intro,
+  ServiceCards,
+  ValueProps,
+  WorkGrid,
+} from "./system";
 
-const ink = "text-[#26261f]";
-const muted = "text-[#75756a]";
+const ACCENT = "#5E7F52"; // moss / sage green
+const PHONE = "(516) 555-0123";
+const NAME = "Stone & Sage Landscapes";
 
-// abstract garden plan — circles for plantings, lines for hardscape
-function GardenPlan() {
-  return (
-    <svg viewBox="0 0 400 300" className="h-full w-full" aria-hidden="true">
-      <rect x="0" y="0" width="400" height="300" fill="#3c4434" />
-      <path d="M40 260 Q 140 200 200 220 T 380 180" stroke="#ece7df" strokeWidth="2" fill="none" opacity="0.6" />
-      <style>{`
-        @keyframes land-breathe {
-          to { transform: scale(1.05); }
-        }
-        .land-breathe {
-          transform-box: fill-box;
-          transform-origin: center;
-          animation: land-breathe 7s ease-in-out infinite alternate;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .land-breathe { animation: none; }
-        }
-      `}</style>
-      <circle className="land-breathe" cx="90" cy="110" r="38" fill="#5a6b4d" />
-      <circle className="land-breathe" style={{ animationDelay: "1.4s" }} cx="150" cy="80" r="22" fill="#6e8059" />
-      <circle className="land-breathe" style={{ animationDelay: "2.8s" }} cx="290" cy="120" r="48" fill="#4c5a41" />
-      <circle className="land-breathe" style={{ animationDelay: "0.7s" }} cx="330" cy="220" r="26" fill="#6e8059" />
-      <rect x="180" y="140" width="70" height="70" fill="none" stroke="#ece7df" strokeWidth="2" opacity="0.7" />
-    </svg>
-  );
-}
-
-const work = [
-  ["Bayside terrace & plantings", "Port Washington", "2025"],
-  ["Pool surround in bluestone", "Huntington", "2025"],
-  ["Native meadow front yard", "Northport", "2024"],
-  ["Outdoor kitchen & pergola", "Cold Spring Harbor", "2024"],
+const SERVICES = [
+  { title: "Design", copy: "A measured plan for the whole property — plantings, stone, lighting, grading — before anything is dug." },
+  { title: "Patios & walkways", copy: "Bluestone, pavers, and gravel laid on a base built to outlast the freeze-thaw, not just look good in spring." },
+  { title: "Retaining walls", copy: "Engineered to hold the grade and drain right, so the wall is still plumb a decade out." },
+  { title: "Garden & planting", copy: "Native and seasonal plantings chosen for your light and soil, set to fill in instead of fight the site." },
+  { title: "Maintenance", copy: "Seasonal care by the people who built it, so year five looks better than year one." },
+  { title: "Custom features", copy: "Fire pits, pergolas, outdoor kitchens, water. The pieces that turn a yard into a place you sit." },
 ];
 
-const practice = [
-  {
-    name: "Design",
-    copy: "A measured plan for the whole property (plantings, stone, lighting, grading) before anything is dug.",
-  },
-  {
-    name: "Build",
-    copy: "Every crew on site is ours. Masonry, carpentry, irrigation, and planting held to the drawing.",
-  },
-  {
-    name: "Care",
-    copy: "Seasonal maintenance by the people who built it, so year five looks better than year one.",
-  },
+const WORK = [
+  { tag: "Patio", caption: "Bayside terrace & plantings — Port Washington" },
+  { tag: "Hardscape", caption: "Pool surround in bluestone — Huntington" },
+  { tag: "Garden", caption: "Native meadow front yard — Northport" },
+  { tag: "Feature", caption: "Outdoor kitchen & pergola — Cold Spring Harbor" },
+  { tag: "Wall", caption: "Tiered retaining wall & steps" },
+  { tag: "Lighting", caption: "Low-voltage path & garden lighting" },
 ];
 
-const materials = ["bluestone", "granite", "cedar", "native plantings", "corten", "gravel gardens"];
+const PROPS = [
+  { title: "Built by hand", copy: "Every crew on site is ours. Masonry, carpentry, irrigation, and planting, held to the drawing." },
+  { title: "Built to last", copy: "We build the base you can't see right, so the surface you can see stays put." },
+  { title: "Straight, written pricing", copy: "A real number on paper before we break ground. No surprises mid-project." },
+  { title: "Local & responsive", copy: "We're on the North Shore and we answer our phone. You deal with the people doing the work." },
+  { title: "Full service", copy: "Design, build, and care under one roof, so there's no finger-pointing between trades." },
+];
+
+const FAQ = [
+  { q: "What areas do you serve?", a: "The North Shore of Long Island — Huntington, Northport, Port Washington, Cold Spring Harbor, and nearby towns." },
+  { q: "Do you do design and build, or just one?", a: "Both, and we prefer to do both. When the crew that builds it drew it, far less gets lost between the plan and the ground." },
+  { q: "How long does a project take?", a: "A patio is usually a couple of weeks; a full property runs a season. We give you a real schedule before we start." },
+  { q: "Do you give free estimates?", a: "Yes. We walk the property, talk through what you want, and put a written number in front of you. No pressure." },
+  { q: "Do you maintain what you build?", a: "We do, and we'd rather. Seasonal care by the people who built it keeps it looking right for years." },
+];
 
 export function LandscapingDemo() {
   return (
-    <div className={`overflow-hidden bg-[#ece7df] ${ink} antialiased`}>
-      {/* nav */}
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:px-10">
-        <span className="font-display text-xl tracking-tight">
-          Stone &amp; Sage Landscapes
-        </span>
-        <nav className="flex items-center gap-6">
-          <span className={`hidden text-sm sm:block ${muted}`}>(516) 555-0123</span>
-          <a
-            href="#land-consult"
-            className="border border-[#26261f] px-5 py-2.5 text-sm transition-colors duration-200 hover:bg-[#26261f] hover:text-[#ece7df]"
-          >
-            Book a consultation
-          </a>
-        </nav>
-      </header>
-
-      {/* hero — type first, then three arched garden panels at offset heights */}
-      <section className="mx-auto max-w-6xl px-6 pb-20 pt-12 md:px-10 md:pb-28 md:pt-20">
-        <Rise>
-          <p className={`text-sm uppercase tracking-widest ${muted}`}>
-            Landscape design &amp; build · North Shore
-          </p>
-          <h1 className="font-display mt-6 max-w-3xl text-5xl leading-[1.04] tracking-tight md:text-7xl">
-            Gardens designed to be lived in, built to stay.
-          </h1>
-        </Rise>
-        <div className="mt-14 grid grid-cols-3 items-end gap-4 md:gap-6">
-          <Rise delay={0.05}>
-            <div className="h-40 overflow-hidden rounded-t-full bg-[#5a6b4d] md:h-64" />
-          </Rise>
-          <Rise delay={0.15}>
-            <div className="h-56 overflow-hidden rounded-t-full md:h-80">
-              <GardenPlan />
-            </div>
-          </Rise>
-          <Rise delay={0.25}>
-            <div className="h-48 overflow-hidden rounded-t-full bg-[#b9a98e] md:h-72" />
-          </Rise>
-        </div>
-        <Rise delay={0.2}>
-          <p className={`mt-10 max-w-lg text-lg ${muted}`}>
-            We design and build the whole property: stone, plantings, lighting,
-            water. Then we keep it. One studio, one crew, one standard.
-          </p>
-        </Rise>
-      </section>
-
-      {/* materials ticker — quiet, serif, the luxury version of a marquee */}
-      <div className="border-y border-[#26261f]/15 py-4">
-        <Marquee label="Materials we work in" duration={30} className="font-display text-xl">
-          {materials.map((t) => (
-            <span key={t} className="inline-flex items-center">
-              <span className="px-8">{t}</span>
-              <span aria-hidden="true" className="h-1 w-1 rounded-full bg-[#3c4434]" />
-            </span>
-          ))}
-        </Marquee>
-      </div>
-
-      {/* practice */}
-      <section>
-        <div className="mx-auto grid max-w-6xl gap-12 px-6 py-20 md:grid-cols-3 md:gap-8 md:px-10 md:py-28">
-          {practice.map((p, i) => (
-            <Rise key={p.name} delay={i * 0.1}>
-              <div className={i === 1 ? "md:translate-y-10" : ""}>
-                <span className={`text-sm ${muted}`}>0{i + 1}</span>
-                <h2 className="font-display mt-2 text-3xl">{p.name}</h2>
-                <p className={`mt-4 max-w-xs text-sm leading-relaxed ${muted}`}>
-                  {p.copy}
-                </p>
-              </div>
-            </Rise>
-          ))}
-        </div>
-      </section>
-
-      {/* selected work */}
-      <section className="bg-[#3c4434] text-[#ece7df]">
-        <div className="mx-auto max-w-6xl px-6 py-20 md:px-10 md:py-28">
-          <Rise>
-            <h2 className="font-display text-3xl md:text-4xl">Selected work</h2>
-          </Rise>
-          <ul className="mt-10">
-            {work.map(([name, town, year], i) => (
-              <Rise key={name} delay={Math.min(i * 0.07, 0.28)}>
-                <li className="group flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-[#ece7df]/20 py-6">
-                  <span className="font-display text-xl transition-transform duration-300 md:text-2xl md:group-hover:translate-x-3">
-                    {name}
-                  </span>
-                  <span className="text-sm text-[#ece7df]/60 transition-colors duration-300 group-hover:text-[#ece7df]">
-                    {town} · {year}
-                  </span>
-                </li>
-              </Rise>
-            ))}
-          </ul>
-          <Rise delay={0.2}>
-            <blockquote className="mx-auto mt-16 max-w-2xl text-center">
-              <p className="font-display text-2xl leading-snug md:text-3xl">
-                &ldquo;They treated our half acre like it was a museum
-                courtyard.&rdquo;
-              </p>
-              <cite className="mt-4 block text-sm not-italic text-[#ece7df]/60">
-                A client in Huntington, sample quote for this demo
-              </cite>
-            </blockquote>
-          </Rise>
-        </div>
-      </section>
-
-      {/* consult band */}
-      <section
-        id="land-consult"
-        className="relative mx-auto max-w-6xl px-6 py-20 text-center md:px-10 md:py-28"
-      >
-        <div
-          aria-hidden="true"
-          className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#26261f]/15"
-        />
-        <Rise>
-          <h2 className="font-display relative mx-auto max-w-2xl text-4xl leading-tight md:text-5xl">
-            Walk the property with us.
-          </h2>
-        </Rise>
-        <Rise delay={0.1}>
-          <p className={`relative mx-auto mt-5 max-w-md ${muted}`}>
-            Consultations run about an hour. You&apos;ll leave with a clear sense
-            of what the land wants to be, whether or not you build with us.
-          </p>
-          <a
-            href="#land-consult"
-            className="relative mt-8 inline-block border border-[#26261f] px-8 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#26261f] hover:text-[#ece7df]"
-          >
-            Book a consultation
-          </a>
-        </Rise>
-      </section>
-
-      {/* footer */}
-      <footer className="border-t border-[#26261f]/15">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-8 md:px-10">
-          <span className="font-display">Stone &amp; Sage Landscapes</span>
-          <span className={`text-sm ${muted}`}>
-            North Shore, Long Island · (516) 555-0123
-          </span>
-        </div>
-      </footer>
-    </div>
+    <DemoShell accent={ACCENT}>
+      <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free consult" />
+      <DemoHero
+        eyebrow="Landscape design & build · North Shore"
+        line1="Built to be lived in."
+        line2="Built to stay."
+        sub="We design and build the whole property — stone, plantings, lighting, water — then we keep it. One studio, one crew, one standard."
+        primaryCta="Book a consultation"
+        phone={PHONE}
+        mediaLabel="HERO VIDEO — finished property b-roll (16:9)"
+      />
+      <DemoMarquee terms={["Patios", "Retaining Walls", "Gardens", "Lighting", "Fire Pits"]} />
+      <Intro
+        eyebrow="Who we are"
+        line1="One studio."
+        line2="One crew."
+        paragraphs={[
+          "Most yards get passed between a designer, a mason, and a landscaper who never talk. The seams show.",
+          "Stone & Sage draws it, builds it, and maintains it with our own people — so the property reads as one finished idea, not three.",
+        ]}
+        badges={[
+          ["Design through maintenance", "Full scope"],
+          ["Licensed & insured", "Fully covered"],
+          ["Our own crew, no subs", "Held to the drawing"],
+          ["Free consultations", "No pressure"],
+        ]}
+      />
+      <ServiceCards
+        eyebrow="What we do"
+        line1="Six specialties."
+        line2="One property."
+        services={SERVICES}
+        thumbPrefix="SERVICE"
+      />
+      <FullBleedBreak
+        eyebrow="See the transformation"
+        line1="We read the land first."
+        line2="Then we build for it."
+        paragraph="Grading, drainage, and light decide what a yard can be long before the stone goes down. We plan for the property you have, not a photo of someone else's."
+        checklist={[
+          "Free on-site consultation",
+          "Our own crew, no subs",
+          "Plan before we break ground",
+          "Licensed & insured",
+        ]}
+        cta="Walk the property with us"
+        mediaLabel="TRANSFORMATION — before/after (16:9)"
+      />
+      <WorkGrid
+        eyebrow="Recent work"
+        line1="Work you can"
+        line2="stand in."
+        items={WORK}
+      />
+      <ValueProps
+        eyebrow="Why hire us"
+        line1="Reasons it"
+        line2="stays put."
+        props={PROPS}
+      />
+      <Faq
+        eyebrow="Questions"
+        line1="The stuff"
+        line2="people ask."
+        items={FAQ}
+      />
+      <Contact
+        eyebrow="Free consult"
+        line1="Walk the property"
+        line2="with us."
+        copy="Consultations run about an hour. You'll leave with a clear sense of what the land wants to be, whether or not you build with us."
+        phone={PHONE}
+        email="hello@stoneandsage.demo"
+        location="North Shore, Long Island, NY"
+        serviceLabel="What you're planning"
+        serviceOptions={["Design", "Patio / walkway", "Retaining wall", "Garden & planting", "Maintenance", "Custom feature", "Not sure yet"]}
+        propertyTypes={["Residential", "Commercial"]}
+      />
+      <CtaBand
+        line1="Ready to start?"
+        line2="Let's walk the property."
+        cta="Book a consultation"
+        phone={PHONE}
+      />
+      <DemoFooter
+        name={NAME}
+        descriptor="Landscape design, build, and maintenance — one crew from drawing to care."
+        area="Serving the North Shore of Long Island"
+        services={["Design", "Patios & walkways", "Retaining walls", "Garden & planting", "Maintenance", "Custom features"]}
+        phone={PHONE}
+        email="hello@stoneandsage.demo"
+        location="North Shore, Long Island, NY"
+        hours="Mon–Sat, 7am–6pm"
+        strip="Licensed & Insured · Free Consultations · Design–Build"
+      />
+    </DemoShell>
   );
 }
