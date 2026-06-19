@@ -101,7 +101,7 @@ function CardFace({
   if (!project.screenshot) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-surface">
-        <span className="text-sm text-muted">In the works</span>
+        <span className="text-sm text-muted">Preview</span>
       </div>
     );
   }
@@ -423,7 +423,7 @@ function HomepagePanel({
             />
           ) : (
             <div className="flex h-[40vh] items-center justify-center text-sm text-muted">
-              In the works
+              Preview unavailable
             </div>
           )}
         </motion.div>
@@ -529,6 +529,22 @@ export function Gallery() {
     setOpenSlug(null);
     regionRef.current?.focus();
   }, []);
+
+  // the "Every site" index (AllSites) dispatches this to step straight into a
+  // demo: center that card, then open it into its live panel.
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const slug = (e as CustomEvent<string>).detail;
+      const idx = projects.findIndex((p) => p.slug === slug);
+      if (idx < 0) return;
+      const vc = Math.round(-x.get() / step);
+      snapTo(idx + count * Math.round((vc - idx) / count));
+      window.setTimeout(() => openCard(idx), reduced ? 0 : 420);
+    };
+    window.addEventListener("vilas:open-demo", onOpen as EventListener);
+    return () =>
+      window.removeEventListener("vilas:open-demo", onOpen as EventListener);
+  }, [projects, snapTo, openCard, x, step, count, reduced]);
 
   // a pointer-up at the end of a drag also lands on a card — ignore it
   const dragging = useRef(false);

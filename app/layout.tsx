@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import {
   Inter,
   Inter_Tight,
-  Instrument_Serif,
+  Syne,
+  Fraunces,
+  Oswald,
   Space_Grotesk,
   Space_Mono,
 } from "next/font/google";
@@ -15,11 +17,11 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const instrumentSerif = Instrument_Serif({
+// Studio display face — section titles + closing CTA on the main Vilas site.
+const syne = Syne({
   subsets: ["latin"],
-  weight: "400",
   display: "swap",
-  variable: "--font-instrument-serif",
+  variable: "--font-syne",
 });
 
 // Wordmark face — variable (300 dim helpers / 700 bright core in the reveal).
@@ -36,6 +38,20 @@ const interTight = Inter_Tight({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-tight",
+});
+
+// Demo display serif — florist + bakery header type (SKILL §13a/§13b). Demo-only.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-fraunces",
+});
+
+// Demo condensed display — barber signage type (SKILL §13c). Demo-only.
+const oswald = Oswald({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-oswald",
 });
 
 // Utility/mono — ".studio" and small UI labels.
@@ -60,7 +76,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${interTight.variable} ${instrumentSerif.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
+      className={`${inter.variable} ${interTight.variable} ${syne.variable} ${fraunces.variable} ${oswald.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
     >
       <body>{children}</body>
     </html>

@@ -1,12 +1,17 @@
 "use client";
 
 // ── Local-service demo design system ("the Axel's / Sallem look") ──────────
-// Near-black, full-bleed, photographic, EDITORIAL. Real photos/video carry the
-// color; the chrome stays dark and quiet. Big two-line headers, uppercase
-// eyebrows with an accent tick, numbered sections, 1px hairlines, ONE accent
-// per niche used ~2× a screen. ZERO decorative geometric shapes — if it isn't a
-// photo, a line of text, a hairline, or a button, it doesn't belong here.
-// Every demo composes these primitives; only `accent` changes per niche.
+// Full-bleed, photographic, EDITORIAL. Real photos/video carry the color; the
+// chrome stays quiet. Big two-line headers, uppercase eyebrows with an accent
+// tick, numbered sections, 1px hairlines, ONE accent per niche used ~2× a
+// screen. ZERO decorative geometric shapes — if it isn't a photo, a line of
+// text, a hairline, or a button, it doesn't belong here.
+//
+// The skeleton is identical on every demo; only the MOOD changes per niche
+// (SKILL §13). Renovation + landscaping are DARK (the default theme). Florist,
+// bakery, power washing, lawn care are LIGHT and barber is WARM-DARK — those
+// pass a full `theme` to DemoShell. Every primitive reads the --d-* vars the
+// shell sets, so re-mooding is a palette/type swap, never a structural one.
 // Spec: .claude/skills/local-service-design-system/SKILL.md
 
 import { motion, useReducedMotion } from "motion/react";
@@ -18,15 +23,40 @@ import {
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-// Dark base palette — identical across every demo (SKILL §2).
-const PALETTE = {
-  "--d-bg": "#0B0B0C",
-  "--d-surface": "#141416",
-  "--d-fg": "#F2EFE9",
-  "--d-body": "#C9C8C0",
-  "--d-muted": "#8A8A82",
-  "--d-line": "#232327",
+// Default DARK theme — renovation + landscaping (SKILL §2). Light/warm niches
+// pass their own `theme` (SKILL §13); anything a theme omits falls back here.
+const DARK_THEME = {
+  bg: "#0B0B0C",
+  surface: "#141416",
+  fg: "#F2EFE9",
+  body: "#C9C8C0",
+  muted: "#8A8A82",
+  line: "#232327",
+  onAccent: "#0B0B0C",
+  heroScrim: "linear-gradient(180deg, rgba(11,11,12,.35), rgba(11,11,12,.85))",
+  breakScrim: "linear-gradient(180deg, rgba(11,11,12,.55), rgba(11,11,12,.9))",
+  font: "var(--font-tight)",
+  display: "var(--font-tight)",
+  radius: "5px",
 } as const;
+
+// A demo's mood. Only `accent` is required when the dark default is used;
+// light/warm niches supply the full palette + type + scrims (SKILL §13).
+export type DemoTheme = {
+  bg: string;
+  surface: string;
+  fg: string;
+  body: string;
+  muted: string;
+  line: string;
+  accent: string;
+  onAccent?: string; // text on accent fills (default: bg)
+  heroScrim?: string; // hero gradient over media (default: dark)
+  breakScrim?: string; // full-bleed break gradient (default: darker)
+  font?: string; // base font-family value (default: --font-tight)
+  display?: string; // display/header font-family (default: same as font)
+  radius?: string; // card/button radius (default: 5px)
+};
 
 // ── Motion: fade + small rise, once on enter. Reduced-motion → final state. ──
 export function Rise({
@@ -53,26 +83,38 @@ export function Rise({
   );
 }
 
-// ── Shell: sets the dark CSS vars + niche accent, dark bg, grotesque type. ───
+// ── Shell: sets every --d-* var the primitives read — palette, accent, scrims,
+// type, radius. Dark niches pass only `accent`; light/warm niches pass `theme`.
 export function DemoShell({
   accent,
+  theme,
   children,
 }: {
   accent: string;
+  theme?: DemoTheme;
   children: ReactNode;
 }) {
+  const t: DemoTheme = theme ?? { ...DARK_THEME, accent };
+  const vars = {
+    "--d-bg": t.bg,
+    "--d-surface": t.surface,
+    "--d-fg": t.fg,
+    "--d-body": t.body,
+    "--d-muted": t.muted,
+    "--d-line": t.line,
+    "--d-accent": t.accent,
+    "--d-onaccent": t.onAccent ?? t.bg,
+    "--d-hero-scrim": t.heroScrim ?? DARK_THEME.heroScrim,
+    "--d-break-scrim": t.breakScrim ?? DARK_THEME.breakScrim,
+    "--d-font": t.font ?? DARK_THEME.font,
+    "--d-display": t.display ?? t.font ?? DARK_THEME.font,
+    "--d-radius": t.radius ?? DARK_THEME.radius,
+    background: "var(--d-bg)",
+    color: "var(--d-body)",
+    fontFamily: "var(--d-font)",
+  } as CSSProperties;
   return (
-    <div
-      className="font-[family-name:var(--font-tight)] antialiased"
-      style={
-        {
-          ...PALETTE,
-          "--d-accent": accent,
-          background: "var(--d-bg)",
-          color: "var(--d-body)",
-        } as CSSProperties
-      }
-    >
+    <div className="antialiased" style={vars}>
       {children}
     </div>
   );
@@ -110,7 +152,7 @@ export function TwoLine({
   return (
     <h2
       className={`text-[32px] font-semibold leading-[1.08] tracking-[-0.01em] md:text-[52px] ${className}`}
-      style={{ color: "var(--d-fg)" }}
+      style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
     >
       {a}
       <br />
@@ -135,7 +177,7 @@ export function Media({
 }) {
   return (
     <div
-      className={`relative w-full overflow-hidden ${rounded ? "rounded-[5px]" : ""} ${className}`}
+      className={`relative w-full overflow-hidden ${rounded ? "rounded-[var(--d-radius)]" : ""} ${className}`}
       style={{
         aspectRatio: ratio,
         background: "var(--d-surface)",
@@ -201,7 +243,7 @@ export function DemoHeader({
           </span>
           <span
             className="px-4 py-2 text-[13px] font-semibold uppercase tracking-[0.08em]"
-            style={{ background: "var(--d-accent)", color: "var(--d-bg)" }}
+            style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
           >
             {quoteLabel}
           </span>
@@ -242,14 +284,12 @@ export function DemoHero({
           </span>
         </div>
       </div>
-      {/* scrim so headlines stay readable on real footage */}
+      {/* scrim so headlines stay readable on real footage — light demos pass a
+          light scrim so the bright hero stays bright (SKILL §13f) */}
       <div
         aria-hidden
         className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(11,11,12,.35), rgba(11,11,12,.85))",
-        }}
+        style={{ background: "var(--d-hero-scrim)" }}
       />
       <div className={`${wrap} relative flex min-h-[640px] flex-col justify-end pb-16 pt-28`}>
         <Rise>
@@ -258,7 +298,7 @@ export function DemoHero({
           </div>
           <h1
             className="max-w-3xl text-[40px] font-bold leading-[1.04] tracking-[-0.02em] md:text-[72px]"
-            style={{ color: "var(--d-fg)" }}
+            style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
           >
             {line1}
             <br />
@@ -273,7 +313,7 @@ export function DemoHero({
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <span
               className="px-6 py-3.5 text-[14px] font-semibold"
-              style={{ background: "var(--d-accent)", color: "var(--d-bg)" }}
+              style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
             >
               {primaryCta}
             </span>
@@ -441,7 +481,7 @@ export function ServiceCards({
               style={{
                 background: "var(--d-surface)",
                 border: "1px solid var(--d-line)",
-                borderRadius: "5px",
+                borderRadius: "var(--d-radius)",
               }}
             >
               <Media label={`${thumbPrefix} — ${s.title} (4:3)`} className="mb-6" />
@@ -510,10 +550,7 @@ export function FullBleedBreak({
       <div
         aria-hidden
         className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(11,11,12,.55), rgba(11,11,12,.9))",
-        }}
+        style={{ background: "var(--d-break-scrim)" }}
       />
       <div className={`${wrap} relative py-[96px] md:py-[160px]`}>
         <Rise>
@@ -534,7 +571,7 @@ export function FullBleedBreak({
           </ul>
           <span
             className="mt-9 inline-block px-6 py-3.5 text-[14px] font-semibold"
-            style={{ background: "var(--d-accent)", color: "var(--d-bg)" }}
+            style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
           >
             {cta}
           </span>
@@ -576,7 +613,7 @@ export function WorkGrid({
         {items.map((w, i) => (
           <Rise key={w.caption} delay={Math.min(i * 0.05, 0.3)}>
             <figure className="group">
-              <div className="overflow-hidden rounded-[5px]">
+              <div className="overflow-hidden rounded-[var(--d-radius)]">
                 <div className="transition-transform duration-500 group-hover:scale-[1.03]">
                   <Media label={`WORK — ${w.caption} (4:3)`} rounded={false} />
                 </div>
@@ -748,7 +785,7 @@ export function Contact({
     background: "var(--d-bg)",
     border: "1px solid var(--d-line)",
     color: "var(--d-fg)",
-    borderRadius: "5px",
+    borderRadius: "var(--d-radius)",
   } as CSSProperties;
   const label = "mb-1.5 block text-[13px] font-semibold";
   return (
@@ -851,7 +888,7 @@ export function Contact({
                 type="button"
                 onClick={() => setState("ok")}
                 className="px-6 py-3.5 text-[14px] font-semibold"
-                style={{ background: "var(--d-accent)", color: "var(--d-bg)" }}
+                style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
               >
                 Send
               </button>
@@ -908,7 +945,7 @@ export function CtaBand({
         <Rise>
           <h2
             className="mx-auto text-[36px] font-bold leading-[1.06] tracking-[-0.02em] md:text-[60px]"
-            style={{ color: "var(--d-fg)" }}
+            style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
           >
             {line1}
             <br />
@@ -917,7 +954,7 @@ export function CtaBand({
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <span
               className="px-7 py-4 text-[14px] font-semibold"
-              style={{ background: "var(--d-accent)", color: "var(--d-bg)" }}
+              style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
             >
               {cta}
             </span>

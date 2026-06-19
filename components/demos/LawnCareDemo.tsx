@@ -1,7 +1,8 @@
-// Style demo — a lawn-care homepage in the dark, photographic, editorial
-// "Axel's / Sallem" system (see
-// .claude/skills/local-service-design-system/SKILL.md). "Fresh Cut Lawn Co."
-// is a sample brand for the demo, not a client.
+// Style demo — a lawn-care homepage in the fresh-daylight "Fresh Cut" mood
+// (SKILL §13e): soft fresh off-white, deep grass near-black, grass-green accent,
+// a friendly grotesque, sunny daylight photography. Light because it's a
+// friendly, low-stakes weekly service — sunny and approachable. Same editorial
+// skeleton as the dark demos. "Fresh Cut Lawn Co." is a sample brand, not a client.
 
 import {
   Contact,
@@ -11,6 +12,7 @@ import {
   DemoHero,
   DemoMarquee,
   DemoShell,
+  type DemoTheme,
   Faq,
   FullBleedBreak,
   Intro,
@@ -20,6 +22,21 @@ import {
 } from "./system";
 
 const ACCENT = "#4E9A4A"; // fresh grass green
+
+// Fresh daylight lawn-care mood (SKILL §13e).
+const THEME: DemoTheme = {
+  bg: "#F6F8F1", // soft fresh off-white, faint green
+  surface: "#FFFFFF",
+  fg: "#1C2417", // deep grass near-black
+  body: "#515B47", // muted olive-gray
+  muted: "#8E9882", // sage gray
+  line: "#E5EBDB", // light green hairline
+  accent: ACCENT,
+  onAccent: "#FFFFFF",
+  font: "var(--font-tight)", // friendly grotesque, no serif
+  heroScrim: "linear-gradient(180deg, rgba(246,248,241,.1), rgba(246,248,241,.76))",
+  breakScrim: "linear-gradient(180deg, rgba(246,248,241,.38), rgba(246,248,241,.85))",
+};
 const PHONE = "(516) 555-0148";
 const NAME = "Fresh Cut Lawn Co.";
 
@@ -57,7 +74,7 @@ const FAQ = [
 
 export function LawnCareDemo() {
   return (
-    <DemoShell accent={ACCENT}>
+    <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" />
       <DemoHero
         eyebrow="Lawn care · Nassau County"

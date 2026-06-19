@@ -31,7 +31,7 @@
 
 @theme inline {
   --font-sans: var(--font-inter);
-  --font-display: var(--font-instrument-serif);
+  --font-display: var(--font-syne);
   --font-wordmark: var(--font-grotesk);
   --font-mono: var(--font-space-mono);
 }

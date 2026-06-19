@@ -127,12 +127,12 @@ References: **terminal-industries.com, igloo.inc, relats.com**. Study the restra
 
 Discipline (Noah, 2026-06-19 — bone/cream palette confirmed): structure runs *entirely* on bg / surface / ink / muted / line — the page reads warm and paper-like, never loud. **Two accents max.** `--color-accent` = primary action / links / active states (deep bronze — NOT bright amber, NOT pink terracotta, to dodge the generic cream-site look); `--color-accent-2` = the occasional second emphasis. Each appears on only a few elements per screen — never a big fill; on accent-filled buttons use light (surface/white) text. Body text = ink (deep warm espresso). No third colour, no one-off hex. Only the demos (`components/demos/*`) keep their own dark palette — see §6.9.
 
-**Typography:** Vilas runs four faces (perf tradeoff, revisit/consolidate in Stage 2):
+**Typography:** the studio site runs four faces (Inter, Syne, Space Grotesk, Space Mono); demos add three more (Inter Tight, Fraunces, Oswald). Perf tradeoff — revisit/consolidate in Stage 2:
 - Body/UI: **Inter**.
-- Section titles: **Instrument Serif** (`--font-display`) — unchanged.
+- Section titles + closing CTA: **Syne** variable (`--font-display`) — the studio display face (Noah, 2026-06-19; replaced Instrument Serif). Syne is Vilas-brand only — never on a demo.
 - Wordmark/reveal: **Space Grotesk** variable (`--font-wordmark`) — uniform weight 500; every letter in the reveal is the same size, weight, and colour (Noah, 2026-06-17). (Was 300/700 dim-vs-bright; the V·A·L now persist by motion alone, not by weight/opacity.)
 - Utility/mono: **Space Mono** (`--font-mono`) — ".studio" + small labels.
-- Demo sites only: **Inter Tight** (`--font-tight`) — the neutral grotesque for the dark contractor demos (§6.9). Never used on the studio site; never use the studio's serif on a demo.
+- Demo sites only (§6.9, never on the studio site): **Inter Tight** (`--font-tight`) base grotesque for every demo; plus **Fraunces** (`--font-fraunces`) serif headers on florist + bakery, and **Oswald** (`--font-oswald`) condensed display on barber. Per-niche type is set via the demo `theme` (SKILL §13). Never use a demo serif on the studio site; never use Syne on a demo.
 - Display scale stays big: hero wordmark `clamp(3.5rem, 13vw, 10rem)`, section titles `clamp(2rem, 5vw, 4rem)`, tight tracking on display sizes.
 
 **Motion principles:**
@@ -165,11 +165,11 @@ Goal: read a clear tier above the templates we sell (Axel's/Sallem's skeleton ×
 - **Footer** restructured into Navigate / What we do / Contact columns (still TBD-aware on email/Instagram).
 
 #### 6.9 Demo design system — the "Axel's / Sallem" look (2026-06-19)
-The gallery demos no longer use decorative geometric shapes — they were restyled to a **dark, full-bleed, photographic, editorial system** so they read like real hired-contractor sites instead of abstract AI pages. **The spec is `.claude/skills/local-service-design-system/SKILL.md` — read it before touching any demo, and follow its prescribed values; do not improvise demo visuals.** Key rules:
-- **Demos are DARK** (`#0B0B0C` base, `#F2EFE9` headlines) and use a **neutral grotesque (Inter Tight, `--font-tight`)** — NEVER the bone palette, NEVER the studio's serif. This deliberately supersedes any earlier "don't touch demo palettes" note.
+The gallery demos no longer use decorative geometric shapes — they were restyled to a **full-bleed, photographic, editorial system** so they read like real hired-contractor sites instead of abstract AI pages. **The spec is `.claude/skills/local-service-design-system/SKILL.md` — read it before touching any demo, and follow its prescribed values; do not improvise demo visuals.** Key rules:
+- **The skeleton is identical on every demo; the MOOD varies per niche (SKILL §13, updated 2026-06-19).** `DemoShell` is theme-driven — it accepts a full `theme` (palette + on-accent text + hero/break scrims + base/display font + radius) and sets the `--d-*` vars every primitive reads. Renovation + landscaping pass **no** theme → the DARK default (`#0B0B0C` base, Inter Tight). Florist/bakery/power-washing/lawn-care are **LIGHT** and barber is **WARM-DARK** — each passes its §13 `theme`. NEVER the bone palette, NEVER Syne, on a demo. Light demos must keep AA text contrast (bright, not washed out). To re-mood a demo, edit its `theme` const only — never the shared primitives' structure.
 - **Zero decorative shapes** (no circles/blobs/cut-diagonals/SVG decoration). Real photo / full-bleed / editorial only. Where photos don't exist yet, use **labeled placeholders at the correct aspect ratio** (`components/demos/system.tsx` `<Media>`) — NO stock, NO AI images committed; Noah drops real photos in later.
-- **One accent per niche, ~2× a screen** (from the SKILL §9 table). Big two-line headers, uppercase eyebrows with an accent tick, numbered sections, 1px hairlines, sharp radii.
-- **Shared primitives live in `components/demos/system.tsx`** (`DemoShell`, `DemoHeader`, `DemoHero`, `DemoMarquee`, `Intro`, `ServiceCards`, `FullBleedBreak`, `WorkGrid`, `ValueProps`, `Faq`, `Contact`, `CtaBand`, `DemoFooter`). Each demo file just composes them + its niche copy/accent. Section order = SKILL §6 blueprint. **No reviews wall, no invented stats** (honesty rules, §7 + SKILL §11/§12).
+- **One accent per niche, ~2× a screen** (from the SKILL §9/§13 table). Big two-line headers, uppercase eyebrows with an accent tick, numbered sections, 1px hairlines, sharp radii (bakery is slightly softer, 8px).
+- **Shared primitives live in `components/demos/system.tsx`** (`DemoShell`, `DemoHeader`, `DemoHero`, `DemoMarquee`, `Intro`, `ServiceCards`, `FullBleedBreak`, `WorkGrid`, `ValueProps`, `Faq`, `Contact`, `CtaBand`, `DemoFooter`). Each demo file just composes them + its niche `theme`/copy. Section order = SKILL §6 blueprint. **No reviews wall, no invented stats** (honesty rules, §7 + SKILL §11/§12).
 - All 7 demos (renovation + the original 6) follow this; **renovation (`RenovationDemo.tsx`, "Maple & Main Renovation Co.") is the reference build** — match its quality.
 
 ### 6.1 Hero

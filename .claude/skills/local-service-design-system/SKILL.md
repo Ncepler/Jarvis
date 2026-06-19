@@ -7,8 +7,9 @@ description: >
   axelslandscapingdesign.com (landscaping) and sallemllc.pages.dev (general contractor).
   Use this whenever building or restyling a Vilas DEMO site. It makes the demos look like
   real, hired-contractor websites — photographic and editorial — NOT like abstract,
-  shape-decorated AI pages. This is for the DARK demo sites only; the main Vilas studio
-  site uses a separate light/bone palette and the Syne display face (do not apply this here).
+  shape-decorated AI pages. Demos vary by niche: renovation + landscaping are DARK, florist + bakery + power
+  washing + lawn care are LIGHT, barber is warm-dark — see section 13. The main Vilas studio site uses its
+  own separate bone palette + the Syne display face, never used on demos.
 ---
 
 # Local-Service Demo Design System ("the Axel's / Sallem look")
@@ -27,16 +28,16 @@ description: >
 
 1. **NO decorative geometric shapes. This is the rule that matters most.** No floating circles, blobs, rings, half-circles, "cut" diagonal shapes, abstract SVG decoration, gradient orbs, or shape-based section dividers. If a shape isn't a photo, a video, a line of text, a hairline rule, or a button, it does not belong. *(This is the single thing wrong with the current demos — strip all of it.)*
 2. **Real photography is the design.** Every section's visual interest comes from full-bleed photos/video of the actual work, not from graphics. Where Noah hasn't supplied photos yet, use clearly-labeled image placeholders at the correct aspect ratio (see §10) so the layout reads correctly and photos drop in later.
-3. **Near-black chrome lets the photos pop.** The UI (backgrounds, text, lines) stays dark and quiet so the photography is the only loud thing.
+3. **Quiet chrome lets the photos pop.** The UI (backgrounds, text, lines) stays quiet so the photography is the only loud thing — near-black for the heavy build niches (renovation, landscaping), and light/warm for florist, bakery, power washing, and lawn care. The chrome never competes with the photos. (Per-niche moods: §13.)
 4. **Editorial, not flashy.** Big confident headers, generous whitespace, hairline rules, numbered markers, eyebrows. It should feel like a well-set magazine spread, not a web "design."
 5. **Restraint with motion and color.** Subtle reveals and one marquee. One accent color, ~2 uses per screen. Nothing blinks, bounces, or floats.
 6. **Local trust is the voice.** Plain, specific, slightly blunt. "We answer our phone." "No subs." "Free estimate, no pressure." (See §8.)
 
 ---
 
-## 2. Color system (DEMO sites — dark)
+## 2. Color system — DARK niches (renovation, landscaping)
 
-Base palette (identical across every demo; only `--accent` changes per niche):
+This near-black base is for the heavy build / contractor trades — renovation and landscaping. **Florist, bakery, power washing, and lawn care use LIGHT palettes, and barber uses a warm-dark one — see §13**, which overrides this section for those niches. Only `--accent` changes between the two dark niches:
 
 ```
 --bg       #0B0B0C   /* page background, near-black */
@@ -200,7 +201,7 @@ Until real photography exists, use neutral, **clearly-labeled** placeholders so 
 - ❌ AI-generated or stock images committed into the build.
 - ❌ "X, not Y" copy constructions; corporate filler; hype.
 - ❌ Heavy rounding / bubbly cards; rainbow of colors; accent used as decoration.
-- ❌ Light backgrounds on demos (demos are dark; the light/bone palette is the main Vilas site only).
+- ❌ Washed-out, low-contrast light demos. Light is *correct* for florist/bakery (§13) — but keep AA text contrast and editorial discipline. Bright and airy, never pale mush. (The main Vilas site's bone palette is still its own thing; don't copy it onto demos.)
 - ❌ Using the Syne display face on demos (Syne = Vilas brand only; demos use a neutral grotesque).
 
 ---
@@ -210,3 +211,108 @@ Until real photography exists, use neutral, **clearly-labeled** placeholders so 
 - Demos are **Vilas's own self-initiated builds**, shown as style examples — never presented as paying clients.
 - Sample business names, phones, and addresses are fine as long as nothing claims real results, reviews, or history.
 - Skip every section that would require fabricating proof (reviews wall, client counts). The work itself is the proof.
+
+## 13. Niche mood & palette variants (not every demo is dark)
+
+**The principle.** The *skeleton* is identical on every demo — same section order (§6), two-line headers, numbered blocks, photo-led layout, full-bleed media break, work grid with tags, plain copy. That shared structure is what makes them read as one studio's system. But the *mood* — palette, type personality, how the photography is lit — must match what that kind of business actually looks like online. **The demos should look different from each other on purpose.** A florist that looks like a roofing company is a failed demo even if it's built perfectly. Matching a business to its own visual language is the entire thing these demos exist to prove.
+
+**Who gets which mood:**
+
+| Niche | Mood | Why |
+|---|---|---|
+| Renovation, Landscaping | **DARK** (the §2 base) | Heavy design-build / hardscape work reads premium on near-black; the photos carry the color. |
+| Florist, Bakery, Power washing, Lawn care | **LIGHT** (airy / warm / clean, below) | Bright, fresh, approachable businesses. Power washing and lawn care sell *clean and fresh* — a bright site proves it; dark makes them feel heavier and pricier than they are. |
+| Barber | **WARM-DARK** (below) | Dark fits the old-school chair — but warm and vintage, not the cool blue-black of the contractor demos. |
+
+§13 overrides §2 (palette) and §3 (type) for the named niches. Every other rule in this skill still holds.
+
+### 13a. Florist — bright & airy (Wildstem)
+
+```
+--bg       #FBF8F3   /* warm paper white */
+--surface  #FFFFFF
+--fg       #2A2622   /* soft warm near-black */
+--body     #5A534B
+--muted    #9A9289
+--line     #ECE6DC   /* very light hairline */
+--accent   #B14A63   /* deep bloom rose, used sparingly */
+--accent-2 #7C8F6F   /* optional soft sage for secondary touches */
+```
+- **Type:** an elegant display **serif** for headers — Fraunces or Playfair Display, used with restraint (not every line) — paired with a clean sans body (Inter / Geist). The serif is what reads "florist / editorial" instead of "contractor." (Still never Syne — that is Vilas-brand only.)
+- **Photography:** bright natural daylight, lots of negative space, close-up stems, the shop, soft real shadows. Airy — never moody or dark.
+- **Shifts vs. the dark base:** more whitespace; lighter, thinner hairlines; soft shadows instead of hard borders on cards; the hero is a bright image with dark text in a clear zone (a light scrim or none, not a heavy dark gradient); marquee in muted rose or sage. Buttons: rose fill + white text, or a thin outline.
+- **Keep all structure:** numbered 01–04, two-line headers, work grid with tags + plain captions, the full contact form.
+
+### 13b. Bakery — warm & inviting (Golden Hour)
+
+```
+--bg       #F6EFE2   /* warm cream / paper bag */
+--surface  #FCF8F0
+--fg       #2B2018   /* warm espresso brown */
+--body     #5E5142
+--muted    #9C8B76
+--line     #E7DCC8
+--accent   #C9802F   /* crust amber */
+--accent-2 #8A4B2A   /* deep crust, optional */
+```
+- **Type:** a warm, slightly characterful display — Fraunces (its softer optical sizes) or a friendly grotesque — with a clean sans body. Should feel handmade and morning-lit, not clinical.
+- **Photography:** warm morning light, golden tones, crumb and crust close-ups, the case, steam. Cozy and appetizing.
+- **Shifts:** warm cream throughout; amber accent on CTAs; soft shadows; cream marquee. Lean slightly more rounded than the sharp dark demos (radius up to ~8px) since warm/handmade suits it — but don't go bubbly.
+- **Keep all structure.**
+
+### 13c. Barber — warm vintage dark (Standard)
+
+```
+--bg       #14110E   /* warm espresso-black (NOT the cool #0B0B0C) */
+--surface  #1E1915
+--fg       #F1EADD   /* warm bone */
+--body     #C3B8A6
+--muted    #8A7E6C
+--line     #2C261F
+--accent   #B23A3A   /* classic chair red — or brass #B08D57 */
+```
+- **Type:** a vintage **condensed** display or a slab — barbershop-signage energy (a bold condensed grotesque, or Oswald / Anton used sparingly) — with a clean sans body. Uppercase, tracked headers work well.
+- **Photography:** warm interior light, leather, chrome, the chair, brass, vintage tones. Moody but *warm* — the opposite of the cold industrial feel of the contractor demos.
+- **Shifts:** warm espresso-black instead of blue-black is the main tell; red or brass accent; a little grain/texture is welcome. This is what makes it read as a *barber* and not as another contractor.
+- **Keep all structure.**
+
+### 13d. Power washing — clean & crisp (Tide Line)
+
+```
+--bg       #F4F7F9   /* clean cool off-white (water-white) */
+--surface  #FFFFFF
+--fg       #14202A   /* deep cool ink */
+--body     #4D5A64   /* cool slate */
+--muted    #8A98A2   /* cool gray */
+--line     #E2E9ED   /* cool light hairline */
+--accent   #1E86C4   /* clean water blue (a touch deeper than §9 for contrast on white) */
+```
+- **Type:** a clean modern grotesque (Inter / Geist), crisp and no-nonsense — power washing is utility, not editorial, so no serif.
+- **Photography:** bright daylight, sparkling-clean surfaces, water spray, vivid before/after with the "after" gleaming. High-key and crisp.
+- **Why light:** the whole pitch is *spotless / like-new*. A bright, almost clinically clean white site proves the service before a word is read — lots of white space literally reads "clean." Blue accent ties it to water.
+- **Shifts vs. the dark base:** white surfaces, cool light hairlines, soft shadows; the before/after transformation block is the hero moment — keep it prominent. Buttons: blue fill + white text.
+- **Keep all structure.**
+
+### 13e. Lawn care — fresh daylight (Fresh Cut)
+
+```
+--bg       #F6F8F1   /* soft fresh off-white, faint green */
+--surface  #FFFFFF
+--fg       #1C2417   /* deep grass near-black */
+--body     #515B47   /* muted olive-gray */
+--muted    #8E9882   /* sage gray */
+--line     #E5EBDB   /* light green hairline */
+--accent   #4E9A4A   /* fresh grass green */
+```
+- **Type:** a clean, friendly grotesque (Inter / Geist), approachable — no serif.
+- **Photography:** bright sunny daylight, fresh-cut striped lawns, blue sky, green. High-key and cheerful.
+- **Why light:** it's a friendly, low-stakes weekly service — it should feel easy, sunny, and approachable, not premium-dark. Lots of sky and green.
+- **Shifts vs. the dark base:** white surfaces, light green hairlines, soft shadows, green accent on CTAs.
+- **Keep all structure.**
+
+### 13f. Don't let "light" become "weak"
+
+- Keep **AA contrast** on all text (the `--fg` / `--body` values above are chosen for this).
+- Bright and airy is not pale and washed out. Keep real contrast, confident headers, and the same editorial discipline as the dark demos.
+- Every §11 / §12 rule still applies: no decorative geometric shapes, no stock or AI images, no fake reviews or stats.
+- Scrims: on light heroes use a *light* scrim or a clear text zone, never a heavy dark gradient.

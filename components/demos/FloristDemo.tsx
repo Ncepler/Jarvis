@@ -1,7 +1,7 @@
-// Style demo — a flower-shop homepage in the dark, photographic, editorial
-// "Axel's / Sallem" system (see
-// .claude/skills/local-service-design-system/SKILL.md). "Wildstem Florals" is
-// a sample brand for the demo, not a client.
+// Style demo — a flower-shop homepage in the bright & airy "Wildstem" mood
+// (SKILL §13a): warm paper-white, daylight photography, a Fraunces serif for
+// headers, rose accent. Same editorial skeleton as the dark demos — only the
+// mood differs. "Wildstem Florals" is a sample brand for the demo, not a client.
 
 import {
   Contact,
@@ -11,6 +11,7 @@ import {
   DemoHero,
   DemoMarquee,
   DemoShell,
+  type DemoTheme,
   Faq,
   FullBleedBreak,
   Intro,
@@ -20,6 +21,22 @@ import {
 } from "./system";
 
 const ACCENT = "#B14A63"; // deep bloom rose
+
+// Bright & airy florist mood (SKILL §13a).
+const THEME: DemoTheme = {
+  bg: "#FBF8F3", // warm paper white
+  surface: "#FFFFFF",
+  fg: "#2A2622", // soft warm near-black
+  body: "#5A534B",
+  muted: "#9A9289",
+  line: "#ECE6DC", // very light hairline
+  accent: ACCENT,
+  onAccent: "#FFFFFF",
+  font: "var(--font-tight)", // clean sans body
+  display: "var(--font-fraunces)", // elegant serif headers
+  heroScrim: "linear-gradient(180deg, rgba(251,248,243,.12), rgba(251,248,243,.78))",
+  breakScrim: "linear-gradient(180deg, rgba(251,248,243,.4), rgba(251,248,243,.86))",
+};
 const PHONE = "(516) 555-0167";
 const NAME = "Wildstem Florals";
 
@@ -57,7 +74,7 @@ const FAQ = [
 
 export function FloristDemo() {
   return (
-    <DemoShell accent={ACCENT}>
+    <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Order flowers" />
       <DemoHero
         eyebrow="Flower shop · Rockville Centre"

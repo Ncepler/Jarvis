@@ -1,7 +1,8 @@
-// Style demo — a neighborhood bakery homepage in the dark, photographic,
-// editorial "Axel's / Sallem" system (see
-// .claude/skills/local-service-design-system/SKILL.md). "Golden Hour
-// Bakehouse" is a sample brand for the demo, not a client.
+// Style demo — a neighborhood bakery homepage in the warm & inviting "Golden
+// Hour" mood (SKILL §13b): warm cream, espresso-brown text, crust-amber accent,
+// a Fraunces display, morning-light photography, slightly softer corners. Same
+// editorial skeleton as the dark demos. "Golden Hour Bakehouse" is a sample
+// brand for the demo, not a client.
 
 import {
   Contact,
@@ -11,6 +12,7 @@ import {
   DemoHero,
   DemoMarquee,
   DemoShell,
+  type DemoTheme,
   Faq,
   FullBleedBreak,
   Intro,
@@ -20,6 +22,23 @@ import {
 } from "./system";
 
 const ACCENT = "#C9802F"; // warm crust amber
+
+// Warm & inviting bakery mood (SKILL §13b).
+const THEME: DemoTheme = {
+  bg: "#F6EFE2", // warm cream / paper bag
+  surface: "#FCF8F0",
+  fg: "#2B2018", // warm espresso brown
+  body: "#5E5142",
+  muted: "#9C8B76",
+  line: "#E7DCC8",
+  accent: ACCENT,
+  onAccent: "#FFFFFF",
+  font: "var(--font-tight)",
+  display: "var(--font-fraunces)", // warm characterful display
+  radius: "8px", // a touch softer — handmade, not bubbly
+  heroScrim: "linear-gradient(180deg, rgba(246,239,226,.12), rgba(246,239,226,.8))",
+  breakScrim: "linear-gradient(180deg, rgba(246,239,226,.42), rgba(246,239,226,.88))",
+};
 const PHONE = "(631) 555-0173";
 const NAME = "Golden Hour Bakehouse";
 
@@ -57,7 +76,7 @@ const FAQ = [
 
 export function BakeryDemo() {
   return (
-    <DemoShell accent={ACCENT}>
+    <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Order ahead" />
       <DemoHero
         eyebrow="Bakery · Sayville"

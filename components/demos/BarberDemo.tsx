@@ -1,6 +1,7 @@
-// Style demo — a barbershop homepage in the dark, photographic, editorial
-// "Axel's / Sallem" system (see
-// .claude/skills/local-service-design-system/SKILL.md). "Standard Barber Co."
+// Style demo — a barbershop homepage in the warm-vintage-dark "Standard" mood
+// (SKILL §13c): warm espresso-black (NOT the cool contractor #0B0B0C), bone
+// text, chair-red accent, an Oswald condensed display, warm interior
+// photography. Same editorial skeleton as the dark demos. "Standard Barber Co."
 // is a sample brand for the demo, not a client.
 
 import {
@@ -11,6 +12,7 @@ import {
   DemoHero,
   DemoMarquee,
   DemoShell,
+  type DemoTheme,
   Faq,
   FullBleedBreak,
   Intro,
@@ -20,6 +22,22 @@ import {
 } from "./system";
 
 const ACCENT = "#B23A3A"; // classic chair red
+
+// Warm vintage dark barber mood (SKILL §13c).
+const THEME: DemoTheme = {
+  bg: "#14110E", // warm espresso-black, NOT the cool #0B0B0C
+  surface: "#1E1915",
+  fg: "#F1EADD", // warm bone
+  body: "#C3B8A6",
+  muted: "#8A7E6C",
+  line: "#2C261F",
+  accent: ACCENT,
+  onAccent: "#F1EADD", // bone text on chair-red
+  font: "var(--font-tight)",
+  display: "var(--font-oswald)", // vintage condensed signage
+  heroScrim: "linear-gradient(180deg, rgba(20,17,14,.35), rgba(20,17,14,.85))",
+  breakScrim: "linear-gradient(180deg, rgba(20,17,14,.55), rgba(20,17,14,.9))",
+};
 const PHONE = "(631) 555-0185";
 const NAME = "Standard Barber Co.";
 
@@ -57,7 +75,7 @@ const FAQ = [
 
 export function BarberDemo() {
   return (
-    <DemoShell accent={ACCENT}>
+    <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Book a chair" />
       <DemoHero
         eyebrow="Barbershop · Patchogue"

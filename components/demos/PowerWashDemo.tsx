@@ -1,7 +1,8 @@
-// Style demo — a power-washing homepage in the dark, photographic, editorial
-// "Axel's / Sallem" system (see
-// .claude/skills/local-service-design-system/SKILL.md). "Tide Line Power
-// Washing" is a sample brand for the demo, not a client.
+// Style demo — a power-washing homepage in the clean & crisp "Tide Line" mood
+// (SKILL §13d): cool off-white, deep cool ink, water-blue accent, a clean
+// grotesque, high-key before/after photography. The bright white site proves
+// "spotless" before a word is read. Same editorial skeleton as the dark demos.
+// "Tide Line Power Washing" is a sample brand for the demo, not a client.
 
 import {
   Contact,
@@ -11,6 +12,7 @@ import {
   DemoHero,
   DemoMarquee,
   DemoShell,
+  type DemoTheme,
   Faq,
   FullBleedBreak,
   Intro,
@@ -19,7 +21,22 @@ import {
   WorkGrid,
 } from "./system";
 
-const ACCENT = "#2F9BD4"; // clean water blue
+const ACCENT = "#1E86C4"; // clean water blue (deeper for contrast on white)
+
+// Clean & crisp power-washing mood (SKILL §13d).
+const THEME: DemoTheme = {
+  bg: "#F4F7F9", // clean cool off-white (water-white)
+  surface: "#FFFFFF",
+  fg: "#14202A", // deep cool ink
+  body: "#4D5A64", // cool slate
+  muted: "#8A98A2", // cool gray
+  line: "#E2E9ED", // cool light hairline
+  accent: ACCENT,
+  onAccent: "#FFFFFF",
+  font: "var(--font-tight)", // clean grotesque, no serif
+  heroScrim: "linear-gradient(180deg, rgba(244,247,249,.1), rgba(244,247,249,.76))",
+  breakScrim: "linear-gradient(180deg, rgba(244,247,249,.38), rgba(244,247,249,.85))",
+};
 const PHONE = "(631) 555-0192";
 const NAME = "Tide Line Power Washing";
 
@@ -57,7 +74,7 @@ const FAQ = [
 
 export function PowerWashDemo() {
   return (
-    <DemoShell accent={ACCENT}>
+    <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" />
       <DemoHero
         eyebrow="Power washing · Suffolk County"
