@@ -43,7 +43,7 @@ const NAME = "Wildstem Florals";
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
 // Put your hero photo in /public (e.g. /public/demos/florist-hero.jpg), then
 // set the path below. Leave "" to show the labeled placeholder instead.
-const firstFloristImage = "";
+const firstFloristImage = "/previews/firstFloristImage.jpg";
 
 const SERVICES = [
   { title: "Daily arrangements", copy: "Whatever came in beautiful that morning, arranged loose and seasonal. No two alike." },

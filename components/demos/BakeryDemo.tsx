@@ -45,7 +45,7 @@ const NAME = "Golden Hour Bakehouse";
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
 // Put your hero photo in /public (e.g. /public/demos/bakery-hero.jpg), then
 // set the path below. Leave "" to show the labeled placeholder instead.
-const firstBakeryImage = "";
+const firstBakeryImage = "/previews/firstBakeryImage.jpg";
 
 const SERVICES = [
   { title: "Daily bread", copy: "Levain sourdough and seeded rye, 36-hour ferment, out of the oven at 7am. When it's gone, it's gone." },

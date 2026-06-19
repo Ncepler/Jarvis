@@ -43,7 +43,7 @@ const NAME = "Fresh Cut Lawn Co.";
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
 // Put your hero photo in /public (e.g. /public/demos/lawncare-hero.jpg), then
 // set the path below. Leave "" to show the labeled placeholder instead.
-const firstLawnCareImage = "";
+const firstLawnCareImage = "/previews/firstLawnCareImage.jpg";
 
 const SERVICES = [
   { title: "Weekly mowing", copy: "Cut, trimmed, edged, blown clean. Same crew, same day every week, and the stripes stay straight." },
