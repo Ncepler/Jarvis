@@ -40,6 +40,11 @@ const THEME: DemoTheme = {
 const PHONE = "(516) 555-0167";
 const NAME = "Wildstem Florals";
 
+// ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
+// Put your hero photo in /public (e.g. /public/demos/florist-hero.jpg), then
+// set the path below. Leave "" to show the labeled placeholder instead.
+const firstFloristImage = "";
+
 const SERVICES = [
   { title: "Daily arrangements", copy: "Whatever came in beautiful that morning, arranged loose and seasonal. No two alike." },
   { title: "Weddings & events", copy: "From two table arrangements to the whole room, designed around your venue and your month." },
@@ -77,6 +82,7 @@ export function FloristDemo() {
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Order flowers" />
       <DemoHero
+        heroImage={firstFloristImage}
         eyebrow="Flower shop · Rockville Centre"
         line1="Picked,"
         line2="not produced."

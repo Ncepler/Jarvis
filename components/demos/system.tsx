@@ -262,6 +262,7 @@ export function DemoHero({
   primaryCta,
   phone,
   mediaLabel,
+  heroImage,
 }: {
   eyebrow: string;
   line1: string;
@@ -270,19 +271,30 @@ export function DemoHero({
   primaryCta: string;
   phone: string;
   mediaLabel: string;
+  heroImage?: string; // drop a real hero background image path here (else placeholder)
 }) {
   return (
     <section className="relative w-full" style={{ minHeight: "640px" }}>
-      {/* full-bleed background media slot */}
-      <div className="absolute inset-0" style={{ background: "var(--d-surface)" }}>
-        <div className="flex h-full w-full items-center justify-center">
-          <span
-            className="text-[11px] font-semibold uppercase tracking-[0.18em]"
-            style={{ color: "var(--d-muted)" }}
-          >
-            {mediaLabel}
-          </span>
-        </div>
+      {/* full-bleed background media slot — real image if given, else label */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundColor: heroImage ? undefined : "var(--d-surface)",
+          backgroundImage: heroImage ? `url("${heroImage}")` : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {!heroImage && (
+          <div className="flex h-full w-full items-center justify-center">
+            <span
+              className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+              style={{ color: "var(--d-muted)" }}
+            >
+              {mediaLabel}
+            </span>
+          </div>
+        )}
       </div>
       {/* scrim so headlines stay readable on real footage — light demos pass a
           light scrim so the bright hero stays bright (SKILL §13f) */}

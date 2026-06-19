@@ -41,6 +41,11 @@ const THEME: DemoTheme = {
 const PHONE = "(631) 555-0185";
 const NAME = "Standard Barber Co.";
 
+// ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
+// Put your hero photo in /public (e.g. /public/demos/barber-hero.jpg), then
+// set the path below. Leave "" to show the labeled placeholder instead.
+const firstBarberImage = "";
+
 const SERVICES = [
   { title: "Haircut — $35", copy: "Scissor or clipper, your call. No rush, no upsell — you leave looking like you, sharper." },
   { title: "Skin fade — $40", copy: "Clean taper down to the skin, blended right and finished by hand." },
@@ -78,6 +83,7 @@ export function BarberDemo() {
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Book a chair" />
       <DemoHero
+        heroImage={firstBarberImage}
         eyebrow="Barbershop · Patchogue"
         line1="A good cut."
         line2="Every time."

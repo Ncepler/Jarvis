@@ -23,6 +23,11 @@ const ACCENT = "#5E7F52"; // moss / sage green
 const PHONE = "(516) 555-0123";
 const NAME = "Stone & Sage Landscapes";
 
+// ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
+// Put your hero photo in /public (e.g. /public/demos/landscaping-hero.jpg), then
+// set the path below. Leave "" to show the labeled placeholder instead.
+const firstLandscapingImage = "";
+
 const SERVICES = [
   { title: "Design", copy: "A measured plan for the whole property — plantings, stone, lighting, grading — before anything is dug." },
   { title: "Patios & walkways", copy: "Bluestone, pavers, and gravel laid on a base built to outlast the freeze-thaw, not just look good in spring." },
@@ -62,6 +67,7 @@ export function LandscapingDemo() {
     <DemoShell accent={ACCENT}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free consult" />
       <DemoHero
+        heroImage={firstLandscapingImage}
         eyebrow="Landscape design & build · North Shore"
         line1="Built to be lived in."
         line2="Built to stay."

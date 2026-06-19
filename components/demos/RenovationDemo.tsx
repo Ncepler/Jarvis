@@ -24,6 +24,11 @@ const ACCENT = "#C8893F"; // warm finished-wood caramel
 const PHONE = "(516) 555-0000";
 const NAME = "Maple & Main Renovation Co.";
 
+// ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
+// Put your hero photo in /public (e.g. /public/demos/renovation-hero.jpg), then
+// set the path below. Leave "" to show the labeled placeholder instead.
+const firstRenovationImage = "";
+
 const SERVICES = [
   { title: "Kitchens", copy: "Full gut to finish — cabinets, counters, tile, lighting. We handle the whole room, not just the pretty part." },
   { title: "Bathrooms", copy: "Walk-in showers, tile, vanities, plumbing. Built to handle water and last decades, not seasons." },
@@ -64,6 +69,7 @@ export function RenovationDemo() {
     <DemoShell accent={ACCENT}>
       <DemoHeader name={NAME} phone={PHONE} />
       <DemoHero
+        heroImage={firstRenovationImage}
         eyebrow="Renovation & remodeling · North Shore"
         line1="Old house."
         line2="New everything."

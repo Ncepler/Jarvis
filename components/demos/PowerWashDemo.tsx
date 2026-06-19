@@ -40,6 +40,11 @@ const THEME: DemoTheme = {
 const PHONE = "(631) 555-0192";
 const NAME = "Tide Line Power Washing";
 
+// ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
+// Put your hero photo in /public (e.g. /public/demos/powerwash-hero.jpg), then
+// set the path below. Leave "" to show the labeled placeholder instead.
+const firstPowerWashImage = "";
+
 const SERVICES = [
   { title: "House soft wash", copy: "Siding, trim, and gutters. Low pressure, no stripped paint. Most homes done in a morning." },
   { title: "Driveways & walkways", copy: "Concrete and pavers back to the color you forgot they were. Oil stains included." },
@@ -77,6 +82,7 @@ export function PowerWashDemo() {
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" />
       <DemoHero
+        heroImage={firstPowerWashImage}
         eyebrow="Power washing · Suffolk County"
         line1="Like the day"
         line2="it was built."

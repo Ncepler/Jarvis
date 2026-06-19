@@ -40,6 +40,11 @@ const THEME: DemoTheme = {
 const PHONE = "(516) 555-0148";
 const NAME = "Fresh Cut Lawn Co.";
 
+// ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
+// Put your hero photo in /public (e.g. /public/demos/lawncare-hero.jpg), then
+// set the path below. Leave "" to show the labeled placeholder instead.
+const firstLawnCareImage = "";
+
 const SERVICES = [
   { title: "Weekly mowing", copy: "Cut, trimmed, edged, blown clean. Same crew, same day every week, and the stripes stay straight." },
   { title: "Spring & fall cleanups", copy: "Leaves, branches, beds, and gutters cleared at ground level. One visit, done." },
@@ -77,6 +82,7 @@ export function LawnCareDemo() {
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" />
       <DemoHero
+        heroImage={firstLawnCareImage}
         eyebrow="Lawn care · Nassau County"
         line1="Your lawn,"
         line2="handled."

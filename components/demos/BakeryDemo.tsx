@@ -42,6 +42,11 @@ const THEME: DemoTheme = {
 const PHONE = "(631) 555-0173";
 const NAME = "Golden Hour Bakehouse";
 
+// ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
+// Put your hero photo in /public (e.g. /public/demos/bakery-hero.jpg), then
+// set the path below. Leave "" to show the labeled placeholder instead.
+const firstBakeryImage = "";
+
 const SERVICES = [
   { title: "Daily bread", copy: "Levain sourdough and seeded rye, 36-hour ferment, out of the oven at 7am. When it's gone, it's gone." },
   { title: "Morning pastry", copy: "Cardamom morning buns, croissants, and one very good cookie, baked in small batches every morning." },
@@ -79,6 +84,7 @@ export function BakeryDemo() {
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Order ahead" />
       <DemoHero
+        heroImage={firstBakeryImage}
         eyebrow="Bakery · Sayville"
         line1="Baked at 4am."
         line2="Gone by noon."
