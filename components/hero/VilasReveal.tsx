@@ -1,6 +1,11 @@
 "use client";
 
-import { AnimatePresence, LayoutGroup, motion } from "motion/react";
+import {
+  AnimatePresence,
+  LayoutGroup,
+  motion,
+  type Transition,
+} from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
 
@@ -24,10 +29,9 @@ const cV: Token = { id: "cV", char: "V", core: true };
 const cA: Token = { id: "cA", char: "A", core: true };
 const cL: Token = { id: "cL", char: "L", core: true };
 
-// The final VALIS → VILAS step swaps A and I. They keep the same ids (and dom
-// slots) across both phases; the swap is performed *visually* by orbiting them
-// around their shared midpoint — both travelling clockwise on one circle (see
-// `orbit`) — rather than by reordering, so the motion reads as a revolve.
+// The final VALIS → VILAS step swaps A and I. The DOM keeps the VALIS order;
+// at LAST they revolve around the centre on a transform (see `finalAnim`) and
+// settle in each other's slots, so the motion reads as a revolve, not a reorder.
 const swapI: Token = { id: "swapI", char: "I", core: false };
 const swapS: Token = { id: "swapS", char: "S", core: false };
 
@@ -55,8 +59,8 @@ function buildPhases(tour: TourWord[]): Token[][] {
   });
   phases.push([cV, cA, cL]); // VAL again
   phases.push([cV, cA, cL, swapI, swapS]); // VALIS  — A·I in source order
-  // VILAS — SAME dom order as VALIS; A and I are swapped visually by the orbit
-  // (both clockwise), not by reordering, so the slots stay measurable.
+  // LAST — same DOM order as VALIS; the reassembly (finalAnim) revolves A & I
+  // into the swapped slots on a transform, so this phase reads as VILAS.
   phases.push([cV, cA, cL, swapI, swapS]);
   return phases;
 }
@@ -97,25 +101,70 @@ export function VilasReveal({
   const boxRef = useRef<HTMLDivElement>(null);
   const dotted = SITE.domain.slice(SITE.domain.indexOf("."));
 
-  // The final swap: A and I orbit their shared midpoint, BOTH clockwise on one
-  // circle (radius = half the slot gap), each ending in the other's slot. We
-  // translate along the arc (no element rotation) so the glyphs stay upright.
-  // A sweeps over the top (φ: 180°→0°), I under the bottom (φ: 0°→-180°).
-  const orbit = (which: "A" | "I") => {
+  // ── Final reveal choreography (VALIS → VILAS) ───────────────────────────
+  // The word breaks apart and reassembles: V flies all the way out left, S all
+  // the way out right, L shrinks to a dot in the middle, and A & I revolve
+  // around that center (A over the top, I under the bottom) into each other's
+  // slots. As the revolution finishes, V/S/L spring back and everything lands
+  // as a normally-spaced VILAS. The DOM order stays VALIS; A & I just settle on
+  // a transform that lands them in the swapped slots, so there's no reflow and
+  // the read is "V I L A S" — every settle uses a bubbly overshoot.
+  const FINAL_DUR = 1.5; // seconds the break-apart-and-reassemble takes
+  const lin = (n: number) => Array.from({ length: n }, (_, i) => i / (n - 1));
+
+  // Half-circle arc for A / I around the shared center (the L slot). x/y are
+  // offsets from the letter's VALIS slot (where it currently sits), starting at
+  // 0 — so the hand-off from the previous phase has no jump — and ending one
+  // half-word over, in the OTHER letter's slot (A: slot1→slot3 over the top;
+  // I: slot3→slot1 under the bottom). The DOM order never changes, so there's
+  // no reflow flash; the swapped look is pure transform.
+  const arc = (which: "A" | "I") => {
     const R = dist / 2;
-    const STEPS = 13;
     const x: number[] = [];
     const y: number[] = [];
+    const STEPS = 13;
     for (let i = 0; i < STEPS; i++) {
       const t = i / (STEPS - 1);
-      const phi = which === "A" ? Math.PI * (1 - t) : -Math.PI * t;
-      x.push(R * Math.cos(phi) + (which === "A" ? R : -R));
-      y.push(-R * Math.sin(phi));
+      const phi = Math.PI * (which === "A" ? 1 - t : t);
+      if (which === "A") {
+        x.push(R * Math.cos(phi) + R); // 0 → +2R  (slot1 → slot3)
+        y.push(-R * Math.sin(phi) * 1.2); // up and over the top
+      } else {
+        x.push(R * Math.cos(phi) - R); // 0 → −2R  (slot3 → slot1)
+        y.push(R * Math.sin(phi) * 1.2); // down and under the bottom
+      }
     }
     return { x, y };
   };
-  const swapping = (id: string) =>
-    !reduced && phase === LAST && (id === "cA" || id === "swapI");
+
+  // Per-letter keyframes for the LAST phase. `dist` must be measured first; if
+  // it isn't, return null and the letters simply land in their resolved slots.
+  type FinalA = {
+    anim: { x?: number[]; y?: number[]; scale?: number[] };
+    times: number[];
+    ease: Record<string, string | string[]>;
+  };
+  const finalAnim = (id: string): FinalA | null => {
+    if (dist <= 0) return null;
+    const OUT = dist * 1.4; // how far V / S shoot off to the sides
+    const sideTimes = [0, 0.3, 0.62, 1];
+    const sideEase = ["easeOut", "easeInOut", "backOut"]; // bubbly snap home
+    if (id === "cV")
+      return { anim: { x: [0, -OUT, -OUT, 0] }, times: sideTimes, ease: { x: sideEase } };
+    if (id === "swapS")
+      return { anim: { x: [0, OUT, OUT, 0] }, times: sideTimes, ease: { x: sideEase } };
+    if (id === "cL")
+      return {
+        anim: { scale: [1, 0.12, 0.12, 1] },
+        times: sideTimes,
+        ease: { scale: ["easeIn", "easeInOut", "backOut"] },
+      };
+    if (id === "cA" || id === "swapI") {
+      const { x, y } = arc(id === "cA" ? "A" : "I");
+      return { anim: { x, y }, times: lin(x.length), ease: { x: "easeInOut", y: "easeInOut" } };
+    }
+    return null;
+  };
 
   // The three core nodes flash --accent while they tour the words (phases 1..6),
   // then settle to --ink on the final VILAS — so the *resolved* name stays
@@ -204,7 +253,7 @@ export function VilasReveal({
       timers.push(
         setTimeout(() => {
           if (!cancelled) setResolved(true);
-        }, acc + 1200 * k), // wait out the swap spin before the copy fades in
+        }, acc + FINAL_DUR * 1000 + 250), // wait out the reassembly before copy fades in
       );
     };
 
@@ -242,38 +291,49 @@ export function VilasReveal({
               style={{ fontSize: "clamp(3.5rem, 13vw, 10rem)" }}
             >
               <AnimatePresence mode="popLayout" initial={false}>
-                {(reduced ? RESOLVED : PHASES[phase]).map((t) => {
-                  const ov = swapping(t.id)
-                    ? orbit(t.id === "cA" ? "A" : "I")
-                    : null;
-                  return (
-                    <motion.span
-                      key={t.id}
-                      data-letter={t.id}
-                      layout={!swapping(t.id)}
-                      initial={{ opacity: 0 }}
-                      animate={{
-                        opacity: 1,
-                        color: colorFor(t),
-                        x: ov ? ov.x : 0,
-                        y: ov ? ov.y : 0,
-                      }}
-                      exit={{ opacity: 0 }}
-                      transition={{
-                        opacity: { duration: 0.7, ease: EASE },
-                        layout: { duration: TRAVEL, ease: EASE },
-                        // A & I trace the orbit a touch slower than a slot slide.
-                        x: { duration: TRAVEL * 1.3, ease: EASE },
-                        y: { duration: TRAVEL * 1.3, ease: EASE },
-                        color: { duration: 0.7, ease: EASE },
-                      }}
-                      className="inline-block"
-                      style={{ fontWeight: 500, transformOrigin: "center" }}
-                    >
-                      {t.char}
-                    </motion.span>
-                  );
-                })}
+                {(reduced ? RESOLVED : PHASES[phase]).map(
+                  (t) => {
+                    const final =
+                      !reduced && phase === LAST ? finalAnim(t.id) : null;
+                    const trans: Record<string, object> = {
+                      opacity: { duration: final ? 0.4 : 0.7, ease: EASE },
+                      color: { duration: 0.7, ease: EASE },
+                    };
+                    if (final) {
+                      for (const key of ["x", "y", "scale"] as const) {
+                        if (Array.isArray(final.anim[key]))
+                          trans[key] = {
+                            duration: FINAL_DUR,
+                            times: final.times,
+                            ease: final.ease[key] ?? "easeInOut",
+                          };
+                      }
+                    } else {
+                      trans.layout = { duration: TRAVEL, ease: EASE };
+                    }
+                    return (
+                      <motion.span
+                        key={t.id}
+                        data-letter={t.id}
+                        layout={phase !== LAST}
+                        initial={{ opacity: 0 }}
+                        animate={{
+                          opacity: 1,
+                          color: colorFor(t),
+                          x: final?.anim.x ?? 0,
+                          y: final?.anim.y ?? 0,
+                          scale: final?.anim.scale ?? 1,
+                        }}
+                        exit={{ opacity: 0 }}
+                        transition={trans as Transition}
+                        className="inline-block"
+                        style={{ fontWeight: 500, transformOrigin: "center" }}
+                      >
+                        {t.char}
+                      </motion.span>
+                    );
+                  },
+                )}
               </AnimatePresence>
             </div>
           </LayoutGroup>
