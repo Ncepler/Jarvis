@@ -48,8 +48,8 @@ const spaceMono = Space_Mono({
 
 // TODO(name): real OG image + favicon now that the name is Vilas
 export const metadata: Metadata = {
-  title: `${SITE.name} — web design studio, Long Island, NY`,
-  description: `A small web design studio on ${SITE.region}. We build websites for local businesses that look like they cost 10x more.`,
+  title: `${SITE.name} — web design studio for small businesses`,
+  description: `A small, fully remote web design studio. We build websites for businesses that look like they cost as much as a villa.`,
 };
 
 export default function RootLayout({

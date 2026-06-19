@@ -12,7 +12,7 @@ export const SITE = {
   tagline: "TAGLINE_TBD",
   email: "CONTACT_EMAIL_TBD",
   instagram: "INSTAGRAM_URL_TBD",
-  region: "Long Island, NY",
+  region: "United States", // studio is fully remote — works with businesses anywhere in the US
 } as const;
 
 // True while a SITE value is still a placeholder — components use this to
@@ -34,13 +34,13 @@ export const COPY = {
     process: { a: "How it works.", b: "Five steps, about a week." },
     why: { a: "Why people", b: "pick us." },
     sites: { a: "Every site,", b: "one tap away." },
-    about: { a: "A small studio.", b: "On your island." },
+    about: { a: "A small studio.", b: "Wherever you are." },
     faq: { a: "Fair questions.", b: "Straight answers." },
     contact: { a: "Start a project.", b: "It takes two minutes." },
   },
   hero: {
     positioning:
-      "Websites for local businesses that look like they cost 10x more.",
+      "Websites for businesses that look like they cost as much as a villa.",
     outcome:
       "People Google you before they hire you. What they find decides who gets the call.",
   },
@@ -65,8 +65,8 @@ export const COPY = {
   // counts — every line is true on day one.
   why: [
     {
-      title: "Long Island local",
-      body: "We're down the road. Same roads, same time zone, real meetings if you want them.",
+      title: "All online, no meetings",
+      body: "It all happens over email and the form — nothing to schedule, no in-person meetings. We work with businesses anywhere in the US.",
     },
     {
       title: "One flat price",
@@ -110,7 +110,7 @@ export const COPY = {
     ],
   },
   about: {
-    p1: `We're a small web studio on ${SITE.region.replace(", NY", "")}, building sites for the businesses around us: flower shops, landscapers, barbershops, contractors.`,
+    p1: "We're a small web studio building sites for local businesses across the US: flower shops, landscapers, barbershops, contractors.",
     p2: "Agencies charge thousands for this, and most of it pays for meetings. We charge a few hundred and spend it on the part you can actually see.",
     // the component appends the Instagram link (or a period) after this
     closer:

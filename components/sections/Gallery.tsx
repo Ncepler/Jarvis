@@ -181,6 +181,7 @@ function GalleryCard({
   index,
   x,
   step,
+  count,
   width,
   isActive,
   reduced,
@@ -190,17 +191,30 @@ function GalleryCard({
   index: number;
   x: MotionValue<number>;
   step: number;
+  count: number;
   width: number;
   isActive: boolean;
   reduced: boolean;
   onSelect: (index: number) => void;
 }) {
-  // 0 when centered, ±1 one slot away — drives the coverflow depth
-  const offset = useTransform(x, (v) =>
-    Math.min(Math.abs((v + index * step) / step), 1),
-  );
-  const scale = useTransform(offset, [0, 1], [1, 0.88]);
-  const opacity = useTransform(offset, [0, 1], [1, 0.45]);
+  // Infinite coverflow: each card carries its own wrapped slot offset from the
+  // current center (…-2,-1,0,1,2…), so as the row scrolls a card that leaves
+  // one edge re-enters from the other — the drag is unbounded and never "ends".
+  // Only ONE DOM node exists per slug, so the `layoutId` morph stays unique.
+  // d is the signed distance in slots, wrapped to [-count/2, count/2).
+  const d = useTransform(x, (v) => {
+    const center = -v / step;
+    let o = (((index - center) % count) + count) % count;
+    if (o > count / 2) o -= count;
+    return o;
+  });
+  const tx = useTransform(d, (o) => o * step);
+  const mag = useTransform(d, (o) => Math.min(Math.abs(o), 1));
+  const scale = useTransform(mag, [0, 1], [1, 0.88]);
+  const opacity = useTransform(mag, [0, 1], [1, 0.45]);
+  // hide the far cards so the wrap-around jump always happens off-screen
+  const display = useTransform(d, (o) => (Math.abs(o) > 2.6 ? "none" : "block"));
+  const zIndex = useTransform(mag, (m) => Math.round((1 - m) * 100));
 
   // hovering the centered card lifts + sharpens it with inertia — the Lusion
   // "the live one comes forward" beat. Neighbours stay quiet.
@@ -211,8 +225,16 @@ function GalleryCard({
     <motion.button
       type="button"
       aria-label={`${project.name}, ${project.category}, ${project.priceLabel}`}
-      className="relative shrink-0 cursor-pointer overflow-hidden border border-line bg-surface"
-      style={reduced ? { width } : { width, scale, opacity }}
+      className={
+        reduced
+          ? "relative shrink-0 cursor-pointer overflow-hidden border border-line bg-surface"
+          : "absolute left-1/2 top-0 cursor-pointer overflow-hidden border border-line bg-surface"
+      }
+      style={
+        reduced
+          ? { width }
+          : { width, marginLeft: -width / 2, x: tx, scale, opacity, display, zIndex }
+      }
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
       onTap={() => onSelect(index)}
@@ -418,16 +440,21 @@ export function Gallery() {
   const regionRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [containerW, setContainerW] = useState(0);
-  const [active, setActive] = useState(0);
   // which card has been opened into its full demo (null = row only, the
   // thumbnails are live mini-previews until you step inside one)
   const [openSlug, setOpenSlug] = useState<string | null>(null);
 
   const cardW = Math.min(containerW * 0.72, 480) || 340;
   const step = cardW + GAP;
-  const sidePad = Math.max((containerW - cardW) / 2, 24);
+  const count = projects.length;
+  // absolute-positioned coverflow needs an explicit row height (media 16:10 +
+  // the name/caption footer)
+  const rowHeight = Math.round(cardW * 0.625) + 108;
 
   const x = useMotionValue(0);
+  // current (unwrapped) virtual center index — the row scrolls forever, so this
+  // can run past the card count in either direction; kept so a resize re-centers
+  const virtualRef = useRef(0);
 
   // raw pointer position for the trailing "step inside →" cursor label
   const cursorX = useMotionValue(0);
@@ -438,7 +465,9 @@ export function Gallery() {
   // drag (not just on snap) so the backdrop and labels follow the scroll
   const [centerIdx, setCenterIdx] = useState(0);
   useMotionValueEvent(x, "change", (v) => {
-    const i = Math.max(0, Math.min(projects.length - 1, Math.round(-v / step)));
+    const virtual = Math.round(-v / step);
+    virtualRef.current = virtual;
+    const i = ((virtual % count) + count) % count;
     if (i !== centerIdx) setCenterIdx(i);
   });
 
@@ -460,19 +489,20 @@ export function Gallery() {
     return () => ro.disconnect();
   }, []);
 
-  // keep the active card centered when the container resizes
+  // keep the centered card centered when the container resizes
   useEffect(() => {
-    x.set(-active * step);
+    x.set(-virtualRef.current * step);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
+  // snap to a virtual (unbounded) slot — the row wraps, so there is no end to
+  // hit; the card nearest center after the wrap becomes active.
   const snapTo = useCallback(
-    (index: number) => {
-      const clamped = Math.max(0, Math.min(projects.length - 1, index));
-      setActive(clamped);
-      animate(x, -clamped * step, { duration: 0.6, ease: EASE });
+    (virtual: number) => {
+      virtualRef.current = virtual;
+      animate(x, -virtual * step, { duration: 0.6, ease: EASE });
     },
-    [projects.length, step, x],
+    [step, x],
   );
 
   // open the centered card INTO its live demo (the layoutId morph), then bring
@@ -506,23 +536,93 @@ export function Gallery() {
   const onSelect = useCallback(
     (index: number) => {
       if (dragging.current) return;
-      // a side card centers first; the centered card steps inside
-      if (index !== active) snapTo(index);
-      else openCard(index);
+      const vc = Math.round(-x.get() / step);
+      const centerMod = ((vc % count) + count) % count;
+      // the centered card steps inside; a side card centers its nearest
+      // instance first (it may live ahead of or behind the current center)
+      if (index === centerMod) openCard(index);
+      else snapTo(index + count * Math.round((vc - index) / count));
     },
-    [active, snapTo, openCard],
+    [snapTo, openCard, x, step, count],
+  );
+
+  // manual drag: we drive `x` ourselves so each card can self-position and wrap
+  // around infinitely. (Motion's built-in drag writes its own transform, which
+  // would double up with the per-card wrap math.)
+  const dragState = useRef<{
+    active: boolean;
+    startX: number;
+    startClient: number;
+    lastClient: number;
+    lastT: number;
+    v: number;
+    moved: boolean;
+    move?: (e: PointerEvent) => void;
+    up?: () => void;
+  }>({ active: false, startX: 0, startClient: 0, lastClient: 0, lastT: 0, v: 0, moved: false });
+
+  const startDrag = (e: React.PointerEvent) => {
+    if (reduced) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    const s = dragState.current;
+    s.active = true;
+    s.moved = false;
+    s.startX = x.get();
+    s.startClient = e.clientX;
+    s.lastClient = e.clientX;
+    s.lastT = performance.now();
+    s.v = 0;
+
+    const move = (ev: PointerEvent) => {
+      if (!s.active) return;
+      const dx = ev.clientX - s.startClient;
+      if (!s.moved && Math.abs(dx) > 4) {
+        s.moved = true;
+        dragging.current = true;
+        setOpenSlug(null); // browsing the row closes the open demo
+      }
+      x.set(s.startX + dx);
+      const now = performance.now();
+      const dt = now - s.lastT;
+      if (dt > 0) s.v = ((ev.clientX - s.lastClient) / dt) * 1000;
+      s.lastClient = ev.clientX;
+      s.lastT = now;
+    };
+    const up = () => {
+      s.active = false;
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      const predicted = x.get() + s.v * 0.2; // flick momentum
+      snapTo(Math.round(-predicted / step));
+      if (s.moved) setTimeout(() => (dragging.current = false), 60);
+    };
+    s.move = move;
+    s.up = up;
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
+
+  // clean up listeners if we unmount mid-drag
+  useEffect(
+    () => () => {
+      const s = dragState.current;
+      if (s.move) window.removeEventListener("pointermove", s.move);
+      if (s.up) window.removeEventListener("pointerup", s.up);
+    },
+    [],
   );
 
   const onKeyDown = (e: React.KeyboardEvent) => {
+    const vc = Math.round(-x.get() / step);
     if (e.key === "ArrowLeft") {
       e.preventDefault();
-      snapTo(active - 1);
+      snapTo(vc - 1);
     } else if (e.key === "ArrowRight") {
       e.preventDefault();
-      snapTo(active + 1);
+      snapTo(vc + 1);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      openCard(active);
+      openCard(centerIdx);
     } else if (e.key === "Escape" && openSlug) {
       e.preventDefault();
       closeCard();
@@ -604,6 +704,7 @@ export function Gallery() {
                 index={i}
                 x={x}
                 step={step}
+                count={count}
                 width={cardW}
                 isActive
                 reduced
@@ -618,8 +719,10 @@ export function Gallery() {
           tabIndex={0}
           role="group"
           aria-label="Portfolio gallery. Drag or use arrow keys to browse; the centered site opens below."
-          className={`relative mt-16 ${canHover ? "md:cursor-none" : ""}`}
+          className={`relative mt-16 touch-pan-y select-none ${canHover ? "md:cursor-none" : ""}`}
+          style={{ height: rowHeight }}
           onKeyDown={onKeyDown}
+          onPointerDown={startDrag}
           onPointerMove={(e) => {
             cursorX.set(e.clientX);
             cursorY.set(e.clientY);
@@ -629,39 +732,20 @@ export function Gallery() {
           }}
           onPointerLeave={() => setCursorOn(false)}
         >
-          <motion.div
-            className="flex items-start"
-            style={{ x, gap: GAP, paddingLeft: sidePad, paddingRight: sidePad }}
-            drag="x"
-            dragConstraints={{ left: -(projects.length - 1) * step, right: 0 }}
-            dragElastic={0.08}
-            dragMomentum={false}
-            onDragStart={() => {
-              dragging.current = true;
-              setOpenSlug(null); // browsing the row closes the open demo
-            }}
-            onDragEnd={(_, info) => {
-              const predicted = -(x.get() + info.velocity.x * 0.25);
-              snapTo(Math.round(predicted / step));
-              setTimeout(() => {
-                dragging.current = false;
-              }, 80);
-            }}
-          >
-            {projects.map((p, i) => (
-              <GalleryCard
-                key={p.slug}
-                project={p}
-                index={i}
-                x={x}
-                step={step}
-                width={cardW}
-                isActive={i === centerIdx}
-                reduced={false}
-                onSelect={onSelect}
-              />
-            ))}
-          </motion.div>
+          {projects.map((p, i) => (
+            <GalleryCard
+              key={p.slug}
+              project={p}
+              index={i}
+              x={x}
+              step={step}
+              count={count}
+              width={cardW}
+              isActive={i === centerIdx}
+              reduced={false}
+              onSelect={onSelect}
+            />
+          ))}
         </div>
       )}
 

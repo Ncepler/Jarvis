@@ -24,10 +24,10 @@ const cV: Token = { id: "cV", char: "V", core: true };
 const cA: Token = { id: "cA", char: "A", core: true };
 const cL: Token = { id: "cL", char: "L", core: true };
 
-// The final VALIS → VILAS step is a real position swap: A and I trade slots.
-// Keep them (and the static S) as persistent nodes across both phases — same
-// ids — so they FLIP-travel instead of crossfading, and the A and I can spin
-// past each other (see `spinFor`) for the circular switch.
+// The final VALIS → VILAS step swaps A and I. They keep the same ids (and dom
+// slots) across both phases; the swap is performed *visually* by orbiting them
+// around their shared midpoint — both travelling clockwise on one circle (see
+// `orbit`) — rather than by reordering, so the motion reads as a revolve.
 const swapI: Token = { id: "swapI", char: "I", core: false };
 const swapS: Token = { id: "swapS", char: "S", core: false };
 
@@ -55,11 +55,16 @@ function buildPhases(tour: TourWord[]): Token[][] {
   });
   phases.push([cV, cA, cL]); // VAL again
   phases.push([cV, cA, cL, swapI, swapS]); // VALIS  — A·I in source order
-  phases.push([cV, swapI, cL, cA, swapS]); // VILAS — A & I swap slots (spin)
+  // VILAS — SAME dom order as VALIS; A and I are swapped visually by the orbit
+  // (both clockwise), not by reordering, so the slots stay measurable.
+  phases.push([cV, cA, cL, swapI, swapS]);
   return phases;
 }
 
 const PHASES = buildPhases(TOUR);
+// Correct final order (A & I in their VILAS slots), used for reduced motion /
+// SSR where the orbit never runs.
+const RESOLVED: Token[] = [cV, swapI, cL, cA, swapS];
 const LAST = PHASES.length - 1;
 // ms a phase holds before advancing (index = the phase being left). Slow, with a
 // full ~1.3s beat on each tour word so each one actually lands before it moves.
@@ -84,16 +89,33 @@ export function VilasReveal({
 }) {
   const [phase, setPhase] = useState(0);
   const [resolved, setResolved] = useState(true); // SSR / no-JS: render resolved
+  const [reduced, setReduced] = useState(false);
   const [scale, setScale] = useState(1);
+  // horizontal gap between the A and I slot centers — the swap's orbit diameter
+  const [dist, setDist] = useState(0);
   const rowRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const dotted = SITE.domain.slice(SITE.domain.indexOf("."));
 
-  // On the final VALIS → VILAS swap, the A and I rotate a full turn (opposite
-  // directions) as they trade slots — a circular switch that lands upright.
-  // Quiet (0) in every other phase, so only the swap spins.
-  const spinFor = (id: string) =>
-    phase !== LAST ? 0 : id === "cA" ? 360 : id === "swapI" ? -360 : 0;
+  // The final swap: A and I orbit their shared midpoint, BOTH clockwise on one
+  // circle (radius = half the slot gap), each ending in the other's slot. We
+  // translate along the arc (no element rotation) so the glyphs stay upright.
+  // A sweeps over the top (φ: 180°→0°), I under the bottom (φ: 0°→-180°).
+  const orbit = (which: "A" | "I") => {
+    const R = dist / 2;
+    const STEPS = 13;
+    const x: number[] = [];
+    const y: number[] = [];
+    for (let i = 0; i < STEPS; i++) {
+      const t = i / (STEPS - 1);
+      const phi = which === "A" ? Math.PI * (1 - t) : -Math.PI * t;
+      x.push(R * Math.cos(phi) + (which === "A" ? R : -R));
+      y.push(-R * Math.sin(phi));
+    }
+    return { x, y };
+  };
+  const swapping = (id: string) =>
+    !reduced && phase === LAST && (id === "cA" || id === "swapI");
 
   // The three core nodes flash --accent while they tour the words (phases 1..6),
   // then settle to --ink on the final VILAS — so the *resolved* name stays
@@ -117,6 +139,18 @@ export function VilasReveal({
       const natural = row.scrollWidth; // layout width — ignores the transform
       const avail = box.clientWidth - 16;
       setScale(natural > 0 ? Math.min(1, avail / natural) : 1);
+      // once the A and I are in their VALIS slots, measure the gap between their
+      // centers (layout coords, pre-transform) — the orbit diameter
+      if (phase >= LAST - 1) {
+        const a = row.querySelector<HTMLElement>('[data-letter="cA"]');
+        const i = row.querySelector<HTMLElement>('[data-letter="swapI"]');
+        if (a && i) {
+          const ca = a.offsetLeft + a.offsetWidth / 2;
+          const ci = i.offsetLeft + i.offsetWidth / 2;
+          const d = Math.abs(ci - ca);
+          if (d > 0) setDist(d);
+        }
+      }
     };
     measure();
     window.addEventListener("resize", measure);
@@ -126,6 +160,7 @@ export function VilasReveal({
   // The timed sequence — skippable, plays once, never gates the page.
   useEffect(() => {
     if (prefersReduced()) {
+      setReduced(true);
       setPhase(LAST);
       setResolved(true);
       return;
@@ -207,30 +242,38 @@ export function VilasReveal({
               style={{ fontSize: "clamp(3.5rem, 13vw, 10rem)" }}
             >
               <AnimatePresence mode="popLayout" initial={false}>
-                {PHASES[phase].map((t) => (
-                  <motion.span
-                    key={t.id}
-                    layout
-                    initial={{ opacity: 0, rotate: 0 }}
-                    animate={{
-                      opacity: 1,
-                      rotate: spinFor(t.id),
-                      color: colorFor(t),
-                    }}
-                    exit={{ opacity: 0 }}
-                    transition={{
-                      opacity: { duration: 0.7, ease: EASE },
-                      // The slide / rearrange + the swap spin share the slow beat.
-                      layout: { duration: TRAVEL, ease: EASE },
-                      rotate: { duration: TRAVEL, ease: EASE },
-                      color: { duration: 0.7, ease: EASE },
-                    }}
-                    className="inline-block"
-                    style={{ fontWeight: 500, transformOrigin: "center" }}
-                  >
-                    {t.char}
-                  </motion.span>
-                ))}
+                {(reduced ? RESOLVED : PHASES[phase]).map((t) => {
+                  const ov = swapping(t.id)
+                    ? orbit(t.id === "cA" ? "A" : "I")
+                    : null;
+                  return (
+                    <motion.span
+                      key={t.id}
+                      data-letter={t.id}
+                      layout={!swapping(t.id)}
+                      initial={{ opacity: 0 }}
+                      animate={{
+                        opacity: 1,
+                        color: colorFor(t),
+                        x: ov ? ov.x : 0,
+                        y: ov ? ov.y : 0,
+                      }}
+                      exit={{ opacity: 0 }}
+                      transition={{
+                        opacity: { duration: 0.7, ease: EASE },
+                        layout: { duration: TRAVEL, ease: EASE },
+                        // A & I trace the orbit a touch slower than a slot slide.
+                        x: { duration: TRAVEL * 1.3, ease: EASE },
+                        y: { duration: TRAVEL * 1.3, ease: EASE },
+                        color: { duration: 0.7, ease: EASE },
+                      }}
+                      className="inline-block"
+                      style={{ fontWeight: 500, transformOrigin: "center" }}
+                    >
+                      {t.char}
+                    </motion.span>
+                  );
+                })}
               </AnimatePresence>
             </div>
           </LayoutGroup>
