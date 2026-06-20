@@ -145,7 +145,7 @@ export function PinnedLogo() {
             type="button"
             aria-label={`About ${SITE.founder}`}
             onClick={() => setOpen(true)}
-            className="block cursor-pointer text-ink/35 transition-colors duration-300 hover:text-ink/70"
+            className="block cursor-pointer opacity-35 transition-opacity duration-300 hover:opacity-70"
             initial={reduced ? { opacity: 0 } : undefined}
             animate={reduced ? { opacity: 1 } : undefined}
             exit={reduced ? { opacity: 0 } : undefined}

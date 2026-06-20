@@ -22,7 +22,6 @@ import { orderedProjects, type Project } from "@/lib/projects";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const GAP = 24;
-const DEMO_DESIGN_W = 1280; // inline demos are laid out at this width, then scaled
 
 // The Lusion-style cursor label: a "step inside →" pill that trails the
 // pointer with spring inertia while it's over the draggable row. Hover-only,
@@ -56,48 +55,16 @@ function StepInsideCursor({
   );
 }
 
-// The real demo component scaled down to fit a container — a live
-// thumbnail, not a screenshot.
-function DemoScaled({
-  slug,
-  width,
-}: {
-  slug: string;
-  width: number;
-}) {
-  const Demo = demos[slug];
-  if (!Demo || width <= 0) return null;
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 overflow-hidden"
-    >
-      <div
-        style={{
-          width: DEMO_DESIGN_W,
-          transform: `scale(${width / DEMO_DESIGN_W})`,
-          transformOrigin: "top left",
-        }}
-      >
-        <Demo />
-      </div>
-    </div>
-  );
-}
-
-// What the card shows in the row.
+// What the card shows in the row — a fast static thumbnail (the demo's hero
+// image), NOT a live mini-render. Mounting all 7 full demos at once was the
+// "takes a second to load" lag; the live homepage now mounts only on open.
 function CardFace({
   project,
-  width,
   sizes,
 }: {
   project: Project;
-  width: number;
   sizes: string;
 }) {
-  if (demos[project.slug]) {
-    return <DemoScaled slug={project.slug} width={width} />;
-  }
   if (!project.screenshot) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-surface">
@@ -239,13 +206,9 @@ function GalleryCard({
       onHoverEnd={() => setHovered(false)}
       onTap={() => onSelect(index)}
     >
-      {/* layoutId lives on the OUTER media box so it can FLIP-morph into the
-          open demo panel; the hover lift/sharpen rides an INNER element so its
-          transform never fights the layout animation */}
-      <motion.div
-        layoutId={reduced ? undefined : `demo-${project.slug}`}
-        className="relative aspect-[16/10] overflow-hidden"
-      >
+      {/* static thumbnail box; the hover lift/sharpen rides an INNER element.
+          Opening no longer morphs this box — the live demo slides in below. */}
+      <div className="relative aspect-[16/10] overflow-hidden">
         <motion.div
           className="absolute inset-0"
           initial={false}
@@ -259,11 +222,10 @@ function GalleryCard({
         >
           <CardFace
             project={project}
-            width={width}
             sizes="(max-width: 768px) 72vw, 480px"
           />
         </motion.div>
-      </motion.div>
+      </div>
       {/* category, name + price, caption — slide in a beat after the card
           settles into the center (Axel "Recent work" anatomy) */}
       <motion.div
@@ -291,12 +253,12 @@ function GalleryCard({
   );
 }
 
-// The opened card's homepage. Clicking the centered card morphs that card's
-// media box (shared `layoutId`) into this panel — the card literally expands
-// into the live, interactive demo (brief #1, supersedes the 2026-06-11
-// always-on panel). It stays physically in the page flow (no floating window,
-// §6.3): the visitor scrolls our page straight through it. Source order:
-// registered demo (inline, no iframe) → mirrored copy → live iframe → capture.
+// The opened card's homepage. Clicking the centered card slides this panel up
+// into the page below the row — the live, interactive demo mounts here (and
+// ONLY here, so the row stays light). It stays physically in the page flow (no
+// floating window, §6.3): the visitor scrolls our page straight through it.
+// Source order: registered demo (inline, no iframe) → mirror → live iframe →
+// capture.
 function HomepagePanel({
   project,
   reduced,
@@ -318,16 +280,20 @@ function HomepagePanel({
       : { duration: 0.4, delay: 0.3 + i * 0.07, ease: EASE };
 
   return (
-    // opacity only on the wrapper — the morph itself rides the layoutId box
-    // below, so no transform here that would fight the FLIP
+    // the whole panel slides up into place like a drawer pulling open
+    // (Noah 2026-06-20 — replaced the tall layoutId FLIP morph)
     <motion.div
       role="region"
       aria-label={`${project.name} homepage`}
       className="w-full"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.16 } }}
-      transition={reduced ? { duration: 0.2 } : { duration: 0.4, ease: EASE }}
+      initial={reduced ? { opacity: 0 } : { opacity: 0, y: 56 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{
+        opacity: 0,
+        y: reduced ? 0 : 24,
+        transition: { duration: 0.2, ease: EASE },
+      }}
+      transition={reduced ? { duration: 0.2 } : { duration: 0.55, ease: EASE }}
     >
       <div className="border-y border-line bg-surface">
         <div className="mx-auto flex max-w-6xl flex-wrap items-baseline gap-x-6 gap-y-2 px-6 py-4 md:px-10">
@@ -402,11 +368,7 @@ function HomepagePanel({
       {/* slim gutter of our own bg + hairline around the homepage — a quiet
           reminder you're browsing it from inside this site (Noah 2026-06-11) */}
       <div className="border-b border-line bg-bg p-3 md:px-6 md:py-5">
-        <motion.div
-          layoutId={reduced ? undefined : `demo-${project.slug}`}
-          className="overflow-hidden border border-line bg-surface"
-          transition={{ duration: 0.5, ease: EASE }}
-        >
+        <div className="overflow-hidden border border-line bg-surface">
           {Demo ? (
             // our own build — the homepage IS part of this page, no iframe
             <Demo />
@@ -426,7 +388,7 @@ function HomepagePanel({
               Preview unavailable
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
     </motion.div>
   );
@@ -440,8 +402,8 @@ export function Gallery() {
   const regionRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [containerW, setContainerW] = useState(0);
-  // which card has been opened into its full demo (null = row only, the
-  // thumbnails are live mini-previews until you step inside one)
+  // which card has been opened into its full demo (null = row only; the
+  // thumbnails are static hero images until you step inside one)
   const [openSlug, setOpenSlug] = useState<string | null>(null);
 
   const cardW = Math.min(containerW * 0.72, 480) || 340;
@@ -505,9 +467,9 @@ export function Gallery() {
     [step, x],
   );
 
-  // open the centered card INTO its live demo (the layoutId morph), then bring
-  // the panel into view if it isn't already. block:"nearest" + a short delay
-  // keeps the smooth-scroll from fighting the FLIP measurement.
+  // open the centered card: mount its live demo in the panel below, which
+  // slides up, then bring it into view. the short delay lets the panel mount
+  // before we scroll to it.
   const openCard = useCallback(
     (index: number) => {
       const p = projects[index];
@@ -673,7 +635,7 @@ export function Gallery() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.8, ease: EASE }}
             >
-              {backdrop.screenshot ? (
+              {backdrop.screenshot && (
                 <Image
                   src={backdrop.screenshot}
                   alt=""
@@ -681,10 +643,6 @@ export function Gallery() {
                   sizes="100vw"
                   className="object-cover object-top opacity-25"
                 />
-              ) : (
-                <div className="absolute inset-0 opacity-25">
-                  <DemoScaled slug={backdrop.slug} width={containerW} />
-                </div>
               )}
             </motion.div>
           </AnimatePresence>
@@ -774,8 +732,8 @@ export function Gallery() {
         </div>
       )}
 
-      {/* no mode="wait": the panel must mount on the SAME commit as the card
-          click so Motion can FLIP the shared layoutId box into it */}
+      {/* mode="wait" would delay the slide-in; let the panel mount immediately
+          and animate its own entrance */}
       <div ref={panelRef} className="relative mt-12 scroll-mt-6">
         <AnimatePresence initial={false}>
           {openProject ? (

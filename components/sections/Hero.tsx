@@ -4,7 +4,10 @@ import { HeroVideo } from "./HeroVideo";
 
 export function Hero() {
   return (
-    <section className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden px-6">
+    <section
+      id="top"
+      className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden px-6"
+    >
       {/* one flat field behind the wordmark; the video slot stays wired */}
       <HeroVideo />
 

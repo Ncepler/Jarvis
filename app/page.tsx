@@ -1,6 +1,7 @@
 import { Footer } from "@/components/Footer";
 import { Marquee } from "@/components/Marquee";
 import { PinnedLogo } from "@/components/PinnedLogo";
+import { SiteHeader } from "@/components/SiteHeader";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { About } from "@/components/sections/About";
 import { AllSites } from "@/components/sections/AllSites";
@@ -23,6 +24,7 @@ export default function Home() {
   return (
     <>
       <SmoothScroll />
+      <SiteHeader />
       <PinnedLogo />
       <main>
         <Hero />

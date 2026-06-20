@@ -1,7 +1,7 @@
-# HANDOFF — updated 2026-06-20 (v27)
+# HANDOFF — updated 2026-06-20 (v28)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v27.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v28.
 - Page order (Stage 1, intact): Hero → Marquee → Services → Gallery → FullBleed → HowItWorks → ValueProps → AllSites → About → Faq → ClosingCta → Contact → Footer.
 - 7 inline demos in `components/demos/`, registered by slug in `index.ts`, shown in the gallery (`lib/projects.ts`). Shared primitives in `system.tsx`.
 
@@ -12,8 +12,13 @@
 - **v25–v26 — opening reveal end rebuilt** (`VilasReveal.tsx`). The old A/I orbit swap didn't read and its end frame was off (transform-swap can't match because A and I have different glyph widths). Now: at the final beat **V flies out left, S out right, L shrinks to a dot, A & I revolve around center** (A over top, I under bottom) into each other's slots, then V/S/L **spring back with a `backOut` overshoot**. At LAST we render the real VILAS order (`RESOLVED`) with all transforms settling to **zero**, so the **ending frame is pixel-identical to the opening frame.** Added a **Replay button** (mono label + spinning circular-arrow icon) under the CTA that re-runs the reveal from frame 0 via a `runKey`-keyed effect. Dials: `OUT = dist*1.4`, `FINAL_DUR = 1.5s`, the `backOut` eases.
 - **v27 — gallery first-load flash fixed** (`Gallery.tsx`). All 7 demo cards render their full markup in SSR; before hydration the motion-value transforms that position them into the coverflow (and `display:none` the off-screen ones) aren't applied, so they briefly piled up visibly then snapped away. Fix: the coverflow row wrapper now ships `opacity:0` whenever `containerW === 0` (true through SSR + first client render → no hydration mismatch), fading in once measured. Verified the SSR HTML carries `opacity:0` on the `role="group"` row.
 
+## v28 — real logo everywhere + gallery load fix + slide-in open (this run, Noah's 3 asks)
+- **Logo is now Noah's real mark, used site-wide.** Source `public/vilasLogo.jpg` is a 1254² PNG (dark disc + cream V, solid white bg). Generated `public/vilas-mark.webp` from it via sharp (trim white → square → circle alpha-mask → transparent corners). `Logo.tsx` now renders that webp (was a placeholder SVG circle). New `components/SiteHeader.tsx` = fixed top-left mark, present on the WHOLE page (`app/page.tsx`), `href="#top"` (added `id="top"` to Hero). **Mark-only on purpose:** the cream V still reads over the dark FullBleed band / dark demo panels; a wordmark in `text-ink` would vanish there. Footer brand now leads with the mark. PinnedLogo (gallery watermark/founder card) repointed to opacity dimming (the old `text-ink/35` did nothing to an `<img>`).
+- **Gallery load lag fixed (root cause).** The row was mounting all 7 FULL demo components at once (live thumbnails + live backdrop) — that was the "takes a second to load." Now cards show a **static hero image** (`screenshot` on each project → `/previews/first<Niche>Image.webp`); the live `<Demo/>` mounts **only in the open panel**. Removed `DemoScaled` + `DEMO_DESIGN_W`. Backdrop now always uses the static image.
+- **Open interaction is now a slide-in, not the tall layoutId FLIP.** Removed the shared `layoutId` from the card media box AND the panel box (the FLIP was animating a full-homepage-height box — the thing flagged for Noah's eyes). The `HomepagePanel` now slides up into place (`y:56→0` + fade, 0.55s) like a drawer. Reduced motion = plain fade. Staggered header text unchanged.
+
 ## In progress
-- Nothing half-finished. v27 is complete and pushed.
+- Nothing half-finished. v28 is complete and pushed.
 
 ## Next up (ordered)
 1. **Noah: eyes on the live URL** — judge (a) the five new demo moods + Syne, (b) the hero photos in each demo, (c) the rebuilt reveal feel: overshoot punch, how far V/S travel, the Replay button + icon spin, and that the end frame == start frame, (d) that the gallery no longer flashes stacked demos on load.

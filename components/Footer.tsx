@@ -1,3 +1,4 @@
+import { Logo } from "@/components/Logo";
 import { COPY, SITE, isTBD } from "@/lib/site";
 import { VERSION } from "@/lib/version";
 
@@ -17,7 +18,10 @@ export function Footer() {
     <footer className="border-t border-line px-6 py-16 text-sm md:px-10">
       <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
-          <span className="font-display text-2xl text-ink">{SITE.name}</span>
+          <span className="flex items-center gap-2.5">
+            <Logo size={28} />
+            <span className="font-display text-2xl text-ink">{SITE.name}</span>
+          </span>
           <p className="mt-3 max-w-xs text-muted leading-relaxed">
             {COPY.hero.positioning}
           </p>
