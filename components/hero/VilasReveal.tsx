@@ -29,9 +29,10 @@ const cV: Token = { id: "cV", char: "V", core: true };
 const cA: Token = { id: "cA", char: "A", core: true };
 const cL: Token = { id: "cL", char: "L", core: true };
 
-// The final VALIS → VILAS step swaps A and I. The DOM keeps the VALIS order;
-// at LAST they revolve around the centre on a transform (see `finalAnim`) and
-// settle in each other's slots, so the motion reads as a revolve, not a reorder.
+// The final VALIS → VILAS step swaps A and I. At LAST we render the real VILAS
+// order (RESOLVED); the keyframes start each at the other's slot and revolve it
+// home (see `finalAnim`), so the motion reads as a revolve and the rest frame
+// is the true word — identical to the opening frame.
 const swapI: Token = { id: "swapI", char: "I", core: false };
 const swapS: Token = { id: "swapS", char: "S", core: false };
 
@@ -59,8 +60,8 @@ function buildPhases(tour: TourWord[]): Token[][] {
   });
   phases.push([cV, cA, cL]); // VAL again
   phases.push([cV, cA, cL, swapI, swapS]); // VALIS  — A·I in source order
-  // LAST — same DOM order as VALIS; the reassembly (finalAnim) revolves A & I
-  // into the swapped slots on a transform, so this phase reads as VILAS.
+  // LAST — triggers the reassembly. We render RESOLVED (real VILAS order) here,
+  // not this array; it's kept so VALIS holds for one beat before the final move.
   phases.push([cV, cA, cL, swapI, swapS]);
   return phases;
 }
@@ -97,6 +98,9 @@ export function VilasReveal({
   const [scale, setScale] = useState(1);
   // horizontal gap between the A and I slot centers — the swap's orbit diameter
   const [dist, setDist] = useState(0);
+  // bump to replay the whole reveal from the top; spin drives the button icon
+  const [runKey, setRunKey] = useState(0);
+  const [spin, setSpin] = useState(0);
   const rowRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const dotted = SITE.domain.slice(SITE.domain.indexOf("."));
@@ -105,19 +109,19 @@ export function VilasReveal({
   // The word breaks apart and reassembles: V flies all the way out left, S all
   // the way out right, L shrinks to a dot in the middle, and A & I revolve
   // around that center (A over the top, I under the bottom) into each other's
-  // slots. As the revolution finishes, V/S/L spring back and everything lands
-  // as a normally-spaced VILAS. The DOM order stays VALIS; A & I just settle on
-  // a transform that lands them in the swapped slots, so there's no reflow and
-  // the read is "V I L A S" — every settle uses a bubbly overshoot.
+  // slots. As the revolution finishes, V/S/L spring back with a bubbly
+  // overshoot and everything lands as a normally-spaced VILAS. At LAST we render
+  // the real VILAS order (RESOLVED) with every transform settling to zero, so
+  // the ending frame is pixel-identical to the opening VILAS frame.
   const FINAL_DUR = 1.5; // seconds the break-apart-and-reassemble takes
   const lin = (n: number) => Array.from({ length: n }, (_, i) => i / (n - 1));
 
-  // Half-circle arc for A / I around the shared center (the L slot). x/y are
-  // offsets from the letter's VALIS slot (where it currently sits), starting at
-  // 0 — so the hand-off from the previous phase has no jump — and ending one
-  // half-word over, in the OTHER letter's slot (A: slot1→slot3 over the top;
-  // I: slot3→slot1 under the bottom). The DOM order never changes, so there's
-  // no reflow flash; the swapped look is pure transform.
+  // Half-circle arc for A / I around the shared center (the L slot). At LAST we
+  // render the real VILAS order (RESOLVED), so each letter's REST position is
+  // its true slot (offset 0) — that guarantees the ending frame is pixel-for-
+  // pixel the starting frame. The keyframes START at the other letter's slot
+  // (where it sat in VALIS) and revolve home: A from the left (slot1) over the
+  // top, I from the right (slot3) under the bottom, both ending at offset 0.
   const arc = (which: "A" | "I") => {
     const R = dist / 2;
     const x: number[] = [];
@@ -127,10 +131,10 @@ export function VilasReveal({
       const t = i / (STEPS - 1);
       const phi = Math.PI * (which === "A" ? 1 - t : t);
       if (which === "A") {
-        x.push(R * Math.cos(phi) + R); // 0 → +2R  (slot1 → slot3)
+        x.push(R * Math.cos(phi) - R); // −2R → 0  (starts left, lands home)
         y.push(-R * Math.sin(phi) * 1.2); // up and over the top
       } else {
-        x.push(R * Math.cos(phi) - R); // 0 → −2R  (slot3 → slot1)
+        x.push(R * Math.cos(phi) + R); // +2R → 0  (starts right, lands home)
         y.push(R * Math.sin(phi) * 1.2); // down and under the bottom
       }
     }
@@ -206,7 +210,8 @@ export function VilasReveal({
     return () => window.removeEventListener("resize", measure);
   }, [phase]);
 
-  // The timed sequence — skippable, plays once, never gates the page.
+  // The timed sequence — skippable, never gates the page. Re-runs whenever
+  // `runKey` changes (the replay button), resetting to the first frame.
   useEffect(() => {
     if (prefersReduced()) {
       setReduced(true);
@@ -214,6 +219,8 @@ export function VilasReveal({
       setResolved(true);
       return;
     }
+    setPhase(0); // back to the opening frame on every (re)run
+    setResolved(false);
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
     const opts: AddEventListenerOptions = { passive: true };
@@ -268,7 +275,14 @@ export function VilasReveal({
       timers.forEach(clearTimeout);
       detach();
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [runKey]);
+
+  // Replay: spin the icon and re-run the sequence from the opening frame.
+  const replay = () => {
+    setSpin((s) => s + 1);
+    setRunKey((k) => k + 1);
+  };
 
   return (
     <div className="relative flex w-full flex-col items-center text-center">
@@ -291,7 +305,7 @@ export function VilasReveal({
               style={{ fontSize: "clamp(3.5rem, 13vw, 10rem)" }}
             >
               <AnimatePresence mode="popLayout" initial={false}>
-                {(reduced ? RESOLVED : PHASES[phase]).map(
+                {(reduced || phase === LAST ? RESOLVED : PHASES[phase]).map(
                   (t) => {
                     const final =
                       !reduced && phase === LAST ? finalAnim(t.id) : null;
@@ -363,6 +377,33 @@ export function VilasReveal({
         >
           {ctaLabel}
         </a>
+
+        <div className="mt-10 flex justify-center">
+          <button
+            type="button"
+            onClick={replay}
+            aria-label="Replay the intro animation"
+            className="press group inline-flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted transition-colors hover:text-accent"
+          >
+            <motion.svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+              animate={{ rotate: spin * -360 }}
+              transition={{ duration: 0.7, ease: EASE }}
+            >
+              <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+              <path d="M21 3v6h-6" />
+            </motion.svg>
+            Replay
+          </button>
+        </div>
       </div>
     </div>
   );
