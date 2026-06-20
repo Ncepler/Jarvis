@@ -736,7 +736,16 @@ export function Gallery() {
           role="group"
           aria-label="Portfolio gallery. Drag or use arrow keys to browse; the centered site opens below."
           className={`relative mt-16 touch-pan-y select-none ${canHover ? "md:cursor-none" : ""}`}
-          style={{ height: rowHeight }}
+          // The cards are positioned by motion values that only apply after
+          // hydration + the first width measure; until then they'd pile up at
+          // the row's origin (a visible flash of stacked demos). containerW is 0
+          // through SSR, so this ships opacity:0 in the HTML and fades the row in
+          // once it's actually measured and laid out.
+          style={{
+            height: rowHeight,
+            opacity: containerW > 0 ? 1 : 0,
+            transition: "opacity 0.45s ease",
+          }}
           onKeyDown={onKeyDown}
           onPointerDown={startDrag}
           onPointerMove={(e) => {
