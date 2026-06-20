@@ -1,7 +1,7 @@
-# HANDOFF — updated 2026-06-20 (v28)
+# HANDOFF — updated 2026-06-20 (v29)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v28.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v29.
 - Page order (Stage 1, intact): Hero → Marquee → Services → Gallery → FullBleed → HowItWorks → ValueProps → AllSites → About → Faq → ClosingCta → Contact → Footer.
 - 7 inline demos in `components/demos/`, registered by slug in `index.ts`, shown in the gallery (`lib/projects.ts`). Shared primitives in `system.tsx`.
 
@@ -17,8 +17,13 @@
 - **Gallery load lag fixed (root cause).** The row was mounting all 7 FULL demo components at once (live thumbnails + live backdrop) — that was the "takes a second to load." Now cards show a **static hero image** (`screenshot` on each project → `/previews/first<Niche>Image.webp`); the live `<Demo/>` mounts **only in the open panel**. Removed `DemoScaled` + `DEMO_DESIGN_W`. Backdrop now always uses the static image.
 - **Open interaction is now a slide-in, not the tall layoutId FLIP.** Removed the shared `layoutId` from the card media box AND the panel box (the FLIP was animating a full-homepage-height box — the thing flagged for Noah's eyes). The `HomepagePanel` now slides up into place (`y:56→0` + fade, 0.55s) like a drawer. Reduced motion = plain fade. Staggered header text unchanged.
 
+## v29 — one persistent logo + seamless marquees (Noah's 2 asks)
+- **Dropped the top-left SiteHeader** (deleted the file + removed from `app/page.tsx`). The brand mark is now ONLY the **bottom-left PinnedLogo**, and it shows **the entire time** (removed the gallery IntersectionObserver gating + the close-on-scroll-away). Still `sm:block` (hidden on phones so it can't crowd the gallery cards) and still click-to-open the founder card. NB this overrides CLAUDE.md §6.4 "gallery-only" — Noah's call.
+- **Marquees now loop seamlessly at ANY width.** Both the hero `Marquee` and every demo `DemoMarquee` measured one copy of the row vs the container and rendered exactly enough copies to overfill it, sliding by one copy width. Short term lists (barber/lawncare/etc = 5 words ≈ 1460px for 2 copies) used to run out and gap/reset on a wide monitor before looping — that was the "carousels not infinite." Hero marquee: rAF + `wrap(-rowW,0)` in px, `copies = ceil(viewport/rowW)+1`. DemoMarquee: CSS keyframe to `translateX(calc(-1*var(--mq-w)))` with measured `--mq-w`/`--mq-dur`, same copy count.
+- **Gallery coverflow was already infinite** (per-card wrapped-offset drag) — left as-is. If Noah meant that one specifically, re-check, but mechanically it loops.
+
 ## In progress
-- Nothing half-finished. v28 is complete and pushed.
+- Nothing half-finished. v29 is complete and pushed.
 
 ## Next up (ordered)
 1. **Noah: eyes on the live URL** — judge (a) the five new demo moods + Syne, (b) the hero photos in each demo, (c) the rebuilt reveal feel: overshoot punch, how far V/S travel, the Replay button + icon spin, and that the end frame == start frame, (d) that the gallery no longer flashes stacked demos on load.

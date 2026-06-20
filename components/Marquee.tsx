@@ -11,27 +11,24 @@ import {
   useVelocity,
   wrap,
 } from "motion/react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { COPY } from "@/lib/site";
 
 // Slow looping marquee of the niches we serve. Drifts on its own; scroll
-// velocity nudges its speed (the page's pace bleeds into the strip). Two
-// copies of the row sit side by side and the x wraps over -50%..0 so the loop
-// is seamless. Reduced motion drops to a static, wrapping row of the same
-// words — no drift, no scroll coupling.
-const BASE_VELOCITY = -2.2; // % of one copy width per second-ish
+// velocity nudges its speed (the page's pace bleeds into the strip). It loops
+// seamlessly at any width: we measure one copy of the row, then render as many
+// copies as it takes to overfill the viewport and wrap x by exactly one copy
+// width — so the track never runs out and shows a gap (Noah 2026-06-20).
+// Reduced motion drops to a static, wrapping row of the same words.
+const SPEED = 55; // px/sec base drift
 
-function Track({ children }: { children: React.ReactNode }) {
+function Row({ inner }: { inner?: React.Ref<HTMLSpanElement> }) {
   return (
-    <span className="flex shrink-0 items-center whitespace-nowrap">
-      {children}
-    </span>
-  );
-}
-
-function Row() {
-  return (
-    <Track>
+    <span
+      ref={inner}
+      className="flex shrink-0 items-center whitespace-nowrap"
+      aria-hidden={inner ? undefined : "true"}
+    >
       {COPY.marquee.map((niche) => (
         <span key={niche} className="flex items-center">
           <span className="px-6 md:px-9">{niche}</span>
@@ -40,12 +37,35 @@ function Row() {
           </span>
         </span>
       ))}
-    </Track>
+    </span>
   );
 }
 
 export function Marquee() {
   const reduced = useReducedMotion();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rowRef = useRef<HTMLSpanElement>(null);
+  const [rowW, setRowW] = useState(0);
+  const [copies, setCopies] = useState(2);
+
+  // measure one copy + the container, then render enough copies to overfill it
+  useEffect(() => {
+    if (reduced) return;
+    const measure = () => {
+      const w = rowRef.current?.offsetWidth ?? 0;
+      const cw = containerRef.current?.offsetWidth ?? 0;
+      if (w > 0) {
+        setRowW(w);
+        setCopies(Math.max(2, Math.ceil(cw / w) + 1));
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (containerRef.current) ro.observe(containerRef.current);
+    if (rowRef.current) ro.observe(rowRef.current);
+    return () => ro.disconnect();
+  }, [reduced]);
 
   const baseX = useMotionValue(0);
   const { scrollY } = useScroll();
@@ -60,12 +80,12 @@ export function Marquee() {
   });
   const direction = useRef(1);
 
-  // duplicated content → wrap across half the total width
-  const x = useTransform(baseX, (v) => `${wrap(-50, 0, v)}%`);
+  // wrap by exactly one copy width (px) so the loop is seamless
+  const x = useTransform(baseX, (v) => `${rowW ? wrap(-rowW, 0, v) : 0}px`);
 
   useAnimationFrame((_, delta) => {
-    let moveBy = direction.current * BASE_VELOCITY * (delta / 1000);
-    // flip the marquee's lean to match scroll direction
+    if (!rowW) return;
+    let moveBy = direction.current * -SPEED * (delta / 1000);
     if (velocityFactor.get() < 0) direction.current = -1;
     else if (velocityFactor.get() > 0) direction.current = 1;
     moveBy += moveBy * Math.abs(velocityFactor.get());
@@ -76,6 +96,7 @@ export function Marquee() {
 
   return (
     <section
+      ref={containerRef}
       aria-label={`Niches we build for: ${label}`}
       className="overflow-hidden border-y border-line bg-surface py-6 md:py-8"
     >
@@ -96,8 +117,9 @@ export function Marquee() {
           </div>
         ) : (
           <motion.div className="flex flex-nowrap" style={{ x }}>
-            <Row />
-            <Row />
+            {Array.from({ length: copies }, (_, i) => (
+              <Row key={i} inner={i === 0 ? rowRef : undefined} />
+            ))}
           </motion.div>
         )}
       </div>

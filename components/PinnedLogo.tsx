@@ -7,35 +7,15 @@ import { Logo } from "./Logo";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-// Brand mark pinned to the gallery section. Clicking it morphs the mark
-// into a small personal business card (Noah 2026-06-11) — same element,
-// layoutId morph, not a swap. Visible only while the gallery is on screen.
+// Brand mark pinned bottom-left, visible the ENTIRE time (Noah 2026-06-20 —
+// this is now the site's only persistent logo; the top-left header was dropped).
+// Clicking it morphs the mark into a small personal business card
+// (Noah 2026-06-11) — same element, layoutId morph, not a swap.
 export function PinnedLogo() {
   const reduced = useReducedMotion() ?? false;
-  const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    const gallery = document.getElementById("work");
-    if (!gallery) return;
-    // threshold 0 + shrunken root, NOT threshold 0.2: the section's height
-    // changes with the open panel, and once 20% of it exceeds a screenful
-    // the 0.2 crossing never fires again — the logo got stuck visible over
-    // other sections
-    const observer = new IntersectionObserver(
-      ([entry]) => setVisible(entry.isIntersecting),
-      { rootMargin: "-20% 0px", threshold: 0 },
-    );
-    observer.observe(gallery);
-    return () => observer.disconnect();
-  }, []);
-
-  // scrolled away from the gallery → the anchor is gone, close the card
-  useEffect(() => {
-    if (!visible) setOpen(false);
-  }, [visible]);
 
   useEffect(() => {
     if (!open) return;
@@ -60,14 +40,7 @@ export function PinnedLogo() {
   const layoutId = reduced ? undefined : "founder-card";
 
   return (
-    // visibility lives on this plain wrapper, NOT the motion.button below —
-    // the layoutId morph writes an inline opacity that overrides any
-    // class-based opacity on the button itself
-    <div
-      className={`fixed bottom-6 left-6 z-40 hidden transition-opacity duration-300 sm:block ${
-        visible ? "opacity-100" : "pointer-events-none opacity-0"
-      }`}
-    >
+    <div className="fixed bottom-6 left-6 z-40 hidden sm:block">
       <AnimatePresence initial={false} mode={reduced ? "wait" : "popLayout"}>
         {open ? (
           <motion.div

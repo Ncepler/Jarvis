@@ -16,6 +16,8 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import {
+  useEffect,
+  useRef,
   useState,
   type CSSProperties,
   type ReactNode,
@@ -352,9 +354,15 @@ export function DemoHero({
 }
 
 // ── Marquee: one looping band of niche service words, ● separators. ──────────
-export function DemoMarquee({ terms }: { terms: string[] }) {
-  const row = (
-    <span className="inline-flex items-center">
+function MarqueeRow({
+  terms,
+  inner,
+}: {
+  terms: string[];
+  inner?: React.Ref<HTMLSpanElement>;
+}) {
+  return (
+    <span ref={inner} className="inline-flex items-center">
       {terms.map((t) => (
         <span key={t} className="inline-flex items-center">
           <span className="px-7 text-[22px] md:text-[28px]" style={{ color: "var(--d-muted)" }}>
@@ -367,21 +375,63 @@ export function DemoMarquee({ terms }: { terms: string[] }) {
       ))}
     </span>
   );
+}
+
+// Seamless at any width: measure one copy of the row + the container, then
+// render enough copies to overfill it and slide by exactly one copy width.
+// A short term list inside a wide demo used to run out and show a gap before
+// it reset (Noah 2026-06-20) — this guarantees it never does.
+export function DemoMarquee({ terms }: { terms: string[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rowRef = useRef<HTMLSpanElement>(null);
+  const [rowW, setRowW] = useState(0);
+  const [copies, setCopies] = useState(2);
+
+  useEffect(() => {
+    const measure = () => {
+      const w = rowRef.current?.offsetWidth ?? 0;
+      const cw = containerRef.current?.offsetWidth ?? 0;
+      if (w > 0) {
+        setRowW(w);
+        setCopies(Math.max(2, Math.ceil(cw / w) + 1));
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (containerRef.current) ro.observe(containerRef.current);
+    if (rowRef.current) ro.observe(rowRef.current);
+    return () => ro.disconnect();
+  }, [terms]);
+
+  // constant speed (~55px/s) regardless of how many copies render
+  const dur = rowW ? rowW / 55 : 30;
+
   return (
     <div
+      ref={containerRef}
       role="marquee"
       aria-label="Services"
       className="w-full overflow-hidden whitespace-nowrap py-7"
       style={{ borderBottom: "1px solid var(--d-line)" }}
     >
       <style>{`
-        @keyframes demo-mq { to { transform: translateX(-50%); } }
-        .demo-mq { display: inline-flex; animation: demo-mq 45s linear infinite; }
+        @keyframes demo-mq { to { transform: translateX(calc(-1 * var(--mq-w))); } }
+        .demo-mq { display: inline-flex; animation: demo-mq var(--mq-dur) linear infinite; }
         @media (prefers-reduced-motion: reduce) { .demo-mq { animation: none; } }
       `}</style>
-      <div className="demo-mq">
-        {row}
-        <span aria-hidden>{row}</span>
+      <div
+        className="demo-mq"
+        style={
+          { "--mq-w": `${rowW}px`, "--mq-dur": `${dur}s` } as CSSProperties
+        }
+      >
+        {Array.from({ length: copies }, (_, i) => (
+          <MarqueeRow
+            key={i}
+            terms={terms}
+            inner={i === 0 ? rowRef : undefined}
+          />
+        ))}
       </div>
     </div>
   );
