@@ -1,7 +1,7 @@
-# HANDOFF — updated 2026-06-20 (v29)
+# HANDOFF — updated 2026-06-20 (v30)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v29.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v30.
 - Page order (Stage 1, intact): Hero → Marquee → Services → Gallery → FullBleed → HowItWorks → ValueProps → AllSites → About → Faq → ClosingCta → Contact → Footer.
 - 7 inline demos in `components/demos/`, registered by slug in `index.ts`, shown in the gallery (`lib/projects.ts`). Shared primitives in `system.tsx`.
 
@@ -22,8 +22,11 @@
 - **Marquees now loop seamlessly at ANY width.** Both the hero `Marquee` and every demo `DemoMarquee` measured one copy of the row vs the container and rendered exactly enough copies to overfill it, sliding by one copy width. Short term lists (barber/lawncare/etc = 5 words ≈ 1460px for 2 copies) used to run out and gap/reset on a wide monitor before looping — that was the "carousels not infinite." Hero marquee: rAF + `wrap(-rowW,0)` in px, `copies = ceil(viewport/rowW)+1`. DemoMarquee: CSS keyframe to `translateX(calc(-1*var(--mq-w)))` with measured `--mq-w`/`--mq-dur`, same copy count.
 - **Gallery coverflow was already infinite** (per-card wrapped-offset drag) — left as-is. If Noah meant that one specifically, re-check, but mechanically it loops.
 
+## v30 — gallery carousel is now FINITE (Noah 2026-06-20)
+- Noah wanted the **gallery card row finite/list-based, NOT infinite** (the infinite one to keep is the demo SERVICE MARQUEE — "kids · cuts · fades · beards" — those stay looping, fixed in v29). Reversed the gallery wrap: each card's `d = index - center` (no modulo), `x` is bounded to `[minX, 0]` where `minX = -(count-1)*step`, drag past either end soft rubber-bands (×0.35) and snaps back, `snapTo`/arrows/`centerIdx`/`onSelect` all clamp to `[0, count-1]`, and the AllSites `vilas:open-demo` handler just `snapTo(idx)`. Removed the now-unused `count` prop from `GalleryCard`. So: first card has empty space to its left, last card empties to the right — it clearly starts and ends.
+
 ## In progress
-- Nothing half-finished. v29 is complete and pushed.
+- Nothing half-finished. v30 is complete and pushed.
 
 ## Next up (ordered)
 1. **Noah: eyes on the live URL** — judge (a) the five new demo moods + Syne, (b) the hero photos in each demo, (c) the rebuilt reveal feel: overshoot punch, how far V/S travel, the Replay button + icon spin, and that the end frame == start frame, (d) that the gallery no longer flashes stacked demos on load.

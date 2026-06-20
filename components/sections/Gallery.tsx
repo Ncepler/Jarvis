@@ -22,6 +22,8 @@ import { orderedProjects, type Project } from "@/lib/projects";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const GAP = 24;
+const clamp = (n: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, n));
 
 // The Lusion-style cursor label: a "step inside →" pill that trails the
 // pointer with spring inertia while it's over the draggable row. Hover-only,
@@ -148,7 +150,6 @@ function GalleryCard({
   index,
   x,
   step,
-  count,
   width,
   isActive,
   reduced,
@@ -158,28 +159,20 @@ function GalleryCard({
   index: number;
   x: MotionValue<number>;
   step: number;
-  count: number;
   width: number;
   isActive: boolean;
   reduced: boolean;
   onSelect: (index: number) => void;
 }) {
-  // Infinite coverflow: each card carries its own wrapped slot offset from the
-  // current center (…-2,-1,0,1,2…), so as the row scrolls a card that leaves
-  // one edge re-enters from the other — the drag is unbounded and never "ends".
-  // Only ONE DOM node exists per slug, so the `layoutId` morph stays unique.
-  // d is the signed distance in slots, wrapped to [-count/2, count/2).
-  const d = useTransform(x, (v) => {
-    const center = -v / step;
-    let o = (((index - center) % count) + count) % count;
-    if (o > count / 2) o -= count;
-    return o;
-  });
+  // Finite coverflow (Noah 2026-06-20 — a bounded list, not an endless loop):
+  // each card sits at its fixed slot offset from the current center; the row
+  // simply ends at the first and last card. d is the signed distance in slots.
+  const d = useTransform(x, (v) => index - -v / step);
   const tx = useTransform(d, (o) => o * step);
   const mag = useTransform(d, (o) => Math.min(Math.abs(o), 1));
   const scale = useTransform(mag, [0, 1], [1, 0.88]);
   const opacity = useTransform(mag, [0, 1], [1, 0.45]);
-  // hide the far cards so the wrap-around jump always happens off-screen
+  // hide cards far off either edge so they don't paint outside the row
   const display = useTransform(d, (o) => (Math.abs(o) > 2.6 ? "none" : "block"));
   const zIndex = useTransform(mag, (m) => Math.round((1 - m) * 100));
 
@@ -414,9 +407,11 @@ export function Gallery() {
   const rowHeight = Math.round(cardW * 0.625) + 108;
 
   const x = useMotionValue(0);
-  // current (unwrapped) virtual center index — the row scrolls forever, so this
-  // can run past the card count in either direction; kept so a resize re-centers
+  // current center slot index, clamped to [0, count-1] (finite row); kept so a
+  // resize re-centers on the same card
   const virtualRef = useRef(0);
+  // the row is bounded: x runs from 0 (first card centered) to the last card
+  const minX = -(count - 1) * step;
 
   // raw pointer position for the trailing "step inside →" cursor label
   const cursorX = useMotionValue(0);
@@ -427,9 +422,8 @@ export function Gallery() {
   // drag (not just on snap) so the backdrop and labels follow the scroll
   const [centerIdx, setCenterIdx] = useState(0);
   useMotionValueEvent(x, "change", (v) => {
-    const virtual = Math.round(-v / step);
-    virtualRef.current = virtual;
-    const i = ((virtual % count) + count) % count;
+    const i = clamp(Math.round(-v / step), 0, count - 1);
+    virtualRef.current = i;
     if (i !== centerIdx) setCenterIdx(i);
   });
 
@@ -457,14 +451,14 @@ export function Gallery() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  // snap to a virtual (unbounded) slot — the row wraps, so there is no end to
-  // hit; the card nearest center after the wrap becomes active.
+  // snap to a slot, clamped to the finite range [0, count-1]
   const snapTo = useCallback(
-    (virtual: number) => {
-      virtualRef.current = virtual;
-      animate(x, -virtual * step, { duration: 0.6, ease: EASE });
+    (slot: number) => {
+      const i = clamp(slot, 0, count - 1);
+      virtualRef.current = i;
+      animate(x, -i * step, { duration: 0.6, ease: EASE });
     },
-    [step, x],
+    [step, x, count],
   );
 
   // open the centered card: mount its live demo in the panel below, which
@@ -499,14 +493,13 @@ export function Gallery() {
       const slug = (e as CustomEvent<string>).detail;
       const idx = projects.findIndex((p) => p.slug === slug);
       if (idx < 0) return;
-      const vc = Math.round(-x.get() / step);
-      snapTo(idx + count * Math.round((vc - idx) / count));
+      snapTo(idx);
       window.setTimeout(() => openCard(idx), reduced ? 0 : 420);
     };
     window.addEventListener("vilas:open-demo", onOpen as EventListener);
     return () =>
       window.removeEventListener("vilas:open-demo", onOpen as EventListener);
-  }, [projects, snapTo, openCard, x, step, count, reduced]);
+  }, [projects, snapTo, openCard, reduced]);
 
   // a pointer-up at the end of a drag also lands on a card — ignore it
   const dragging = useRef(false);
@@ -514,12 +507,10 @@ export function Gallery() {
   const onSelect = useCallback(
     (index: number) => {
       if (dragging.current) return;
-      const vc = Math.round(-x.get() / step);
-      const centerMod = ((vc % count) + count) % count;
-      // the centered card steps inside; a side card centers its nearest
-      // instance first (it may live ahead of or behind the current center)
-      if (index === centerMod) openCard(index);
-      else snapTo(index + count * Math.round((vc - index) / count));
+      const center = clamp(Math.round(-x.get() / step), 0, count - 1);
+      // the centered card steps inside; a side card just centers itself
+      if (index === center) openCard(index);
+      else snapTo(index);
     },
     [snapTo, openCard, x, step, count],
   );
@@ -559,7 +550,11 @@ export function Gallery() {
         dragging.current = true;
         setOpenSlug(null); // browsing the row closes the open demo
       }
-      x.set(s.startX + dx);
+      // finite row: past either end, resist with a soft rubber-band so the
+      // drag clearly "hits" a boundary instead of scrolling on forever
+      const raw = s.startX + dx;
+      const over = raw > 0 ? raw : raw < minX ? raw - minX : 0;
+      x.set(raw - over + over * 0.35);
       const now = performance.now();
       const dt = now - s.lastT;
       if (dt > 0) s.v = ((ev.clientX - s.lastClient) / dt) * 1000;
@@ -678,7 +673,6 @@ export function Gallery() {
                 index={i}
                 x={x}
                 step={step}
-                count={count}
                 width={cardW}
                 isActive
                 reduced
@@ -722,7 +716,6 @@ export function Gallery() {
               index={i}
               x={x}
               step={step}
-              count={count}
               width={cardW}
               isActive={i === centerIdx}
               reduced={false}
