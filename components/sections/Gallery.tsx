@@ -585,6 +585,37 @@ export function Gallery() {
     [],
   );
 
+  // trackpad horizontal scroll: a two-finger sideways swipe over the row moves
+  // through the cards. We only claim HORIZONTAL-dominant wheel events so a
+  // normal vertical two-finger scroll still scrolls the page straight past the
+  // gallery. The listener is native + non-passive because React's synthetic
+  // onWheel is passive (preventDefault would be a no-op there).
+  useEffect(() => {
+    const el = regionRef.current;
+    if (!el || reduced) return;
+    let snapTimer: number | undefined;
+    const onWheel = (e: WheelEvent) => {
+      // let vertical-dominant gestures fall through to the page scroll
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      setOpenSlug(null); // browsing the row closes the open demo (matches drag)
+      const raw = x.get() - e.deltaX;
+      // rubber-band past either end so it "hits" a boundary like the drag does
+      const over = raw > 0 ? raw : raw < minX ? raw - minX : 0;
+      x.set(raw - over + over * 0.35);
+      // settle onto the nearest card once the swipe stops
+      window.clearTimeout(snapTimer);
+      snapTimer = window.setTimeout(() => {
+        snapTo(Math.round(-x.get() / step));
+      }, 120);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      window.clearTimeout(snapTimer);
+    };
+  }, [reduced, x, minX, step, snapTo]);
+
   const onKeyDown = (e: React.KeyboardEvent) => {
     const vc = Math.round(-x.get() / step);
     if (e.key === "ArrowLeft") {
@@ -686,7 +717,7 @@ export function Gallery() {
           ref={regionRef}
           tabIndex={0}
           role="group"
-          aria-label="Portfolio gallery. Drag or use arrow keys to browse; the centered site opens below."
+          aria-label="Portfolio gallery. Drag, scroll sideways, or use arrow keys to browse; the centered site opens below."
           className={`relative mt-16 touch-pan-y select-none ${canHover ? "md:cursor-none" : ""}`}
           // The cards are positioned by motion values that only apply after
           // hydration + the first width measure; until then they'd pile up at
