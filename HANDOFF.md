@@ -1,7 +1,13 @@
-# HANDOFF — updated 2026-06-21 (v32)
+# HANDOFF — updated 2026-06-21 (v33)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v32.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint, lint now 0 warnings), footer stamp v33.
+
+## v33 — Apex before/after photos + SEO metadata + lint clean (this run)
+- **Apex Collision before/after slider now uses real photos** (`public/previews/carBefore.webp` / `carAfter.webp`, 1672×941). `BeforeAfter` `Slot` renders the image as `center/cover`; both the drag slider and the reduced-motion side-by-side use them. (Other Apex `<Media>` slots — work grid / damage map — are still labeled placeholders.)
+- **SEO/share metadata enriched** (`app/layout.tsx`). Was title + description only, so pasted links unfurled bare — and §1 makes the search/share snippet the first trust impression (cold-email prospect Googles the name). Added `metadataBase` (https://vilas.studio), `alternates.canonical`, `applicationName`, full `openGraph` (title/description/url/site_name/locale/type), and a Twitter `summary` card. **Text only** — the real OG image + favicon are still `TODO(name)` (§12, need a designed asset). Verified rendered in `next start` HTML.
+- **Lint fully clean:** removed a dead `eslint-disable react-hooks/exhaustive-deps` in `VilasReveal.tsx` (the only lint warning). `next lint` → "No ESLint warnings or errors."
+- **Verified this run (headless Chromium):** homepage loads with **0 console errors / 0 warnings / 0 hydration mismatches**, 0 failed requests, all 8 preview images present; the opening reveal settles correctly on **VILAS + .studio + tagline + See the work + REPLAY** (the transient "VALIS" is just a mid-animation frame); logo (`vilas-mark.webp`) loads. Gallery off-screen cards are lazy (0×0 until centered) — expected, not broken.
 - Page order (Stage 1, intact): Hero → Marquee → Services → Gallery → FullBleed → HowItWorks → ValueProps → AllSites → About → Faq → ClosingCta → Contact → Footer.
 - **8** inline demos in `components/demos/`, registered by slug in `index.ts`, shown in the gallery (`lib/projects.ts`). Shared primitives in `system.tsx`.
 
