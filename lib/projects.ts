@@ -145,7 +145,7 @@ export const projects: Project[] = [
     category: "Auto body & collision",
     caption: "Damage map, live paint match, drag-to-reveal repairs.",
     url: "",
-    screenshot: "",
+    screenshot: "/previews/firstAutoBodyImage.webp",
     screenshotFull: "",
     preview: "",
     tier: "custom",

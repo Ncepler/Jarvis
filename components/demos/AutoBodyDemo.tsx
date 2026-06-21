@@ -58,6 +58,9 @@ const PHONE = "(516) 555-0143";
 const NAME = "Apex Collision";
 const EMAIL = "hello@apexcollision.demo";
 
+// Hero background photo (Noah's upload, compressed to WebP). "" → placeholder.
+const firstAutoBodyImage = "/previews/firstAutoBodyImage.webp";
+
 // ── Reusable side-profile car outline (content, not decoration — §14d). ──────
 // viewBox 360×170; used by the damage map and the paint matcher.
 function CarOutline({
@@ -100,17 +103,26 @@ function HeroCarReveal() {
   const reduced = useReducedMotion();
   return (
     <section className="relative w-full overflow-hidden" style={{ minHeight: "640px" }}>
-      {/* full-bleed media slot (labeled placeholder until a sequence exists) */}
+      {/* full-bleed media slot — real photo if present, else labeled placeholder */}
       <div
-        className="absolute inset-0 flex items-center justify-center"
-        style={{ background: "var(--d-surface)" }}
+        className="absolute inset-0"
+        style={{
+          backgroundColor: firstAutoBodyImage ? undefined : "var(--d-surface)",
+          backgroundImage: firstAutoBodyImage ? `url("${firstAutoBodyImage}")` : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
       >
-        <span
-          className="text-[11px] font-semibold uppercase tracking-[0.18em]"
-          style={{ color: "var(--d-muted)" }}
-        >
-          HERO — car reveal sequence (16:9)
-        </span>
+        {!firstAutoBodyImage && (
+          <div className="flex h-full w-full items-center justify-center">
+            <span
+              className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+              style={{ color: "var(--d-muted)" }}
+            >
+              HERO — car reveal sequence (16:9)
+            </span>
+          </div>
+        )}
       </div>
       {/* clear-coat shine sweep — a glossy highlight travels across on enter */}
       {!reduced && (

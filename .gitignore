@@ -9,6 +9,11 @@
 .DS_Store
 *.pem
 
+# demo hero source uploads — only the compressed .webp is committed
+/public/previews/*.jpg
+/public/previews/*.jpeg
+/public/previews/*.png
+
 # debug
 npm-debug.log*
 
