@@ -57,6 +57,50 @@ body {
   transform: scale(0.98);
 }
 
+/* custom bronze range slider for the "do the math" calculator — large 28px
+   thumb (touch target), hairline track, accent fill. Cross-browser thumb. */
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-line);
+  outline: none;
+  cursor: pointer;
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  border: 4px solid var(--color-surface);
+  box-shadow: 0 1px 4px rgb(31 26 20 / 0.25);
+  cursor: pointer;
+}
+.range::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border: 4px solid var(--color-surface);
+  border-radius: 999px;
+  background: var(--color-accent);
+  box-shadow: 0 1px 4px rgb(31 26 20 / 0.25);
+  cursor: pointer;
+}
+.range:focus-visible {
+  outline: none;
+}
+.range:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+.range:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
 @keyframes rise-in {
   from {
     opacity: 0;

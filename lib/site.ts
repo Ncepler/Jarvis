@@ -61,6 +61,33 @@ export const COPY = {
     line: "People decide in five seconds. Give them something good to look at.",
     cta: "See the work",
   },
+  // "Do the math" ROI beat (the section before #why). The interactive
+  // calculator runs on the visitor's OWN numbers — opportunity cost, never a
+  // promise of returns. Default state (300 × 1 × 12 = 3,600) renders
+  // server-side so even with JS off a real sentence shows.
+  math: {
+    eyebrow: "The math",
+    heading: { a: "Do the math.", b: "One customer covers it." },
+    intro:
+      "A good site is the difference between getting the call and watching it go next door.",
+    q1: {
+      label: "What's one new customer worth to you?",
+      sub: "A typical job, sale, or first visit.",
+    },
+    q2: {
+      pre: "Say a slow or missing site costs you just",
+      post: "a month",
+      sub: "A hypothetical you set — not a number we're claiming about your business.",
+    },
+    readoutSuffix: "a year",
+    readoutCaption: "walking to whoever's easier to find online.",
+    kicker: "A site that fixes that is about $300, once.",
+    // {n} is replaced with the rounded multiple in the component.
+    multiple: "That's roughly {n}× the site's cost — in year one alone.",
+    honest: "Your numbers, not ours. We're just doing the multiplication.",
+    jsOff:
+      "Miss one $300 customer a month and that's $3,600 a year — the site's about $300, once.",
+  },
   // The honest differentiators, numbered 01–04. No invented stats, no client
   // counts — every line is true on day one.
   why: [
@@ -73,7 +100,7 @@ export const COPY = {
       body: "Agreed up front, half to start. No retainers, no surprise invoices later.",
     },
     {
-      title: "Live in about two weeks",
+      title: "Live in about a week",
       body: "Pick a style and it's about a week. Custom runs a little longer; we give you a real date.",
     },
     {

@@ -6,6 +6,7 @@ import { About } from "@/components/sections/About";
 import { AllSites } from "@/components/sections/AllSites";
 import { ClosingCta } from "@/components/sections/ClosingCta";
 import { Contact } from "@/components/sections/Contact";
+import { DoTheMath } from "@/components/sections/DoTheMath";
 import { Faq } from "@/components/sections/Faq";
 import { FullBleed } from "@/components/sections/FullBleed";
 import { Gallery } from "@/components/sections/Gallery";
@@ -31,6 +32,7 @@ export default function Home() {
         <Gallery />
         <FullBleed />
         <HowItWorks />
+        <DoTheMath />
         <ValueProps />
         <AllSites />
         <About />
