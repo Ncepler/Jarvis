@@ -275,7 +275,6 @@ export function VilasReveal({
       timers.forEach(clearTimeout);
       detach();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runKey]);
 
   // Replay: spin the icon and re-run the sequence from the opening frame.

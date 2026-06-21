@@ -62,10 +62,32 @@ const spaceMono = Space_Mono({
   variable: "--font-space-mono",
 });
 
-// TODO(name): real OG image + favicon now that the name is Vilas
+// The search/share snippet is the first trust impression — a prospect from a
+// cold email Googles the name to check it's real (CLAUDE.md §1). So the meta
+// reads like a plain, real business and links unfurl with title + description.
+// TODO(name): real OG image + favicon still pending (needs a designed asset, §12).
+const META_TITLE = `${SITE.name} — web design studio for small businesses`;
+const META_DESCRIPTION = `A small, fully remote web design studio. We build websites for local businesses that look like they cost as much as a villa.`;
+
 export const metadata: Metadata = {
-  title: `${SITE.name} — web design studio for small businesses`,
-  description: `A small, fully remote web design studio. We build websites for businesses that look like they cost as much as a villa.`,
+  metadataBase: new URL(`https://${SITE.domain}`),
+  title: META_TITLE,
+  description: META_DESCRIPTION,
+  applicationName: SITE.name,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE.name,
+    title: META_TITLE,
+    description: META_DESCRIPTION,
+    url: "/",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary",
+    title: META_TITLE,
+    description: META_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({

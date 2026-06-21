@@ -389,18 +389,14 @@ function BeforeAfter() {
     dragging.current = false;
   };
 
-  const Slot = ({ label, when }: { label: string; when: string }) => (
-    <div className="flex h-full w-full items-center justify-center" style={{ background: "var(--d-surface)" }}>
-      <div className="text-center">
-        <span className="block text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--d-muted)" }}>
-          {label}
-        </span>
-        <span className="mt-1 block text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-line)" }}>
-          {when}
-        </span>
-      </div>
-    </div>
+  const Slot = ({ img }: { img: string }) => (
+    <div
+      className="h-full w-full"
+      style={{ background: `var(--d-surface) url("${img}") center/cover no-repeat` }}
+    />
   );
+  const BEFORE = "/previews/carBefore.webp";
+  const AFTER = "/previews/carAfter.webp";
 
   return (
     <section className="w-full" style={{ borderTop: "1px solid var(--d-line)", borderBottom: "1px solid var(--d-line)" }}>
@@ -420,10 +416,10 @@ function BeforeAfter() {
           // reduced-motion: show both stills side by side, no drag
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             <div style={{ aspectRatio: "16/9", border: "1px solid var(--d-line)" }}>
-              <Slot label="BEFORE — collision" when="(16:9)" />
+              <Slot img={BEFORE} />
             </div>
             <div style={{ aspectRatio: "16/9", border: "1px solid var(--d-line)" }}>
-              <Slot label="AFTER — restored" when="(16:9)" />
+              <Slot img={AFTER} />
             </div>
           </div>
         ) : (
@@ -439,11 +435,11 @@ function BeforeAfter() {
             >
               {/* BEFORE (under) */}
               <div className="absolute inset-0">
-                <Slot label="BEFORE — collision" when="(16:9)" />
+                <Slot img={BEFORE} />
               </div>
               {/* AFTER (over), clipped to the handle */}
               <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
-                <Slot label="AFTER — restored" when="(16:9)" />
+                <Slot img={AFTER} />
               </div>
               {/* labels */}
               <span className="absolute bottom-3 left-3 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
