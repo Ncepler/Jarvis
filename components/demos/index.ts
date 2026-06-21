@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { AutoBodyDemo } from "./AutoBodyDemo";
 import { BakeryDemo } from "./BakeryDemo";
 import { BarberDemo } from "./BarberDemo";
 import { FloristDemo } from "./FloristDemo";
@@ -20,4 +21,5 @@ export const demos: Record<string, ComponentType> = {
   "demo-lawncare": LawnCareDemo,
   "demo-bakery": BakeryDemo,
   "demo-barber": BarberDemo,
+  "demo-autobody": AutoBodyDemo,
 };

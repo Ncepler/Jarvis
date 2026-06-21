@@ -1,9 +1,15 @@
-# HANDOFF — updated 2026-06-20 (v30)
+# HANDOFF — updated 2026-06-21 (v31)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v30.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint), footer stamp v31.
 - Page order (Stage 1, intact): Hero → Marquee → Services → Gallery → FullBleed → HowItWorks → ValueProps → AllSites → About → Faq → ClosingCta → Contact → Footer.
-- 7 inline demos in `components/demos/`, registered by slug in `index.ts`, shown in the gallery (`lib/projects.ts`). Shared primitives in `system.tsx`.
+- **8** inline demos in `components/demos/`, registered by slug in `index.ts`, shown in the gallery (`lib/projects.ts`). Shared primitives in `system.tsx`.
+
+## v31 — Apex Collision (8th demo: auto body / collision) — this run
+- New `components/demos/AutoBodyDemo.tsx`, slug `demo-autobody`, "Apex Collision," Hicksville/Nassau, (516) 555-0143, hello@apexcollision.demo. Graphite-dark §13h theme (bg #0A0C0F, accent #2FA8FF electric blue, ACCENT2 #FF5A2C hot orange used ONLY on urgent CTAs — hero estimate, estimate widget, CTA band). Figures/specs set in `font-mono` for the instrument-readout feel. Tier **custom / "from $500"**, order 7.
+- **Motion-heavy §14d, but every moving part is content (§11):** (1) Hero clear-coat shine-sweep over a labeled placeholder; (2) **damage map** — inline side-profile car-outline SVG (`CarOutline`) with 6 hotspots, hover/tap → blue pulse ring + side panel swaps service; tap-chip list below = mobile/reduced path; (3) full-bleed **before/after slider** (`clip-path` drag, blue handle, range input for a11y) → side-by-side on reduced-motion; (4) **paint match** — swatches live-tint the same `CarOutline`; (5) **estimate widget** — vehicle×area×severity → live mono range, "rough estimate, not a quote," CTA → `#apex-contact`; (6) **spec strip** value props (mono figures) + honest `CERT — (placeholder)` chips (no faked certs).
+- Spine reused from `system.tsx` (auto-graphite via `--d-*`): header, marquee, Intro, WorkGrid, Faq, CtaBand, footer. **One additive shared change:** `Contact` gained optional `vehicleFields` (Year/Make/Model) + `claimToggle` ("insurance claim") — default-off, other 7 demos untouched.
+- `screenshot: ""` (no photo yet) → gallery card shows the graceful "Preview" box; hero shows the labeled placeholder. Verified in-browser: all sections render, spine matches the others, gallery open + "Every site" row + "Start with this style →" all work.
 
 ## Recent work (v21 → v27, this run)
 - **v21 — demos re-mooded per SKILL §13.** `DemoShell` is theme-driven: pass a `theme: DemoTheme` (palette + onAccent + hero/break scrims + base/display font + radius) and it sets the `--d-*` vars every primitive reads. Dark demos (renovation, landscaping) pass NO theme → dark default. Florist (rose, Fraunces, paper-white), Bakery (amber, Fraunces, cream, 8px radius), Barber (chair-red, Oswald, warm espresso-black), Power-washing (water-blue, cool white), Lawn-care (grass-green, fresh white). **To re-mood, edit a demo's `theme` const only — never the primitives.**
@@ -36,7 +42,7 @@
 
 ## Gotchas & decisions
 - **Version stamp (standing rule):** bump `lib/version.ts` every push; last message of session states "version: vN".
-- **Demos vary by mood (SKILL §13).** DARK = renovation + landscaping (no theme). LIGHT = florist/bakery/powerwash/lawncare. WARM-DARK = barber. Main site = bone/cream + Syne — a separate system; demos NEVER use the bone palette or Syne, the studio NEVER uses a demo palette/serif/demo-serif (Fraunces/Oswald are demo-only).
+- **Demos vary by mood (SKILL §13).** DARK = renovation + landscaping (no theme). LIGHT = florist/bakery/powerwash/lawncare. WARM-DARK = barber. GRAPHITE-DARK + motion = auto body (Apex Collision). Main site = bone/cream + Syne — a separate system; demos NEVER use the bone palette or Syne, the studio NEVER uses a demo palette/serif/demo-serif (Fraunces/Oswald are demo-only).
 - **Re-mooding a demo = a `theme` swap, not a structural one.** Every primitive reads `--d-*` vars set by `DemoShell`. Don't fork primitives per niche.
 - **Demo hero images** live in `public/previews/first<Niche>Image.webp`; the per-demo `first<Niche>Image` const points at them. Keep new demo photos compressed (≤~0.5 MB each, WebP) — the gallery renders all demos at once.
 - **Gallery first-load:** the coverflow row is hidden (`opacity:0`) until `containerW > 0`. Don't remove that or the stacked-demo flash returns.

@@ -829,6 +829,8 @@ export function Contact({
   serviceLabel,
   serviceOptions,
   propertyTypes,
+  vehicleFields,
+  claimToggle,
 }: {
   eyebrow: string;
   line1: string;
@@ -840,6 +842,8 @@ export function Contact({
   serviceLabel: string;
   serviceOptions: string[];
   propertyTypes?: string[];
+  vehicleFields?: boolean; // Year / Make / Model row (auto body)
+  claimToggle?: boolean; // "this is an insurance claim" toggle (auto body)
 }) {
   const [state, setState] = useState<"idle" | "ok" | "err">("idle");
   const reduced = useReducedMotion();
@@ -938,6 +942,38 @@ export function Contact({
                   <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="Your town" />
                 </div>
               </div>
+            )}
+            {vehicleFields && (
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <span className={label} style={{ color: "var(--d-muted)" }}>
+                    Year
+                  </span>
+                  <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="2019" />
+                </div>
+                <div>
+                  <span className={label} style={{ color: "var(--d-muted)" }}>
+                    Make
+                  </span>
+                  <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="Honda" />
+                </div>
+                <div>
+                  <span className={label} style={{ color: "var(--d-muted)" }}>
+                    Model
+                  </span>
+                  <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="Accord" />
+                </div>
+              </div>
+            )}
+            {claimToggle && (
+              <label className="flex cursor-pointer items-center gap-3 text-[15px]" style={{ color: "var(--d-body)" }}>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4"
+                  style={{ accentColor: "var(--d-accent)" }}
+                />
+                This is an insurance claim
+              </label>
             )}
             <div>
               <span className={label} style={{ color: "var(--d-muted)" }}>

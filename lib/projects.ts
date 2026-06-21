@@ -139,6 +139,21 @@ export const projects: Project[] = [
     embeddable: false,
     isStyleDemo: true,
   },
+  {
+    slug: "demo-autobody",
+    name: "Auto body",
+    category: "Auto body & collision",
+    caption: "Damage map, live paint match, drag-to-reveal repairs.",
+    url: "",
+    screenshot: "",
+    screenshotFull: "",
+    preview: "",
+    tier: "custom",
+    priceLabel: "from $500",
+    order: 7,
+    embeddable: false,
+    isStyleDemo: true,
+  },
 ];
 
 export const orderedProjects = [...projects].sort((a, b) => a.order - b.order);
