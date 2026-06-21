@@ -1,7 +1,11 @@
-# HANDOFF — updated 2026-06-21 (v33)
+# HANDOFF — updated 2026-06-21 (v34)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint, lint now 0 warnings), footer stamp v33.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint, 0 warnings), footer stamp v34.
+
+## v34 — gallery trackpad scroll + auto body first (this run, Noah's 2 asks)
+- **Trackpad horizontal scroll on the gallery row** (`components/sections/Gallery.tsx`). A two-finger sideways swipe now moves through the coverflow cards. Native **non-passive** `wheel` listener on the row (React's synthetic `onWheel` is passive → `preventDefault` no-ops, so it's attached via `addEventListener` in a `useEffect`). It claims **only horizontal-dominant** events (`|deltaX| > |deltaY|`) so a normal vertical two-finger scroll still falls straight through to the page; rubber-bands at both ends like the drag; settles onto the nearest card 120ms after the swipe stops. Reduced-motion row already scrolls natively (`overflow-x-auto`), untouched. aria-label now says "Drag, scroll sideways, or use arrow keys." Verified headless: swipe-right Auto body→Renovation, swipe-left back; vertical wheel over the row scrolls the page (510px); 0 JS errors.
+- **Auto body card is now first.** `lib/projects.ts` order: demo-autobody = 0; renovation/landscaping/powerwash/florist/lawncare/bakery/barber keep their relative order, each shifted +1. Gallery opens centered on Auto body.
 
 ## v33 — Apex before/after photos + SEO metadata + lint clean (this run)
 - **Apex Collision before/after slider now uses real photos** (`public/previews/carBefore.webp` / `carAfter.webp`, 1672×941). `BeforeAfter` `Slot` renders the image as `center/cover`; both the drag slider and the reduced-motion side-by-side use them. (Other Apex `<Media>` slots — work grid / damage map — are still labeled placeholders.)
