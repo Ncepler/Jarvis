@@ -1,7 +1,15 @@
-# HANDOFF — updated 2026-06-21 (v34)
+# HANDOFF — updated 2026-06-21 (v35)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — builds clean (build + tsc + lint, 0 warnings), footer stamp v34.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — footer stamp v35. My files pass tsc + eslint clean; a full `npm run build` was blocked at commit time by a CONCURRENT session mid-edit on the demos (LandscapingDemo unescaped entity) — not v35 code. Re-run build once demos settle.
+
+## v35 — "Do the math" ROI section + timeline fix (this run)
+- **New `#worth` section, placed before `#why`** (`components/sections/DoTheMath.tsx`, wired in `app/page.tsx` between HowItWorks and ValueProps). Interactive calculator on the visitor's OWN numbers: customer value (slider $50–$2,500 + typed `$` input, default $300) × missed/month (−/+ stepper 1–10, default 1) × 12 → big annual figure. Opportunity cost, never a promise of returns; permanent "Your numbers, not ours" line. Readout tweens via Motion `animate`, **snaps under reduced-motion**, `tabular-nums`+centered (no CLS). Default state SSRs a real sentence ($3,600/yr); `<noscript>` static fallback. Shows "roughly N× the site's cost" when ≥3×. a11y: slider `aria-valuetext`, stepper is a labeled button group.
+- **Design:** kept on the LIGHT field as a raised `surface` panel, readout in bronze accent — NOT a second dark band (CLAUDE.md §5 spends the one dark beat on FullBleed). Two-tone intact. **No stat band** (cut per brief §4 — calculator alone is stronger; no verifiable+sourced stats at build).
+- **Copy** lives in `COPY.math` (`lib/site.ts`). Intro tweaked off Noah's draft to drop the "isn't X, it's Y" tic (the honest line already uses "not").
+- **Timeline contradiction fixed:** Why-us card 03 title "Live in about two weeks" → **"Live in about a week"** (body already said a week). Only the main-site occurrence; AutoBody demo's "one to two weeks" repair line is correct, untouched.
+- **New CSS:** `.range` bronze slider (28px thumb, cross-browser) in `globals.css`.
+- **Committed `765ad26`, 5 files only** (DoTheMath, page, globals, site.ts, version) — deliberately did NOT stage the other session's demo edits or SKILL.md.
 
 ## v34 — gallery trackpad scroll + auto body first (this run, Noah's 2 asks)
 - **Trackpad horizontal scroll on the gallery row** (`components/sections/Gallery.tsx`). A two-finger sideways swipe now moves through the coverflow cards. Native **non-passive** `wheel` listener on the row (React's synthetic `onWheel` is passive → `preventDefault` no-ops, so it's attached via `addEventListener` in a `useEffect`). It claims **only horizontal-dominant** events (`|deltaX| > |deltaY|`) so a normal vertical two-finger scroll still falls straight through to the page; rubber-bands at both ends like the drag; settles onto the nearest card 120ms after the swipe stops. Reduced-motion row already scrolls natively (`overflow-x-auto`), untouched. aria-label now says "Drag, scroll sideways, or use arrow keys." Verified headless: swipe-right Auto body→Renovation, swipe-left back; vertical wheel over the row scrolls the page (510px); 0 JS errors.
@@ -42,7 +50,7 @@
 - Noah wanted the **gallery card row finite/list-based, NOT infinite** (the infinite one to keep is the demo SERVICE MARQUEE — "kids · cuts · fades · beards" — those stay looping, fixed in v29). Reversed the gallery wrap: each card's `d = index - center` (no modulo), `x` is bounded to `[minX, 0]` where `minX = -(count-1)*step`, drag past either end soft rubber-bands (×0.35) and snaps back, `snapTo`/arrows/`centerIdx`/`onSelect` all clamp to `[0, count-1]`, and the AllSites `vilas:open-demo` handler just `snapTo(idx)`. Removed the now-unused `count` prop from `GalleryCard`. So: first card has empty space to its left, last card empties to the right — it clearly starts and ends.
 
 ## In progress
-- Nothing half-finished. v30 is complete and pushed.
+- v35 (#worth section) complete and pushed. A separate concurrent session is mid-edit on the demos (AutoBody/Landscaping/Renovation/system.tsx) + SKILL.md — those are NOT mine and were left unstaged.
 
 ## Next up (ordered)
 1. **Noah: eyes on the live URL** — judge (a) the five new demo moods + Syne, (b) the hero photos in each demo, (c) the rebuilt reveal feel: overshoot punch, how far V/S travel, the Replay button + icon spin, and that the end frame == start frame, (d) that the gallery no longer flashes stacked demos on load.
