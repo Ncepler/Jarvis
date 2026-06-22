@@ -76,7 +76,7 @@ export const COPY = {
     },
     q2: {
       pre: "Say a slow or missing site costs you just",
-      post: "a month",
+      post: "clients a month",
       sub: "A hypothetical you set — not a number we're claiming about your business.",
     },
     readoutSuffix: "a year",

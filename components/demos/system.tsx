@@ -16,10 +16,13 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import {
+  useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
   type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
 
@@ -643,6 +646,203 @@ export function FullBleedBreak({
   );
 }
 
+// ── Before/after slider: draggable clip-path reveal of two stacked images. ───
+// Theme-driven (accent handle, --d-onaccent on the grip). Real images if given,
+// else labeled placeholders at the right aspect so it works before photos land.
+// Reduced-motion → the two stills side by side; a hidden range input keeps it
+// keyboard-operable. Shared by renovation rooms, auto-body collision, etc.
+// (SKILL §14a/§14d/§14e).
+export function BeforeAfterSlider({
+  beforeImg,
+  afterImg,
+  beforeLabel,
+  afterLabel,
+  ratio = "16/9",
+}: {
+  beforeImg?: string;
+  afterImg?: string;
+  beforeLabel: string;
+  afterLabel: string;
+  ratio?: string;
+}) {
+  const reduced = useReducedMotion();
+  const [pos, setPos] = useState(50);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+  const id = useId();
+
+  const setFromClientX = useCallback((clientX: number) => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const p = ((clientX - r.left) / r.width) * 100;
+    setPos(Math.max(0, Math.min(100, p)));
+  }, []);
+
+  const onDown = (e: ReactPointerEvent) => {
+    dragging.current = true;
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    setFromClientX(e.clientX);
+  };
+  const onMove = (e: ReactPointerEvent) => {
+    if (dragging.current) setFromClientX(e.clientX);
+  };
+  const onUp = () => {
+    dragging.current = false;
+  };
+
+  const Slot = ({ img, label }: { img?: string; label: string }) => (
+    <div
+      className="flex h-full w-full items-center justify-center p-4 text-center"
+      style={{
+        background: img
+          ? `var(--d-surface) url("${img}") center/cover no-repeat`
+          : "var(--d-surface)",
+      }}
+    >
+      {!img && (
+        <span
+          className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+          style={{ color: "var(--d-muted)" }}
+        >
+          {label}
+        </span>
+      )}
+    </div>
+  );
+
+  // reduced-motion: two stills side by side, no drag
+  if (reduced) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div style={{ aspectRatio: ratio, border: "1px solid var(--d-line)" }}>
+          <Slot img={beforeImg} label={beforeLabel} />
+        </div>
+        <div style={{ aspectRatio: ratio, border: "1px solid var(--d-line)" }}>
+          <Slot img={afterImg} label={afterLabel} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={wrapRef}
+      className="relative w-full touch-none select-none overflow-hidden"
+      style={{
+        aspectRatio: ratio,
+        border: "1px solid var(--d-line)",
+        borderRadius: "var(--d-radius)",
+        cursor: "ew-resize",
+      }}
+      onPointerDown={onDown}
+      onPointerMove={onMove}
+      onPointerUp={onUp}
+      onPointerLeave={onUp}
+    >
+      {/* BEFORE (under) */}
+      <div className="absolute inset-0">
+        <Slot img={beforeImg} label={beforeLabel} />
+      </div>
+      {/* AFTER (over), clipped to the handle */}
+      <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
+        <Slot img={afterImg} label={afterLabel} />
+      </div>
+      <span className="absolute bottom-3 left-3 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
+        Before
+      </span>
+      <span className="absolute bottom-3 right-3 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-accent)" }}>
+        After
+      </span>
+      {/* handle */}
+      <div className="absolute top-0 bottom-0" style={{ left: `${pos}%`, transform: "translateX(-50%)" }}>
+        <div className="h-full" style={{ width: 2, background: "var(--d-accent)" }} />
+        <div
+          className="absolute top-1/2 left-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[13px] font-bold"
+          style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
+        >
+          ⇄
+        </div>
+      </div>
+      {/* a11y / keyboard control */}
+      <label className="sr-only" htmlFor={id}>
+        Reveal amount
+      </label>
+      <input
+        id={id}
+        type="range"
+        min={0}
+        max={100}
+        value={pos}
+        onChange={(e) => setPos(Number(e.target.value))}
+        className="absolute inset-x-0 bottom-0 h-10 w-full cursor-ew-resize opacity-0"
+      />
+    </div>
+  );
+}
+
+// ── Process stepper: horizontal numbered steps on a connecting hairline. ─────
+// One-line "what happens" + an honest duration per step, plus an optional
+// overall note. Stacks to one column on mobile. (SKILL §14e/§14f.)
+export type Step = { title: string; what: string; duration?: string };
+export function ProcessStepper({
+  eyebrow,
+  line1,
+  line2,
+  steps,
+  note,
+}: {
+  eyebrow: string;
+  line1: string;
+  line2: string;
+  steps: Step[];
+  note?: string;
+}) {
+  const colClass = steps.length === 3 ? "md:grid-cols-3" : "md:grid-cols-4";
+  return (
+    <Section>
+      <Rise>
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <div className="mt-5">
+          <TwoLine a={line1} b={line2} />
+        </div>
+      </Rise>
+      <div
+        className={`mt-14 grid grid-cols-1 gap-px ${colClass}`}
+        style={{ background: "var(--d-line)", border: "1px solid var(--d-line)" }}
+      >
+        {steps.map((s, i) => (
+          <Rise key={s.title} delay={Math.min(i * 0.08, 0.32)}>
+            <div className="flex h-full flex-col p-7" style={{ background: "var(--d-bg)" }}>
+              <span className="text-[13px] font-semibold tracking-[0.1em]" style={{ color: "var(--d-accent)" }}>
+                0{i + 1}
+              </span>
+              <h3 className="mt-3 text-[20px] font-semibold" style={{ color: "var(--d-fg)" }}>
+                {s.title}
+              </h3>
+              <p className="mt-2 flex-1 text-[14px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+                {s.what}
+              </p>
+              {s.duration && (
+                <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--d-muted)" }}>
+                  {s.duration}
+                </p>
+              )}
+            </div>
+          </Rise>
+        ))}
+      </div>
+      {note && (
+        <Rise delay={0.1}>
+          <p className="mt-6 text-[14px]" style={{ color: "var(--d-muted)" }}>
+            {note}
+          </p>
+        </Rise>
+      )}
+    </Section>
+  );
+}
+
 // ── Work grid: tiles with a category tag + one-line caption. ─────────────────
 export type Work = { tag: string; caption: string };
 export function WorkGrid({
@@ -674,6 +874,87 @@ export function WorkGrid({
       <div className="mt-12 grid grid-cols-2 gap-5 lg:grid-cols-3">
         {items.map((w, i) => (
           <Rise key={w.caption} delay={Math.min(i * 0.05, 0.3)}>
+            <figure className="group">
+              <div className="overflow-hidden rounded-[var(--d-radius)]">
+                <div className="transition-transform duration-500 group-hover:scale-[1.03]">
+                  <Media label={`WORK — ${w.caption} (4:3)`} rounded={false} />
+                </div>
+              </div>
+              <figcaption className="mt-3">
+                <span
+                  className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+                  style={{ color: "var(--d-muted)" }}
+                >
+                  {w.tag}
+                </span>
+                <p className="mt-1 text-[15px]" style={{ color: "var(--d-body)" }}>
+                  {w.caption}
+                </p>
+              </figcaption>
+            </figure>
+          </Rise>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+// ── Filterable work grid: category chips filter the same tile grid. ──────────
+// Same tile component as WorkGrid; an "All" chip plus the niche's categories
+// filter by item.tag. (SKILL §14e renovation rooms / §14f landscaping types.)
+export function FilterableWorkGrid({
+  eyebrow,
+  line1,
+  line2,
+  chips,
+  items,
+}: {
+  eyebrow: string;
+  line1: string;
+  line2: string;
+  chips: string[];
+  items: Work[];
+}) {
+  const [active, setActive] = useState("All");
+  const all = ["All", ...chips];
+  const shown = active === "All" ? items : items.filter((w) => w.tag === active);
+  return (
+    <Section>
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <Rise>
+          <Eyebrow>{eyebrow}</Eyebrow>
+          <div className="mt-5">
+            <TwoLine a={line1} b={line2} />
+          </div>
+        </Rise>
+        <Rise delay={0.1}>
+          <span className="inline-flex items-center gap-1.5 text-[14px] font-semibold" style={{ color: "var(--d-accent)" }}>
+            See all work →
+          </span>
+        </Rise>
+      </div>
+      <div className="mt-8 flex flex-wrap gap-2">
+        {all.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => setActive(c)}
+            aria-pressed={c === active}
+            className="px-3.5 py-2 text-[12px] font-semibold uppercase tracking-[0.08em] transition-colors"
+            style={{
+              background: c === active ? "var(--d-accent)" : "transparent",
+              color: c === active ? "var(--d-onaccent)" : "var(--d-muted)",
+              border: `1px solid ${c === active ? "var(--d-accent)" : "var(--d-line)"}`,
+              borderRadius: "var(--d-radius)",
+            }}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+      <div className="mt-10 grid grid-cols-2 gap-5 lg:grid-cols-3">
+        {shown.map((w) => (
+          <Rise key={w.caption}>
             <figure className="group">
               <div className="overflow-hidden rounded-[var(--d-radius)]">
                 <div className="transition-transform duration-500 group-hover:scale-[1.03]">

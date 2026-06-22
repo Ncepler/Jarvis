@@ -1,10 +1,12 @@
 // Style demo — a renovation/remodeling contractor homepage in the dark,
 // photographic, editorial "Axel's / Sallem" system (see
-// .claude/skills/local-service-design-system/SKILL.md §9). "Maple & Main
+// .claude/skills/local-service-design-system/SKILL.md §9 + §14e). "Maple & Main
 // Renovation Co." is a sample brand for the demo, not a client. This is the
-// REFERENCE build the other six demos match for quality.
+// REFERENCE build the other demos match for quality. Mood stays near-black §2,
+// minimal and gallery-driven — the photography does the talking.
 
 import {
+  BeforeAfterSlider,
   Contact,
   CtaBand,
   DemoFooter,
@@ -12,12 +14,16 @@ import {
   DemoHero,
   DemoMarquee,
   DemoShell,
+  Eyebrow,
   Faq,
+  FilterableWorkGrid,
   FullBleedBreak,
   Intro,
-  ServiceCards,
+  ProcessStepper,
+  Rise,
+  Section,
+  TwoLine,
   ValueProps,
-  WorkGrid,
 } from "./system";
 
 const ACCENT = "#C8893F"; // warm finished-wood caramel
@@ -38,13 +44,26 @@ const SERVICES = [
   { title: "Trim & finish carpentry", copy: "Crown, baseboard, built-ins, doors. The details that make a renovation read as custom instead of contractor-grade." },
 ];
 
+// "How it goes" — the process timeline (§14e). Honest durations.
+const PROCESS = [
+  { title: "Design", what: "We measure, talk through the scope, and put a real written number in front of you.", duration: "1–2 weeks" },
+  { title: "Demolition", what: "Floors covered, the old room out clean, and any surprises found before they cost you.", duration: "2–4 days" },
+  { title: "Build", what: "Framing, plumbing, electric, and tile — our own crew, held to the drawing.", duration: "2–4 weeks" },
+  { title: "Finish", what: "Trim, paint, fixtures, and a walk-through. We don't leave you a punch list.", duration: "3–5 days" },
+];
+
+// Work grid is filterable by room (§14e). Tags match the chip set below.
+const WORK_CHIPS = ["Kitchen", "Bath", "Addition", "Whole-home", "Exterior"];
 const WORK = [
   { tag: "Kitchen", caption: "Kitchen — full gut renovation" },
   { tag: "Bath", caption: "Primary bath — walk-in tile shower" },
   { tag: "Addition", caption: "Rear addition — framed & finished" },
   { tag: "Whole-home", caption: "1920s colonial — full restoration" },
   { tag: "Exterior", caption: "Front entry & porch rebuild" },
-  { tag: "Basement", caption: "Basement — finished living suite" },
+  { tag: "Kitchen", caption: "Galley kitchen — opened to the dining room" },
+  { tag: "Bath", caption: "Guest bath — floating vanity & tile" },
+  { tag: "Whole-home", caption: "Cape — second-story gut & rebuild" },
+  { tag: "Exterior", caption: "Cedar siding & new windows" },
 ];
 
 const PROPS = [
@@ -63,6 +82,57 @@ const FAQ = [
   { q: "How long does a renovation take?", a: "A bathroom is usually a few weeks; a whole-home runs a few months. We give you a real schedule up front and keep you posted as we go." },
   { q: "Do you use your own crew?", a: "Yes — no subs. The people who quote the job are the people doing it. That's how the quality stays consistent." },
 ];
+
+// ── Services — room before/after sliders carry the visual weight, with the
+// numbered 01–06 list as a compact strip beneath (§14e). ──────────────────────
+function RoomTransforms() {
+  return (
+    <Section>
+      <Rise>
+        <Eyebrow>What we do</Eyebrow>
+        <div className="mt-5">
+          <TwoLine a="Drag to see" b="the difference." />
+        </div>
+        <p className="mt-6 max-w-xl text-[17px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+          Same room, before and after. Drag the handle on a kitchen and a bath we
+          took down to the studs and brought back better than new.
+        </p>
+      </Rise>
+      <div className="mt-12 grid gap-10 lg:grid-cols-2">
+        <Rise>
+          <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
+            Kitchen — full gut
+          </p>
+          <BeforeAfterSlider beforeLabel="BEFORE — kitchen (16:9)" afterLabel="AFTER — kitchen (16:9)" />
+        </Rise>
+        <Rise delay={0.1}>
+          <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
+            Bath — walk-in tile shower
+          </p>
+          <BeforeAfterSlider beforeLabel="BEFORE — bath (16:9)" afterLabel="AFTER — bath (16:9)" />
+        </Rise>
+      </div>
+      {/* compact numbered service list */}
+      <div className="mt-16 grid gap-x-10 gap-y-9 md:grid-cols-2 lg:grid-cols-3">
+        {SERVICES.map((s, i) => (
+          <Rise key={s.title} delay={Math.min(i * 0.05, 0.25)}>
+            <div className="pt-5" style={{ borderTop: "1px solid var(--d-line)" }}>
+              <span className="text-[13px] font-semibold tracking-[0.1em]" style={{ color: "var(--d-accent)" }}>
+                0{i + 1}
+              </span>
+              <h3 className="mt-2 text-[19px] font-semibold" style={{ color: "var(--d-fg)" }}>
+                {s.title}
+              </h3>
+              <p className="mt-2 text-[14px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+                {s.copy}
+              </p>
+            </div>
+          </Rise>
+        ))}
+      </div>
+    </Section>
+  );
+}
 
 export function RenovationDemo() {
   return (
@@ -94,12 +164,13 @@ export function RenovationDemo() {
           ["Free estimates", "No pressure"],
         ]}
       />
-      <ServiceCards
-        eyebrow="What we do"
-        line1="Six things."
-        line2="Done right."
-        services={SERVICES}
-        thumbPrefix="SERVICE"
+      <RoomTransforms />
+      <ProcessStepper
+        eyebrow="How it goes"
+        line1="No mystery."
+        line2="Here's the order."
+        steps={PROCESS}
+        note="Most kitchens run 4–6 weeks start to finish; a full bath is usually 2–3. We give you a real schedule before we start and keep you posted as we go."
       />
       <FullBleedBreak
         eyebrow="See the transformation"
@@ -115,10 +186,11 @@ export function RenovationDemo() {
         cta="Meet the crew"
         mediaLabel="TRANSFORMATION — before/after (16:9)"
       />
-      <WorkGrid
+      <FilterableWorkGrid
         eyebrow="Recent work"
         line1="The work"
         line2="speaks plainly."
+        chips={WORK_CHIPS}
         items={WORK}
       />
       <ValueProps

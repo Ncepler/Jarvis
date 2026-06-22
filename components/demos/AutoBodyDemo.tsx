@@ -10,13 +10,9 @@
 // tap (not hover) fallback. "Apex Collision" is a sample brand, not a client.
 
 import { motion, useReducedMotion } from "motion/react";
+import { useState } from "react";
 import {
-  useCallback,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
-import {
+  BeforeAfterSlider,
   Contact,
   CtaBand,
   DemoFooter,
@@ -363,41 +359,9 @@ function DamageMap() {
 }
 
 // ── 3. TRANSFORMATION — full-bleed draggable before/after slider. ────────────
+// Uses the shared BeforeAfterSlider (SKILL §14d), fed Noah's real collision
+// stills; the electric-blue handle comes from the theme accent.
 function BeforeAfter() {
-  const reduced = useReducedMotion();
-  const [pos, setPos] = useState(50);
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const dragging = useRef(false);
-
-  const setFromClientX = useCallback((clientX: number) => {
-    const el = wrapRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const p = ((clientX - r.left) / r.width) * 100;
-    setPos(Math.max(0, Math.min(100, p)));
-  }, []);
-
-  const onDown = (e: ReactPointerEvent) => {
-    dragging.current = true;
-    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-    setFromClientX(e.clientX);
-  };
-  const onMove = (e: ReactPointerEvent) => {
-    if (dragging.current) setFromClientX(e.clientX);
-  };
-  const onUp = () => {
-    dragging.current = false;
-  };
-
-  const Slot = ({ img }: { img: string }) => (
-    <div
-      className="h-full w-full"
-      style={{ background: `var(--d-surface) url("${img}") center/cover no-repeat` }}
-    />
-  );
-  const BEFORE = "/previews/carBefore.webp";
-  const AFTER = "/previews/carAfter.webp";
-
   return (
     <section className="w-full" style={{ borderTop: "1px solid var(--d-line)", borderBottom: "1px solid var(--d-line)" }}>
       <div className="mx-auto w-full max-w-[1200px] px-6 py-[80px] md:px-16 md:py-[120px]">
@@ -411,67 +375,16 @@ function BeforeAfter() {
             that gap is the whole job.
           </p>
         </Rise>
-
-        {reduced ? (
-          // reduced-motion: show both stills side by side, no drag
-          <div className="mt-10 grid gap-4 sm:grid-cols-2">
-            <div style={{ aspectRatio: "16/9", border: "1px solid var(--d-line)" }}>
-              <Slot img={BEFORE} />
-            </div>
-            <div style={{ aspectRatio: "16/9", border: "1px solid var(--d-line)" }}>
-              <Slot img={AFTER} />
-            </div>
+        <Rise delay={0.1}>
+          <div className="mt-10">
+            <BeforeAfterSlider
+              beforeImg="/previews/carBefore.webp"
+              afterImg="/previews/carAfter.webp"
+              beforeLabel="BEFORE — collision (16:9)"
+              afterLabel="AFTER — restored (16:9)"
+            />
           </div>
-        ) : (
-          <Rise delay={0.1}>
-            <div
-              ref={wrapRef}
-              className="relative mt-10 w-full touch-none select-none overflow-hidden"
-              style={{ aspectRatio: "16/9", border: "1px solid var(--d-line)", borderRadius: "var(--d-radius)", cursor: "ew-resize" }}
-              onPointerDown={onDown}
-              onPointerMove={onMove}
-              onPointerUp={onUp}
-              onPointerLeave={onUp}
-            >
-              {/* BEFORE (under) */}
-              <div className="absolute inset-0">
-                <Slot img={BEFORE} />
-              </div>
-              {/* AFTER (over), clipped to the handle */}
-              <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
-                <Slot img={AFTER} />
-              </div>
-              {/* labels */}
-              <span className="absolute bottom-3 left-3 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
-                Before
-              </span>
-              <span className="absolute bottom-3 right-3 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: ACCENT }}>
-                After
-              </span>
-              {/* handle */}
-              <div className="absolute top-0 bottom-0" style={{ left: `${pos}%`, transform: "translateX(-50%)" }}>
-                <div className="h-full" style={{ width: 2, background: ACCENT }} />
-                <div
-                  className="absolute top-1/2 left-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[13px] font-bold"
-                  style={{ background: ACCENT, color: "#0A0C0F" }}
-                >
-                  ⇄
-                </div>
-              </div>
-              {/* a11y / keyboard control */}
-              <label className="sr-only" htmlFor="apex-ba">Reveal amount</label>
-              <input
-                id="apex-ba"
-                type="range"
-                min={0}
-                max={100}
-                value={pos}
-                onChange={(e) => setPos(Number(e.target.value))}
-                className="absolute inset-x-0 bottom-0 h-10 w-full cursor-ew-resize opacity-0"
-              />
-            </div>
-          </Rise>
-        )}
+        </Rise>
       </div>
     </section>
   );
