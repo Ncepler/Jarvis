@@ -1,8 +1,9 @@
-// Style demo — a barbershop homepage in the warm-vintage-dark "Standard" mood
-// (SKILL §13c): warm espresso-black (NOT the cool contractor #0B0B0C), bone
-// text, chair-red accent, an Oswald condensed display, warm interior
-// photography. Same editorial skeleton as the dark demos. "Standard Barber Co."
-// is a sample brand for the demo, not a client.
+// Style demo — a barbershop homepage in the warm leather-lounge "Standard" mood
+// (SKILL §13c + §14c): warm espresso-black, candlelit bone text, BRASS/GOLD
+// accent (oxblood secondary), an Oswald condensed display, warm lamplit
+// photography. The cut list is a vintage PRICE BOARD with brass leader dots, and
+// "why this chair" is a warm lounge statement — not the numbered grid. "Standard
+// Barber Co." is a sample brand for the demo, not a client.
 
 import {
   Contact,
@@ -13,30 +14,34 @@ import {
   DemoMarquee,
   DemoShell,
   type DemoTheme,
+  Eyebrow,
   Faq,
   FullBleedBreak,
   Intro,
-  ServiceCards,
-  ValueProps,
+  Media,
+  Rise,
+  Section,
+  TwoLine,
   WorkGrid,
 } from "./system";
 
-const ACCENT = "#B23A3A"; // classic chair red
+const ACCENT = "#B0833F"; // brass / gold — warm lamplight (primary)
+const OXBLOOD = "#9A3B33"; // deep oxblood (secondary, used sparingly)
 
-// Warm vintage dark barber mood (SKILL §13c).
+// Warm leather-lounge barber mood (SKILL §13c).
 const THEME: DemoTheme = {
-  bg: "#14110E", // warm espresso-black, NOT the cool #0B0B0C
-  surface: "#1E1915",
-  fg: "#F1EADD", // warm bone
-  body: "#C3B8A6",
-  muted: "#8A7E6C",
-  line: "#2C261F",
+  bg: "#16110C", // warm espresso-black, leather-dark (NOT the cool #0B0B0C)
+  surface: "#20180F", // worn-leather panel, a touch warmer/lighter
+  fg: "#F0E7D6", // warm bone / candlelit cream
+  body: "#C2B49C", // aged paper
+  muted: "#8A7B65", // dim brass-gray
+  line: "#2E2419", // dark leather seam
   accent: ACCENT,
-  onAccent: "#F1EADD", // bone text on chair-red
+  onAccent: "#16110C", // dark text on brass
   font: "var(--font-tight)",
   display: "var(--font-oswald)", // vintage condensed signage
-  heroScrim: "linear-gradient(180deg, rgba(20,17,14,.35), rgba(20,17,14,.85))",
-  breakScrim: "linear-gradient(180deg, rgba(20,17,14,.55), rgba(20,17,14,.9))",
+  heroScrim: "linear-gradient(180deg, rgba(22,17,12,.35), rgba(22,17,12,.85))",
+  breakScrim: "linear-gradient(180deg, rgba(22,17,12,.55), rgba(22,17,12,.9))",
 };
 const PHONE = "(631) 555-0185";
 const NAME = "Standard Barber Co.";
@@ -46,11 +51,14 @@ const NAME = "Standard Barber Co.";
 // set the path below. Leave "" to show the labeled placeholder instead.
 const firstBarberImage = "/previews/firstBarberImage.webp";
 
-const SERVICES = [
-  { title: "Haircut — $35", copy: "Scissor or clipper, your call. No rush, no upsell — you leave looking like you, sharper." },
-  { title: "Skin fade — $40", copy: "Clean taper down to the skin, blended right and finished by hand." },
-  { title: "Beard & line-up — $20", copy: "Trimmed, shaped, and lined up so it actually looks intentional." },
-  { title: "Hot-towel shave — $45", copy: "Straight razor, hot towel, the full ritual. Worth booking a few extra minutes for." },
+// The price board — real prices, leader dots, the section itself (§14c).
+const BOARD = [
+  { name: "Haircut", price: "$35", note: "Scissor or clipper. No rush, no upsell." },
+  { name: "Skin Fade", price: "$40", note: "Clean taper to the skin, blended by hand." },
+  { name: "Beard & Line-up", price: "$20", note: "Trimmed, shaped, lined up sharp." },
+  { name: "Hot-towel Shave", price: "$45", note: "Straight razor, hot towel, the full ritual." },
+  { name: "The Works", price: "$70", note: "Cut, shave, and towel — the whole chair." },
+  { name: "Kids (12 & under)", price: "$25", note: "Quick and easy, first cuts welcome." },
 ];
 
 const WORK = [
@@ -62,14 +70,6 @@ const WORK = [
   { tag: "Shop", caption: "Four chairs, mid-afternoon" },
 ];
 
-const PROPS = [
-  { title: "Four chairs, no rush", copy: "We take the time the cut needs. You're not getting hustled out for the next head." },
-  { title: "No upsell", copy: "You asked for a haircut, you get a haircut. We're not selling you a shelf of product." },
-  { title: "Walk in or book", copy: "Book online in under a minute, or just come by. If the pole's spinning, we're cutting." },
-  { title: "Same barbers", copy: "The same hands every time, so your cut comes out the same every time." },
-  { title: "Cash or card", copy: "Whatever's easy. Rebook on your way out and the next one's already on the calendar." },
-];
-
 const FAQ = [
   { q: "Do I need an appointment?", a: "No — walk-ins are always welcome. But booking online takes under a minute and skips the wait." },
   { q: "What are your hours?", a: "Tue–Sat, 9am to 7pm. If the pole out front is spinning, we're open and cutting." },
@@ -77,6 +77,107 @@ const FAQ = [
   { q: "How much is a cut?", a: "Haircut $35, skin fade $40, beard line-up $20, hot-towel shave $45. The works — cut, shave, towel — is $70." },
   { q: "Cash or card?", a: "Either. And if you rebook on the way out, your next chair's already on the calendar." },
 ];
+
+// ── The list — a vintage price board: name, brass leader dots, price (§14c). ─
+function PriceBoard() {
+  return (
+    <Section>
+      <Rise>
+        <Eyebrow>The list</Eyebrow>
+        <div className="mt-5">
+          <TwoLine a="The cuts." b="The prices." />
+        </div>
+      </Rise>
+      <Rise delay={0.1}>
+        <div
+          className="mt-12 p-8 md:p-12"
+          style={{
+            background: "var(--d-surface)",
+            border: "1px solid var(--d-line)",
+            borderRadius: "var(--d-radius)",
+            // warm lamplight on worn leather — texture, not a shape (§13c)
+            backgroundImage:
+              "radial-gradient(120% 80% at 50% 0%, rgba(176,131,63,.10), transparent 60%)",
+          }}
+        >
+          {BOARD.map((b, i) => (
+            <div
+              key={b.name}
+              className="flex flex-col gap-2 py-5 md:flex-row md:items-baseline md:gap-4"
+              style={i > 0 ? { borderTop: "1px solid var(--d-line)" } : undefined}
+            >
+              <span
+                className="text-[24px] font-medium uppercase leading-none tracking-[0.02em] md:text-[28px]"
+                style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
+              >
+                {b.name}
+              </span>
+              {/* brass leader dots */}
+              <span
+                aria-hidden
+                className="hidden flex-1 translate-y-[-4px] md:block"
+                style={{ borderBottom: "2px dotted var(--d-accent)", opacity: 0.5 }}
+              />
+              <span className="hidden max-w-[16rem] text-[13px] leading-[1.5] md:block md:text-right" style={{ color: "var(--d-muted)" }}>
+                {b.note}
+              </span>
+              <span
+                className="text-[24px] font-medium leading-none md:text-[28px]"
+                style={{ color: "var(--d-accent)", fontFamily: "var(--d-display)" }}
+              >
+                {b.price}
+              </span>
+              <p className="text-[13px] leading-[1.5] md:hidden" style={{ color: "var(--d-muted)" }}>
+                {b.note}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Rise>
+    </Section>
+  );
+}
+
+// ── Why this chair — the lounge statement beside a lamplit interior (§14c). ──
+function TheChair() {
+  return (
+    <Section dark>
+      <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
+        <Rise>
+          <Media label="THE CHAIR — leather, brass, lamplight (4:5)" ratio="4/5" />
+        </Rise>
+        <Rise delay={0.1}>
+          <Eyebrow>Why this chair</Eyebrow>
+          <div className="mt-6 space-y-6">
+            {[
+              "No rush. We take the time the cut needs and you leave looking like you, sharper.",
+              "No upsell. You asked for a haircut, you get a haircut — not a shelf of product.",
+              "Same barbers, every visit. The same hands, so your cut comes out the same every time.",
+            ].map((line) => (
+              <p
+                key={line}
+                className="text-[22px] font-medium leading-[1.3] md:text-[26px]"
+                style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
+              >
+                {line}
+              </p>
+            ))}
+          </div>
+          <p className="mt-8 text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+            Pull up a chair. Rebook on your way out and the next one&apos;s already
+            on the calendar.
+          </p>
+          <span
+            className="mt-7 inline-block px-6 py-3.5 text-[13px] font-semibold uppercase tracking-[0.1em]"
+            style={{ background: OXBLOOD, color: "var(--d-fg)" }}
+          >
+            Book a chair
+          </span>
+        </Rise>
+      </div>
+    </Section>
+  );
+}
 
 export function BarberDemo() {
   return (
@@ -108,18 +209,12 @@ export function BarberDemo() {
           ["Cash or card", "Easy"],
         ]}
       />
-      <ServiceCards
-        eyebrow="The list"
-        line1="Four services."
-        line2="Done sharp."
-        services={SERVICES}
-        thumbPrefix="LOOK"
-      />
+      <PriceBoard />
       <FullBleedBreak
-        eyebrow="The chair"
-        line1="No rush."
-        line2="No upsell."
-        paragraph="We take the time the cut needs and send you out looking like you, sharper. Rebook on your way out and the next one's already on the calendar."
+        eyebrow="The shop"
+        line1="Leather, brass,"
+        line2="and warm light."
+        paragraph="Standard is built to feel like a room you'd actually sit in — worn leather, a little brass, lamplight, and no one rushing you toward the door."
         checklist={[
           "Walk-ins always welcome",
           "Book online in under a minute",
@@ -127,7 +222,7 @@ export function BarberDemo() {
           "Cash or card",
         ]}
         cta="Book a chair"
-        mediaLabel="THE SHOP — chairs & details (16:9)"
+        mediaLabel="THE SHOP — chairs, brass, lamplight (16:9)"
       />
       <WorkGrid
         eyebrow="Recent work"
@@ -135,12 +230,7 @@ export function BarberDemo() {
         line2="on the wall."
         items={WORK}
       />
-      <ValueProps
-        eyebrow="Why this chair"
-        line1="Reasons people"
-        line2="keep coming back."
-        props={PROPS}
-      />
+      <TheChair />
       <Faq
         eyebrow="Questions"
         line1="The stuff"

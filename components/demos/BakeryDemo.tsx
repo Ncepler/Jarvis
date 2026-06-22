@@ -1,8 +1,9 @@
 // Style demo — a neighborhood bakery homepage in the warm & inviting "Golden
-// Hour" mood (SKILL §13b): warm cream, espresso-brown text, crust-amber accent,
-// a Fraunces display, morning-light photography, slightly softer corners. Same
-// editorial skeleton as the dark demos. "Golden Hour Bakehouse" is a sample
-// brand for the demo, not a client.
+// Hour" mood (SKILL §13b + §14b): warm cream, espresso text, crust-amber accent,
+// a Fraunces display, softer corners. A bakery sells off a MENU and a CASE, so
+// "what we bake" is a printed-menu layout beside the case, and "why people come
+// back" is a warm narrative band — not the numbered grid. "Golden Hour
+// Bakehouse" is a sample brand for the demo, not a client.
 
 import {
   Contact,
@@ -13,11 +14,14 @@ import {
   DemoMarquee,
   DemoShell,
   type DemoTheme,
+  Eyebrow,
   Faq,
   FullBleedBreak,
   Intro,
-  ServiceCards,
-  ValueProps,
+  Media,
+  Rise,
+  Section,
+  TwoLine,
   WorkGrid,
 } from "./system";
 
@@ -47,11 +51,12 @@ const NAME = "Golden Hour Bakehouse";
 // set the path below. Leave "" to show the labeled placeholder instead.
 const firstBakeryImage = "/previews/firstBakeryImage.webp";
 
-const SERVICES = [
-  { title: "Daily bread", copy: "Levain sourdough and seeded rye, 36-hour ferment, out of the oven at 7am. When it's gone, it's gone." },
-  { title: "Morning pastry", copy: "Cardamom morning buns, croissants, and one very good cookie, baked in small batches every morning." },
-  { title: "Cakes to order", copy: "Vanilla or chocolate, plus seasonal specials. Two days' notice and it's ready for the table." },
-  { title: "Wholesale", copy: "Standing morning deliveries of bread and pastry to cafés and restaurants nearby. Ask about a route." },
+// The menu — category, a short appetizing line, an honest price/note (§14b).
+const MENU = [
+  { name: "Daily bread", desc: "Levain sourdough and seeded rye, 36-hour ferment, out of the oven at 7am.", price: "from $7" },
+  { name: "Morning pastry", desc: "Cardamom morning buns, croissants, and one very good cookie, small batches.", price: "from $4" },
+  { name: "Cakes to order", desc: "Vanilla or chocolate, plus seasonal specials. Two days' notice.", price: "from $45" },
+  { name: "Wholesale", desc: "Standing morning deliveries of bread and pastry to cafés and restaurants nearby.", price: "ask us" },
 ];
 
 const WORK = [
@@ -63,14 +68,6 @@ const WORK = [
   { tag: "Cake", caption: "Whole birthday cake — order two days ahead" },
 ];
 
-const PROPS = [
-  { title: "Baked this morning", copy: "Everything in the case came out of the oven today. Nothing carried over from yesterday." },
-  { title: "Small batches", copy: "We bake what we can do well, then we're done. The empty case means it was good." },
-  { title: "Real ferment", copy: "Sourdough on a 36-hour rise — flavor and keeping quality you can't rush." },
-  { title: "Order ahead", copy: "Reserve a bag the night before so the buns are still there when you arrive." },
-  { title: "Right in town", copy: "Walk to it. We're on Main Street, open from 7am until the case is empty." },
-];
-
 const FAQ = [
   { q: "What days are you open?", a: "Wed–Sun, 7am until sold out. We post the morning's bake so you know what's in the case before you come." },
   { q: "Can I order ahead?", a: "Yes — order by 8pm and your bag is on the shelf with your name on it the next morning." },
@@ -78,6 +75,93 @@ const FAQ = [
   { q: "Do you sell wholesale to cafés?", a: "We do — standing morning deliveries of bread and pastry. Reach out and we'll talk about a route." },
   { q: "Do you do gluten-free?", a: "Not yet — we're a small flour-and-water shop and can't promise a clean kitchen for it. We'd rather be honest than careless." },
 ];
+
+// ── What we bake — the menu beside the case, like stepping to the counter (§14b).
+function BakeryMenu() {
+  return (
+    <Section>
+      <Rise>
+        <Eyebrow>What we bake</Eyebrow>
+        <div className="mt-5">
+          <TwoLine a="Step up" b="to the counter." />
+        </div>
+      </Rise>
+      <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-16">
+        {/* the menu */}
+        <Rise>
+          <div style={{ borderTop: "1px solid var(--d-line)" }}>
+            {MENU.map((m) => (
+              <div
+                key={m.name}
+                className="flex items-baseline justify-between gap-6 py-6"
+                style={{ borderBottom: "1px solid var(--d-line)" }}
+              >
+                <div>
+                  <h3
+                    className="text-[26px] font-semibold leading-[1.1]"
+                    style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
+                  >
+                    {m.name}
+                  </h3>
+                  <p className="mt-2 max-w-sm text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+                    {m.desc}
+                  </p>
+                </div>
+                <span className="shrink-0 text-[14px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--d-accent)" }}>
+                  {m.price}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Rise>
+        {/* the case */}
+        <Rise delay={0.1}>
+          <div className="md:sticky md:top-10">
+            <Media label="THE CASE — morning bake (3:2)" ratio="3/2" />
+            <p className="mt-3 text-[13px]" style={{ color: "var(--d-muted)" }}>
+              The case at 7am. When it&apos;s empty, that&apos;s the day.
+            </p>
+          </div>
+        </Rise>
+      </div>
+    </Section>
+  );
+}
+
+// ── Why people come back — a warm narrative band, not a corporate grid (§14b).
+function WarmNarrative() {
+  return (
+    <Section dark>
+      <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
+        <Rise>
+          <Eyebrow>Why people come back</Eyebrow>
+          <div className="mt-5">
+            <TwoLine a="Baked at 4am." b="Gone by noon." />
+          </div>
+          <div className="mt-7 space-y-6">
+            {[
+              ["Everything's from this morning.", "Nothing in the case carried over from yesterday — we bake it, you eat it the same day, and the empty shelf at noon is the point."],
+              ["We bake a short list, well.", "Sourdough on a 36-hour rise, pastry out before the rush, cakes to order. A few things every day instead of a long menu we phone in."],
+              ["Reserve a bag the night before.", "Order by 8pm and it's on the shelf with your name on it. The regulars never gamble on the morning."],
+            ].map(([h, p]) => (
+              <div key={h}>
+                <h3 className="text-[19px] font-semibold" style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}>
+                  {h}
+                </h3>
+                <p className="mt-1.5 text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+                  {p}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Rise>
+        <Rise delay={0.1}>
+          <Media label="THE BAKEHOUSE — morning light (4:5)" ratio="4/5" />
+        </Rise>
+      </div>
+    </Section>
+  );
+}
 
 export function BakeryDemo() {
   return (
@@ -109,13 +193,7 @@ export function BakeryDemo() {
           ["Open from 7am", "Until sold out"],
         ]}
       />
-      <ServiceCards
-        eyebrow="What we bake"
-        line1="A short list."
-        line2="Done right."
-        services={SERVICES}
-        thumbPrefix="BAKE"
-      />
+      <BakeryMenu />
       <FullBleedBreak
         eyebrow="Order ahead"
         line1="Skip the line,"
@@ -136,12 +214,7 @@ export function BakeryDemo() {
         line2="most days."
         items={WORK}
       />
-      <ValueProps
-        eyebrow="Why people come back"
-        line1="Reasons the"
-        line2="case empties."
-        props={PROPS}
-      />
+      <WarmNarrative />
       <Faq
         eyebrow="Questions"
         line1="The stuff"

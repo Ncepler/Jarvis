@@ -1,7 +1,16 @@
-# HANDOFF — updated 2026-06-22 (v36)
+# HANDOFF — updated 2026-06-22 (v37)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — footer stamp v36. `npm run build` + `tsc --noEmit` + `next lint` all clean. Both reworked demos screenshot-verified (renovation sliders + caramel handle, landscaping forest-dark + working day↔night toggle, spine intact on both).
+- Deployed: https://jarvis-nceplers-projects.vercel.app — footer stamp v37. `npm run build` + `tsc --noEmit` + `next lint` all clean. **All 8 demos now have their §14 niche-specific services + "why us" layouts** (renovation/landscaping in v36; power-wash/bakery/barber/lawn-care/florist this run; auto-body was already §14d). Each new niche section screenshot-verified; shared spine intact on every demo.
+
+## v37 — power-wash / bakery / barber / lawn-care / florist niche layouts per SKILL §14 (this run)
+- **Shared add (`system.tsx`): `ProofStrip`** — a hairline-separated row of ✓ + short claims (no numbers), used by power-wash and lawn-care "why us".
+- **Power washing (§14a, light):** services → alternating before/after **proof rows** (`WashProofRows`, 4 services, before/after placeholder pair + text, media alternates side); a prominent interactive **before/after slider** transformation (`WashTransformation`, reuses `BeforeAfterSlider`); "why us" → `ProofStrip`. WorkGrid + spine kept.
+- **Bakery (§14b, warm cream + Fraunces):** services → **menu/case** layout (`BakeryMenu` — menu rows with serif category names + amber prices beside a sticky "THE CASE" photo); "why people come back" → **warm narrative band** (`WarmNarrative`, 3 short reasons + a portrait photo). FullBleed + WorkGrid + spine kept.
+- **Barber (§14c):** **palette updated to spec** — leather-lounge brass/gold (bg #16110C, accent **#B0833F**, oxblood `OXBLOOD=#9A3B33` secondary used only on a CTA), was the old chair-red. Services → vintage **price board** (`PriceBoard` — Oswald names, brass dotted leaders, brass prices on a lamplit leather panel via a subtle radial highlight); "why this chair" → **the lounge** (`TheChair`, big serif statement beside a lamplit interior). Spine kept.
+- **Lawn care (§14g, light, now `"use client"`):** services → **plan tier cards** (`PlanCards` — Basic/Full Care[most picked]/Seasonal, "from $X / visit"); added a live **instant-estimate widget** (`EstimateWidget` — lawn size × frequency → rough $/visit, "rough estimate, not a quote", CTA → `#freshcut-contact`); "why us" → `ProofStrip`. WorkGrid + spine kept.
+- **Florist (§14h, light + Fraunces):** services → **occasion tiles** (`OccasionTiles` — Weddings/Sympathy/Everyday/Events, serif names, hover-lift); work grid → **bouquet gallery** (`BouquetGallery`, name + "from $X"); added a **weekly-flowers subscription** block (`Subscription`); "why us" → soft 3-item set (`SoftValues`). Spine kept.
+- Honesty held throughout: labeled placeholders only, no fabricated reviews/stats, illustrative prices clearly "from"/"rough estimate". No decorative shapes.
 
 ## v36 — renovation + landscaping reworked per updated SKILL §14e/§14f/§13g (this run)
 - **Shared additions to `components/demos/system.tsx`** (so both demos share, and AutoBody reuses): (1) **`BeforeAfterSlider`** — extracted/generalized from Apex's inline slider; theme-driven accent handle (`--d-accent`/`--d-onaccent`), takes real images OR labeled placeholders, drag + hidden range (keyboard) + reduced-motion side-by-side. **AutoBodyDemo refactored** to consume it (its inline copy deleted; behaviour identical, real car photos still wired). (2) **`ProcessStepper`** — horizontal numbered steps on a hairline strip, one-line "what happens" + duration per step + optional overall `note`; `md:grid-cols-3|4` by step count. (3) **`FilterableWorkGrid`** — same tiles as `WorkGrid` + an "All"+chips row filtering by `item.tag`.
@@ -56,7 +65,7 @@
 - Noah wanted the **gallery card row finite/list-based, NOT infinite** (the infinite one to keep is the demo SERVICE MARQUEE — "kids · cuts · fades · beards" — those stay looping, fixed in v29). Reversed the gallery wrap: each card's `d = index - center` (no modulo), `x` is bounded to `[minX, 0]` where `minX = -(count-1)*step`, drag past either end soft rubber-bands (×0.35) and snaps back, `snapTo`/arrows/`centerIdx`/`onSelect` all clamp to `[0, count-1]`, and the AllSites `vilas:open-demo` handler just `snapTo(idx)`. Removed the now-unused `count` prop from `GalleryCard`. So: first card has empty space to its left, last card empties to the right — it clearly starts and ends.
 
 ## In progress
-- Nothing half-finished. v36 demo rework complete, verified, and pushed.
+- Nothing half-finished. All 8 demos carry their §14 niche layouts (v36 + v37), verified and pushed.
 
 ## Next up (ordered)
 1. **Noah: eyes on the live URL** — judge (a) the five new demo moods + Syne, (b) the hero photos in each demo, (c) the rebuilt reveal feel: overshoot punch, how far V/S travel, the Replay button + icon spin, and that the end frame == start frame, (d) that the gallery no longer flashes stacked demos on load.

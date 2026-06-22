@@ -1028,6 +1028,55 @@ export function ValueProps({
   );
 }
 
+// ── Proof strip: a hairline-separated row of ✓ + short claims, no numbers. ───
+// Replaces the numbered value list on niches that want a compact, plain strip
+// (power washing §14a, lawn care §14g).
+export type Claim = { label: string; sub?: string };
+export function ProofStrip({
+  eyebrow,
+  line1,
+  line2,
+  claims,
+}: {
+  eyebrow: string;
+  line1: string;
+  line2: string;
+  claims: Claim[];
+}) {
+  return (
+    <Section dark>
+      <Rise>
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <div className="mt-5">
+          <TwoLine a={line1} b={line2} />
+        </div>
+      </Rise>
+      <div
+        className="mt-12 grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4"
+        style={{ background: "var(--d-line)", border: "1px solid var(--d-line)" }}
+      >
+        {claims.map((c, i) => (
+          <Rise key={c.label} delay={Math.min(i * 0.06, 0.24)}>
+            <div className="h-full p-7" style={{ background: "var(--d-bg)" }}>
+              <span className="text-[20px] leading-none" style={{ color: "var(--d-accent)" }}>
+                ✓
+              </span>
+              <h3 className="mt-4 text-[17px] font-semibold" style={{ color: "var(--d-fg)" }}>
+                {c.label}
+              </h3>
+              {c.sub && (
+                <p className="mt-2 text-[14px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+                  {c.sub}
+                </p>
+              )}
+            </div>
+          </Rise>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 // ── FAQ accordion: Q0N, one open at a time, hairline rows. ───────────────────
 export type Qa = { q: string; a: string };
 export function Faq({
