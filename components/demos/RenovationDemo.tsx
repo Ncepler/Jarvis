@@ -55,15 +55,15 @@ const PROCESS = [
 // Work grid is filterable by room (§14e). Tags match the chip set below.
 const WORK_CHIPS = ["Kitchen", "Bath", "Addition", "Whole-home", "Exterior"];
 const WORK = [
-  { tag: "Kitchen", caption: "Kitchen — full gut renovation" },
-  { tag: "Bath", caption: "Primary bath — walk-in tile shower" },
-  { tag: "Addition", caption: "Rear addition — framed & finished" },
-  { tag: "Whole-home", caption: "1920s colonial — full restoration" },
-  { tag: "Exterior", caption: "Front entry & porch rebuild" },
-  { tag: "Kitchen", caption: "Galley kitchen — opened to the dining room" },
-  { tag: "Bath", caption: "Guest bath — floating vanity & tile" },
-  { tag: "Whole-home", caption: "Cape — second-story gut & rebuild" },
-  { tag: "Exterior", caption: "Cedar siding & new windows" },
+  { tag: "Kitchen", caption: "Kitchen — full gut renovation", img: "/previews/renovation3.1.webp" },
+  { tag: "Bath", caption: "Primary bath — walk-in tile shower", img: "/previews/renovation3.2.webp" },
+  { tag: "Addition", caption: "Rear addition — framed & finished", img: "/previews/renovation3.3.webp" },
+  { tag: "Whole-home", caption: "1920s colonial — full restoration", img: "/previews/renovation3.4.webp" },
+  { tag: "Exterior", caption: "Front entry & porch rebuild", img: "/previews/renovation3.5.webp" },
+  { tag: "Kitchen", caption: "Galley kitchen — opened to the dining room", img: "/previews/renovation3.6.webp" },
+  { tag: "Bath", caption: "Guest bath — floating vanity & tile", img: "/previews/renovation3.7.webp" },
+  { tag: "Whole-home", caption: "Cape — second-story gut & rebuild", img: "/previews/renovation3.8.webp" },
+  { tag: "Exterior", caption: "Cedar siding & new windows", img: "/previews/renovation3.9.webp" },
 ];
 
 const PROPS = [
@@ -103,13 +103,23 @@ function RoomTransforms() {
           <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
             Kitchen — full gut
           </p>
-          <BeforeAfterSlider beforeLabel="BEFORE — kitchen (16:9)" afterLabel="AFTER — kitchen (16:9)" />
+          <BeforeAfterSlider
+            beforeImg="/previews/renovation1.before.webp"
+            afterImg="/previews/renovation1.after.webp"
+            beforeLabel="BEFORE — kitchen (16:9)"
+            afterLabel="AFTER — kitchen (16:9)"
+          />
         </Rise>
         <Rise delay={0.1}>
           <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
             Bath — walk-in tile shower
           </p>
-          <BeforeAfterSlider beforeLabel="BEFORE — bath (16:9)" afterLabel="AFTER — bath (16:9)" />
+          <BeforeAfterSlider
+            beforeImg="/previews/renovation2.before.webp"
+            afterImg="/previews/renovation2.after.webp"
+            beforeLabel="BEFORE — bath (16:9)"
+            afterLabel="AFTER — bath (16:9)"
+          />
         </Rise>
       </div>
       {/* compact numbered service list */}
