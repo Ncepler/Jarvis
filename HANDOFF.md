@@ -1,6 +1,12 @@
-# HANDOFF — updated 2026-06-23 (v38)
+# HANDOFF — updated 2026-06-23 (v39)
 
-## v38 — auto-body "In the booth, and back out" work tiles get real photos (this run)
+## v39 — renovation before/after sliders + 9 work tiles get real photos (this run)
+- Noah uploaded renovation photos: `renovation1.before/after` → **Kitchen** before/after slider, `renovation2.before/after` → **Bath** slider, `renovation3.1`–`renovation3.9` → the 9 `FilterableWorkGrid` tiles (in array order).
+- Reused the v38 plumbing — no component changes. Just passed `beforeImg`/`afterImg` to the two `BeforeAfterSlider`s and `img` to each `WORK` item in `RenovationDemo.tsx`.
+- Compressed to WebP (~1500px q80; before/after 16:9, grid tiles 4:3, ≤175KB each). PNG sources gitignored; only `.webp` committed.
+- The FullBleed "TRANSFORMATION" break still uses a labeled placeholder — Noah didn't supply an image for it. Build + tsc + lint clean.
+
+## v38 — auto-body "In the booth, and back out" work tiles get real photos
 - Noah uploaded 6 photos (`public/previews/car1.1.png` … `car1.6.png`) for the AutoBody WorkGrid — sequence: into the booth → back out. Mapped to the 6 `WORK` tiles in **reading order** (3-col grid: top row 1.1/1.2/1.3, bottom row 1.4/1.5/1.6).
 - Compressed to WebP (`car1.N.webp`, ~1400px q80, all exactly 4:3, ≤120KB each). PNG sources stay gitignored (existing demo-photo pattern); only `.webp` committed.
 - **`Media` (`system.tsx`) gained an optional `img` prop** (renders `center/cover`, drops the placeholder label when present) + `Work.img?`; both `WorkGrid` and `FilterableWorkGrid` pass `w.img` through. Other 7 demos unaffected (their WORK items have no `img` → unchanged placeholders).
