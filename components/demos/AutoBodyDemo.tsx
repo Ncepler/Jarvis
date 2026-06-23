@@ -626,13 +626,15 @@ function SpecStrip() {
 }
 
 // ── Spine data ───────────────────────────────────────────────────────────────
+// Noah's 6 booth photos — reading order, top row then bottom (car1.1 → car1.6:
+// into the booth on the left, back out on the right).
 const WORK = [
-  { tag: "Collision", caption: "Front-end collision — bumper & hood rebuilt" },
-  { tag: "Paint", caption: "Full panel respray, color-matched" },
-  { tag: "Dent", caption: "Door crease pulled paintless (PDR)" },
-  { tag: "Frame", caption: "Unibody pulled back to spec" },
-  { tag: "Glass", caption: "Windshield swap & ADAS recalibration" },
-  { tag: "Detail", caption: "Paint correction & ceramic finish" },
+  { tag: "Collision", caption: "Front-end collision — bumper & hood rebuilt", img: "/previews/car1.1.webp" },
+  { tag: "Paint", caption: "Full panel respray, color-matched", img: "/previews/car1.2.webp" },
+  { tag: "Dent", caption: "Door crease pulled paintless (PDR)", img: "/previews/car1.3.webp" },
+  { tag: "Frame", caption: "Unibody pulled back to spec", img: "/previews/car1.4.webp" },
+  { tag: "Glass", caption: "Windshield swap & ADAS recalibration", img: "/previews/car1.5.webp" },
+  { tag: "Detail", caption: "Paint correction & ceramic finish", img: "/previews/car1.6.webp" },
 ];
 
 const FAQ = [

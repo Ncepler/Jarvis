@@ -171,11 +171,13 @@ export function TwoLine({
 // NO stock, NO AI imagery committed; just the correct aspect box.
 export function Media({
   label,
+  img,
   ratio = "4/3",
   className = "",
   rounded = true,
 }: {
   label: string;
+  img?: string;
   ratio?: string;
   className?: string;
   rounded?: boolean;
@@ -185,18 +187,22 @@ export function Media({
       className={`relative w-full overflow-hidden ${rounded ? "rounded-[var(--d-radius)]" : ""} ${className}`}
       style={{
         aspectRatio: ratio,
-        background: "var(--d-surface)",
+        background: img
+          ? `var(--d-surface) url("${img}") center/cover no-repeat`
+          : "var(--d-surface)",
         border: "1px solid var(--d-line)",
       }}
     >
-      <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
-        <span
-          className="text-[11px] font-semibold uppercase tracking-[0.18em]"
-          style={{ color: "var(--d-muted)" }}
-        >
-          {label}
-        </span>
-      </div>
+      {!img && (
+        <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
+          <span
+            className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+            style={{ color: "var(--d-muted)" }}
+          >
+            {label}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -844,7 +850,7 @@ export function ProcessStepper({
 }
 
 // ── Work grid: tiles with a category tag + one-line caption. ─────────────────
-export type Work = { tag: string; caption: string };
+export type Work = { tag: string; caption: string; img?: string };
 export function WorkGrid({
   eyebrow,
   line1,
@@ -877,7 +883,7 @@ export function WorkGrid({
             <figure className="group">
               <div className="overflow-hidden rounded-[var(--d-radius)]">
                 <div className="transition-transform duration-500 group-hover:scale-[1.03]">
-                  <Media label={`WORK — ${w.caption} (4:3)`} rounded={false} />
+                  <Media label={`WORK — ${w.caption} (4:3)`} img={w.img} rounded={false} />
                 </div>
               </div>
               <figcaption className="mt-3">
@@ -958,7 +964,7 @@ export function FilterableWorkGrid({
             <figure className="group">
               <div className="overflow-hidden rounded-[var(--d-radius)]">
                 <div className="transition-transform duration-500 group-hover:scale-[1.03]">
-                  <Media label={`WORK — ${w.caption} (4:3)`} rounded={false} />
+                  <Media label={`WORK — ${w.caption} (4:3)`} img={w.img} rounded={false} />
                 </div>
               </div>
               <figcaption className="mt-3">
