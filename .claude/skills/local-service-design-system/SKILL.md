@@ -2,18 +2,20 @@
 name: local-service-design-system
 description: >
   The visual design system for Vilas demo sites for local trade/service businesses
-  (renovation/remodeling, landscaping, power washing, lawn care, florist, bakery, barber, auto body).
+  (renovation/remodeling, landscaping, power washing, lawn care, florist, bakery, barber, auto
+  body — plus the magician, the documented theatrical exception).
   Reverse-engineered from two real, high-quality sites built on the same template family:
   axelslandscapingdesign.com (landscaping) and sallemllc.pages.dev (general contractor),
-  then extended per niche with patterns observed from real barber, bakery, power-washing, and
-  automotive sites (see §0). Use this whenever building or restyling a Vilas DEMO site. It makes the demos
+  then extended with patterns observed from real sites in every niche — barber, bakery,
+  power-washing, automotive, renovation, landscaping, lawn-care, florist, and magician (see §0). Use this whenever building or restyling a Vilas DEMO site. It makes the demos
   look like real, hired-contractor websites — photographic and editorial — NOT like abstract,
   shape-decorated AI pages. The niches no longer differ by PALETTE alone: the services and
   "why us" sections, the palette, and the type all adapt to what each business actually is, so
   a barber reads as a barber and a bakery as a bakery — not one template recolored. Demos vary:
   renovation is DARK, landscaping is FOREST-DARK, florist + bakery + power washing + lawn care
   are LIGHT, barber is a WARM LEATHER-LOUNGE dark, auto body is GRAPHITE-DARK & motion-heavy —
-  see §13 and §14. The main Vilas studio site
+  see §13 and §14. The Magician (§16) is the deliberate exception — a dark, theatrical,
+  motion-heavy spectacle that breaks the editorial system on purpose. The main Vilas studio site
   uses its own separate bone palette + the Syne display face, never used on demos.
 ---
 
@@ -37,6 +39,7 @@ description: >
 - **Landscaping (beyond the base system):** Cedar Ridge, Huntergreen, GMC Landscapes, Mark Tessier, Martin Cuthbert. Patterns: **filterable project grid** by type (patios / walls / gardens / lighting / fire pits), before/after, an **"Our Process" visual stepper**, and the lighting hook — pros sell landscape lighting with **a rendering by day and one by night with the lights on**, which maps to a **day↔night toggle**. *(See §14f.)*
 - **Lawn care:** TruGreen (custom quote builder by lawn size/issues), Just Right Lawns, GrassPerson, Peak Environment. Patterns: **quote/estimate-centric** (one CTA, repeated), **service plans / tiers** laid out as packages, a "what to expect" explainer. It's a recurring-plan business, so plan cards + an instant estimate fit, not a project grid. *(See §14g.)*
 - **Florist:** Bramble & Wild, Ode à la Rose, Arena Flowers, Juniper, KAN (dark-elegant). Patterns: **elegant serif on neutral backgrounds** with photography doing the work, **occasion-based browsing** (weddings / sympathy / everyday / events — people search "anniversary flowers," not "red roses"), a **bouquet-menu grid**, and **weekly-flower subscriptions**. *(See §14h.)*
+- **Magician / illusionist (the theatrical exception):** Rob Lake (roblake.com — high-end theatrical illusionist: spectacle, emotion, storytelling, dark and cinematic), Ellusionist (ellusionist.com — dark vintage-casino, card-forward, mysterious). Motion vocabulary from award sites: **interactive WebGL particle heroes**, **mouse-driven card animations**, **GSAP card galleries with scroll**, **interactive hero cards**. Patterns: deep theatrical black + one rich accent (gold / crimson / violet), card-flourish and shuffle video, floating/flying cards, sparks/embers, smoke and spotlight, reveal-based interactions, booking-focused (corporate / private / weddings / theaters). *(See §16 — this niche breaks the editorial DNA on purpose.)*
 
 ---
 
@@ -44,17 +47,19 @@ description: >
 
 1. **NO decorative geometric shapes. This is the rule that matters most.** No floating circles, blobs, rings, half-circles, "cut" diagonal shapes, abstract SVG decoration, gradient orbs, or shape-based section dividers. If a shape isn't a photo, a video, a line of text, a hairline rule, or a button, it does not belong. *(This is the single thing wrong with the current demos — strip all of it.)*
 2. **Real photography is the design.** Every section's visual interest comes from full-bleed photos/video of the actual work, not from graphics. Where Noah hasn't supplied photos yet, use clearly-labeled image placeholders at the correct aspect ratio (see §10) so the layout reads correctly and photos drop in later.
-3. **Quiet chrome lets the photos pop.** The UI (backgrounds, text, lines) stays quiet so the photography is the only loud thing — near-black for renovation, forest-dark for landscaping, warm leather-dark for barber, light/warm for florist, bakery, power washing, and lawn care. The chrome never competes with the photos. (Per-niche moods: §13.)
+3. **Quiet chrome lets the photos pop.** The UI (backgrounds, text, lines) stays quiet so the photography is the only loud thing — near-black for renovation, forest-dark for landscaping, warm leather-dark for barber, graphite-dark for auto body, light/warm for florist, bakery, power washing, and lawn care. The chrome never competes with the photos. (Per-niche moods: §13.)
 4. **Editorial, not flashy.** Big confident headers, generous whitespace, hairline rules, numbered markers, eyebrows. It should feel like a well-set magazine spread, not a web "design."
 5. **Restraint with motion and color.** Subtle reveals and one marquee. One accent color, ~2 uses per screen. Nothing blinks, bounces, or floats.
 6. **Local trust is the voice.** Plain, specific, slightly blunt. "We answer our phone." "No subs." "Free estimate, no pressure." (See §8.)
 7. **Shared spine, niche-specific guts.** The spine (header, hero, marquee, full-bleed media break, work grid, FAQ, contact, CTA band, footer) is structurally the same on every demo — that's what makes them one studio's system. But the **services section and the "why us" section** are NOT the same grid everywhere; they adapt per business (§14). Identical-grid-everywhere is the failure these demos exist to avoid.
 
+> **⚠ One documented exception to all of the above: the Magician demo (§16).** It is an *entertainer/performer*, not a local trade, and it deliberately throws out this entire DNA — the no-shapes rule, editorial restraint, the shared spine, the photographic discipline — in favor of a dark, theatrical, motion-heavy spectacle (floating cards, sparks, shuffle video). Rules §1–§5, §11 do **not** apply to it; §16 is its own self-contained system. The universal Vilas rules still hold there: honesty/no-fabricated-proof (§12), labeled placeholders (§10), and the demo label. Everywhere *except* the magician, this DNA is law.
+
 ---
 
 ## 2. Color system — near-black base (renovation)
 
-This cool near-black base is the original heavy-contractor look; on demos it's now used as-is for **renovation only**. **Landscaping uses a forest-dark green-tinted variant (§13g); barber uses a warm leather-lounge dark (§13c); florist, bakery, power washing, and lawn care use LIGHT palettes (§13a/b/d/e).** §13 overrides this section for every niche except renovation. Only `--accent` changes per niche where the base applies:
+This cool near-black base is the original heavy-contractor look; on demos it's now used as-is for **renovation only**. **Landscaping uses a forest-dark green-tinted variant (§13g); barber uses a warm leather-lounge dark (§13c); auto body uses a graphite-dark (§13h); florist, bakery, power washing, and lawn care use LIGHT palettes (§13a/b/d/e); the magician has its own theatrical palette (§16a).** §13/§16 override this section for every niche except renovation. Only `--accent` changes per niche where the base applies:
 
 ```
 --bg       #0B0B0C   /* page background, near-black */
@@ -74,7 +79,7 @@ This cool near-black base is the original heavy-contractor look; on demos it's n
 
 ## 3. Typography (DEMO sites)
 
-Use a clean modern **grotesque sans** as the default for everything — the demos must read like a normal, real local business site, **not** like the Vilas brand. (Do NOT use Syne here; Syne is reserved for the main Vilas site.) **Florist and bakery swap in a display serif, and barber swaps in a condensed/slab signage face — see §13.**
+Use a clean modern **grotesque sans** as the default for everything — the demos must read like a normal, real local business site, **not** like the Vilas brand. (Do NOT use Syne here; Syne is reserved for the main Vilas site.) **Florist and bakery swap in a display serif, barber swaps in a condensed/slab signage face, auto body sets figures in a monospace — see §13. The magician uses its own playbill display serif (§16b).**
 
 - **Display/headers (default):** a tight neutral grotesque — `Geist`, `Inter Tight`, or `Satoshi`. Weight 600–700.
 - **Body:** the same family at 400 (e.g. `Geist`/`Inter`).
@@ -116,7 +121,7 @@ Use a clean modern **grotesque sans** as the default for everything — the demo
 - **Scroll reveals:** fade + 16–24px translate-up as a section enters view, ~0.6s ease-out, children staggered ~0.08s. Once only, not on every re-scroll.
 - **Marquee:** one continuous horizontal scroll band of service words, **seamless infinite loop** — duplicate the track and run a continuous `translateX` so it NEVER pauses, jumps, or resets (this is the same technique the main Vilas hero marquee uses; the current demo marquees stall after ~3s and must be fixed). ~40–60s loop.
 - **Hero video:** `autoplay muted loop playsinline`, poster image for instant paint, scrim on top. **Mobile:** show the poster still instead of autoplaying. **Reduced-motion:** poster still, no autoplay.
-- **Before/after slider (power washing):** draggable handle revealing the "after" over the "before" via `clip-path`/`clip`; on touch it's drag, on desktop drag or hover-scrub. Reduced-motion: show the two images side by side instead.
+- **Before/after slider (power washing; reused by renovation §14e and auto body §14d; the landscaping day↔night toggle §14f is a cross-fade variant of it):** draggable handle revealing the "after" over the "before" via `clip-path`/`clip`; on touch it's drag, on desktop drag or hover-scrub. Reduced-motion: show the two images side by side instead.
 - **Hover:** cards lift `translateY(-4px)` + border brightens / soft shadow; links nudge their "→" ~4px and/or underline.
 - **Sticky header:** transparent over the hero, then gains a background + bottom hairline after ~80px of scroll; may shrink height slightly.
 - **prefers-reduced-motion:** disable marquee auto-scroll, disable reveals (show final state), no video autoplay, before/after shown side-by-side.
@@ -125,7 +130,7 @@ Use a clean modern **grotesque sans** as the default for everything — the demo
 
 ## 6. Homepage section sequence (the blueprint)
 
-Build every demo homepage in this order. **Sections marked ⟨spine⟩ are structurally identical on every niche. Sections marked ⟨adapts⟩ change layout per niche — see §14.** Sections marked ⟨skip on demos⟩ are real on Axel's but require real clients/data Vilas doesn't have.
+Build every demo homepage in this order *(every demo except the Magician — §16 has its own booking-focused sequence)*. **Sections marked ⟨spine⟩ are structurally identical on every niche. Sections marked ⟨adapts⟩ change layout per niche — see §14.** Sections marked ⟨skip on demos⟩ are real on Axel's but require real clients/data Vilas doesn't have.
 
 1. ⟨spine⟩ **Sticky header** — logo/name (left or centered) · primary nav (Home/About/Services/Work/Contact) · phone number · one accent "Get a Quote / Free Estimate" button. Mobile collapses nav; keep a visible CALL/phone affordance.
 2. ⟨spine⟩ **Hero** — full-bleed background **video** (or photo placeholder) + scrim. Small eyebrow or logo, **two-line H1**, one line of sub-copy, **two CTAs** (primary accent "Get a free estimate/quote" + secondary "Call (xxx) xxx-xxxx"), and a small **"Scroll"** cue at the bottom.
@@ -149,9 +154,10 @@ Build every demo homepage in this order. **Sections marked ⟨spine⟩ are struc
 - **Hero:** `min-height: 100svh`. Video layer (cover) → scrim → content bottom-left or centered. H1 two lines. Primary CTA = `--accent` background, dark text; secondary CTA = ghost (1px `--line` border, `--fg` text). "Scroll" cue = small `--muted` label, optional tiny down-chevron line (not a shape blob).
 - **Marquee:** flex row duplicated for seamless infinite loop; words in `--muted` (or `--fg` low opacity), separators in `--accent` or `--muted`; `will-change: transform`; pause on reduced-motion.
 - **Numbered service card (default niches):** `--surface` background, 1px `--line` border, 4–6px radius, ~28px padding. Number marker top, title, description, "Explore →" pinned bottom. Hover: lift + border lightens, arrow nudges.
-- **Before/after slider (power washing):** two stacked images (before under, after over), draggable divider with a thin `--accent` handle line + grab affordance; 4:3. Caption strip below (`--muted`).
+- **Before/after slider (power washing, renovation, auto body):** two stacked images (before under, after over), draggable divider with a thin `--accent` handle line + grab affordance; 4:3 (16:9 for full-bleed uses). Caption strip below (`--muted`).
 - **Price-board row (barber):** service name left (display face), **brass leader dots** (`........`) filling the middle, price right. Rows separated by `--line`; sits on a `--surface` leather panel. No card chrome.
 - **Menu row (bakery):** category name in the display serif (left), short appetizing description, thin warm rule under each row; optional small price/tag right. Photo column (the case) alongside.
+- **Other niche-specific components** — the process stepper (renovation/landscaping), day↔night toggle (landscaping), plan tier cards + instant estimate (lawn care), occasion tiles (florist), damage map + color picker + estimate widget (auto body), and work-grid filter chips — are specced inline in their §14 sections; build them to those specs rather than inventing variants.
 - **Full-bleed break:** 100vw media + scrim; content constrained to container; checklist items use a `--accent` ✓ then `--body` text.
 - **Work tile:** image (4:3/3:2 cover) with a small category tag (uppercase `--muted`) + a one-line caption. Subtle zoom on hover (`scale(1.03)`, overflow hidden).
 - **Value-prop item (default niches):** big number (ghost or label), H3, body. No card needed — hairlines or grid gaps.
@@ -187,6 +193,7 @@ One accent per site, drawn from the trade. Marquee terms + the 01–0N services 
 | **Power washing** (Tide Line, light §13d, layout §14a) | `#1E86C4` clean water blue | Houses ● Driveways ● Decks ● Patios ● Fences | 01 House soft wash · 02 Driveways & walkways · 03 Decks, fences & patios · 04 Roof/gutter wash | "Like the day / it was built." |
 | **Lawn care** (Fresh Cut, light §13e, layout §14g) | `#4E9A4A` fresh grass green | Mowing ● Cleanups ● Edging ● Mulch ● Fertilizing | 01 Weekly mowing · 02 Spring & fall cleanups · 03 Mulch & edging · 04 Fertilizing & weed control | "Your lawn, / handled." |
 | **Florist** (Wildstem, light §13a, layout §14h) | `#B14A63` deep bloom rose | Weddings ● Events ● Daily ● Weekly ● Sympathy | 01 Daily arrangements · 02 Weddings & events · 03 Weekly flowers · 04 Sympathy | "Picked, / not produced." |
+| **Magician** *(THEATRICAL EXCEPTION — see §16, ignore the spine)* | `#D4A53C` stage gold (ember `#E0531F` + optional mystic violet `#7B2D8E`) | Close-up ● Stage ● Mentalism ● Corporate ● Weddings | (shows, not services) Close-up / strolling · Stage illusions · Mentalism · Corporate & galas · Private & weddings | "You won't / believe your eyes." |
 | **Bakery** (Golden Hour, light §13b, layout §14b) | `#C9802F` warm crust amber | Sourdough ● Pastry ● Cakes ● Focaccia ● Cookies | 01 Daily bread · 02 Morning pastry · 03 Cakes to order · 04 Wholesale | "Baked at 4am. / Gone by noon." |
 | **Barber** (Standard, leather-lounge §13c, layout §14c) | `#B0833F` brass/gold (oxblood `#9A3B33` secondary) | Cuts ● Fades ● Beards ● Shaves ● Kids | 01 Haircut · 02 Skin fade · 03 Beard & line-up · 04 Hot-towel shave | "A good cut. / Every time." |
 | **Auto body / collision** (Apex Collision, graphite-dark §13h, layout §14d) | `#2FA8FF` electric blue (hot-orange `#FF5A2C` secondary; gold/red are classic alternates) | Collision ● Paint ● Dents ● Frame ● Glass ● Detailing | 01 Collision repair · 02 Auto painting & refinishing · 03 Dent removal (PDR) · 04 Frame straightening · 05 Glass & calibration · 06 Detailing & paint correction | "Wrecked. / Like it never happened." |
@@ -219,6 +226,8 @@ Until real photography exists, use neutral, **clearly-labeled** placeholders so 
 
 ## 11. Anti-patterns — do NOT do these
 
+*(These govern the local-service demos. The Magician (§16) is exempt from the aesthetic ones — shapes, restraint, motion — but NOT from the honesty ones: no fabricated reviews/credits/stats applies there too.)*
+
 - ❌ Any decorative geometric shapes (circles, blobs, rings, cut/diagonal shapes, abstract SVG, gradient orbs, shape dividers). *This is the main thing to remove from the current demos.*
 - ❌ **Forcing the contractor numbered-card service grid (and numbered "why us" list) onto every niche.** The services + "why us" sections adapt to the business — price board for barber, menu for bakery, before/after rows for power washing (§14). Identical-grid-everywhere is the failure these demos exist to avoid.
 - ❌ Fabricated reviews, testimonials, client names, star counts, "trusted by," or logo walls.
@@ -227,7 +236,7 @@ Until real photography exists, use neutral, **clearly-labeled** placeholders so 
 - ❌ "X, not Y" copy constructions; corporate filler; hype.
 - ❌ Heavy rounding / bubbly cards; rainbow of colors; accent used as decoration.
 - ❌ Marquees that stall/reset after a few seconds. They loop seamlessly and infinitely (§5).
-- ❌ Treating the auto-body motion budget (§14d) as a license for decorative motion. The moving parts there are all *content* — cars, paint, damage, before/after — and every one ships a reduced-motion/static fallback. Motion that doesn't demonstrate the work doesn't belong, on any niche.
+- ❌ Treating the auto-body motion budget (§14d) as a license for decorative motion. The moving parts there are all *content* — cars, paint, damage, before/after — and every one ships a reduced-motion/static fallback. Motion that doesn't demonstrate the work doesn't belong on any local-service demo (the Magician, §16, is the documented exception where decorative spectacle — sparks, drifting cards — is the point).
 - ❌ Eyebrow labels so small/low-contrast they read as hidden. Size them to read as intentional (§3 note).
 - ❌ Washed-out, low-contrast light demos. Light is *correct* for florist/bakery/power washing/lawn care (§13) — but keep AA text contrast and editorial discipline. Bright and airy, never pale mush.
 - ❌ Using the Syne display face on demos (Syne = Vilas brand only; demos use a neutral grotesque, or the per-niche serif/condensed face in §13).
@@ -255,6 +264,7 @@ Until real photography exists, use neutral, **clearly-labeled** placeholders so 
 | Florist, Bakery, Power washing, Lawn care | **LIGHT** (airy / warm / clean, below) | Bright, fresh, approachable businesses. Power washing and lawn care sell *clean and fresh* — a bright site proves it. |
 | Barber | **WARM LEATHER-LOUNGE DARK** (§13c) | Dark fits the old-school chair — but warm, leathery, fireplace-lit, not the cool blue-black of the contractor demos. |
 | Auto body / collision | **GRAPHITE-DARK, motion-heavy** (§13h) | Cars look incredible on a cool graphite black with glossy reflections; an electric accent reads precision/automotive. This is the niche that leans into motion (§14d). |
+| Magician | **THEATRICAL** (§16 — the documented exception) | An entertainer, not a trade. Velvet black + stage gold, playbill serif, spectacle. Skips this system entirely; §16 is self-contained. |
 
 §13 overrides §2 (palette) and §3 (type) for the named niches. §14 governs the services + "why us" layout. Every other rule in this skill still holds.
 
@@ -273,7 +283,7 @@ Until real photography exists, use neutral, **clearly-labeled** placeholders so 
 - **Type:** an elegant display **serif** for headers — Fraunces or Playfair Display, used with restraint (not every line) — paired with a clean sans body (Inter / Geist). The serif is what reads "florist / editorial" instead of "contractor." (Still never Syne.)
 - **Photography:** bright natural daylight, lots of negative space, close-up stems, the shop, soft real shadows. Airy — never moody or dark.
 - **Shifts:** more whitespace; lighter, thinner hairlines; soft shadows instead of hard borders on cards; the hero is a bright image with dark text in a clear zone (light scrim or none); marquee in muted rose or sage. Buttons: rose fill + white text, or a thin outline.
-- **Keep the default services grid + value list** (florist reads fine on the grid). Two-line headers, work grid with tags + plain captions, full contact form.
+- **Services + "why us" use the occasion-tiles + bouquet-gallery layouts in §14h** (not the numbered grid). Two-line headers, work grid with tags + plain captions, and the full contact form all stay.
 
 ### 13b. Bakery — warm & inviting (Golden Hour)
 
@@ -345,7 +355,7 @@ The vibe Noah wants: **a comfy, leathery, fireplace-lit lounge** — old-world, 
 - **Photography:** bright sunny daylight, fresh-cut striped lawns, blue sky, green. High-key and cheerful.
 - **Why light:** a friendly, low-stakes weekly service — should feel easy, sunny, approachable, not premium-dark. Lots of sky and green.
 - **Shifts:** white surfaces, light green hairlines, soft shadows, green accent on CTAs.
-- **Keep the default services grid + value list** (lawn care reads fine on the grid).
+- **Services + "why us" use the plan-cards + instant-estimate layouts in §14g** (not the project grid).
 
 ### 13f. Don't let "light" become "weak"
 
@@ -367,7 +377,7 @@ Noah found the pure near-black too cold for landscaping and wants it greener, wh
 --line     #202820   /* green-tinted hairline */
 --accent   #6E9A5C   /* moss/sage green, nudged a touch brighter to pop on the green-black */
 ```
-- **Only the background family shifts** from cool pure-black to this forest-dark. Type, layout, the default services grid + value list, photography approach — everything else stays exactly as the landscaping demo is now.
+- **Only the background family shifts** from cool pure-black to this forest-dark — type, photography approach, and everything Noah already likes stay put. (The layout upgrades — the day↔night toggle, filterable work grid, and process stepper — live in §14f and ride on top of this palette; they're additions, not changes to what exists.)
 - **Scrim** on full-bleed media: green-tinted dark gradient, e.g. `linear-gradient(180deg, rgba(12,17,11,.35), rgba(12,17,11,.85))`.
 - **If Noah wants it greener:** push the bg green channel further (e.g. `#0D140B` → `#0F180C`); if it muddies the photos or drops text contrast, ease back. Don't go to a mid/light green — that breaks the premium dark look he likes.
 
@@ -395,7 +405,7 @@ The look of a modern collision center / premium automotive studio: a cool **grap
 
 ## 14. Per-niche SECTION LAYOUTS — the real differentiator
 
-The §6 sequence defines the **spine** every demo shares — header, hero, marquee, full-bleed break, work grid, FAQ, contact, CTA band, footer. Those stay structurally the same everywhere; that shared spine is what makes the demos read as one studio.
+The §6 sequence defines the **spine** every demo shares — header, hero, marquee, full-bleed break, work grid, FAQ, contact, CTA band, footer. Those stay structurally the same everywhere; that shared spine is what makes the demos read as one studio. *(One demo sits outside this system entirely: the Magician — §16.)*
 
 But two sections — **the services section ("what we do") and the value-props section ("why hire us")** — must NOT be the same numbered-card grid on every site. That sameness is the thing that makes the demos feel like one template recolored. These two sections **adapt to what the business actually is.** Match the section to the business.
 
@@ -483,11 +493,71 @@ People shop a florist **by occasion**, not by service number, and the arrangemen
 
 ## 15. What stays shared (so the demos are still one studio)
 
-Even with §13/§14 pulling each niche toward its own identity, these hold everywhere so the set reads as one studio's work:
+Even with §13/§14 pulling each niche toward its own identity, these hold across all the **local-service** demos so the set reads as one studio's work (the Magician §16 shares only the honesty, placeholder, and demo-label rules):
 - The **spine** sections (§6 ⟨spine⟩) — same structure, same order, same two-line header pattern, same eyebrow + numbered-section discipline.
-- The **editorial restraint** — generous whitespace, hairline rules, ~2 accent uses per screen, no decorative shapes, one seamless marquee. Motion stays subtle and purposeful everywhere; auto body (§14d) is the one niche that turns the motion *up*, but even there every moving part is content (cars/paint/damage), never decoration.
+- The **editorial restraint** — generous whitespace, hairline rules, ~2 accent uses per screen, no decorative shapes, one seamless marquee. Motion stays subtle and purposeful; auto body (§14d) turns it up the furthest *within* the system, but even there every moving part is content (cars/paint/damage), never decoration. (The Magician's decorative spectacle sits outside the system by design — §16.)
 - The **voice** (§8) — plain, specific, local, confident, no hype, no "X, not Y."
 - The **honesty rules** (§12) — no fabricated proof; demo-labeled; the work is the pitch.
 - The **placeholder convention** (§10) — labeled, correct aspect ratios, no stock/AI imagery committed.
 
 The differentiation lives in palette, type, photography mood, and the two adaptive sections — *on top of* a shared spine. That balance (same bones, different skin and two different rooms) is the whole point: it proves Vilas can match a business to its own visual language without rebuilding from scratch each time.
+
+---
+
+## 16. THE MAGICIAN — the theatrical exception (sample: "Elias Vane")
+
+**Read this first.** The magician is the one demo that exists to prove Vilas can go *fully theatrical* — the opposite end of the range from the restrained contractor sites. So it ignores almost everything earlier in this file: no editorial restraint, no hairlines-and-eyebrows spine, no "subtle motion," no "no-decorative-shapes." Here the spectacle **is** the design. Floating cards, drifting sparks, shuffle video, smoke, a card you can pick — that's the point. The only universal rules that still apply: **honesty (§12)** — no fabricated TV credits, celebrity names, award counts, or "sold-out" claims on a demo — **labeled placeholders (§10)**, and the **demo label**.
+
+The feeling to hit: walking into a dark theater the moment before the show — velvet black, a spotlight, a shuffle in the dark, anticipation. Mysterious, elegant, a little dangerous. **Cool, not cheesy.** Avoid clip-art top-hats, cartoon rabbits, sparkly wands, and "abracadabra" kitsch. This is a close-up card magician in a speakeasy, not a kids'-birthday clown.
+
+### 16a. Palette — velvet black + stage gold + embers
+```
+--bg        #0A0711   /* velvet near-black, faint midnight-plum (the dark house) */
+--surface   #14101D   /* raised panel, deep plum-black */
+--fg        #F4EFE6   /* warm candlelight cream */
+--body      #B9B2C2   /* soft muted lavender-gray */
+--muted     #7A7388   /* dim smoke gray */
+--line      #251F33   /* low plum hairline (used sparingly) */
+--accent    #D4A53C   /* STAGE GOLD — spotlight, brass, the primary glow */
+--accent-2  #E0531F   /* EMBER ORANGE — sparks / particle glow */
+--accent-3  #7B2D8E   /* MYSTIC VIOLET — optional deep stage glow (use rarely) */
+```
+- **Alternates (pick ONE identity, don't use all the accents loudly):** swap gold for **crimson `#B11E2F`** (blood-and-velvet drama) or lean **violet `#7B2D8E`** (modern mystic). Gold is the default — it reads "spotlight / vintage stage magic / class."
+- Glows are *encouraged* here (this is the exception): soft radial gold/ember glows behind the hero, the cards, the spotlight. Keep the base deep and dark so the glows and video pop.
+
+### 16b. Type — theatrical display
+- **Headlines:** a dramatic **high-contrast display serif** — Playfair Display, Cormorant, or a Didone — large, often UPPERCASE and letter-spaced like a vintage **theater playbill / magic poster**. This is what makes it feel like a *show*, not a startup.
+- **Body:** a clean, quiet sans (Inter / Geist) so copy stays readable on the dark.
+- **Wordmark:** the magician's name can use an extra-dramatic cut (a tall condensed serif, or an elegant script for the logo only). Still never Syne.
+
+### 16c. Motion philosophy — spectacle, but it still has to perform
+Motion is the product here, so lean in — but it must be smooth and degrade gracefully. Everything below ships a `prefers-reduced-motion` fallback (static, no particles, no autoplay) and a mobile path (tap, lighter particle counts, posters). A janky magic site breaks the illusion worse than a still one does.
+
+### 16d. The moving parts (the heart of this demo — build these)
+1. **Hero — the shuffle.** Full-bleed, dark, vignetted video of **card flourishes / shuffles** (springs, cascades, fans, one-handed cuts) — ideally 2–3 clips that cross-fade or hard-cut on a loop. Over it: the magician's name (huge playbill serif), a two-line tagline (*"You won't / believe your eyes."*), and one CTA (**Book the show**). A soft gold spotlight glow + drifting embers on top. Placeholder `HERO — card shuffle / flourish loop (16:9, dark)`. This is the centerpiece Noah asked for — the shuffle videos ARE the hero.
+2. **Drifting cards (things flying around).** A few **playing cards** tumble/parallax slowly across sections as you scroll — some catching a glint of gold, slightly 3D (`rotateY/rotateZ`), behind and in front of content. A handful, drifting — not a blizzard. On desktop they can drift subtly toward the cursor; on mobile, fewer and scroll-driven only.
+3. **Sparks / embers.** A **canvas particle layer** — warm ember/gold sparks rising and fading, like embers off a flame or dust in a spotlight. Low density, slow, behind content. This is the "sparks" Noah wants. Cap the particle count; disable on reduced-motion; lighter on mobile.
+4. **"Pick a card" — the signature interaction.** A **fan of face-down cards**; the visitor hovers/taps one and it **lifts out of the fan and flips to reveal** something — a word, a show type, or "your card is the [X]." The visitor *participates in a trick.* This is the magician's equivalent of the auto-body color picker — the on-theme interactive that makes the page memorable. Reduced-motion/mobile: a simple tap-to-flip on one card.
+5. **Spotlight / smoke (optional polish).** A soft **spotlight that follows the cursor**, revealing content out of the dark; or slow **smoke/haze** drifting low. Optional — only if it stays smooth.
+6. **Reveals from the dark.** Section content **materializes** — fades up out of black with a slight rise (like appearing from smoke), not the editorial fade. Section transitions can use a quick **card-flip / vanish** wipe.
+
+### 16e. Section sequence (booking-focused — NOT the trade spine)
+A magician site sells *bookings* for events. Order:
+1. **Hero** — shuffle video + name + tagline + **Book the show**. (§16d.1)
+2. **Dramatic phrase band** (optional, replaces the trade marquee) — a single line drifting across: *Close-up ● Stage ● Mentalism ● Galas ● Weddings*, or a one-line hook. Gold/ember on black.
+3. **The Experience / "What I do"** — the show *types*, not "services": **Close-up & strolling · Stage illusions · Mentalism / mind-reading · Corporate & galas · Private & weddings.** Present as the **"pick a card" interaction** (each card reveals a show type) or as dark dramatic cards with a hover lift + glint.
+4. **The reel** — a big **performance video** moment (the proof). Full-bleed, a single dramatic play button, audience-reaction energy. Placeholder `REEL — live performance (16:9)`.
+5. **Witnessed / reactions** — short audience reactions. **Honesty:** do NOT fabricate real named people, venues, TV credits, or "as seen on." Use clearly-illustrative unattributed reactions, or label them demo. Vague-but-dramatic, never specific false claims.
+6. **About** — a **mysterious bio**: who the magician is, the origin, the style. Low-key dark portrait placeholder (`PORTRAIT — the magician, low key (4:5)`), a few evocative lines. No invented awards.
+7. **Where it works** — event types / settings (corporate events, galas, private parties, weddings, theaters). Short and confident. Don't name real venues.
+8. **Booking** — **"Book the show"**: event type, date, location/venue, headcount, message → form with success/error states. Gold button, unmissable. This is the conversion point.
+9. **Footer** — name, one dramatic line, contact, socials. Dark and minimal.
+
+### 16f. The rules that DO still apply
+- **Honesty (§12) is NOT suspended.** No fabricated TV/film credits, celebrity clients, award counts, review stars, "sold out at [venue]," or press logos. The drama comes from design and language, not invented credentials. Sample name/show are demo-labeled.
+- **Placeholders (§10):** labeled, correct aspect ratios, no stock or AI imagery committed — `HERO — card shuffle loop (16:9)`, `REEL — live performance (16:9)`, `PORTRAIT — the magician (4:5)`, `CARD — face / back`.
+- **Performance / accessibility:** lazy-load all video; poster first paint; cap particles; throttle scroll/cursor handlers; honor `prefers-reduced-motion` everywhere (kill particles, drifting cards, autoplay → a static dark hero with the name + CTA); on mobile reduce particle counts, drop the cursor-spotlight, use tap for "pick a card," show video posters. Target a smooth 60fps — if a piece can't hit it on a mid phone, ship its static fallback.
+- **Demo label**, like every other Vilas demo.
+
+### 16g. Why this one matters
+The local-service demos prove Vilas can do *restraint* — matching a trade to its own quiet, editorial language. The magician proves the **opposite extreme**: full cinematic theater. Having both in the portfolio is the strongest possible range argument — same studio, from a calm landscaper's site to a dark, card-throwing, spark-lit magic show. That contrast is the whole point, so make this one genuinely **cool**.
