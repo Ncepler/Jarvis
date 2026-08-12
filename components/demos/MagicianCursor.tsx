@@ -54,15 +54,23 @@ const BG_R = parseInt(BG.slice(1, 3), 16);
 const BG_G = parseInt(BG.slice(3, 5), 16);
 const BG_B = parseInt(BG.slice(5, 7), 16);
 const BG_FADE = `rgba(${BG_R},${BG_G},${BG_B},0.15)`;
-const SHAFT = "#14101D"; // --surface — the wand shaft, dark/near-black
-const SHAFT_EDGE = "#7A7388"; // --muted — thin edge so the shaft reads against the velvet bg
-const HANDLE = "#B9B2C2"; // --body — lighter grip detail
-const TIP_GOLD = "#D4A53C"; // --accent — stage gold, the sparkle at the tip
+// Wand is strictly black + white (Noah's call) — no palette gold on it, the
+// gold/ember stays reserved for the sparks themselves.
+const WAND_BLACK = "#0A0A0A";
+const WAND_WHITE = "#FFFFFF";
 const SPARK_CORE = "255,248,220"; // #fff8dc, cream core
 const SPARK_TAIL = "255,179,71"; // #ffb347, amber fade
 
-const WAND_SIZE = 28; // px — about the size of a normal cursor
-const TIP = { x: 24, y: 8 }; // the tip's local position inside the wand's own box
+// The SVG is drawn in a fixed 28-unit design space (paths below never
+// change); WAND_SIZE is the actual rendered px — bump that alone to resize
+// the whole wand, everything scales proportionally.
+const DESIGN_SIZE = 28;
+const WAND_SIZE = 34; // px — slightly bigger than a normal cursor
+const WAND_SCALE = WAND_SIZE / DESIGN_SIZE;
+const TIP_DESIGN = { x: 24, y: 8 }; // tip position in the 28-unit design space
+// tip position in actual rendered px — this is what the positioning math
+// (translate offset, hover-scale transform-origin) needs
+const TIP = { x: TIP_DESIGN.x * WAND_SCALE, y: TIP_DESIGN.y * WAND_SCALE };
 const MAX_PARTICLES = 300;
 const GRAVITY = 0.15;
 const LIFE_DECAY = 0.02;
@@ -96,39 +104,40 @@ function WandSVG() {
     <svg
       width={WAND_SIZE}
       height={WAND_SIZE}
-      viewBox={`0 0 ${WAND_SIZE} ${WAND_SIZE}`}
+      viewBox={`0 0 ${DESIGN_SIZE} ${DESIGN_SIZE}`}
       aria-hidden="true"
       focusable="false"
     >
-      {/* shaft: dark near-black fill with a thin lighter edge underneath so it
-          doesn't vanish against the velvet-black magician background */}
-      <line x1={4} y1={23} x2={21} y2={9} stroke={SHAFT_EDGE} strokeWidth={4.2} strokeLinecap="round" />
-      <line x1={4} y1={23} x2={21} y2={9} stroke={SHAFT} strokeWidth={3} strokeLinecap="round" />
-      {/* handle grip — the lighter detail at the base */}
-      <circle cx={5.5} cy={21.5} r={2.3} fill={HANDLE} opacity={0.92} />
-      {/* tip sparkle: a soft glow behind a 4-point star */}
-      <circle cx={TIP.x} cy={TIP.y} r={5} fill={TIP_GOLD} opacity={0.35} style={{ filter: "blur(2.5px)" }} />
+      {/* shaft: black fill with a thin white edge underneath so it doesn't
+          vanish against the velvet-black magician background */}
+      <line x1={4} y1={23} x2={21} y2={9} stroke={WAND_WHITE} strokeWidth={4.2} strokeLinecap="round" />
+      <line x1={4} y1={23} x2={21} y2={9} stroke={WAND_BLACK} strokeWidth={3} strokeLinecap="round" />
+      {/* handle grip — the lighter (white) detail at the base */}
+      <circle cx={5.5} cy={21.5} r={2.3} fill={WAND_WHITE} opacity={0.92} />
+      {/* tip sparkle: a soft white glow behind a 4-point star */}
+      <circle cx={TIP_DESIGN.x} cy={TIP_DESIGN.y} r={5} fill={WAND_WHITE} opacity={0.4} style={{ filter: "blur(2.5px)" }} />
       <path
-        d={`M${TIP.x} 3 L${TIP.x + 1.2} ${TIP.y - 1.2} L${TIP.x + 5} ${TIP.y} L${TIP.x + 1.2} ${TIP.y + 1.2} L${TIP.x} 13 L${TIP.x - 1.2} ${TIP.y + 1.2} L${TIP.x - 5} ${TIP.y} L${TIP.x - 1.2} ${TIP.y - 1.2} Z`}
-        fill={TIP_GOLD}
+        d={`M${TIP_DESIGN.x} 3 L${TIP_DESIGN.x + 1.2} ${TIP_DESIGN.y - 1.2} L${TIP_DESIGN.x + 5} ${TIP_DESIGN.y} L${TIP_DESIGN.x + 1.2} ${TIP_DESIGN.y + 1.2} L${TIP_DESIGN.x} 13 L${TIP_DESIGN.x - 1.2} ${TIP_DESIGN.y + 1.2} L${TIP_DESIGN.x - 5} ${TIP_DESIGN.y} L${TIP_DESIGN.x - 1.2} ${TIP_DESIGN.y - 1.2} Z`}
+        fill={WAND_WHITE}
       />
     </svg>
   );
 }
 
 function makeSpark(x: number, y: number, dx: number, dy: number): Spark {
-  // opposite of the current motion direction — sparks fly off the back of
-  // the tip as it moves, like a sparkler
+  // Sparks launch ONLY opposite the current travel direction (a spread cone
+  // centered dead-opposite, no forward-inherited component pulling them
+  // toward the motion) — then gravity takes over frame by frame in the main
+  // loop, so they arc down and fall like real sparks off a struck flint.
   const oppositeAngle = Math.atan2(-dy, -dx);
   const spread = (Math.random() - 0.5) * (Math.PI / 2); // ±45°
   const angle = oppositeAngle + spread;
-  const spreadSpeed = 1 + Math.random() * 3; // 1–4 px/frame
+  const speed = 1 + Math.random() * 3; // 1–4 px/frame
   return {
     x,
     y,
-    // a fraction of the wand's own motion (trails behind) + the spread cone
-    vx: dx * 0.3 + Math.cos(angle) * spreadSpeed,
-    vy: dy * 0.3 + Math.sin(angle) * spreadSpeed,
+    vx: Math.cos(angle) * speed,
+    vy: Math.sin(angle) * speed,
     life: 0.6 + Math.random() * 0.4,
     size: 1 + Math.random() * 2,
   };
