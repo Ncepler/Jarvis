@@ -31,6 +31,7 @@ import {
   type ReactNode,
 } from "react";
 import { useCanHover } from "@/lib/hooks";
+import { MagicianCursor } from "./MagicianCursor";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -936,21 +937,25 @@ function MagicianFooter() {
 
 export function MagicianDemo() {
   return (
-    <div className="antialiased" style={{ background: BG, color: BODY, fontFamily: SANS, position: "relative" }}>
-      {/* the drifting-card layer spans the whole demo, positioned by % of its
-          total height — mounted once, absolute, behind section content */}
-      <DriftingCards />
-      <div className="relative">
-        <Hero />
-        <PhraseBand />
-        <TheExperience />
-        <Reel />
-        <Witnessed />
-        <About />
-        <WhereItWorks />
-        <Booking />
-        <MagicianFooter />
+    // wraps ALL of the magician's content, only this demo — see
+    // MagicianCursor.tsx for exactly how the wand cursor stays scoped here
+    <MagicianCursor>
+      <div className="antialiased" style={{ background: BG, color: BODY, fontFamily: SANS, position: "relative" }}>
+        {/* the drifting-card layer spans the whole demo, positioned by % of its
+            total height — mounted once, absolute, behind section content */}
+        <DriftingCards />
+        <div className="relative">
+          <Hero />
+          <PhraseBand />
+          <TheExperience />
+          <Reel />
+          <Witnessed />
+          <About />
+          <WhereItWorks />
+          <Booking />
+          <MagicianFooter />
+        </div>
       </div>
-    </div>
+    </MagicianCursor>
   );
 }
