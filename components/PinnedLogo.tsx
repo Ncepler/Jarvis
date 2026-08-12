@@ -122,6 +122,8 @@ export function PinnedLogo() {
             initial={reduced ? { opacity: 0 } : undefined}
             animate={reduced ? { opacity: 1 } : undefined}
             exit={reduced ? { opacity: 0 } : undefined}
+            whileHover={reduced ? undefined : { scale: 1.06 }}
+            whileTap={reduced ? undefined : { scale: 0.97 }}
             transition={
               reduced ? { duration: 0.15 } : { duration: 0.45, ease: EASE }
             }

@@ -48,7 +48,7 @@ export function SectionHeading({
     <div className={className}>
       {eyebrow && (
         <motion.span
-          className="mb-5 block font-mono text-xs uppercase tracking-[0.2em] text-accent"
+          className="mb-5 block font-mono text-[15px] font-bold uppercase tracking-[0.16em] text-accent"
           initial={reduced ? false : { opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}

@@ -54,10 +54,11 @@ const oswald = Oswald({
   variable: "--font-oswald",
 });
 
-// Utility/mono — ".studio" and small UI labels.
+// Utility/mono — ".studio" and small UI labels. 700 added for the bumped
+// eyebrow labels (Noah's fix, §3 note) — everything else still uses 400.
 const spaceMono = Space_Mono({
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "700"],
   display: "swap",
   variable: "--font-space-mono",
 });

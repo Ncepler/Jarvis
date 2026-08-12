@@ -127,12 +127,15 @@ export function DemoShell({
 
 const wrap = "mx-auto w-full max-w-[1200px] px-6 md:px-16";
 
-// ── Eyebrow: uppercase label with an accent tick. ────────────────────────────
+// ── Eyebrow: uppercase label with an accent tick. Sized and weighted to read
+// as an intentional section marker, not an afterthought (Noah's fix, §3 note)
+// — 15px/bold, and --d-body instead of --d-muted for real contrast while
+// staying under full --d-fg. ───────────────────────────────────────────────
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
     <p
-      className="flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-[0.14em]"
-      style={{ color: "var(--d-muted)" }}
+      className="flex items-center gap-2.5 text-[15px] font-bold uppercase tracking-[0.12em]"
+      style={{ color: "var(--d-body)" }}
     >
       <span
         aria-hidden
@@ -226,13 +229,23 @@ export function DemoHeader({
       style={{ borderBottom: "1px solid var(--d-line)" }}
     >
       <div
-        className={`${wrap} flex h-[72px] items-center justify-between`}
+        className={`${wrap} flex min-h-[72px] flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3`}
       >
-        <span
-          className="text-[17px] font-semibold tracking-[-0.01em]"
-          style={{ color: "var(--d-fg)" }}
-        >
-          {name}
+        <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+          <span
+            className="text-[15px] font-semibold tracking-[-0.01em] md:text-[17px]"
+            style={{ color: "var(--d-fg)" }}
+          >
+            {name}
+          </span>
+          {/* honesty label (SKILL §12) — a prospect clicking through must never
+              mistake the placeholder phone/email for a real business */}
+          <span
+            className="whitespace-nowrap rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]"
+            style={{ color: "var(--d-muted)", border: "1px solid var(--d-line)" }}
+          >
+            Demo build
+          </span>
         </span>
         <nav className="hidden items-center gap-7 lg:flex">
           {nav.map((n) => (
@@ -1326,14 +1339,18 @@ export function Contact({
               >
                 Send
               </button>
-              <button
-                type="button"
-                onClick={() => setState("err")}
-                className="text-[13px]"
-                style={{ color: "var(--d-muted)" }}
-              >
-                (demo: preview error state)
-              </button>
+              {/* dev-only affordance to preview the error state — never ships
+                  to the live opened demo a prospect actually sees (§12) */}
+              {process.env.NODE_ENV !== "production" && (
+                <button
+                  type="button"
+                  onClick={() => setState("err")}
+                  className="text-[13px]"
+                  style={{ color: "var(--d-muted)" }}
+                >
+                  (demo: preview error state)
+                </button>
+              )}
             </div>
             {state === "ok" && (
               <motion.p
