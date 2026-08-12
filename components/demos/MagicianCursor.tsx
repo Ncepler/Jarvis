@@ -44,16 +44,6 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-// ── §16a palette (duplicated here on purpose — this file has zero imports
-// from MagicianDemo.tsx or system.tsx so it stays fully self-contained). ────
-const BG = "#0A0711"; // velvet near-black — the magician's page background
-// BG at low alpha, drawn each frame instead of a full clearRect — leaves a
-// soft fade-trail behind the sparks. Only correct because the page is dark
-// (§16a); a light-bg niche would need a real clearRect instead.
-const BG_R = parseInt(BG.slice(1, 3), 16);
-const BG_G = parseInt(BG.slice(3, 5), 16);
-const BG_B = parseInt(BG.slice(5, 7), 16);
-const BG_FADE = `rgba(${BG_R},${BG_G},${BG_B},0.15)`;
 // Wand is strictly black + white (Noah's call) — no palette gold on it, the
 // gold/ember stays reserved for the sparks themselves.
 const WAND_BLACK = "#0A0A0A";
@@ -182,25 +172,46 @@ function CursorOverlay({ zoneRef }: { zoneRef: React.RefObject<HTMLDivElement | 
     resize();
     window.addEventListener("resize", resize);
 
-    const onEnter = () => {
-      activeRef.current = true;
-      setVisible(true);
-    };
-    const onLeave = () => {
-      activeRef.current = false;
-      setVisible(false);
+    // Geometry-based activity check — NOT just mouseenter/mouseleave.
+    // Browsers only fire mouseleave on actual pointer movement, never on
+    // scroll alone: a visitor who moves the wand around then scrolls the
+    // page (wheel/trackpad, cursor never physically moving again) leaves
+    // the zone without ever generating a mouseleave event. That left
+    // `activeRef` stuck true, which kept the fade-trail compositing over
+    // the full viewport every frame forever — the "whole page goes dark"
+    // bug this function exists to prevent. So containment is re-derived
+    // from the actual DOM rect (cheap) on real mousemove, on scroll, AND
+    // once per animation frame for as long as the loop is running (e.g.
+    // sparks still fading right as a scroll happens) — always self-
+    // correcting within a frame or two, never dependent on a single event.
+    const evaluate = () => {
+      const rect = zone.getBoundingClientRect();
+      const { x, y } = mouseRef.current;
+      const inside = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+      if (inside !== activeRef.current) {
+        activeRef.current = inside;
+        setVisible(inside);
+      }
+      // the loop pauses itself once fully idle (see the end of `frame`
+      // below) — restart it the moment the pointer is inside again
+      if (inside && rafRef.current === undefined) {
+        rafRef.current = requestAnimationFrame(frame);
+      }
     };
     const onMove = (e: MouseEvent) => {
       mouseRef.current.x = e.clientX;
       mouseRef.current.y = e.clientY;
+      evaluate();
     };
-    zone.addEventListener("mouseenter", onEnter);
-    zone.addEventListener("mouseleave", onLeave);
-    zone.addEventListener("mousemove", onMove);
+    // window-scoped (not zone-scoped) — needed to notice the pointer
+    // crossing back IN, and to keep position fresh right up to the edge
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("scroll", evaluate, { passive: true });
 
     const ctx = canvasRef.current?.getContext("2d") ?? null;
 
     const frame = () => {
+      evaluate();
       const { x, y } = mouseRef.current;
       const dx = x - prevFrameRef.current.x;
       const dy = y - prevFrameRef.current.y;
@@ -241,15 +252,24 @@ function CursorOverlay({ zoneRef }: { zoneRef: React.RefObject<HTMLDivElement | 
       }
 
       // update + draw
+      const arr = sparksRef.current;
       if (ctx) {
         const { w, h } = sizeRef.current;
-        // dark magician background → fade-trail instead of a full clear
-        ctx.globalCompositeOperation = "source-over";
-        ctx.fillStyle = BG_FADE;
-        ctx.fillRect(0, 0, w, h);
-
+        // A hard clear every frame — NOT a semi-transparent "fade" rect.
+        // The fade-rect trick (repeatedly compositing rgba(bg, .15) with
+        // source-over to leave a soft motion trail) looks fine for a few
+        // frames, but per-pixel alpha compositing is unbounded: a pixel
+        // that never gets a bright particle drawn over it keeps
+        // accumulating that 0.15 alpha frame after frame and converges to
+        // FULLY OPAQUE within well under a second of sustained movement
+        // (~15-20 frames), independent of any scroll/idle state — that's
+        // what was painting the whole viewport dark navy. Individual
+        // sparks already carry their own soft-edged radial gradient and
+        // fade via `life`, so a clean per-frame clear loses none of the
+        // visual softness while making the "whole screen goes dark" bug
+        // structurally impossible.
+        ctx.clearRect(0, 0, w, h);
         ctx.globalCompositeOperation = "lighter";
-        const arr = sparksRef.current;
         for (let i = arr.length - 1; i >= 0; i--) {
           const p = arr[i];
           p.vy += GRAVITY;
@@ -276,16 +296,21 @@ function CursorOverlay({ zoneRef }: { zoneRef: React.RefObject<HTMLDivElement | 
         ctx.globalCompositeOperation = "source-over";
       }
 
-      rafRef.current = requestAnimationFrame(frame);
+      // stop scheduling frames once fully idle — no mouse in the zone and
+      // nothing left animating. `evaluate()` restarts the loop the instant
+      // the pointer is back inside. Otherwise the rAF loop (and the CPU it
+      // burns) would run forever for as long as the magician demo panel
+      // stays open, even hours after the visitor scrolled past it to browse
+      // the rest of the single-page site.
+      rafRef.current = activeRef.current || arr.length > 0 ? requestAnimationFrame(frame) : undefined;
     };
     rafRef.current = requestAnimationFrame(frame);
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
-      zone.removeEventListener("mouseenter", onEnter);
-      zone.removeEventListener("mouseleave", onLeave);
-      zone.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("scroll", evaluate);
     };
     // zoneRef.current is stable for this component's lifetime (set once by
     // the parent before mounting the portal — see MagicianCursor below)
