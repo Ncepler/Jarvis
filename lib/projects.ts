@@ -154,6 +154,23 @@ export const projects: Project[] = [
     embeddable: false,
     isStyleDemo: true,
   },
+  {
+    slug: "demo-magician",
+    name: "Magician",
+    category: "Entertainer",
+    caption: "The theatrical outlier — cards, embers, a booking form.",
+    url: "",
+    // no real footage yet — never fabricate one (§7/§12); the card falls
+    // back to a plain "Preview" label until Noah supplies a hero still
+    screenshot: "",
+    screenshotFull: "",
+    preview: "",
+    tier: "flagship",
+    priceLabel: "let's talk",
+    order: 8,
+    embeddable: false,
+    isStyleDemo: true,
+  },
 ];
 
 export const orderedProjects = [...projects].sort((a, b) => a.order - b.order);

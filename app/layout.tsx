@@ -5,6 +5,7 @@ import {
   Syne,
   Fraunces,
   Oswald,
+  Playfair_Display,
   Space_Grotesk,
   Space_Mono,
 } from "next/font/google";
@@ -54,6 +55,15 @@ const oswald = Oswald({
   variable: "--font-oswald",
 });
 
+// Magician-only playbill display serif (SKILL §16b) — the theatrical
+// exception. High-contrast Didone-ish serif for the vintage magic-poster
+// feel; never used on any local-service demo or the main site.
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-playfair",
+});
+
 // Utility/mono — ".studio" and small UI labels. 700 added for the bumped
 // eyebrow labels (Noah's fix, §3 note) — everything else still uses 400.
 const spaceMono = Space_Mono({
@@ -99,7 +109,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${interTight.variable} ${syne.variable} ${fraunces.variable} ${oswald.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
+      className={`${inter.variable} ${interTight.variable} ${syne.variable} ${fraunces.variable} ${oswald.variable} ${playfair.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
     >
       <body>{children}</body>
     </html>

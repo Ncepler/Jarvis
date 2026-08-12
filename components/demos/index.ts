@@ -5,6 +5,7 @@ import { BarberDemo } from "./BarberDemo";
 import { FloristDemo } from "./FloristDemo";
 import { LandscapingDemo } from "./LandscapingDemo";
 import { LawnCareDemo } from "./LawnCareDemo";
+import { MagicianDemo } from "./MagicianDemo";
 import { PowerWashDemo } from "./PowerWashDemo";
 import { RenovationDemo } from "./RenovationDemo";
 
@@ -22,4 +23,5 @@ export const demos: Record<string, ComponentType> = {
   "demo-bakery": BakeryDemo,
   "demo-barber": BarberDemo,
   "demo-autobody": AutoBodyDemo,
+  "demo-magician": MagicianDemo,
 };
