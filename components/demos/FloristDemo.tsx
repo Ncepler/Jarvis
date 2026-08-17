@@ -272,6 +272,8 @@ export function FloristDemo() {
         line2="people ask."
         items={FAQ}
       />
+      {/* kept to 3 fields — name, email, message. Occasion/timing is easy
+          enough to say in the message, and walk-ins/calls cover the rest */}
       <Contact
         eyebrow="Get in touch"
         line1="Come smell"
@@ -280,8 +282,7 @@ export function FloristDemo() {
         phone={PHONE}
         email="hello@wildstem.demo"
         location="14 Maple Ave, Rockville Centre, NY"
-        serviceLabel="What it's for"
-        serviceOptions={["Everyday arrangement", "Wedding / event", "Weekly flowers", "Sympathy", "Not sure yet"]}
+        minimal
       />
       <CtaBand
         line1="Need flowers?"

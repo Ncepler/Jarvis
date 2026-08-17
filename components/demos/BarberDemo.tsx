@@ -144,7 +144,7 @@ function TheChair() {
     <Section dark>
       <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
         <Rise>
-          <Media label="THE CHAIR — leather, brass, lamplight (4:5)" ratio="4/5" />
+          <Media label="THE CHAIR — where you sit (4:5)" ratio="4/5" />
         </Rise>
         <Rise delay={0.1}>
           <Eyebrow>Why this chair</Eyebrow>

@@ -97,13 +97,17 @@ const FAQ = [
 
 // ── Services — alternating before/after proof rows (§14a). The result, not an
 // icon, is the visual for every service. ─────────────────────────────────────
+// One before/after slider is plenty on a single page (WashTransformation,
+// right after this) — this row now shows one representative "after" shot
+// per service instead of a second, redundant before/after pairing (Noah's
+// demo audit: the two sections were doing the same job back to back).
 function WashProofRows() {
   return (
     <Section>
       <Rise>
         <Eyebrow>What we wash</Eyebrow>
         <div className="mt-5">
-          <TwoLine a="We don't describe it." b="We show it." />
+          <TwoLine a="Four services." b="One flat quote." />
         </div>
       </Rise>
       <div className="mt-14 space-y-16 md:space-y-20">
@@ -112,12 +116,9 @@ function WashProofRows() {
           return (
             <Rise key={s.slug}>
               <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
-                {/* before/after pair */}
+                {/* one representative shot */}
                 <div className={flip ? "md:order-2" : ""}>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Media label={`BEFORE — ${s.slug} (4:3)`} />
-                    <Media label={`AFTER — ${s.slug} (4:3)`} />
-                  </div>
+                  <Media label={`RESULT — ${s.title} (4:3)`} ratio="4/3" />
                 </div>
                 {/* text */}
                 <div className={flip ? "md:order-1" : ""}>

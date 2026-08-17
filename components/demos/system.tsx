@@ -1180,6 +1180,7 @@ export function Contact({
   propertyTypes,
   vehicleFields,
   claimToggle,
+  minimal,
 }: {
   eyebrow: string;
   line1: string;
@@ -1188,11 +1189,14 @@ export function Contact({
   phone: string;
   email: string;
   location: string;
-  serviceLabel: string;
-  serviceOptions: string[];
+  serviceLabel?: string;
+  serviceOptions?: string[];
   propertyTypes?: string[];
   vehicleFields?: boolean; // Year / Make / Model row (auto body)
   claimToggle?: boolean; // "this is an insurance claim" toggle (auto body)
+  // 3 fields only — name, email, message. No phone, no service picker, no
+  // extras. For niches where the form itself should stay quick (florist).
+  minimal?: boolean;
 }) {
   const [state, setState] = useState<"idle" | "ok" | "err">("idle");
   const reduced = useReducedMotion();
@@ -1248,28 +1252,32 @@ export function Contact({
                 <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="you@email.com" />
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <span className={label} style={{ color: "var(--d-muted)" }}>
-                  Phone
-                </span>
-                <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="(516) 555-0000" />
+            {!minimal && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <span className={label} style={{ color: "var(--d-muted)" }}>
+                    Phone
+                  </span>
+                  <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="(516) 555-0000" />
+                </div>
+                {serviceOptions && (
+                  <div>
+                    <span className={label} style={{ color: "var(--d-muted)" }}>
+                      {serviceLabel}
+                    </span>
+                    <select className="w-full px-3.5 py-3 text-[15px]" style={field} defaultValue="">
+                      <option value="" disabled>
+                        Select…
+                      </option>
+                      {serviceOptions.map((o) => (
+                        <option key={o}>{o}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
-              <div>
-                <span className={label} style={{ color: "var(--d-muted)" }}>
-                  {serviceLabel}
-                </span>
-                <select className="w-full px-3.5 py-3 text-[15px]" style={field} defaultValue="">
-                  <option value="" disabled>
-                    Select…
-                  </option>
-                  {serviceOptions.map((o) => (
-                    <option key={o}>{o}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            {propertyTypes && (
+            )}
+            {!minimal && propertyTypes && (
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <span className={label} style={{ color: "var(--d-muted)" }}>
@@ -1292,7 +1300,7 @@ export function Contact({
                 </div>
               </div>
             )}
-            {vehicleFields && (
+            {!minimal && vehicleFields && (
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
                   <span className={label} style={{ color: "var(--d-muted)" }}>
@@ -1314,7 +1322,7 @@ export function Contact({
                 </div>
               </div>
             )}
-            {claimToggle && (
+            {!minimal && claimToggle && (
               <label className="flex cursor-pointer items-center gap-3 text-[15px]" style={{ color: "var(--d-body)" }}>
                 <input
                   type="checkbox"
