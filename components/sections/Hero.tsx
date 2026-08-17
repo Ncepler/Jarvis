@@ -13,7 +13,7 @@ export function Hero() {
 
       <VilasReveal
         tagline={COPY.hero.positioning}
-        ctaHref="https://anotherseason.org/start"
+        ctaHref="#contact"
         ctaLabel="Start"
       />
 

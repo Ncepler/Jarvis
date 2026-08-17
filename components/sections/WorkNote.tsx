@@ -6,7 +6,7 @@ import { COPY } from "@/lib/site";
 export function WorkNote() {
   return (
     <section className="border-t border-line px-6 py-8 md:px-10">
-      <p className="mx-auto max-w-6xl text-center font-mono text-xs uppercase tracking-[0.14em] text-muted">
+      <p className="mx-auto max-w-6xl text-center font-mono text-[13px] font-semibold uppercase tracking-[0.12em] text-muted">
         {COPY.workNote}
       </p>
     </section>

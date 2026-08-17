@@ -45,7 +45,7 @@ export function Footer() {
         </div>
 
         <nav aria-label="Footer navigation" className="grid content-start gap-3">
-          <span className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
+          <span className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-muted">
             Navigate
           </span>
           {NAV.map((item) => (
@@ -60,7 +60,7 @@ export function Footer() {
         </nav>
 
         <div className="grid content-start gap-3">
-          <span className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
+          <span className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-muted">
             Contact
           </span>
           {/* real email pending (SITE.email TBD) — hello@vilas.studio is a
@@ -98,7 +98,7 @@ export function Footer() {
       {/* "what we do" — quiet editorial row, no boxes/borders/shadows: a
           small stroke mark, a 2-word label, one line each */}
       <div className="mx-auto mt-14 max-w-6xl border-t border-line pt-10">
-        <span className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
+        <span className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-muted">
           What we do
         </span>
         <div className="mt-6 grid gap-8 sm:grid-cols-3">
@@ -116,7 +116,7 @@ export function Footer() {
               >
                 {WHAT_WE_DO_ICONS[i]}
               </svg>
-              <span className="text-ink">{item.label}</span>
+              <span className="font-medium text-ink">{item.label}</span>
               <p className="text-muted leading-relaxed">{item.body}</p>
             </div>
           ))}

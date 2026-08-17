@@ -26,7 +26,6 @@ export function Pricing() {
                   {tier.build}{" "}
                   <span className="text-lg text-ink">+ {tier.monthly}</span>
                 </p>
-                <p className="mt-4 text-sm text-muted">{tier.yearOne}</p>
               </div>
             </Reveal>
           ))}
@@ -37,7 +36,7 @@ export function Pricing() {
         </Reveal>
 
         <Reveal delay={0.24}>
-          <p className="mt-10 max-w-2xl text-sm leading-relaxed text-muted">
+          <p className="mt-10 max-w-2xl text-[15px] font-medium leading-relaxed text-muted">
             {COPY.pricing.note}
           </p>
         </Reveal>

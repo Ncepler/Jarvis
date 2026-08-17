@@ -97,34 +97,22 @@ export const COPY = {
   // starts dragging through the gallery.
   workNote:
     "Live in under a week. You fill out a short intake, we build, you review, it ships.",
-  // Before/after rows: the shared template on the left, a personalized build
-  // on the right. Real screenshots come later — placeholders for now.
+  // Before/after rows: the shared starting template on the left, the actual
+  // finished site on the right — real work, not a description of the
+  // process. Slugs reference lib/projects.ts; "Template" stays a labeled
+  // placeholder until there's a real generic-template screenshot to show.
   templateVsPersonalized: {
     intro:
       "Every site starts from a foundation. What you get is nothing like the starting point.",
-    rows: [
-      { niche: "Landscaping" },
-      { niche: "Florist" },
-      { niche: "Barbershop" },
-    ],
+    rows: ["demo-landscaping", "demo-florist", "demo-barber"],
     note: "You upload your own photos at intake — each just needs to be named to match its slot in the template (we tell you how).",
   },
   // Two tiers, flat and public. No feature lists — the tiers are the same
   // work at a different starting point, not different levels of effort.
   pricing: {
     tiers: [
-      {
-        title: "Template",
-        build: "$300 build",
-        monthly: "$50/month",
-        yearOne: "$900 year one",
-      },
-      {
-        title: "Custom",
-        build: "$500 build",
-        monthly: "$80/month",
-        yearOne: "$1,460 year one",
-      },
+      { title: "Template", build: "$300 build", monthly: "$50/month" },
+      { title: "Custom", build: "$500 build", monthly: "$80/month" },
     ],
     flagship: "Flagship work — let's talk.",
     note: "Your monthly covers hosting, the domain, and updates when you need them. If a payment lapses, the site pauses until it's caught up — nothing gets deleted, your content and domain are safe.",

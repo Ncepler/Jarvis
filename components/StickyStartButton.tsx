@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-// TODO(noah): placeholder — points at the real /start page once it exists.
-const START_HREF = "https://anotherseason.org/start";
+// TODO(noah): swap to the real /start page once it exists — for now this
+// just jumps straight to the contact form.
+const START_HREF = "#contact";
 
 // Small fixed "Start" button, top-right. Hidden while the hero is on screen,
 // fades in once the visitor scrolls past it — same CTA, always reachable

@@ -14,7 +14,8 @@
   --color-bg: #efe9dd; /* bone — base background (warm, paper, never white) */
   --color-surface: #f6f1e8; /* raised panels, cards, inputs */
   --color-ink: #1f1a14; /* deep warm espresso — primary text + wordmark (never #000) */
-  --color-muted: #5f574a; /* warm taupe — captions, secondary text (AA on bone) */
+  --color-muted: #4d4638; /* warm taupe, darkened for legibility (Noah's call — the old
+    #5f574a read thin against the light bone bg) — still AA on bone, richer */
   --color-line: #d9d0c1; /* warm hairline borders / dividers */
   --color-accent: #8a5a2b; /* deep bronze/caramel — primary: actions, links, active states */
   --color-accent-2: #4a5d43; /* muted forest — secondary emphasis, used sparingly */
@@ -40,6 +41,9 @@ body {
   background-color: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-weight: 460; /* Inter loads as a full variable font (no fixed weight
+    subset), so this nudges the whole site's default text a touch past 400 —
+    Noah's call: the body copy and small labels were reading thin at 400. */
   -webkit-font-smoothing: antialiased;
 }
 

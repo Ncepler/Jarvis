@@ -20,10 +20,10 @@ export function About() {
           {BLOCKS.map((block, i) => (
             <Reveal key={block.heading} delay={Math.min(i * 0.08, 0.24)}>
               <div className="flex flex-col gap-3">
-                <h3 className="font-mono text-xs uppercase tracking-[0.18em] text-accent">
+                <h3 className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-accent">
                   {block.heading}
                 </h3>
-                <p className="max-w-sm text-lg leading-relaxed text-muted">
+                <p className="max-w-sm text-lg leading-relaxed text-ink/85">
                   {block.body}
                 </p>
               </div>

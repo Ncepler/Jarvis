@@ -200,7 +200,7 @@ export function DoTheMath() {
           </div>
         </Reveal>
 
-        <p className="mt-6 font-mono text-xs uppercase tracking-[0.15em] text-muted">
+        <p className="mt-6 font-mono text-[13px] font-semibold uppercase tracking-[0.14em] text-muted">
           {m.honest}
         </p>
 
