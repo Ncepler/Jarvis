@@ -1,26 +1,17 @@
 "use client";
 
-import {
-  motion,
-  useAnimationFrame,
-  useMotionValue,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-  useVelocity,
-  wrap,
-} from "motion/react";
+import { motion, useMotionValue, useReducedMotion, useTransform, animate, wrap } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { COPY } from "@/lib/site";
 
-// Slow looping marquee of the niches we serve. Drifts on its own; scroll
-// velocity nudges its speed (the page's pace bleeds into the strip). It loops
-// seamlessly at any width: we measure one copy of the row, then render as many
-// copies as it takes to overfill the viewport and wrap x by exactly one copy
-// width — so the track never runs out and shows a gap (Noah 2026-06-20).
-// Reduced motion drops to a static, wrapping row of the same words.
-const SPEED = 55; // px/sec base drift
+// Slow looping marquee of the niches we serve. Fixed speed, one direction,
+// forever — does NOT react to scroll (Noah's call: it was reversing direction
+// under fast scroll and felt broken). It loops seamlessly at any width: we
+// measure one copy of the row, then render as many copies as it takes to
+// overfill the viewport and wrap x by exactly one copy width — so the track
+// never runs out and shows a gap (Noah 2026-06-20). Reduced motion drops to a
+// static, wrapping row of the same words.
+const CYCLE_SECONDS = 35; // one full loop of the row, ~30-40s per Noah
 
 function Row({ inner }: { inner?: React.Ref<HTMLSpanElement> }) {
   return (
@@ -68,29 +59,22 @@ export function Marquee() {
   }, [reduced]);
 
   const baseX = useMotionValue(0);
-  const { scrollY } = useScroll();
-  const scrollVelocity = useVelocity(scrollY);
-  const smoothVelocity = useSpring(scrollVelocity, {
-    damping: 50,
-    stiffness: 400,
-  });
-  // scroll speed bends the marquee speed, capped so it never sprints
-  const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 4], {
-    clamp: false,
-  });
-  const direction = useRef(1);
 
   // wrap by exactly one copy width (px) so the loop is seamless
   const x = useTransform(baseX, (v) => `${rowW ? wrap(-rowW, 0, v) : 0}px`);
 
-  useAnimationFrame((_, delta) => {
-    if (!rowW) return;
-    let moveBy = direction.current * -SPEED * (delta / 1000);
-    if (velocityFactor.get() < 0) direction.current = -1;
-    else if (velocityFactor.get() > 0) direction.current = 1;
-    moveBy += moveBy * Math.abs(velocityFactor.get());
-    baseX.set(baseX.get() + moveBy);
-  });
+  // fixed-speed, one-direction drift — a plain linear loop from 0 to -rowW,
+  // repeating forever. No scroll input at all.
+  useEffect(() => {
+    if (reduced || !rowW) return;
+    const controls = animate(baseX, baseX.get() - rowW, {
+      duration: CYCLE_SECONDS,
+      ease: "linear",
+      repeat: Infinity,
+    });
+    return () => controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reduced, rowW]);
 
   const label = COPY.marquee.join(", ");
 

@@ -48,17 +48,6 @@ function PathCard({ path, n }: { path: (typeof PATHS)[number]; n: number }) {
       onHoverStart={() => canHover && setHovered(true)}
       onHoverEnd={() => canHover && setHovered(false)}
     >
-      {/* the frame-breaking element — grows past the card bounds on expand */}
-      <motion.div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-12 -right-12 size-44 rounded-full border border-line"
-        initial={false}
-        animate={{ scale: expanded ? 1 : 0.35, opacity: expanded ? 1 : 0 }}
-        transition={
-          reduced ? { duration: 0.15 } : { duration: 0.6, ease: EASE }
-        }
-      />
-
       <span
         aria-hidden="true"
         className="block font-display text-5xl leading-none text-muted/40 tabular-nums"

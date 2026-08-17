@@ -8,7 +8,6 @@ import {
   useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
-  useSpring,
   useTransform,
   type MotionValue,
 } from "motion/react";
@@ -24,38 +23,6 @@ const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const GAP = 24;
 const clamp = (n: number, min: number, max: number) =>
   Math.max(min, Math.min(max, n));
-
-// The Lusion-style cursor label: a "step inside →" pill that trails the
-// pointer with spring inertia while it's over the draggable row. Hover-only,
-// motion-only — touch taps the card and reduced motion never mounts this.
-function StepInsideCursor({
-  x,
-  y,
-  visible,
-}: {
-  x: MotionValue<number>;
-  y: MotionValue<number>;
-  visible: boolean;
-}) {
-  const sx = useSpring(x, { stiffness: 500, damping: 40, mass: 0.4 });
-  const sy = useSpring(y, { stiffness: 500, damping: 40, mass: 0.4 });
-  return (
-    <motion.div
-      aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-50 hidden md:block"
-      style={{ x: sx, y: sy }}
-    >
-      <motion.span
-        className="block -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-accent px-4 py-2 font-mono text-xs tracking-wide text-white shadow-[0_8px_30px_rgba(31,26,20,0.25)]"
-        initial={false}
-        animate={{ opacity: visible ? 1 : 0, scale: visible ? 1 : 0.6 }}
-        transition={{ duration: 0.22, ease: EASE }}
-      >
-        step inside →
-      </motion.span>
-    </motion.div>
-  );
-}
 
 // What the card shows in the row — a fast static thumbnail (the demo's hero
 // image), NOT a live mini-render. Mounting all 7 full demos at once was the
@@ -413,11 +380,6 @@ export function Gallery() {
   // the row is bounded: x runs from 0 (first card centered) to the last card
   const minX = -(count - 1) * step;
 
-  // raw pointer position for the trailing "step inside →" cursor label
-  const cursorX = useMotionValue(0);
-  const cursorY = useMotionValue(0);
-  const [cursorOn, setCursorOn] = useState(false);
-
   // which card is nearest center RIGHT NOW — tracks continuously during the
   // drag (not just on snap) so the backdrop and labels follow the scroll
   const [centerIdx, setCenterIdx] = useState(0);
@@ -633,6 +595,18 @@ export function Gallery() {
     }
   };
 
+  // prev/next arrow buttons — the explicit, no-guesswork way to move through
+  // the row (drag/wheel/keys all still work). Reduced motion's row is a real
+  // native scroller, so it just scrolls one card; the coverflow snaps.
+  const goPrev = () => {
+    if (reduced) regionRef.current?.scrollBy({ left: -step, behavior: "smooth" });
+    else snapTo(centerIdx - 1);
+  };
+  const goNext = () => {
+    if (reduced) regionRef.current?.scrollBy({ left: step, behavior: "smooth" });
+    else snapTo(centerIdx + 1);
+  };
+
   // the ambient backdrop follows the settled center index (not the live drag
   // index) so a fling across the row doesn't mount every demo in between
   const backdrop = projects[panelIdx];
@@ -718,7 +692,7 @@ export function Gallery() {
           tabIndex={0}
           role="group"
           aria-label="Portfolio gallery. Drag, scroll sideways, or use arrow keys to browse; the centered site opens below."
-          className={`relative mt-16 touch-pan-y select-none ${canHover ? "md:cursor-none" : ""}`}
+          className="relative mt-16 touch-pan-y select-none"
           // The cards are positioned by motion values that only apply after
           // hydration + the first width measure; until then they'd pile up at
           // the row's origin (a visible flash of stacked demos). containerW is 0
@@ -731,14 +705,6 @@ export function Gallery() {
           }}
           onKeyDown={onKeyDown}
           onPointerDown={startDrag}
-          onPointerMove={(e) => {
-            cursorX.set(e.clientX);
-            cursorY.set(e.clientY);
-          }}
-          onPointerEnter={(e) => {
-            if (e.pointerType === "mouse") setCursorOn(true);
-          }}
-          onPointerLeave={() => setCursorOn(false)}
         >
           {projects.map((p, i) => (
             <GalleryCard
@@ -755,6 +721,33 @@ export function Gallery() {
           ))}
         </div>
       )}
+
+      {/* explicit prev/next controls — the drag/scroll/keys friction the
+          coverflow had on its own wasn't enough of an affordance */}
+      <div className="mt-6 flex justify-center gap-3">
+        <button
+          type="button"
+          onClick={goPrev}
+          disabled={!reduced && centerIdx <= 0}
+          aria-label="Previous site"
+          className="press flex size-10 items-center justify-center rounded-full border border-line text-ink transition-colors duration-200 hover:border-accent hover:text-accent disabled:opacity-30 disabled:hover:border-line disabled:hover:text-ink"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M15 5 8 12l7 7" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={goNext}
+          disabled={!reduced && centerIdx >= count - 1}
+          aria-label="Next site"
+          className="press flex size-10 items-center justify-center rounded-full border border-line text-ink transition-colors duration-200 hover:border-accent hover:text-accent disabled:opacity-30 disabled:hover:border-line disabled:hover:text-ink"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="m9 5 7 7-7 7" />
+          </svg>
+        </button>
+      </div>
 
       {/* mode="wait" would delay the slide-in; let the panel mount immediately
           and animate its own entrance */}
@@ -783,10 +776,6 @@ export function Gallery() {
           )}
         </AnimatePresence>
       </div>
-
-      {canHover && !reduced && (
-        <StepInsideCursor x={cursorX} y={cursorY} visible={cursorOn} />
-      )}
     </section>
   );
 }
