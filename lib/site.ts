@@ -32,15 +32,13 @@ export const COPY = {
     services: { a: "Three ways in.", b: "Pick the one that fits." },
     gallery: { a: "Sites we built.", b: "Step inside one." },
     process: { a: "How it works.", b: "Five steps, about a week." },
-    why: { a: "Why people", b: "pick us." },
     sites: { a: "Every site,", b: "one tap away." },
     about: { a: "A small studio.", b: "Wherever you are." },
     faq: { a: "Fair questions.", b: "Straight answers." },
     contact: { a: "Start a project.", b: "It takes two minutes." },
   },
   hero: {
-    positioning:
-      "Websites for businesses that look like they cost as much as a villa.",
+    positioning: "Websites for local businesses. Live in under a week.",
     outcome:
       "People Google you before they hire you. What they find decides who gets the call.",
   },
@@ -76,7 +74,7 @@ export const COPY = {
     },
     q2: {
       pre: "Say a slow or missing site costs you just",
-      post: "clients a month",
+      post: "a month", // component prepends "client"/"clients" based on the count
       sub: "A hypothetical you set — not a number we're claiming about your business.",
     },
     readoutSuffix: "a year",
@@ -88,26 +86,6 @@ export const COPY = {
     jsOff:
       "Miss one $300 customer a month and that's $3,600 a year — the site's about $300, once.",
   },
-  // The honest differentiators, numbered 01–04. No invented stats, no client
-  // counts — every line is true on day one.
-  why: [
-    {
-      title: "All online, no meetings",
-      body: "It all happens over email and the form — nothing to schedule, no in-person meetings. We work with businesses anywhere in the US.",
-    },
-    {
-      title: "One flat price",
-      body: "Agreed up front, half to start. No retainers, no surprise invoices later.",
-    },
-    {
-      title: "Live in about a week",
-      body: "Pick a style and it's about a week. Custom runs a little longer; we give you a real date.",
-    },
-    {
-      title: "One person, start to finish",
-      body: "No account managers. Whoever builds your site is who you talk to.",
-    },
-  ],
   // Final CTA band before the form.
   closing: {
     a: "Let's build the site",
@@ -136,13 +114,38 @@ export const COPY = {
       "Pay the rest. It goes live.",
     ],
   },
+  // Three short blocks, not a wall of text (Noah's rewrite). Each stays under
+  // 3 sentences and says nothing about studio size, location, or who's behind
+  // it — Vilas presents as a studio, full stop.
   about: {
-    p1: "We're a small web studio building sites for local businesses across the US: flower shops, landscapers, barbershops, contractors.",
-    p2: "Agencies charge thousands for this, and most of it pays for meetings. We charge a few hundred and spend it on the part you can actually see.",
-    // the component appends the Instagram link (or a period) after this
-    closer:
-      "You don't pay in full until you're happy with your site. We care way too much about how these look; the work above is the pitch",
+    who: {
+      heading: "Who we are",
+      body: "We're a web studio focused on local service businesses. Every site is built by hand for the business it belongs to.",
+    },
+    how: {
+      heading: "How we work",
+      body: "Direct, no middlemen. You tell us what you want, we build it, and it's live in about a week — no ongoing meetings.",
+    },
+    what: {
+      heading: "What you get",
+      body: "A real site you own, hosted and maintained. A contact form that emails you directly. Updates whenever you need them.",
+    },
   },
+  // Footer "what we do" row — icon + 2-word label + one-line description.
+  footerWhatWeDo: [
+    {
+      label: "Custom builds",
+      body: "Every site built by hand for the business it's for.",
+    },
+    {
+      label: "Hosted & maintained",
+      body: "We keep it live, secure, and updated for you.",
+    },
+    {
+      label: "Fast turnaround",
+      body: "Live in about a week, no long back-and-forth.",
+    },
+  ],
   faq: {
     title: "Fair questions",
     items: [

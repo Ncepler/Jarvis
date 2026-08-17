@@ -2,6 +2,7 @@ import { Footer } from "@/components/Footer";
 import { Marquee } from "@/components/Marquee";
 import { PinnedLogo } from "@/components/PinnedLogo";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { StickyStartButton } from "@/components/StickyStartButton";
 import { About } from "@/components/sections/About";
 import { AllSites } from "@/components/sections/AllSites";
 import { ClosingCta } from "@/components/sections/ClosingCta";
@@ -13,7 +14,6 @@ import { Gallery } from "@/components/sections/Gallery";
 import { Hero } from "@/components/sections/Hero";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { Services } from "@/components/sections/Services";
-import { ValueProps } from "@/components/sections/ValueProps";
 
 export default function Home() {
   // decided server-side so the service role key never reaches the client;
@@ -25,6 +25,7 @@ export default function Home() {
     <>
       <SmoothScroll />
       <PinnedLogo />
+      <StickyStartButton />
       <main>
         <Hero />
         <Marquee />
@@ -33,7 +34,6 @@ export default function Home() {
         <FullBleed />
         <HowItWorks />
         <DoTheMath />
-        <ValueProps />
         <AllSites />
         <About />
         <Faq />

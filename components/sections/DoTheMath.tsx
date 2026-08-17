@@ -140,7 +140,7 @@ export function DoTheMath() {
                     <span
                       className="mx-1 inline-flex items-center gap-3 align-middle"
                       role="group"
-                      aria-label={`${m.q2.pre} this many ${m.q2.post}`}
+                      aria-label={`${m.q2.pre} this many ${mpm === 1 ? "client" : "clients"} ${m.q2.post}`}
                     >
                       <button
                         type="button"
@@ -168,7 +168,7 @@ export function DoTheMath() {
                       </button>
                     </span>
                   </span>{" "}
-                  {m.q2.post}
+                  {mpm === 1 ? "client" : "clients"} {m.q2.post}
                 </p>
                 <p className="mt-2 text-sm text-muted">{m.q2.sub}</p>
               </div>

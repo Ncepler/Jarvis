@@ -13,8 +13,8 @@ export function Hero() {
 
       <VilasReveal
         tagline={COPY.hero.positioning}
-        ctaHref="#work"
-        ctaLabel="See the work"
+        ctaHref="https://anotherseason.org/start"
+        ctaLabel="Start"
       />
 
       <div className="pointer-events-none absolute inset-x-0 bottom-10 flex justify-center">
