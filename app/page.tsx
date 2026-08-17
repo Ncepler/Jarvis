@@ -13,7 +13,10 @@ import { FullBleed } from "@/components/sections/FullBleed";
 import { Gallery } from "@/components/sections/Gallery";
 import { Hero } from "@/components/sections/Hero";
 import { HowItWorks } from "@/components/sections/HowItWorks";
+import { Pricing } from "@/components/sections/Pricing";
 import { Services } from "@/components/sections/Services";
+import { TemplateVsPersonalized } from "@/components/sections/TemplateVsPersonalized";
+import { WorkNote } from "@/components/sections/WorkNote";
 
 export default function Home() {
   // decided server-side so the service role key never reaches the client;
@@ -31,10 +34,13 @@ export default function Home() {
         <Marquee />
         <Services />
         <Gallery />
+        <WorkNote />
+        <TemplateVsPersonalized />
         <FullBleed />
         <HowItWorks />
         <DoTheMath />
         <AllSites />
+        <Pricing />
         <About />
         <Faq />
         <ClosingCta />

@@ -33,9 +33,16 @@ export const COPY = {
     gallery: { a: "Sites we built.", b: "Step inside one." },
     process: { a: "How it works.", b: "Five steps, about a week." },
     sites: { a: "Every site,", b: "one tap away." },
-    about: { a: "A small studio.", b: "Wherever you are." },
+    // was "A small studio. Wherever you are." — dropped "small" per the house
+    // rule against referencing studio size (found while rewriting About).
+    about: { a: "How we build.", b: "And what you get." },
     faq: { a: "Fair questions.", b: "Straight answers." },
     contact: { a: "Start a project.", b: "It takes two minutes." },
+    templateVsPersonalized: {
+      a: "Here's the template.",
+      b: "Here's what it becomes.",
+    },
+    pricing: { a: "Pricing.", b: "No surprises later." },
   },
   hero: {
     positioning: "Websites for local businesses. Live in under a week.",
@@ -85,6 +92,42 @@ export const COPY = {
     honest: "Your numbers, not ours. We're just doing the multiplication.",
     jsOff:
       "Miss one $300 customer a month and that's $3,600 a year — the site's about $300, once.",
+  },
+  // Small note near the work section — sets expectations before anyone
+  // starts dragging through the gallery.
+  workNote:
+    "Live in under a week. You fill out a short intake, we build, you review, it ships.",
+  // Before/after rows: the shared template on the left, a personalized build
+  // on the right. Real screenshots come later — placeholders for now.
+  templateVsPersonalized: {
+    intro:
+      "Every site starts from a foundation. What you get is nothing like the starting point.",
+    rows: [
+      { niche: "Landscaping" },
+      { niche: "Florist" },
+      { niche: "Barbershop" },
+    ],
+    note: "You upload your own photos at intake — each just needs to be named to match its slot in the template (we tell you how).",
+  },
+  // Two tiers, flat and public. No feature lists — the tiers are the same
+  // work at a different starting point, not different levels of effort.
+  pricing: {
+    tiers: [
+      {
+        title: "Template",
+        build: "$300 build",
+        monthly: "$50/month",
+        yearOne: "$900 year one",
+      },
+      {
+        title: "Custom",
+        build: "$500 build",
+        monthly: "$80/month",
+        yearOne: "$1,460 year one",
+      },
+    ],
+    flagship: "Flagship work — let's talk.",
+    note: "Your monthly covers hosting, the domain, and updates when you need them. If a payment lapses, the site pauses until it's caught up — nothing gets deleted, your content and domain are safe.",
   },
   // Final CTA band before the form.
   closing: {
