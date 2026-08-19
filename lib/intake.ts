@@ -158,7 +158,7 @@ export const rowsToText = (rows: Row[], fields: ListField[]) =>
       fields
         .map((f) => (r[f.key] ?? "").replace(/\s*[\r\n]+\s*/g, " ").replace(/\|/g, "/").trim())
         .join(" | ")
-        .replace(/(\s*\|)+$/, ""),
+        .replace(/(\s*\|\s*)+$/, ""),
     )
     .join("\n");
 

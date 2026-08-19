@@ -67,7 +67,13 @@ function templateSection(row: SubmissionRow) {
   const rows = tpl.questions
     .map((q) => {
       const a = str(answers[q.key]);
-      return a ? `- ${q.label}: ${a}` : null;
+      if (!a) return null;
+      // A list answer is one item per line. Inlined after the label, every
+      // line but the first loses its bullet and reads as a stray sentence, so
+      // it goes underneath as an indented sub-list instead.
+      if (!a.includes("\n")) return `- ${q.label}: ${a}`;
+      const items = a.split("\n").map((line) => `  - ${line.trim()}`);
+      return `- ${q.label}:\n${items.join("\n")}`;
     })
     .filter(Boolean);
 
