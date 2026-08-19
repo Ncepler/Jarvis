@@ -13,7 +13,7 @@ export function Hero() {
 
       <VilasReveal
         tagline={COPY.hero.positioning}
-        ctaHref="#contact"
+        ctaHref="/start"
         ctaLabel="Start"
       />
 

@@ -297,16 +297,11 @@ function HomepagePanel({
             )}
             {project.isStyleDemo && (
               <motion.a
-                href="#contact"
+                href={`/start?template=${project.slug}`}
                 className="text-sm text-accent transition-colors duration-200 hover:text-ink"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={stagger(4)}
-                onClick={() => {
-                  window.dispatchEvent(
-                    new CustomEvent("preselect-style", { detail: project.slug }),
-                  );
-                }}
               >
                 Start with this style →
               </motion.a>

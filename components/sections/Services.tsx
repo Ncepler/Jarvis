@@ -88,7 +88,7 @@ function PathCard({ path, n }: { path: (typeof PATHS)[number]; n: number }) {
             {path.copy}
           </p>
           <a
-            href="#contact"
+            href="/start"
             tabIndex={expanded ? 0 : -1}
             className="mt-8 inline-block text-sm transition-colors duration-200 hover:text-accent"
           >

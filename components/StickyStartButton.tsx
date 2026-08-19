@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-// TODO(noah): swap to the real /start page once it exists — for now this
-// just jumps straight to the contact form.
-const START_HREF = "#contact";
+const START_HREF = "/start";
 
 // Small fixed "Start" button, top-right. Hidden while the hero is on screen,
 // fades in once the visitor scrolls past it — same CTA, always reachable
@@ -29,7 +27,7 @@ export function StickyStartButton() {
       href={START_HREF}
       aria-hidden={!visible}
       tabIndex={visible ? 0 : -1}
-      className="press fixed right-5 top-5 z-50 flex h-9 items-center rounded-sm border border-accent bg-accent px-4 text-sm text-white shadow-[0_2px_12px_-2px_rgba(31,26,20,0.35)] transition-opacity duration-[250ms] md:right-8 md:top-6"
+      className="press fixed right-5 top-5 z-50 flex h-8 items-center rounded-sm border border-line/60 bg-ink/90 px-3.5 text-[13px] text-bg shadow-sm backdrop-blur-sm transition-opacity duration-[250ms] hover:bg-ink md:right-8 md:top-6"
       style={{
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? "auto" : "none",

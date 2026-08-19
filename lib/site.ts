@@ -10,7 +10,7 @@ export const SITE = {
   founder: "FOUNDER_NAME_TBD", // Noah's display name on the business card
   domain: "vilas.studio",
   tagline: "TAGLINE_TBD",
-  email: "CONTACT_EMAIL_TBD",
+  email: "hello@vilas.studio",
   instagram: "INSTAGRAM_URL_TBD",
   region: "United States", // studio is fully remote — works with businesses anywhere in the US
 } as const;
