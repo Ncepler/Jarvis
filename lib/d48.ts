@@ -92,3 +92,61 @@ export async function updateStatus(id: string, status: string) {
   });
   if (!res.ok) throw new Error(`Couldn't save that status (${res.status}).`);
 }
+
+// ── Permanent delete ─────────────────────────────────────────────────────
+// Every file a submission uploaded, as bucket → paths. Anything that isn't a
+// URL we wrote is ignored rather than guessed at.
+const PUBLIC = "/storage/v1/object/public/";
+
+function filesOf(row: SubmissionRow) {
+  const urls = [
+    row.main_logo_url,
+    row.profile_logo_url,
+    row.profile_logo_original_url,
+    row.hero_video_url,
+    row.logo_url,
+    ...(row.photo_urls ?? []).map((p) => p.url),
+  ];
+  const byBucket = new Map<string, string[]>();
+  for (const url of urls) {
+    if (!url?.startsWith(`${URL}${PUBLIC}`)) continue;
+    const rest = url.slice(`${URL}${PUBLIC}`.length);
+    const cut = rest.indexOf("/");
+    if (cut < 1) continue;
+    const bucket = rest.slice(0, cut);
+    const path = decodeURIComponent(rest.slice(cut + 1));
+    byBucket.set(bucket, [...(byBucket.get(bucket) ?? []), path]);
+  }
+  return byBucket;
+}
+
+// Files first, row second. If a bucket won't give the files up, the row stays
+// so there's still a record of what the orphaned files belong to.
+export async function deleteSubmission(id: string) {
+  if (!hasBackend()) throw new Error("Supabase isn't configured on this deploy.");
+  const row = await getSubmission(id);
+  if (!row) return;
+
+  for (const [bucket, prefixes] of filesOf(row)) {
+    const res = await fetch(`${URL}/storage/v1/object/${bucket}`, {
+      method: "DELETE",
+      headers: {
+        apikey: KEY as string,
+        Authorization: `Bearer ${KEY}`,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+      body: JSON.stringify({ prefixes }),
+    });
+    if (!res.ok) {
+      throw new Error(
+        `Couldn't delete the files in ${bucket} (${res.status}), so the submission is still here.`,
+      );
+    }
+  }
+
+  const res = await sb(`intake_submissions?id=eq.${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error(`The files are gone but the row wouldn't delete (${res.status}).`);
+}

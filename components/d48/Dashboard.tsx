@@ -1,8 +1,16 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { copyBuildPrompt, copyTemplateCode, logout, setStatus } from "@/app/d48/actions";
-import { STATUSES, type SubmissionRow } from "@/lib/intake";
+import { Fragment, useEffect, useMemo, useState, useTransition } from "react";
+import {
+  archive,
+  copyBuildPrompt,
+  copyTemplateCode,
+  destroy,
+  logout,
+  setStatus,
+  type Result,
+} from "@/app/d48/actions";
+import { LIVE_STATUSES, STATUSES, type SubmissionRow } from "@/lib/intake";
 import { questionsFor, templateByKey } from "@/lib/templates";
 
 const hairline = "border-b border-line";
@@ -13,53 +21,201 @@ const fmtDate = (iso: string) =>
 
 const isImage = (url: string) => /\.(png|jpe?g|webp|gif|avif|svg)(\?|$)/i.test(url);
 
+const statusOf = (row: SubmissionRow) => row.status ?? "new";
+const templateOf = (row: SubmissionRow) =>
+  row.is_custom_build
+    ? "Custom"
+    : (templateByKey(row.template_choice ?? "")?.name ?? row.template_choice ?? row.template ?? "—");
+
+// ── Icons ────────────────────────────────────────────────────────────────
+// Line icons rather than emoji (CLAUDE.md §5), sized to the row.
+const svg = { width: 16, height: 16, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.3 };
+
+const EyeIcon = () => (
+  <svg {...svg} aria-hidden="true">
+    <path d="M1 8s2.6-4.2 7-4.2S15 8 15 8s-2.6 4.2-7 4.2S1 8 1 8Z" />
+    <circle cx="8" cy="8" r="1.9" />
+  </svg>
+);
+
+const ArchiveIcon = () => (
+  <svg {...svg} aria-hidden="true">
+    <rect x="1.8" y="2.6" width="12.4" height="3" />
+    <path d="M3 5.6v7.8h10V5.6M6.2 8.4h3.6" />
+  </svg>
+);
+
+const TrashIcon = () => (
+  <svg {...svg} aria-hidden="true">
+    <path d="M2.6 4.2h10.8M6.4 4.2V2.6h3.2v1.6M4 4.2l.7 9.2h6.6l.7-9.2M6.6 6.6v4.4M9.4 6.6v4.4" />
+  </svg>
+);
+
+// ── Bits ─────────────────────────────────────────────────────────────────
+const TONE: Record<string, string> = {
+  new: "border-accent/40 bg-accent/[0.07] text-accent",
+  "in progress": "border-line bg-surface text-ink",
+  done: "border-accent-2/40 bg-accent-2/[0.07] text-accent-2",
+  archived: "border-line bg-transparent text-muted/70",
+};
+
 function StatusBadge({ status }: { status: string }) {
-  const tone =
-    status === "done"
-      ? "border-accent-2 text-accent-2"
-      : status === "in progress"
-        ? "border-accent text-accent"
-        : "border-line text-muted";
   return (
-    <span className={`shrink-0 border px-2 py-[3px] font-mono text-[10px] uppercase tracking-[0.14em] ${tone}`}>
+    <span
+      className={`inline-block shrink-0 border px-2 py-[3px] font-mono text-[10px] uppercase tracking-[0.14em] ${
+        TONE[status] ?? TONE.archived
+      }`}
+    >
       {status}
     </span>
   );
 }
 
-// Runs a server action, copies whatever it returns, and says so for 2s.
+const iconButtonClass =
+  "grid size-8 cursor-pointer place-items-center border border-transparent text-muted transition-colors duration-200 hover:border-line hover:text-ink disabled:cursor-default disabled:opacity-40";
+
+function IconButton({
+  label,
+  danger,
+  onClick,
+  children,
+}: {
+  label: string;
+  danger?: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      title={label}
+      aria-label={label}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      className={`${iconButtonClass} ${danger ? "hover:border-red-500/50 hover:text-red-500" : ""}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+// Destructive actions ask first. One dialog for both, with the copy carrying
+// the difference — a browser confirm in the middle of this page would look
+// like a different piece of software.
+function ConfirmDialog({
+  title,
+  body,
+  confirm,
+  danger,
+  busy,
+  error,
+  onConfirm,
+  onCancel,
+}: {
+  title: string;
+  body: string;
+  confirm: string;
+  danger?: boolean;
+  busy: boolean;
+  error: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && onCancel();
+    document.addEventListener("keydown", esc);
+    return () => document.removeEventListener("keydown", esc);
+  }, [onCancel]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-6"
+      onClick={onCancel}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onClick={(e) => e.stopPropagation()}
+        className="grid w-full max-w-md gap-4 border border-line bg-bg p-6"
+      >
+        <h2 className="font-display text-xl text-ink">{title}</h2>
+        <p className="text-sm leading-relaxed text-muted">{body}</p>
+        {error && <p className="text-sm text-red-500">{error}</p>}
+        <div className="mt-2 flex flex-wrap gap-3">
+          <button
+            type="button"
+            autoFocus
+            disabled={busy}
+            onClick={onConfirm}
+            className={`press cursor-pointer border px-5 py-2 text-sm transition-colors duration-200 disabled:opacity-40 ${
+              danger
+                ? "border-red-500 bg-red-500 text-white hover:bg-red-500/90"
+                : "border-accent bg-accent text-white hover:bg-accent/90"
+            }`}
+          >
+            {busy ? "Working…" : confirm}
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onCancel}
+            className="press cursor-pointer border border-line px-5 py-2 text-sm text-ink transition-colors duration-200 hover:border-ink disabled:opacity-40"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Runs a server action, copies whatever it returns, and confirms beside the
+// button. The label stays put: a button that renames itself is a button you
+// can't find again.
 function CopyButton({
   label,
   get,
 }: {
   label: string;
-  get: () => Promise<string>;
+  get: () => Promise<Result<string>>;
 }) {
-  const [copied, setCopied] = useState(false);
+  const [note, setNote] = useState("");
   const [failed, setFailed] = useState("");
   const [pending, start] = useTransition();
 
   const click = () =>
     start(async () => {
+      setFailed("");
+      const result = await get();
+      if (!result.ok) return setFailed(result.error);
       try {
-        await navigator.clipboard.writeText(await get());
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (e) {
-        setFailed(e instanceof Error ? e.message : "Couldn't copy that.");
+        await navigator.clipboard.writeText(result.value);
+        setNote("Copied to clipboard");
+        setTimeout(() => setNote(""), 2400);
+      } catch {
+        setFailed("The browser wouldn't let us reach the clipboard.");
       }
     });
 
   return (
-    <span className="grid gap-1">
+    <span className="flex flex-wrap items-center gap-3">
       <button
         type="button"
         onClick={click}
         disabled={pending}
         className="press cursor-pointer border border-line px-4 py-2 text-sm text-ink transition-colors duration-200 hover:border-ink disabled:opacity-40"
       >
-        {copied ? "Copied!" : pending ? "…" : label}
+        {label}
       </button>
+      {pending && <span className={meta}>Working…</span>}
+      {note && (
+        <span role="status" className="animate-fade-in font-mono text-[11px] uppercase tracking-[0.14em] text-accent-2">
+          {note}
+        </span>
+      )}
       {failed && <span className="text-xs text-red-500">{failed}</span>}
     </span>
   );
@@ -115,7 +271,7 @@ function Asset({ label, url }: { label: string; url: string }) {
 }
 
 function Detail({ row }: { row: SubmissionRow }) {
-  const [status, setLocal] = useState(row.status ?? "new");
+  const [status, setLocal] = useState(statusOf(row));
   const [, start] = useTransition();
   const tpl = templateByKey(row.template_choice ?? "");
   const answers = row.template_customizations ?? {};
@@ -133,21 +289,23 @@ function Detail({ row }: { row: SubmissionRow }) {
 
   return (
     <div className="grid gap-8 border-t border-line bg-surface px-4 py-8 md:px-6">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-4">
         <label className="flex items-center gap-2 text-sm text-muted">
           Status
           <select
-            value={status}
+            value={LIVE_STATUSES.includes(status as never) ? status : ""}
             onChange={(e) => {
               const next = e.target.value;
               setLocal(next);
-              start(() => {
-                setStatus(row.id, next).catch(() => setLocal(row.status ?? "new"));
+              start(async () => {
+                const result = await setStatus(row.id, next);
+                if (!result.ok) setLocal(statusOf(row));
               });
             }}
             className="cursor-pointer border border-line bg-bg px-2 py-1 text-sm text-ink"
           >
-            {STATUSES.map((s) => (
+            {status === "archived" && <option value="">archived</option>}
+            {LIVE_STATUSES.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
@@ -155,9 +313,7 @@ function Detail({ row }: { row: SubmissionRow }) {
           </select>
         </label>
         <CopyButton label="Copy build prompt" get={() => copyBuildPrompt(row.id)} />
-        {tpl && (
-          <CopyButton label="Copy template code" get={() => copyTemplateCode(tpl.key)} />
-        )}
+        {tpl && <CopyButton label="Copy template code" get={() => copyTemplateCode(tpl.key)} />}
       </div>
 
       <div className="grid gap-8 md:grid-cols-2">
@@ -169,10 +325,7 @@ function Detail({ row }: { row: SubmissionRow }) {
           <Field label="Phone" value={row.phone} />
           <Field label="Address" value={row.address} />
           <Field label="Domain they want" value={row.desired_domain} />
-          <Field
-            label="Build"
-            value={row.is_custom_build ? "Custom build, no template" : (tpl?.name ?? row.template_choice ?? row.template)}
-          />
+          <Field label="Build" value={row.is_custom_build ? "Custom build, no template" : templateOf(row)} />
         </Group>
 
         <Group title="Brand">
@@ -200,9 +353,7 @@ function Detail({ row }: { row: SubmissionRow }) {
 
         <Group title={tpl ? `${tpl.name} template` : "Template"}>
           {tpl ? (
-            questionsFor(tpl.key)
-              .map((q) => <Field key={q.key} label={q.label} value={answers[q.key]} />)
-              .filter(Boolean)
+            questionsFor(tpl.key).map((q) => <Field key={q.key} label={q.label} value={answers[q.key]} />)
           ) : (
             <p className="py-2 text-sm text-muted">No template on this one.</p>
           )}
@@ -228,13 +379,90 @@ function Detail({ row }: { row: SubmissionRow }) {
   );
 }
 
+// ── The list ─────────────────────────────────────────────────────────────
+type Filter = "all" | string;
+type SortKey = "created_at" | "status";
+type Pending = { kind: "archive" | "delete"; row: SubmissionRow } | null;
+
+const th = "px-3 py-2 text-left font-mono text-[11px] uppercase tracking-[0.14em] text-muted";
+
+function SortHeader({
+  label,
+  active,
+  dir,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: "asc" | "desc";
+  onClick: () => void;
+}) {
+  return (
+    <th scope="col" className={th} aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}>
+      <button
+        type="button"
+        onClick={onClick}
+        className={`cursor-pointer transition-colors duration-200 hover:text-ink ${active ? "text-ink" : ""}`}
+      >
+        {label}
+        <span aria-hidden="true" className="ml-1">
+          {active ? (dir === "asc" ? "↑" : "↓") : "·"}
+        </span>
+      </button>
+    </th>
+  );
+}
+
 export function Dashboard({ rows, error }: { rows: SubmissionRow[]; error?: string }) {
   const [open, setOpen] = useState<string | null>(null);
+  const [filter, setFilter] = useState<Filter>("all");
+  const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" }>({
+    key: "created_at",
+    dir: "desc",
+  });
+  const [pending, setPending] = useState<Pending>(null);
+  const [busy, startAction] = useTransition();
+  const [actionError, setActionError] = useState("");
+
+  const counts = useMemo(() => {
+    const out: Record<string, number> = Object.fromEntries(STATUSES.map((s) => [s, 0]));
+    for (const row of rows) out[statusOf(row)] = (out[statusOf(row)] ?? 0) + 1;
+    return out;
+  }, [rows]);
+
+  const shown = useMemo(() => {
+    // "All" means everything still in play. Archived is its own view, which is
+    // the point of archiving.
+    const kept = rows.filter((r) =>
+      filter === "all" ? statusOf(r) !== "archived" : statusOf(r) === filter,
+    );
+    const rank = (r: SubmissionRow) =>
+      sort.key === "created_at" ? r.created_at : String(STATUSES.indexOf(statusOf(r) as never));
+    return [...kept].sort((a, b) => {
+      const cmp = rank(a) < rank(b) ? -1 : rank(a) > rank(b) ? 1 : 0;
+      return sort.dir === "asc" ? cmp : -cmp;
+    });
+  }, [rows, filter, sort]);
+
+  const toggleSort = (key: SortKey) =>
+    setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "desc" }));
+
+  const run = () => {
+    if (!pending) return;
+    const { kind, row } = pending;
+    setActionError("");
+    startAction(async () => {
+      const result = await (kind === "archive" ? archive(row.id) : destroy(row.id));
+      if (!result.ok) return setActionError(result.error);
+      setOpen((id) => (id === row.id ? null : id));
+      setPending(null);
+    });
+  };
 
   return (
-    <div className="grid gap-10">
-      <div className="flex items-baseline justify-between gap-4">
-        <h1 className="font-display text-title text-ink">Intake</h1>
+    <div className="grid gap-8">
+      <div className="flex flex-wrap items-baseline justify-between gap-4">
+        <h1 className="font-display text-title text-ink">Intake submissions</h1>
         <form action={logout}>
           <button type="submit" className="cursor-pointer text-sm text-muted hover:text-ink">
             Sign out
@@ -242,39 +470,165 @@ export function Dashboard({ rows, error }: { rows: SubmissionRow[]; error?: stri
         </form>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <p className={meta}>
+          {STATUSES.map((s) => `${counts[s] ?? 0} ${s}`).join(" · ")}
+        </p>
+        <label className="flex items-center gap-2 text-sm text-muted">
+          Show
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="cursor-pointer border border-line bg-bg px-2 py-1 text-sm text-ink"
+          >
+            <option value="all">All</option>
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
       {error && <p className="text-sm text-accent">{error}</p>}
 
-      {!error && rows.length === 0 && (
-        <p className="text-sm text-muted">Nothing has come in yet.</p>
+      {!error && shown.length === 0 && (
+        <p className="text-sm text-muted">
+          {filter === "all" ? "Nothing has come in yet." : `No ${filter} submissions yet.`}
+        </p>
       )}
 
-      <div className="grid">
-        {rows.map((row) => {
-          const isOpen = open === row.id;
-          const tpl = templateByKey(row.template_choice ?? "");
-          return (
-            <div key={row.id} className={hairline}>
-              <button
-                type="button"
-                onClick={() => setOpen(isOpen ? null : row.id)}
-                aria-expanded={isOpen}
-                className="flex w-full cursor-pointer flex-wrap items-center gap-x-4 gap-y-2 px-1 py-5 text-left transition-colors duration-200 hover:bg-surface"
-              >
-                <span className="min-w-0 flex-1 truncate text-ink">
-                  {row.business_name || "(no name)"}
-                </span>
-                <span className={meta}>{fmtDate(row.created_at)}</span>
-                <span className={meta}>
-                  {row.is_custom_build ? "custom" : (tpl?.name ?? row.template_choice ?? row.template ?? "—")}
-                </span>
-                <StatusBadge status={row.status ?? "new"} />
-                <span className="w-4 text-muted">{isOpen ? "−" : "+"}</span>
-              </button>
-              {isOpen && <Detail row={row} />}
-            </div>
-          );
-        })}
-      </div>
+      {shown.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[42rem] border-collapse text-sm">
+            <thead>
+              <tr className={hairline}>
+                <th scope="col" className={th}>
+                  Business
+                </th>
+                <th scope="col" className={th}>
+                  Template
+                </th>
+                <SortHeader
+                  label="Submitted"
+                  active={sort.key === "created_at"}
+                  dir={sort.dir}
+                  onClick={() => toggleSort("created_at")}
+                />
+                <SortHeader
+                  label="Status"
+                  active={sort.key === "status"}
+                  dir={sort.dir}
+                  onClick={() => toggleSort("status")}
+                />
+                <th scope="col" className={`${th} text-right`}>
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((row) => {
+                const isOpen = open === row.id;
+                const archived = statusOf(row) === "archived";
+                const name = row.business_name || "(no name)";
+                return (
+                  <Fragment key={row.id}>
+                    <tr
+                      onClick={() => setOpen(isOpen ? null : row.id)}
+                      className={`h-12 cursor-pointer transition-colors duration-200 hover:bg-surface ${hairline} ${
+                        isOpen ? "bg-surface" : ""
+                      }`}
+                    >
+                      <th scope="row" className="max-w-[16rem] truncate px-3 text-left font-normal">
+                        <button
+                          type="button"
+                          aria-expanded={isOpen}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpen(isOpen ? null : row.id);
+                          }}
+                          className="cursor-pointer text-ink"
+                        >
+                          {name}
+                        </button>
+                      </th>
+                      <td className="px-3 text-muted">{templateOf(row)}</td>
+                      <td className="px-3 tabular-nums text-muted">{fmtDate(row.created_at)}</td>
+                      <td className="px-3">
+                        <StatusBadge status={statusOf(row)} />
+                      </td>
+                      <td className="px-3">
+                        <div className="flex items-center justify-end gap-1">
+                          <IconButton
+                            label={isOpen ? `Hide ${name}` : `View ${name}`}
+                            onClick={() => setOpen(isOpen ? null : row.id)}
+                          >
+                            <EyeIcon />
+                          </IconButton>
+                          {archived ? (
+                            <IconButton
+                              danger
+                              label={`Permanently delete ${name}`}
+                              onClick={() => {
+                                setActionError("");
+                                setPending({ kind: "delete", row });
+                              }}
+                            >
+                              <TrashIcon />
+                            </IconButton>
+                          ) : (
+                            <IconButton
+                              label={`Archive ${name}`}
+                              onClick={() => {
+                                setActionError("");
+                                setPending({ kind: "archive", row });
+                              }}
+                            >
+                              <ArchiveIcon />
+                            </IconButton>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                    {isOpen && (
+                      <tr>
+                        <td colSpan={5} className="p-0">
+                          <Detail row={row} />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {pending && (
+        <ConfirmDialog
+          danger={pending.kind === "delete"}
+          busy={busy}
+          error={actionError}
+          title={
+            pending.kind === "archive"
+              ? "Archive this submission?"
+              : `Permanently delete ${pending.row.business_name || "this submission"}?`
+          }
+          body={
+            pending.kind === "archive"
+              ? "It drops out of this list. You can find it again under the Archived filter, and move it back from there."
+              : "This cannot be undone. Everything they uploaded — logo, photos, video — is deleted along with the record."
+          }
+          confirm={pending.kind === "archive" ? "Archive it" : "Delete permanently"}
+          onConfirm={run}
+          onCancel={() => {
+            setPending(null);
+            setActionError("");
+          }}
+        />
+      )}
     </div>
   );
 }
