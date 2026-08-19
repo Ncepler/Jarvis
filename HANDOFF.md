@@ -1,11 +1,22 @@
-# HANDOFF — updated 2026-08-12 (v41)
+# HANDOFF — updated 2026-08-19 (v45)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — footer stamp v41. `npm run build` + `tsc --noEmit` + `next lint` all clean.
-- **9 demos now** (added the Magician, see below). All 9 registered in `components/demos/index.ts` + `lib/projects.ts`, all show in the gallery and the "Every site" index. Verified end-to-end in-browser (open from gallery card, open from "Every site" row, reduced-motion, 390px mobile) — 0 console errors from anything touched this session.
-- This session ran a full design-system compliance pass against `.claude/skills/local-service-design-system/SKILL.md`. Headline finding: **most of the brief was already done** in earlier sessions (marquees were already seamless, the timeline copy was already fixed, the logo was already a real transparent mark) — see "Gotchas" below for what was actually a gap vs. already-compliant.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — footer stamp v45. `npm run build` + `tsc --noEmit` + `next lint` all clean.
+- **9 demos** (added the Magician, see v41 below). All 9 registered in `components/demos/index.ts` + `lib/projects.ts`, all show in the gallery and the "Every site" index.
 
-## v41 — Elias Vane, the Magician demo (this run, SKILL §16)
+## v45 — /start intake form (this run)
+- New standalone route `app/start/page.tsx`: a 4-page intake form (Contact → Brand → Content → Brain dump) for a client who's already said yes, longer/more detailed than the homepage's quick `Contact` form. State lives in one `IntakeDraft` object (`lib/intake.ts`), mirrored to `localStorage` (`vilas-intake-draft-v1`, text fields + current step only — file objects can't survive `JSON.stringify` so a refresh mid-upload loses the file selection, not the text).
+- Components under `components/intake/`: `IntakeForm` (orchestrator/state), `PageContact`/`PageBrand`/`PageContent`/`PageBrainDump` (the 4 pages), `ProgressSteps`, `fields.tsx` (shared input primitives, same visual language as `Contact.tsx`).
+- `app/api/intake/route.ts` (Node runtime): parses multipart form data, uploads logo/photos straight to Supabase Storage (`intake-logos` / `intake-photos` buckets, raw REST — no client lib, same fetch-based pattern as `/api/lead`), inserts the row into `intake_submissions`, returns `{ id }`.
+- `app/api/notify-intake/route.ts` (edge runtime): client fires this after a successful save, non-blocking. Re-fetches the row by id from Supabase (doesn't trust client-posted data) and emails Noah via Resend's REST API. Swallows all errors and always returns `{ ok: true }` — the row's already saved by the time this runs, so a mail outage never blocks the user.
+- **Not yet run: the Supabase migrations.** `supabase/migrations/0002_create_intake_submissions.sql` (table) and `0003_create_intake_storage_buckets.sql` (the two storage buckets) need to be run in the Supabase SQL editor before `/start` can actually save anything. Until then the route 503s gracefully (same "not wired up" pattern as `/api/lead`).
+- **New env vars needed** (not yet in Vercel): `RESEND_API_KEY`, `NOTIFY_EMAIL`. Reuses the existing `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`. A `.env` at repo root (gitignored) lists all four with blank values as a fill-in template.
+- **Resend sending domain not yet verified** — `vilas.studio` needs to be added in the Resend dashboard and its generated DNS records added before `from: intake@vilas.studio` will actually send. Until then `/api/notify-intake` will get a Resend error, which it silently swallows (row still saves fine either way).
+- **Storage buckets are public** (my call, flagged for Noah) — simplest way to get a plain URL for `logo_url`/`photo_urls` without a signed-token step. Files aren't listable and paths include a timestamp, but anyone with a URL can view that one file. Switch to private + signed URLs if that's not okay.
+- `StickyStartButton.tsx` still points its `START_HREF` at `#contact`, not `/start` — its own `TODO(noah)` comment invites the swap, deliberately left alone (ground rule: this session was scoped to the new route only, no other files touched).
+
+## v41 — Elias Vane, the Magician demo (SKILL §16)
+- This session ran a full design-system compliance pass against `.claude/skills/local-service-design-system/SKILL.md`. Headline finding: **most of the brief was already done** in earlier sessions (marquees were already seamless, the timeline copy was already fixed, the logo was already a real transparent mark) — see "Gotchas" below for what was actually a gap vs. already-compliant.
 - New `components/demos/MagicianDemo.tsx` (~950 lines), slug `demo-magician`, flagship tier, order 8. **Fully self-contained — does NOT import `./system`** (the local-service spine); §16 is a deliberate departure from the rest of the demo system (no hairline/eyebrow spine, no "zero decorative shapes," spectacle is the point).
 - Velvet-black + stage-gold + ember palette, new **Playfair Display** playbill serif (`--font-playfair`, added to `app/layout.tsx`, demo-only, never Syne).
 - Built all of §16d's moving parts: hero spotlight-glow + capped ember canvas (`Embers`, off on reduced-motion, half-density mobile) + huge playbill wordmark; 6 decorative `DriftingCards` with **bounded per-card scroll parallax** (each card gets its own `useScroll({target})`, not raw `scrollY`, so they never runaway on a long page) + cursor tilt on hover-capable devices, 3 of 6 stay visible on phones; seamless `PhraseBand` marquee (same measure-and-overfill technique as the rest of the site); 5-card 3D flip-to-reveal "pick a card" section (`ShowCard`) with a **fully static, always-readable fallback** (`StaticShowList`) under reduced motion instead of hiding the interaction; Reel/Witnessed/About/Where-it-works/Booking sections per the §16e sequence.
@@ -30,6 +41,7 @@
 - Project "studio-site", ref `wbrftodyvnjxxncfnvvt`, us-east-1, free tier. `leads` table + RLS deny-all; `/api/lead` plain fetch → PostgREST. `.env.local` has SUPABASE_URL, SERVICE_ROLE_KEY blank — Noah pastes the key into .env.local AND Vercel, then redeploy. Free tier pauses ~1wk idle.
 
 ## Blocked on Noah
+- **/start (v45):** run `supabase/migrations/0002_create_intake_submissions.sql` + `0003_create_intake_storage_buckets.sql`; add `RESEND_API_KEY` + `NOTIFY_EMAIL` to Vercel; verify `vilas.studio` as a sending domain in Resend and add its DNS records. Fill in `.env` at repo root (gitignored template) with all four vars for local dev.
 - SUPABASE_SERVICE_ROLE_KEY; tagline/email/instagram/founder.
 - Eyes on the live URL: the Magician demo (does it read as "genuinely cool" per SKILL §16g, or does anything feel cheesy instead of theatrical), the bumped eyebrows, the new "Demo build" tags.
 - A decision on the pre-existing reduced-motion hydration warning above — worth a dedicated pass, or leave it (it's cosmetic-only in the console, not user-visible)?
