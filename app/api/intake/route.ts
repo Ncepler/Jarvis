@@ -1,55 +1,50 @@
 import { NextResponse } from "next/server";
 import {
-  MAX_VIDEO_BYTES,
   isValidDomain,
   isValidEmail,
   scrubDomain,
   HEX_RE,
+  type Upload,
 } from "@/lib/intake";
 import { templateByKey } from "@/lib/templates";
 
-// Talks to Supabase's REST + Storage APIs with plain fetch, same pattern as
-// /api/lead: no client lib, and the service role key never leaves the server
-// (CLAUDE.md §14). Handles the DB write and every upload for /start.
+// Talks to Supabase's REST API with plain fetch, same pattern as /api/lead:
+// no client lib, and the service role key never leaves the server
+// (CLAUDE.md §14). Files are already in Storage by the time this runs —
+// /api/intake/upload puts them there as they're picked — so this handler only
+// records where they landed.
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const clip = (v: unknown, max: number) =>
   typeof v === "string" ? v.trim().slice(0, max) : "";
 
-const slugify = (name: string) =>
-  name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "business";
-
-const safeName = (name: string) =>
-  name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(0, 200) || "file";
-
 const bad = (error: string, status = 400) => NextResponse.json({ error }, { status });
 
-async function uploadFile(bucket: string, path: string, file: File) {
-  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`, {
-    method: "POST",
-    headers: {
-      apikey: SERVICE_KEY as string,
-      Authorization: `Bearer ${SERVICE_KEY}`,
-      "Content-Type": file.type || "application/octet-stream",
-      "x-upsert": "true",
-    },
-    body: await file.arrayBuffer(),
-  });
-  if (!res.ok) throw new Error(`upload failed: ${bucket}/${path} (${res.status})`);
-  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
-}
+// Only a URL we uploaded ourselves goes in the row, so a crafted payload can't
+// point the dashboard at someone else's host.
+const ownUrl = (v: unknown): string | null => {
+  const url = typeof v === "string" ? v.trim() : "";
+  return url.startsWith(`${SUPABASE_URL}/storage/v1/object/public/intake-`) ? url : null;
+};
+
+const asUpload = (v: unknown): string | null =>
+  v && typeof v === "object" ? ownUrl((v as Upload).url) : null;
+
+const asPhotos = (v: unknown): Upload[] =>
+  (Array.isArray(v) ? v : [])
+    .slice(0, 40)
+    .map((p) => ({ name: clip((p as Upload)?.name, 200), url: asUpload(p) ?? "" }))
+    .filter((p) => p.url);
 
 export async function POST(req: Request) {
   if (!SUPABASE_URL || !SERVICE_KEY) {
     return bad("The form isn't wired up on this deploy.", 503);
   }
 
-  let form: FormData;
   let raw: Record<string, unknown>;
   try {
-    form = await req.formData();
-    raw = JSON.parse(String(form.get("data") ?? "{}"));
+    raw = (await req.json()) as Record<string, unknown>;
   } catch {
     return bad("Bad request.");
   }
@@ -73,8 +68,13 @@ export async function POST(req: Request) {
 
   // Mirrors lib/intake.ts's validateStep. The client already checked all of
   // this; re-checking here is what actually protects the table.
-  if (!businessName || !businessType || !yourName || !address) {
-    return bad("We need the business name, what kind of business it is, your name, and where you work out of.");
+  if (!businessName || !yourName || !address) {
+    return bad("We need the business name, your name, and where you work out of.");
+  }
+  // On a template build the template already says what kind of business this
+  // is, so the field is optional there and required on a custom build.
+  if (isCustomBuild && !businessType) {
+    return bad("Tell us what kind of business this is.");
   }
   if (!isValidEmail(businessEmail)) return bad("That email address doesn't look right.");
   if (!desiredDomain || !isValidDomain(desiredDomain)) {
@@ -94,46 +94,8 @@ export async function POST(req: Request) {
       ? (raw.templateCustomizations as Record<string, unknown>)
       : null;
 
-  const prefix = `${slugify(businessName)}-${Date.now()}`;
-
-  // One upload slot. A failed logo or video is worth telling someone about;
-  // a failed photo out of thirty isn't worth sinking the submission over.
-  const put = async (key: string, bucket: string, as?: string) => {
-    const file = form.get(key);
-    if (!(file instanceof File) || file.size === 0) return null;
-    if (key === "heroVideo" && file.size > MAX_VIDEO_BYTES) {
-      throw new Error("video-too-big");
-    }
-    return uploadFile(bucket, `${prefix}/${as ?? safeName(file.name)}`, file);
-  };
-
-  let mainLogoUrl: string | null = null;
-  let profileLogoUrl: string | null = null;
-  let profileLogoOriginalUrl: string | null = null;
-  let heroVideoUrl: string | null = null;
-  try {
-    mainLogoUrl = await put("mainLogo", "intake-logos");
-    profileLogoUrl = await put("profileLogo", "intake-logos");
-    profileLogoOriginalUrl = await put("profileLogoOriginal", "intake-logos", "profile-original");
-    heroVideoUrl = await put("heroVideo", "intake-videos");
-  } catch (e) {
-    return e instanceof Error && e.message === "video-too-big"
-      ? bad("That video is over 25MB. Trim it or export it smaller.")
-      : bad("An upload failed. Try again, or email us the files instead.", 502);
-  }
-
-  const photoUrls: { name: string; url: string }[] = [];
-  const photos = form.getAll("photos").filter((p): p is File => p instanceof File && p.size > 0);
-  for (const file of photos.slice(0, 30)) {
-    try {
-      photoUrls.push({
-        name: file.name,
-        url: await uploadFile("intake-photos", `${prefix}/${safeName(file.name)}`, file),
-      });
-    } catch {
-      // one bad photo shouldn't sink the whole submission
-    }
-  }
+  const uploads = (raw.uploads ?? {}) as Record<string, unknown>;
+  const photoUrls = asPhotos(uploads.photos);
 
   const res = await fetch(`${SUPABASE_URL}/rest/v1/intake_submissions?select=id`, {
     method: "POST",
@@ -146,7 +108,7 @@ export async function POST(req: Request) {
     cache: "no-store",
     body: JSON.stringify({
       business_name: businessName,
-      business_type: businessType,
+      business_type: businessType || null,
       your_name: yourName,
       business_email: businessEmail,
       phone: f("phone", 50) || null,
@@ -161,10 +123,10 @@ export async function POST(req: Request) {
       main_color: paletteChoice === "own" ? mainColor : null,
       accent_color: paletteChoice === "own" ? accentColor : null,
       has_logo: f("hasLogo", 10) || "no",
-      main_logo_url: mainLogoUrl,
-      profile_logo_url: profileLogoUrl,
-      profile_logo_original_url: profileLogoOriginalUrl,
-      hero_video_url: heroVideoUrl,
+      main_logo_url: asUpload(uploads.mainLogo),
+      profile_logo_url: asUpload(uploads.profileLogo),
+      profile_logo_original_url: asUpload(uploads.profileLogoOriginal),
+      hero_video_url: asUpload(uploads.heroVideo),
       services,
       hours,
       instagram: f("instagram", 300) || null,

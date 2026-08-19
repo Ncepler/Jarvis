@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { isValidHex, type Errors, type IntakeDraft, type IntakeFiles } from "@/lib/intake";
+import { useState } from "react";
+import { isValidHex, type Errors, type IntakeDraft, type IntakeUploads } from "@/lib/intake";
 import { FieldError, FieldSet, RadioCards, fileInputClass, inputClass } from "./fields";
 import { LogoCropper } from "./LogoCropper";
+import { UploadField, UploadPreview, uploadFile } from "./UploadField";
 
 function ColorField({
   name,
@@ -50,47 +51,47 @@ function ColorField({
   );
 }
 
-// Shows the picked file with a thumbnail so someone can see they grabbed the
-// right one before moving on.
-function Preview({ file, round }: { file: File; round?: boolean }) {
-  const [url, setUrl] = useState("");
-  useEffect(() => {
-    const u = URL.createObjectURL(file);
-    setUrl(u);
-    return () => URL.revokeObjectURL(u);
-  }, [file]);
-  if (!url) return null;
-  return (
-    <span className="flex items-center gap-3">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={url}
-        alt=""
-        className={`size-12 border border-line bg-surface object-contain ${round ? "rounded-full" : ""}`}
-      />
-      <span className="text-xs text-muted/80">{file.name}</span>
-    </span>
-  );
-}
-
 export function PageBrand({
   draft,
-  files,
   errors,
   onChange,
-  onFiles,
+  onUploads,
   onBlur,
+  getPrefix,
 }: {
   draft: IntakeDraft;
-  files: IntakeFiles;
   errors: Errors;
   onChange: (patch: Partial<IntakeDraft>) => void;
-  onFiles: (patch: Partial<IntakeFiles>) => void;
+  onUploads: (patch: Partial<IntakeUploads>) => void;
   onBlur: (name: string) => void;
+  getPrefix: () => string;
 }) {
   // The image waiting to be cropped. Set when someone picks a profile logo,
   // cleared once they save or cancel.
   const [cropping, setCropping] = useState<File | null>(null);
+  const [profileBusy, setProfileBusy] = useState(false);
+  const [profileError, setProfileError] = useState("");
+  const uploads = draft.uploads;
+
+  // The cropper hands back two files — the square crop and the untouched
+  // original — and both go up before the modal closes.
+  const saveProfile = async (cropped: File, original: File) => {
+    setProfileBusy(true);
+    setProfileError("");
+    try {
+      const prefix = getPrefix();
+      const [profileLogo, profileLogoOriginal] = await Promise.all([
+        uploadFile(cropped, "profileLogo", prefix),
+        uploadFile(original, "profileLogoOriginal", prefix),
+      ]);
+      onUploads({ profileLogo, profileLogoOriginal });
+      setCropping(null);
+    } catch (e) {
+      setProfileError(e instanceof Error ? e.message : "That upload didn't go through.");
+    } finally {
+      setProfileBusy(false);
+    }
+  };
 
   return (
     <div className="grid gap-10">
@@ -140,7 +141,7 @@ export function PageBrand({
             onChange({ hasLogo: v });
             onBlur("hasLogo");
             if (v === "no") {
-              onFiles({ mainLogo: null, profileLogo: null, profileLogoOriginal: null });
+              onUploads({ mainLogo: null, profileLogo: null, profileLogoOriginal: null });
             }
           }}
           options={[
@@ -152,31 +153,26 @@ export function PageBrand({
 
       {draft.hasLogo === "yes" && (
         <>
-          <label data-field="mainLogo" className="grid gap-2 text-sm text-muted">
-            <span>
-              Main logo<span className="text-accent"> *</span>
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                onFiles({ mainLogo: e.target.files?.[0] ?? null });
-                onBlur("mainLogo");
-              }}
-              className={fileInputClass}
-            />
-            <span className="text-xs text-muted/80">
-              Any shape. This is the one that goes in your header and footer.
-            </span>
-            {files.mainLogo && <Preview file={files.mainLogo} />}
-            <FieldError error={errors.mainLogo} />
-          </label>
+          <UploadField
+            name="mainLogo"
+            label="Main logo"
+            required
+            accept="image/*"
+            kind="mainLogo"
+            getPrefix={getPrefix}
+            value={uploads.mainLogo}
+            error={errors.mainLogo}
+            onChange={(mainLogo) => onUploads({ mainLogo })}
+            onBlur={() => onBlur("mainLogo")}
+            hint="Any shape. This is the one that goes in your header and footer."
+          />
 
           <label data-field="profileLogo" className="grid gap-2 text-sm text-muted">
             <span>Profile logo</span>
             <input
               type="file"
               accept="image/*"
+              disabled={profileBusy}
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) setCropping(f);
@@ -189,7 +185,15 @@ export function PageBrand({
               the site shows your logo in a circle. Pick a file and you&rsquo;ll get a
               crop step.
             </span>
-            {files.profileLogo && <Preview file={files.profileLogo} round />}
+            {profileBusy && <span className="text-xs text-muted">Uploading…</span>}
+            {uploads.profileLogo && (
+              <UploadPreview
+                upload={uploads.profileLogo}
+                round
+                onRemove={() => onUploads({ profileLogo: null, profileLogoOriginal: null })}
+              />
+            )}
+            <FieldError error={profileError} />
           </label>
         </>
       )}
@@ -198,10 +202,7 @@ export function PageBrand({
         <LogoCropper
           file={cropping}
           onCancel={() => setCropping(null)}
-          onSave={(cropped) => {
-            onFiles({ profileLogo: cropped, profileLogoOriginal: cropping });
-            setCropping(null);
-          }}
+          onSave={(cropped) => saveProfile(cropped, cropping)}
         />
       )}
 

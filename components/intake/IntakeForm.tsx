@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   STORAGE_KEY,
   emptyDraft,
-  emptyFiles,
+  mergedCustomizations,
+  slugify,
   stepsFor,
   validateStep,
   type IntakeDraft,
-  type IntakeFiles,
+  type IntakeUploads,
+  type Row,
 } from "@/lib/intake";
-import { templateByKey } from "@/lib/templates";
+import { questionsFor, templateByKey } from "@/lib/templates";
+import { SITE } from "@/lib/site";
+import { getTemplateContent } from "@/app/start/actions";
 import { ProgressSteps } from "./ProgressSteps";
 import { PageContact } from "./PageContact";
 import { PageBrand } from "./PageBrand";
@@ -22,23 +26,25 @@ import { ghostButtonClass, primaryButtonClass } from "./fields";
 type Stage = "form" | "submitting" | "done";
 type Stored = { step: number; draft: IntakeDraft };
 
-// Multi-page intake for /start. One draft object holds every text field; the
-// files live alongside it (they can't be JSON-serialized). Page navigation is
-// local state, and the draft mirrors to localStorage so a refresh doesn't cost
-// someone their answers.
+// Multi-page intake for /start. One draft object holds every answer, including
+// where each uploaded file landed in Storage, and it mirrors to localStorage
+// so a refresh doesn't cost someone their answers or their uploads.
 //
 // Validation model: errors are recomputed on every render, but a message is
 // only *shown* once its field has been blurred, or once someone has pressed
-// Next on a page with problems. Next is never silently disabled.
+// Next on a page with problems. Next is never silently disabled — pressing it
+// with something wrong reveals every message at once and jumps to the first.
 export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
   const [draft, setDraft] = useState<IntakeDraft>(emptyDraft);
-  const [files, setFiles] = useState<IntakeFiles>(emptyFiles);
   const [index, setIndex] = useState(0);
   const [hydrated, setHydrated] = useState(false);
   const [touched, setTouched] = useState<Record<string, true>>({});
   const [showAll, setShowAll] = useState(false);
   const [stage, setStage] = useState<Stage>("form");
   const [error, setError] = useState("");
+  // The chosen template's real content, read off its source server-side.
+  const [content, setContent] = useState<Record<string, Row[]>>({});
+  const [loadingContent, setLoadingContent] = useState(false);
   const honeypotRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -69,6 +75,14 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
   const current = steps[step];
   const isLast = step === steps.length - 1;
 
+  const patch = useCallback(
+    (p: Partial<IntakeDraft>) => setDraft((d) => ({ ...d, ...p })),
+    [],
+  );
+  const patchUploads = (p: Partial<IntakeUploads>) =>
+    setDraft((d) => ({ ...d, uploads: { ...d.uploads, ...p } }));
+  const blur = (name: string) => setTouched((t) => ({ ...t, [name]: true }));
+
   useEffect(() => {
     if (!hydrated) return;
     try {
@@ -78,14 +92,58 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
     }
   }, [draft, step, hydrated]);
 
-  const allErrors = validateStep(current.id, draft, files);
+  // Every upload for one submission shares a storage folder. Created by the
+  // first upload rather than on mount, so the business name is already in it,
+  // and held in a ref so an upload handler can read it without waiting for a
+  // render. Fixed once created: it must not move if the name is edited later.
+  const prefixRef = useRef(draft.uploads.prefix);
+  useEffect(() => {
+    if (draft.uploads.prefix) prefixRef.current = draft.uploads.prefix;
+  }, [draft.uploads.prefix]);
+
+  const getPrefix = useCallback(() => {
+    if (!prefixRef.current) {
+      prefixRef.current = `${slugify(draft.businessName) || "intake"}-${Date.now()}`;
+      setDraft((d) => ({ ...d, uploads: { ...d.uploads, prefix: prefixRef.current } }));
+    }
+    return prefixRef.current;
+  }, [draft.businessName]);
+
+  // Read the chosen template's content, then seed every list with what that
+  // template says today. Switching template throws the old answers out rather
+  // than carrying them across a same-named question: they described a
+  // different site.
+  const templateChoice = draft.usingTemplate === "yes" ? draft.templateChoice : "";
+  useEffect(() => {
+    if (!templateChoice) return setContent({});
+    let live = true;
+    setLoadingContent(true);
+    getTemplateContent(templateChoice)
+      .then((rows) => {
+        if (!live) return;
+        setContent(rows);
+        setDraft((d) => {
+          const fresh = d.templateListsFor !== templateChoice;
+          const lists: Record<string, Row[]> = {};
+          for (const q of questionsFor(templateChoice)) {
+            if (!q.list) continue;
+            lists[q.key] = (fresh ? undefined : d.templateLists[q.key]) ?? rows[q.key] ?? [];
+          }
+          return { ...d, templateLists: lists, templateListsFor: templateChoice };
+        });
+      })
+      .catch(() => live && setContent({}))
+      .finally(() => live && setLoadingContent(false));
+    return () => {
+      live = false;
+    };
+  }, [templateChoice]);
+
+  const allErrors = validateStep(current.id, draft);
   const visible = Object.fromEntries(
     Object.entries(allErrors).filter(([k]) => showAll || touched[k]),
   );
-
-  const patch = (p: Partial<IntakeDraft>) => setDraft((d) => ({ ...d, ...p }));
-  const patchFiles = (p: Partial<IntakeFiles>) => setFiles((f) => ({ ...f, ...p }));
-  const blur = (name: string) => setTouched((t) => ({ ...t, [name]: true }));
+  const problems = Object.keys(allErrors).length;
 
   const goTo = (next: number) => {
     setShowAll(false);
@@ -104,33 +162,18 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
     });
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (Object.keys(allErrors).length > 0) return reveal();
-    if (!isLast) return goTo(step + 1);
-
-    if (honeypotRef.current?.value) {
-      // bots fill hidden fields. Answer like a normal success, send nothing.
-      setStage("done");
-      return;
-    }
-    if (!hasBackend) {
-      setError("The form isn't wired up on this deploy yet, the backend env vars are missing.");
-      return;
-    }
-
+  const send = async () => {
     setStage("submitting");
     setError("");
     try {
-      const fd = new FormData();
-      fd.append("data", JSON.stringify(draft));
-      if (files.mainLogo) fd.append("mainLogo", files.mainLogo);
-      if (files.profileLogo) fd.append("profileLogo", files.profileLogo);
-      if (files.profileLogoOriginal) fd.append("profileLogoOriginal", files.profileLogoOriginal);
-      if (files.heroVideo) fd.append("heroVideo", files.heroVideo);
-      files.photos.forEach((f) => fd.append("photos", f));
-
-      const res = await fetch("/api/intake", { method: "POST", body: fd });
+      const res = await fetch("/api/intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...draft,
+          templateCustomizations: mergedCustomizations(draft),
+        }),
+      });
       const json = await res.json();
       if (!res.ok) {
         setError(
@@ -159,68 +202,141 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
       }
       setStage("done");
     } catch {
-      setError("That didn't send. Give it another try in a minute.");
+      setError("That didn't send. Check your connection and try again — nothing you typed is lost.");
       setStage("form");
     }
   };
 
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (problems > 0) return reveal();
+    if (!isLast) return goTo(step + 1);
+    if (honeypotRef.current?.value) {
+      // bots fill hidden fields. Answer like a normal success, send nothing.
+      setStage("done");
+      return;
+    }
+    if (!hasBackend) {
+      setError("The form isn't wired up on this deploy yet, the backend env vars are missing.");
+      return;
+    }
+    void send();
+  };
+
   if (stage === "done") {
     return (
-      <div className="grid gap-4">
-        <p className="text-lg text-ink">
-          Got it, thanks. We&rsquo;ll go through everything and reach out within a day.
-        </p>
-        <p className="text-sm text-muted">
-          Keep your logo and photos handy in case we need to follow up on anything.
+      <div className="grid gap-5 py-10">
+        <h1 className="font-display text-title text-ink">Got it — we&rsquo;re on it.</h1>
+        <p className="max-w-md leading-relaxed text-muted">
+          We&rsquo;ll reach out within 48 hours to confirm details and get
+          started. If you don&rsquo;t hear back, check your spam folder or email
+          us at{" "}
+          <a
+            href={`mailto:${SITE.email}`}
+            className="text-accent underline underline-offset-4"
+          >
+            {SITE.email}
+          </a>
+          .
         </p>
       </div>
     );
   }
 
   const busy = stage === "submitting";
-  const shared = { draft, errors: visible, onChange: patch, onBlur: blur };
 
   return (
-    <div className="grid gap-10">
-      <ProgressSteps steps={steps} step={step} />
+    <>
+      <h1 className="text-title font-display text-ink">Let&rsquo;s get your site built.</h1>
+      <p className="mt-4 max-w-md text-muted">
+        A few questions about your business so we can start building. Takes
+        about five minutes, and nothing here locks you in.
+      </p>
 
-      <form ref={formRef} onSubmit={onSubmit} noValidate className="grid gap-10">
-        {current.id === "contact" && <PageContact {...shared} />}
-        {current.id === "brand" && (
-          <PageBrand {...shared} files={files} onFiles={patchFiles} />
-        )}
-        {current.id === "content" && (
-          <PageContent {...shared} files={files} onFiles={patchFiles} />
-        )}
-        {current.id === "customize" && <PageCustomize draft={draft} onChange={patch} />}
-        {current.id === "braindump" && <PageBrainDump draft={draft} onChange={patch} />}
+      {!hasBackend && (
+        <p className="mt-6 max-w-md text-sm text-accent">
+          Heads up: this form isn&rsquo;t wired up to save submissions on this
+          deploy yet.
+        </p>
+      )}
 
-        {/* honeypot, hidden from people and tempting to bots */}
-        <label className="hidden" aria-hidden="true">
-          Website
-          <input ref={honeypotRef} tabIndex={-1} autoComplete="off" />
-        </label>
+      <div className="mt-16 grid gap-10">
+        <ProgressSteps steps={steps} step={step} />
 
-        {showAll && Object.keys(allErrors).length > 0 && (
-          <p className="text-sm text-red-500">
-            {Object.keys(allErrors).length === 1
-              ? "One field needs another look."
-              : `${Object.keys(allErrors).length} fields need another look.`}
-          </p>
-        )}
-        {error && <p className="text-sm text-accent">{error}</p>}
-
-        <div className="flex flex-wrap items-center gap-5">
-          {step > 0 && (
-            <button type="button" onClick={() => goTo(step - 1)} disabled={busy} className={ghostButtonClass}>
-              Back
-            </button>
+        <form ref={formRef} onSubmit={onSubmit} noValidate className="grid gap-10">
+          {showAll && problems > 0 && (
+            <p className="animate-fade-in border border-red-500/40 bg-red-500/5 px-4 py-3 text-sm text-red-500">
+              Fix the highlighted fields to continue.
+            </p>
           )}
-          <button type="submit" disabled={busy} className={primaryButtonClass}>
-            {isLast ? (busy ? "Sending…" : "Submit") : "Next"}
-          </button>
-        </div>
-      </form>
-    </div>
+
+          {current.id === "contact" && (
+            <PageContact draft={draft} errors={visible} onChange={patch} onBlur={blur} />
+          )}
+          {current.id === "brand" && (
+            <PageBrand
+              draft={draft}
+              errors={visible}
+              onChange={patch}
+              onUploads={patchUploads}
+              onBlur={blur}
+              getPrefix={getPrefix}
+            />
+          )}
+          {current.id === "content" && (
+            <PageContent
+              draft={draft}
+              errors={visible}
+              onChange={patch}
+              onUploads={patchUploads}
+              onBlur={blur}
+              getPrefix={getPrefix}
+            />
+          )}
+          {current.id === "customize" && (
+            <PageCustomize
+              draft={draft}
+              errors={visible}
+              content={content}
+              loading={loadingContent}
+              onChange={patch}
+            />
+          )}
+          {current.id === "braindump" && <PageBrainDump draft={draft} onChange={patch} />}
+
+          {/* honeypot, hidden from people and tempting to bots */}
+          <label className="hidden" aria-hidden="true">
+            Website
+            <input ref={honeypotRef} tabIndex={-1} autoComplete="off" />
+          </label>
+
+          {error && (
+            <div className="grid gap-3 border border-red-500/40 bg-red-500/5 px-4 py-4">
+              <p className="text-sm text-red-500">{error}</p>
+              <p className="text-xs text-muted">
+                Everything you typed is still here, and your uploads are already
+                saved.
+              </p>
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center gap-5">
+            {step > 0 && (
+              <button
+                type="button"
+                onClick={() => goTo(step - 1)}
+                disabled={busy}
+                className={ghostButtonClass}
+              >
+                Back
+              </button>
+            )}
+            <button type="submit" disabled={busy} className={primaryButtonClass}>
+              {isLast ? (busy ? "Sending…" : error ? "Try again" : "Submit") : "Next"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </>
   );
 }

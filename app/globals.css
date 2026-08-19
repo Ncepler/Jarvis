@@ -116,6 +116,31 @@ body {
   animation: rise-in 700ms var(--ease-out-expo) both;
 }
 
+/* Validation summaries and toasts: appear, don't slide. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 200ms var(--ease-out-expo) both;
+}
+
+/* the validation summary on /start, which appears only when Next was pressed
+   with something wrong */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 220ms var(--ease-out-expo) both;
+}
+
 @keyframes cue-draw {
   from {
     transform: scaleY(0);
@@ -129,7 +154,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .rise-in,
-  .scroll-cue {
+  .scroll-cue,
+  .animate-fade-in {
     animation: none;
   }
 }

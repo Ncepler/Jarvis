@@ -1,11 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // /d48's "Copy template code" reads the demo source off disk at request
-  // time so what gets copied is always what's live. Without this the files
+  // Two features read the demo source off disk at request time: /d48's "Copy
+  // template code", and /start's customize page, which lifts each template's
+  // real content out so a client can edit it in place. Without this the files
   // aren't traced into the serverless bundle and the read 404s on Vercel.
   outputFileTracingIncludes: {
     "/d48": ["./components/demos/**/*.tsx"],
+    "/start": ["./components/demos/**/*.tsx"],
   },
 };
 

@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { scrubDomain, scrubPhone, type Errors, type IntakeDraft } from "@/lib/intake";
+import {
+  PHONE_KEY_RE,
+  scrubDomain,
+  scrubPhone,
+  type Errors,
+  type IntakeDraft,
+} from "@/lib/intake";
 import { TEMPLATES } from "@/lib/templates";
 import { FieldSet, RadioCards, SelectField, TextField, Wrap, inputClass } from "./fields";
 
@@ -95,6 +101,7 @@ export function PageContact({
   onBlur: (name: string) => void;
 }) {
   const touch = (name: string) => () => onBlur(name);
+  const usingTemplate = draft.usingTemplate === "yes";
 
   return (
     <div className="grid gap-10">
@@ -117,7 +124,7 @@ export function PageContact({
         />
       </FieldSet>
 
-      {draft.usingTemplate === "yes" && (
+      {usingTemplate && (
         <SelectField
           name="templateChoice"
           label="Which one?"
@@ -156,15 +163,22 @@ export function PageContact({
         />
       </div>
 
+      {/* Optional on a template build: the template already says what kind
+          of business this is. On a custom build nothing else does. */}
       <TextField
         name="businessType"
         label="What kind of business is it?"
-        required
+        required={!usingTemplate}
         placeholder="Flower shop, barbershop, roofing…"
         error={errors.businessType}
         value={draft.businessType}
         onChange={(e) => onChange({ businessType: e.target.value })}
         onBlur={touch("businessType")}
+        hint={
+          usingTemplate
+            ? "Only fill this in if it's not obvious from the template you picked."
+            : undefined
+        }
       />
 
       <TextField
@@ -187,8 +201,15 @@ export function PageContact({
         error={errors.phone}
         value={draft.phone}
         onChange={(e) => onChange({ phone: scrubPhone(e.target.value) })}
+        // A letter never reaches state: the keystroke is dropped here, and
+        // onChange scrubs what gets pasted. No warning needed for something
+        // that can't be typed in the first place.
+        onKeyDown={(e) => {
+          const typing = e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey;
+          if (typing && !PHONE_KEY_RE.test(e.key)) e.preventDefault();
+        }}
         onBlur={touch("phone")}
-        hint="Optional. Numbers only."
+        hint="Optional."
       />
 
       <TextField

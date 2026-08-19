@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
-  MAX_VIDEO_BYTES,
   VIDEO_TYPES,
   type DayHours,
   type Errors,
   type IntakeDraft,
-  type IntakeFiles,
+  type IntakeUploads,
+  type Upload,
 } from "@/lib/intake";
 import { templateByKey } from "@/lib/templates";
 import { FieldError, TextAreaField, TextField, fieldClass, fileInputClass } from "./fields";
+import { UploadField, UploadPreview, uploadFile } from "./UploadField";
 
 function HoursTable({
   hours,
@@ -67,77 +68,94 @@ function HoursTable({
   );
 }
 
-const mb = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)}MB`;
-
-function VideoField({
-  file,
-  error,
-  onFile,
+// Photos go up one at a time as they're picked, so a batch off a phone
+// uploads while the rest of the form gets filled in. Each one can be pulled
+// back out without touching the others.
+function PhotosField({
+  photos,
+  getPrefix,
+  onChange,
 }: {
-  file: File | null;
-  error?: string;
-  onFile: (f: File | null) => void;
+  photos: Upload[];
+  getPrefix: () => string;
+  onChange: (photos: Upload[]) => void;
 }) {
-  const [url, setUrl] = useState("");
-  const [tooBig, setTooBig] = useState("");
+  const [busy, setBusy] = useState(0);
+  const [failed, setFailed] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (!file) return setUrl("");
-    const u = URL.createObjectURL(file);
-    setUrl(u);
-    return () => URL.revokeObjectURL(u);
-  }, [file]);
+  const pick = async (files: File[], input: HTMLInputElement) => {
+    if (!files.length) return;
+    setFailed([]);
+    setBusy(files.length);
+    const prefix = getPrefix();
+    const done: Upload[] = [];
+    const errors: string[] = [];
+    for (const file of files) {
+      try {
+        done.push(await uploadFile(file, "photo", prefix));
+      } catch (e) {
+        errors.push(`${file.name}: ${e instanceof Error ? e.message : "didn't upload"}`);
+      }
+      setBusy((n) => n - 1);
+    }
+    // One patch at the end: a per-file patch would race against the stale
+    // `photos` this closure captured.
+    onChange([...photos, ...done]);
+    setFailed(errors);
+    input.value = "";
+  };
 
   return (
-    <label data-field="heroVideo" className="grid gap-2 text-sm text-muted">
-      <span>Hero background video (optional)</span>
-      <p className="text-xs text-muted/80">
-        Some businesses upload a short video of themselves working, under 30
-        seconds. A few quick clips edited together, or one continuous shot. It
-        plays behind your hero section on desktop, muted, on loop. Skip it if
-        you&rsquo;d rather stick with a still image.
-      </p>
+    <div data-field="photos" className="grid gap-3">
       <input
         type="file"
-        accept={VIDEO_TYPES}
-        onChange={(e) => {
-          const f = e.target.files?.[0] ?? null;
-          if (f && f.size > MAX_VIDEO_BYTES) {
-            setTooBig(`That file is ${mb(f.size)}. The limit is 25MB, so trim it or export it smaller.`);
-            onFile(null);
-            e.target.value = "";
-            return;
-          }
-          setTooBig("");
-          onFile(f);
-        }}
+        accept="image/*"
+        multiple
+        onChange={(e) => pick(Array.from(e.target.files ?? []), e.target)}
         className={fileInputClass}
+        aria-label="Photos"
       />
-      <span className="text-xs text-muted/80">MP4, MOV, or WebM. 25MB max.</span>
-      {url && (
-        <video src={url} controls muted playsInline className="mt-1 w-full max-w-sm border border-line" />
+      {busy > 0 && (
+        <span className="text-xs text-muted">
+          Uploading {busy} {busy === 1 ? "photo" : "photos"}…
+        </span>
       )}
-      <FieldError error={tooBig || error} />
-    </label>
+      {photos.length > 0 && (
+        <ul className="grid gap-2">
+          {photos.map((p, i) => (
+            <li key={p.url}>
+              <UploadPreview
+                upload={p}
+                onRemove={() => onChange(photos.filter((_, idx) => idx !== i))}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+      {failed.map((f) => (
+        <FieldError key={f} error={f} />
+      ))}
+    </div>
   );
 }
 
 export function PageContent({
   draft,
-  files,
   errors,
   onChange,
-  onFiles,
+  onUploads,
   onBlur,
+  getPrefix,
 }: {
   draft: IntakeDraft;
-  files: IntakeFiles;
   errors: Errors;
   onChange: (patch: Partial<IntakeDraft>) => void;
-  onFiles: (patch: Partial<IntakeFiles>) => void;
+  onUploads: (patch: Partial<IntakeUploads>) => void;
   onBlur: (name: string) => void;
+  getPrefix: () => string;
 }) {
   const tpl = templateByKey(draft.templateChoice);
+  const uploads = draft.uploads;
 
   return (
     <div className="grid gap-10">
@@ -159,22 +177,28 @@ export function PageContent({
           name="instagram"
           label="Instagram"
           hint="Optional."
+          error={errors.instagram}
           value={draft.instagram}
           onChange={(e) => onChange({ instagram: e.target.value })}
+          onBlur={() => onBlur("instagram")}
         />
         <TextField
           name="facebook"
           label="Facebook"
           hint="Optional."
+          error={errors.facebook}
           value={draft.facebook}
           onChange={(e) => onChange({ facebook: e.target.value })}
+          onBlur={() => onBlur("facebook")}
         />
         <TextField
           name="googleBusiness"
           label="Google Business"
           hint="Optional."
+          error={errors.googleBusiness}
           value={draft.googleBusiness}
           onChange={(e) => onChange({ googleBusiness: e.target.value })}
+          onBlur={() => onBlur("googleBusiness")}
         />
       </div>
 
@@ -193,25 +217,30 @@ export function PageContent({
           worry about matching perfectly. We&rsquo;ll adjust anything that&rsquo;s
           unclear on our end.
         </p>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => onFiles({ photos: Array.from(e.target.files ?? []) })}
-          className={fileInputClass}
-          aria-label="Photos"
+        <PhotosField
+          photos={uploads.photos}
+          getPrefix={getPrefix}
+          onChange={(photos) => onUploads({ photos })}
         />
-        {files.photos.length > 0 && (
-          <span className="text-xs text-muted/80">
-            {files.photos.length} selected: {files.photos.map((f) => f.name).join(", ")}
-          </span>
-        )}
       </div>
 
-      <VideoField
-        file={files.heroVideo}
+      <UploadField
+        name="heroVideo"
+        label="Hero background video (optional)"
+        accept={VIDEO_TYPES}
+        kind="heroVideo"
+        getPrefix={getPrefix}
+        value={uploads.heroVideo}
         error={errors.heroVideo}
-        onFile={(f) => onFiles({ heroVideo: f })}
+        onChange={(heroVideo) => onUploads({ heroVideo })}
+        hint={
+          <>
+            Some businesses upload a short video of themselves working, under 30
+            seconds. A few quick clips edited together, or one continuous shot. It
+            plays behind your hero section on desktop, muted, on loop. Skip it if
+            you&rsquo;d rather stick with a still image. MP4, MOV, or WebM, 25MB max.
+          </>
+        }
       />
     </div>
   );

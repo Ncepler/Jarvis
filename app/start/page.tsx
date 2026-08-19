@@ -9,10 +9,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Standalone intake — a longer, more detailed form than the homepage's
-// quick contact form (§6.7). Reached from a project that's already moving
-// (a client who said yes), not a cold visitor, so it asks for more up front
-// in exchange for skipping a round of back-and-forth email.
+// Standalone intake — a longer, more detailed form than a homepage contact
+// form (§6.7). Reached from a project that's already moving (a client who said
+// yes), not a cold visitor, so it asks for more up front in exchange for
+// skipping a round of back-and-forth email.
+//
+// The heading lives inside IntakeForm on purpose: on a successful submit the
+// whole thing is replaced by the confirmation, so there's no "let's get your
+// site built" sitting above a "we got it".
 export default function StartPage() {
   const hasBackend = Boolean(
     process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -28,22 +32,7 @@ export default function StartPage() {
           ← {SITE.name}
         </Link>
 
-        <h1 className="mt-8 text-title font-display text-ink">
-          Let&rsquo;s get your site built.
-        </h1>
-        <p className="mt-4 max-w-md text-muted">
-          A few questions about your business so we can start building. Takes
-          about five minutes — nothing here locks you in.
-        </p>
-
-        {!hasBackend && (
-          <p className="mt-6 max-w-md text-sm text-accent">
-            Heads up: this form isn&rsquo;t wired up to save submissions on
-            this deploy yet.
-          </p>
-        )}
-
-        <div className="mt-16">
+        <div className="mt-8">
           <IntakeForm hasBackend={hasBackend} />
         </div>
       </div>
