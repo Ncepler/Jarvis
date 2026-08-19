@@ -1,5 +1,8 @@
--- Applied to the "studio-site" Supabase project (ref wbrftodyvnjxxncfnvvt)
--- on 2026-06-12. Kept here so the schema is reproducible.
+-- Originally applied to the "studio-site" Supabase project (ref
+-- wbrftodyvnjxxncfnvvt) on 2026-06-12. Superseded 2026-08-19: the studio
+-- now runs on the "Vilas" project (ref epynfvskwaxejdibvgbr) — this table
+-- was re-applied there so /api/lead and /api/intake share one project.
+-- Kept here so the schema is reproducible.
 
 create table public.leads (
   id uuid primary key default gen_random_uuid(),

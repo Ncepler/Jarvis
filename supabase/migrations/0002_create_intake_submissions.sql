@@ -1,7 +1,9 @@
 -- Creates the intake_submissions table for the /start form
--- (app/api/intake/route.ts writes here). Run this in the Supabase SQL
--- editor for the "studio-site" project. Kept here so the schema is
--- reproducible — same pattern as 0001_create_leads.sql.
+-- (app/api/intake/route.ts writes here). Applied 2026-08-19 to the
+-- "Vilas" Supabase project (ref epynfvskwaxejdibvgbr) — the project
+-- SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY point at, both locally and in
+-- Vercel. Kept here so the schema is reproducible — same pattern as
+-- 0001_create_leads.sql.
 
 create table public.intake_submissions (
   id uuid primary key default gen_random_uuid(),

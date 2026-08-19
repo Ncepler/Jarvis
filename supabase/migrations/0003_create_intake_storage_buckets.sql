@@ -1,8 +1,9 @@
 -- Creates the two Storage buckets the /start form uploads into
 -- (app/api/intake/route.ts: logo → intake-logos, photos → intake-photos).
--- Run this in the Supabase SQL editor for the "studio-site" project,
--- after 0002_create_intake_submissions.sql. You can also create these by
--- hand in the dashboard (Storage → New bucket) if you'd rather click.
+-- Applied 2026-08-19 to the "Vilas" Supabase project (ref
+-- epynfvskwaxejdibvgbr), after 0002_create_intake_submissions.sql. You
+-- can also create these by hand in the dashboard (Storage → New bucket)
+-- if you'd rather click.
 --
 -- Both are public so an uploaded file resolves as a plain URL with no
 -- signed token needed (that URL is what gets stored in logo_url /

@@ -1,7 +1,7 @@
-# HANDOFF — updated 2026-08-19 (v45)
+# HANDOFF — updated 2026-08-19 (v46)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — footer stamp v45. `npm run build` + `tsc --noEmit` + `next lint` all clean.
+- Deployed: https://jarvis-nceplers-projects.vercel.app — footer stamp v46. `npm run build` + `tsc --noEmit` + `next lint` all clean.
 - **9 demos** (added the Magician, see v41 below). All 9 registered in `components/demos/index.ts` + `lib/projects.ts`, all show in the gallery and the "Every site" index.
 
 ## v45 — /start intake form (this run)
@@ -37,12 +37,16 @@
 - **Gallery first-load / coverflow / reveal-ending-frame gotchas from earlier sessions still hold** — see git log for `VilasReveal.tsx`, `Gallery.tsx` if touching those.
 - No decorative shapes anywhere in the **local-service** demos (SKILL §11) — the Magician is the one documented exception (§16). Honesty: no fake reviews/stats; media is labeled placeholders / real photos only, except the Magician's pure-decoration cards/embers which are explicitly allowed.
 
-## Supabase (unchanged — RESOLVED: Supabase)
-- Project "studio-site", ref `wbrftodyvnjxxncfnvvt`, us-east-1, free tier. `leads` table + RLS deny-all; `/api/lead` plain fetch → PostgREST. `.env.local` has SUPABASE_URL, SERVICE_ROLE_KEY blank — Noah pastes the key into .env.local AND Vercel, then redeploy. Free tier pauses ~1wk idle.
+## Supabase (RESOLVED: Supabase — project switched 2026-08-19)
+- **Canonical project is now "Vilas", ref `epynfvskwaxejdibvgbr`, us-west-2.** `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` in Vercel and in the local `.env` (gitignored, repo root) both point here. Both `/api/lead` and `/api/intake` share this one project.
+- Has `public.leads` (RLS deny-all) and `public.intake_submissions` (RLS deny-all) — both applied via Supabase MCP directly against this project on 2026-08-19 (see `supabase/migrations/0001…0003`, comments updated to match). Storage buckets `intake-logos` / `intake-photos` exist here too, both public.
+- **Gotcha:** this project isn't fresh — it has unrelated leftover tables/migrations from a prior, different app (`web_clients`, `school_subjects`, `exam_dates`, etc., migration names mention "goalmaxx"). Harmless to the studio site (separate tables, RLS deny-all on ours), but don't be confused by them showing up in `list_tables`; they're not studio data.
+- The old "studio-site" project (ref `wbrftodyvnjxxncfnvvt`) is no longer used by anything — its `leads` table is now orphaned. Fine to ignore/delete later, nothing points at it anymore.
+- Free tier pauses on ~1wk idle — a cold request just needs a retry/redeploy to wake it.
 
 ## Blocked on Noah
-- **/start (v45):** run `supabase/migrations/0002_create_intake_submissions.sql` + `0003_create_intake_storage_buckets.sql`; add `RESEND_API_KEY` + `NOTIFY_EMAIL` to Vercel; verify `vilas.studio` as a sending domain in Resend and add its DNS records. Fill in `.env` at repo root (gitignored template) with all four vars for local dev.
-- SUPABASE_SERVICE_ROLE_KEY; tagline/email/instagram/founder.
+- **/start (v45):** add `RESEND_API_KEY` + `NOTIFY_EMAIL` to Vercel (Supabase side is done — migrations ran, tables + buckets confirmed live); verify `vilas.studio` as a sending domain in Resend and add its DNS records. Fill in the last two vars in `.env` at repo root (gitignored template) for local dev.
+- tagline/email/instagram/founder.
 - Eyes on the live URL: the Magician demo (does it read as "genuinely cool" per SKILL §16g, or does anything feel cheesy instead of theatrical), the bumped eyebrows, the new "Demo build" tags.
 - A decision on the pre-existing reduced-motion hydration warning above — worth a dedicated pass, or leave it (it's cosmetic-only in the console, not user-visible)?
 - Real photos/video still pending for: the Magician's hero shuffle clip, reel clip, portrait; the renovation FullBleed break image; more work-grid photos across other demos.
