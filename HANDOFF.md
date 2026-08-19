@@ -1,52 +1,58 @@
-# HANDOFF — updated 2026-08-19 (v46)
+# HANDOFF — updated 2026-08-19 (v47)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app — footer stamp v46. `npm run build` + `tsc --noEmit` + `next lint` all clean.
-- **9 demos** (added the Magician, see v41 below). All 9 registered in `components/demos/index.ts` + `lib/projects.ts`, all show in the gallery and the "Every site" index.
+- Deployed: https://jarvis-nceplers-projects.vercel.app (also anotherseason.org) — footer stamp v47.
+  `npm run build` + `npx tsc --noEmit` + `next lint` all clean.
+- **9 demos**, all registered in `components/demos/index.ts`, `lib/projects.ts`, and now `lib/templates.ts`.
+- **The homepage no longer has its own contact form.** `/start` is the single intake. `components/sections/Contact.tsx` was deleted and `ClosingCta` absorbed its job (heading + one Start button + `hello@vilas.studio`).
 
-## v45 — /start intake form (this run)
-- New standalone route `app/start/page.tsx`: a 4-page intake form (Contact → Brand → Content → Brain dump) for a client who's already said yes, longer/more detailed than the homepage's quick `Contact` form. State lives in one `IntakeDraft` object (`lib/intake.ts`), mirrored to `localStorage` (`vilas-intake-draft-v1`, text fields + current step only — file objects can't survive `JSON.stringify` so a refresh mid-upload loses the file selection, not the text).
-- Components under `components/intake/`: `IntakeForm` (orchestrator/state), `PageContact`/`PageBrand`/`PageContent`/`PageBrainDump` (the 4 pages), `ProgressSteps`, `fields.tsx` (shared input primitives, same visual language as `Contact.tsx`).
-- `app/api/intake/route.ts` (Node runtime): parses multipart form data, uploads logo/photos straight to Supabase Storage (`intake-logos` / `intake-photos` buckets, raw REST — no client lib, same fetch-based pattern as `/api/lead`), inserts the row into `intake_submissions`, returns `{ id }`.
-- `app/api/notify-intake/route.ts` (edge runtime): client fires this after a successful save, non-blocking. Re-fetches the row by id from Supabase (doesn't trust client-posted data) and emails Noah via Resend's REST API. Swallows all errors and always returns `{ ok: true }` — the row's already saved by the time this runs, so a mail outage never blocks the user.
-- **Not yet run: the Supabase migrations.** `supabase/migrations/0002_create_intake_submissions.sql` (table) and `0003_create_intake_storage_buckets.sql` (the two storage buckets) need to be run in the Supabase SQL editor before `/start` can actually save anything. Until then the route 503s gracefully (same "not wired up" pattern as `/api/lead`).
-- **New env vars needed** (not yet in Vercel): `RESEND_API_KEY`, `NOTIFY_EMAIL`. Reuses the existing `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`. A `.env` at repo root (gitignored) lists all four with blank values as a fill-in template.
-- **Resend sending domain not yet verified** — `vilas.studio` needs to be added in the Resend dashboard and its generated DNS records added before `from: intake@vilas.studio` will actually send. Until then `/api/notify-intake` will get a Resend error, which it silently swallows (row still saves fine either way).
-- **Storage buckets are public** (my call, flagged for Noah) — simplest way to get a plain URL for `logo_url`/`photo_urls` without a signed-token step. Files aren't listable and paths include a timestamp, but anyone with a URL can view that one file. Switch to private + signed URLs if that's not okay.
-- `StickyStartButton.tsx` still points its `START_HREF` at `#contact`, not `/start` — its own `TODO(noah)` comment invites the swap, deliberately left alone (ground rule: this session was scoped to the new route only, no other files touched).
+## ⚠️ Run this first
+`supabase/migrations/0004_expand_intake_submissions.sql` **has not been run.** Until it is, `/start` submissions fail with "Couldn't save that just now" — the insert writes columns that don't exist yet. Paste it into the Supabase SQL editor for the **Vilas** project (ref `epynfvskwaxejdibvgbr`). It's idempotent.
 
-## v41 — Elias Vane, the Magician demo (SKILL §16)
-- This session ran a full design-system compliance pass against `.claude/skills/local-service-design-system/SKILL.md`. Headline finding: **most of the brief was already done** in earlier sessions (marquees were already seamless, the timeline copy was already fixed, the logo was already a real transparent mark) — see "Gotchas" below for what was actually a gap vs. already-compliant.
-- New `components/demos/MagicianDemo.tsx` (~950 lines), slug `demo-magician`, flagship tier, order 8. **Fully self-contained — does NOT import `./system`** (the local-service spine); §16 is a deliberate departure from the rest of the demo system (no hairline/eyebrow spine, no "zero decorative shapes," spectacle is the point).
-- Velvet-black + stage-gold + ember palette, new **Playfair Display** playbill serif (`--font-playfair`, added to `app/layout.tsx`, demo-only, never Syne).
-- Built all of §16d's moving parts: hero spotlight-glow + capped ember canvas (`Embers`, off on reduced-motion, half-density mobile) + huge playbill wordmark; 6 decorative `DriftingCards` with **bounded per-card scroll parallax** (each card gets its own `useScroll({target})`, not raw `scrollY`, so they never runaway on a long page) + cursor tilt on hover-capable devices, 3 of 6 stay visible on phones; seamless `PhraseBand` marquee (same measure-and-overfill technique as the rest of the site); 5-card 3D flip-to-reveal "pick a card" section (`ShowCard`) with a **fully static, always-readable fallback** (`StaticShowList`) under reduced motion instead of hiding the interaction; Reel/Witnessed/About/Where-it-works/Booking sections per the §16e sequence.
-- Honesty held: "Demo build — sample act" tag in the hero, "demo build / sample site" repeated in the footer copyright, Witnessed reactions are unattributed with an explicit "illustrative — not real client quotes" caption, no invented awards/credits/venues, no fake certs.
-- `HERO_VIDEO_SRC` is wired but empty — drop a real card-shuffle clip path in and the placeholder disappears automatically (same pattern as every other demo's `firstXImage` const).
+Second thing: the gitignored `.env` at the repo root got blanked during the v47 session. `SUPABASE_URL` is restored; **`SUPABASE_SERVICE_ROLE_KEY` needs pasting back out of Vercel** for local dev. Vercel itself was never touched.
 
-## v40 — system-wide compliance fixes (this run)
-- **Eyebrows bumped** site-wide to 15px/bold with better contrast: `SectionHeading.tsx` (main site) and the shared `Eyebrow` in `components/demos/system.tsx` (all demos) — was 12–13px and read as hidden. Demo eyebrows moved off `--d-muted` onto `--d-body` for real contrast. Added Space Mono weight 700 for the bump.
-- **"Demo build" honesty label** added to every demo's header (`DemoHeader` in `system.tsx`) — SKILL §12 requires it and it didn't exist anywhere before. Header row also widened to `flex-wrap`/`min-h` instead of a fixed 72px so long business names + the new badge don't clip on mobile (pre-existing overflow on names like "Maple & Main Renovation Co.", worsened by the badge until fixed).
-- **`(demo: preview error state)` button** (in every demo's `Contact`) now gated behind `NODE_ENV !== "production"` — it was rendering on the actual opened demo a prospect would see, not just in dev.
-- **Pinned logo** got the missing hover-scale (~1.06). Its click-to-open-founder-card behavior was kept as-is rather than replaced with "scroll to bottom" as the brief literally asked — that's a deliberate, documented Noah decision from 2026-06-11, flagged in chat rather than silently overridden.
+## v47 — /d48 dashboard + intake overhaul (this run)
+- **`/d48`** (`app/d48/page.tsx`, `app/d48/actions.ts`, `components/d48/*`): password-gated internal dashboard. One env var, `DASHBOARD_PASSWORD`. The `d48_session` cookie is httpOnly, 30 days, and holds a **hash** of the password, not the password. Rows list newest first and **expand inline** (chosen over a `/d48/[id]` route — less navigation, faster to scan; that route was never built). Each open row: every field grouped by intake page, asset previews with download links, a status dropdown that PATCHes Supabase, and two copy buttons.
+  - **Copy template code** reads the demo's `.tsx` off disk on every click, so it's always what's live. This needs `outputFileTracingIncludes` in `next.config.ts` — without it the source isn't in the serverless bundle on Vercel and the read 404s. Don't delete that config.
+  - **Copy build prompt** → `lib/generatePrompt.ts`, a pure function over one row. Edit the prompt wording there; the dashboard never needs touching.
+- **`lib/templates.ts` is the new registry.** A template's display name, its source path, its sample business, and the per-template questions the intake form asks all live in one entry. The form's page-1 dropdown, its per-template page, the prompt's `{templateSpecificSection}`, and the dashboard's labels all read it. **Adding a demo means adding an entry here**, or it won't appear anywhere in the intake flow.
+- **`/start` is now up to 5 pages**: Contact → Brand → Content → Customize (only when a template was picked) → Brain dump. Step count is computed per draft (`stepsFor`), not a constant.
+  - Validation lives in `validateStep` in `lib/intake.ts` and returns a map of field name → message. The form shows a message once its field is blurred, or once Next is pressed on a page with problems (then all of them show and the view jumps to the first). **Next is never disabled** — that silent dead button was the thing being fixed.
+  - Email regex rejects `g@g.g`. Phone strips non-phone characters on input. Domain strips scheme/`www.`/path as typed.
+  - Dual logo: main upload plus a profile logo with a circular `react-easy-crop` modal that uploads **both** the cropped square and the original.
+  - Hero video: optional, 25MB cap enforced client-side *and* in the route.
+  - localStorage key bumped to `vilas-intake-draft-v2` (the v1 shape is gone).
+- **`/api/check-domain`** (edge): Vercel `v4/domains/status`. Availability lookups are free; you only pay to register. Reads `VERCEL_API_TOKEN`, plus `VERCEL_TEAM_ID` if the token is a team token. Any failure returns the yellow "couldn't check, we'll verify at build time" state and never blocks the form.
+- **Filename badges on demo images** (`FileBadge` in `components/demos/system.tsx`): hovering any image slot in a demo shows the filename a client should give their own photo (`hero.jpg`, `service-1.jpg`, `work-3.jpg`, `before-1.jpg`…). Hover-only, `md:` and up, so it never shows on a phone. The /start photo instructions tell clients to go find these.
+
+## Next up (ordered)
+1. Run migration 0004, then submit `/start` once for real and confirm the row lands in `/d48`.
+2. Restore `SUPABASE_SERVICE_ROLE_KEY` in the local `.env`.
+3. Verify `/api/check-domain` against a real token on the deploy — it could only be exercised as far as the "no token" branch locally.
+4. Resend sending domain for `vilas.studio` is still unverified, so `/api/notify-intake` still silently swallows a Resend error.
 
 ## Gotchas & decisions
-- **Version stamp (standing rule):** bump `lib/version.ts` every push; last message of session states "version: vN".
-- **Demos vary by mood (SKILL §13).** DARK = renovation + landscaping. LIGHT = florist/bakery/powerwash/lawncare. WARM-DARK = barber. GRAPHITE-DARK + motion = auto body. **THEATRICAL = the Magician (§16, its own system, ignore this whole section for it).** Main site = bone/cream + Syne — demos never use the bone palette or Syne; the studio never uses a demo palette/serif.
-- **Re-mooding a local-service demo = a `theme` swap, not a structural one** — every primitive reads `--d-*` vars `DemoShell` sets. Don't fork primitives per niche. The Magician doesn't participate in this system at all.
-- **Known pre-existing bug, NOT fixed this session (out of scope, flagging for priority call):** if a browser already has `prefers-reduced-motion: reduce` active at first paint (confirmed via Playwright's `reducedMotion: 'reduce'` context), the main site's hero `Marquee.tsx` throws a React hydration-mismatch error in the console on load (it branches to completely different DOM for the reduced case, and `useReducedMotion()` appears to resolve synchronously before the first client render in that scenario, so it disagrees with the server's non-reduced HTML). React self-heals by regenerating the subtree client-side, so nothing visibly breaks — but it logs an error and likely affects every demo that branches the same way, not just this one instance. Proper fix needs a `mounted`-gate pattern applied consistently, which touches many files — deliberately not attempted blind under this session's scope.
-- **Gallery first-load / coverflow / reveal-ending-frame gotchas from earlier sessions still hold** — see git log for `VilasReveal.tsx`, `Gallery.tsx` if touching those.
-- No decorative shapes anywhere in the **local-service** demos (SKILL §11) — the Magician is the one documented exception (§16). Honesty: no fake reviews/stats; media is labeled placeholders / real photos only, except the Magician's pure-decoration cards/embers which are explicitly allowed.
+- **Version stamp (standing rule):** bump `lib/version.ts` every push; last message of the session states the new version.
+- **Demos live in `components/demos/`, not `app/demos/`.** Every path in `lib/templates.ts` and in the generated build prompt reflects the real location.
+- **`template_choice` vs `template`:** the old `template` column is NOT NULL, so the route writes both. `template_choice` is the one to read.
+- `SITE.email` resolved from `CONTACT_EMAIL_TBD` to `hello@vilas.studio`. **If that inbox doesn't exist, change it back** — it's now live in the footer and the closing CTA, not just one spot.
+- The generated build prompt points at `.claude/skills/humanizer` and `.claude/skills/impeccable`. There is no `frontend-design` skill in this repo; `impeccable` is its equivalent.
+- **Demos vary by mood (SKILL §13).** DARK = renovation + landscaping. LIGHT = florist/bakery/powerwash/lawncare. WARM-DARK = barber. GRAPHITE-DARK = auto body. THEATRICAL = the Magician (§16, its own system entirely). Main site = bone/cream + Syne; demos never use either.
+- **Re-mooding a local-service demo is a `theme` swap, not a structural one.** Every primitive reads the `--d-*` vars `DemoShell` sets.
+- **Known pre-existing bug, still not fixed:** with `prefers-reduced-motion: reduce` active at first paint, `Marquee.tsx` throws a React hydration mismatch in the console (it branches to different DOM for the reduced case). React self-heals, nothing visibly breaks. Needs a consistent `mounted`-gate across many files.
+- Honesty rules hold: no fake reviews or stats, labeled placeholders instead of stock or generated imagery.
 
-## Supabase (RESOLVED: Supabase — project switched 2026-08-19)
-- **Canonical project is now "Vilas", ref `epynfvskwaxejdibvgbr`, us-west-2.** `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` in Vercel and in the local `.env` (gitignored, repo root) both point here. Both `/api/lead` and `/api/intake` share this one project.
-- Has `public.leads` (RLS deny-all) and `public.intake_submissions` (RLS deny-all) — both applied via Supabase MCP directly against this project on 2026-08-19 (see `supabase/migrations/0001…0003`, comments updated to match). Storage buckets `intake-logos` / `intake-photos` exist here too, both public.
-- **Gotcha:** this project isn't fresh — it has unrelated leftover tables/migrations from a prior, different app (`web_clients`, `school_subjects`, `exam_dates`, etc., migration names mention "goalmaxx"). Harmless to the studio site (separate tables, RLS deny-all on ours), but don't be confused by them showing up in `list_tables`; they're not studio data.
-- The old "studio-site" project (ref `wbrftodyvnjxxncfnvvt`) is no longer used by anything — its `leads` table is now orphaned. Fine to ignore/delete later, nothing points at it anymore.
-- Free tier pauses on ~1wk idle — a cold request just needs a retry/redeploy to wake it.
+## Supabase
+- Canonical project: **"Vilas"**, ref `epynfvskwaxejdibvgbr`, us-west-2. `public.leads` and `public.intake_submissions`, both RLS deny-all (service role bypasses).
+- Buckets `intake-logos`, `intake-photos` exist and are public; **`intake-videos` is created by migration 0004** and is public for the same reason. Public means anyone holding a URL can view that one file; nothing is listable and paths carry a timestamp.
+- The project has unrelated leftover tables from a prior app (`web_clients`, `school_subjects`, migrations mentioning "goalmaxx"). Not studio data, ignore them.
+- Free tier pauses after ~1wk idle; a cold request just needs a retry.
+- `/api/lead` and `public.leads` are now **orphaned** — nothing in the UI posts to them since the homepage form was removed. Left in place; safe to delete later.
 
 ## Blocked on Noah
-- **/start (v45):** add `RESEND_API_KEY` + `NOTIFY_EMAIL` to Vercel (Supabase side is done — migrations ran, tables + buckets confirmed live); verify `vilas.studio` as a sending domain in Resend and add its DNS records. Fill in the last two vars in `.env` at repo root (gitignored template) for local dev.
-- tagline/email/instagram/founder.
-- Eyes on the live URL: the Magician demo (does it read as "genuinely cool" per SKILL §16g, or does anything feel cheesy instead of theatrical), the bumped eyebrows, the new "Demo build" tags.
-- A decision on the pre-existing reduced-motion hydration warning above — worth a dedicated pass, or leave it (it's cosmetic-only in the console, not user-visible)?
-- Real photos/video still pending for: the Magician's hero shuffle clip, reel clip, portrait; the renovation FullBleed break image; more work-grid photos across other demos.
+- Migration 0004 + the local `SUPABASE_SERVICE_ROLE_KEY` (top of this file).
+- Confirm `hello@vilas.studio` is a real inbox.
+- `RESEND_API_KEY` / `NOTIFY_EMAIL` in Vercel, and verify `vilas.studio` as a Resend sending domain.
+- tagline / instagram / founder still `*_TBD`.
+- Eyes on the live deploy: the reworked `/start`, `/d48`, the toned-down sticky button, and whether the demos' hover filename badges are subtle enough.
+- Real photos/video still pending across the demos.
