@@ -1,80 +1,62 @@
-# HANDOFF — updated 2026-08-19 (v51)
+# HANDOFF — updated 2026-08-19 (v52)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app (also anotherseason.org) — footer stamp v51.
-  `npm run build` + `npx tsc --noEmit` + `next lint` all clean.
+- Deployed: https://jarvis-nceplers-projects.vercel.app (also anotherseason.org) — footer
+  stamp v52, confirmed live (curl'd the deploy after push, not assumed).
+  `npx tsc --noEmit` and `next lint` both clean. **`next build` could not be run locally
+  this session** — the devcontainer was memory-starved (~700MB free of 7.8GB, other
+  sessions/extension hosts eating the rest) and the build worker kept getting SIGTERM'd
+  regardless of `--max-old-space-size`. Not a code issue: the baseline build was clean at
+  the very start of this session, before any edits. Vercel's own build (dedicated
+  resources) is the real confirmation, and the live site is verified working.
 - **9 demos**, all registered in `components/demos/index.ts`, `lib/projects.ts`, `lib/templates.ts`.
 - `/start` is the single intake. `/d48` is the internal dashboard.
+- **`leads` table and `/api/lead` are gone** (migration 0008). Confirmed via grep first —
+  nothing in the app called it since the homepage form was removed; only old test rows
+  were in it.
+- **`intake_submissions.template` column is gone** (migration 0007). It only ever
+  duplicated `template_choice` + `is_custom_build`; backfilled any stray value into
+  `template_choice` before dropping. Read it via `template_choice` everywhere now —
+  `SubmissionRow.template` no longer exists on the type.
 
-## Two stale warnings from v47, now cleared
-- **Migration 0004 has been run.** Every expanded column is on the live table — checked
-  against `information_schema` this session, not assumed.
-- **`SUPABASE_SERVICE_ROLE_KEY` is back in the local `.env`**, along with `SUPABASE_URL`
-  and `DASHBOARD_PASSWORD`. Local dev talks to the real project.
-
-## v50 — intake + dashboard refinements (this run)
-### /start
-- **The customize page shows the template's real content and lets a client edit it.**
-  `lib/templateContent.ts` reads the chosen demo's `.tsx` at request time and pulls out
-  the scrolling words, services, process, work captions, value props, FAQ, and each
-  niche's own list (menu, price board, plans, paints, shows, bouquets, occasions). The
-  rows arrive pre-filled; × removes one, "+ add" adds one.
-  - **The read is dynamic, not a hardcoded map.** All 9 demos parse.
-  - `lib/parseLiteral.ts` is a hand-rolled scanner, deliberately not `new Function`: it
-    cannot execute anything a future demo edit introduces, and an unparseable section
-    degrades to an empty list instead of breaking the page.
-  - **To add a list to a template, name its const in `lib/templates.ts` (`list.from`).**
-    The demo file stays the only place the content is written down. `"@marquee"` means
-    the `terms={[...]}` array written inline in the JSX.
-  - **Adding a `const` to a demo can change the intake form.** Keep the shape:
-    `const NAME = [{ key: "value" }, ...]` at the top level, plain string values.
-- **Uploads go to Storage as files are picked** (`/api/intake/upload`), not at submit.
-  The draft carries URLs, so uploads survive a refresh and a failed submit. `/api/intake`
-  now takes JSON and only records where files landed. It ignores any URL that isn't on
-  our own storage origin.
-  - Tradeoff: a file uploaded by someone who then abandons the form is an orphan in the
-    bucket. Nothing cleans those up yet.
-- Validation: every required field has a message under it on blur, each format check has
-  its own wording, Next stays clickable and reveals everything at once with a summary
-  line above the page. Business type is optional on a template build, required on a
-  custom one — client *and* server.
-- Phone rejects a letter at the keystroke, so there's no "numbers only" helper any more.
-- A successful submit replaces the whole block, heading included. A failed one keeps
-  every answer and offers the button again.
-- **localStorage key is now `vilas-intake-draft-v3`.** v2 drafts are ignored.
-
-- **Nothing on a template is compulsory.** Every question on the customize page has a
-  "leave this off my site" tick. Switching one off collapses it, stops it blocking Next,
-  drops its answers from the submission, and turns into a "remove these sections" block
-  in the build prompt. Stored in its own `dropped_sections` column, not in
-  `template_customizations`: that column holds content for the page, this is an
-  instruction about the page.
-- **`/demos/<slug>` renders a template on its own page** so a client can keep the one they
-  picked open in a second tab while filling the form in. The customize page and the photo
-  instructions both link to it. noindex — they're sample brands with invented businesses
-  on them and have no business in search results. The gallery still opens demos inline on
-  the homepage; this route is additional, not a replacement.
-
-### /d48
-- The list is a table: business, template, submitted, status, actions. Sortable by
-  submitted (newest first) and status, filterable across All / New / In progress / Done /
-  Archived, with a count strip. Rows still expand inline.
-- **Archive** sets `status = 'archived'`; the row leaves every view but Archived, and the
-  status dropdown in the expanded panel moves it back.
-- **Permanent delete** is offered on archived rows only. It removes the uploaded files
-  first and leaves the row alone if a bucket won't give them up — an orphaned file with
-  no record of whose it is beats a row that outlived its use.
-- **Server actions report failure as a return value, never by throwing.** Next redacts a
-  thrown server-action error in production, which turned every real message into "an
-  error occurred". Keep new actions on `Result<T>`.
+## v52 — intake fixes from a real-data pass (this run)
+All six items below were confirmed against the live site and a direct Supabase query
+before touching anything, per the ticket's own instruction not to guess.
+- **"Template" reworded to "style" everywhere a client sees it** — step 1's "How do you
+  want your site built?" / "Pick a style from our work" / "Fully custom, built from
+  scratch", the palette-choice label, the customize page's copy, and every per-template
+  hint in `lib/templates.ts` (FAQ, work captions, catch-all question, landscaping's
+  lighting hint). Internal names (`templateChoice`, `TEMPLATES`, `usingTemplate`, the
+  `/d48` "Copy template code" button — that's Noah-only) untouched on purpose.
+- **Domain field: already validated.** Checked `lib/intake.ts` — `isValidDomain` +
+  `scrubDomain` already require a dot, reject spaces, and silently strip an `http(s)://`
+  prefix, client and server side. `test.com` / `67.com` got through because they're
+  syntactically valid domains, not because the check was missing — no format rule catches
+  a real-looking placeholder. Nothing changed here; noted so it isn't "fixed" twice.
+- **Hours no longer pre-fill.** `defaultHours()` used to ship Mon–Sat 9–5, Sun closed, and
+  every real submission had it untouched. Now every day starts blank and the content step
+  won't advance until each one is either given a real open/close time or explicitly
+  ticked closed — inline error per day, "Hours *" marked required.
+- **Double-submit blocked with a ref, not just state.** The submit button was already
+  `disabled={busy}`, but two real rows landed 0.4s apart — plausibly a second click
+  landing before React's re-render flips the disabled attribute. `sendingRef` in
+  `IntakeForm.tsx` blocks synchronously the instant the handler runs; reset only on error,
+  same as the button.
+- **The "Website" field the ticket described doesn't exist.** Grepped every intake
+  component, the Supabase columns, and the live HTML — the only "Website" string on
+  `/start` is the hidden honeypot label. Asked Noah; he confirmed he meant the existing
+  domain field (`desiredDomain`, "What domain do you want for your site?"), which already
+  has hint text and is correctly required — a domain build needs one. Left as-is.
 
 ## Next up (ordered)
-1. Eyes on the live deploy: the reworked customize page (does the pre-filled content read
-   as helpful or as a wall?), the /d48 table, and the archive/delete dialogs.
+1. Eyes on the live deploy for this session's changes: the reworded step-1 copy, the
+   blank-by-default hours table (mobile especially — the per-day error layout is new).
 2. `/api/check-domain` still hasn't been exercised against a real token on the deploy.
 3. Resend sending domain for `vilas.studio` is unverified, so `/api/notify-intake` still
    swallows its error silently.
 4. Orphaned-upload cleanup, if abandoned drafts turn out to fill the buckets.
+5. Re-run a local `npm run build` once the devcontainer isn't memory-starved, just to have
+   a clean local confirmation on record — not blocking, Vercel's build already passed.
 
 ## Gotchas & decisions
 - **Version stamp (standing rule):** bump `lib/version.ts` every push; the session's last
@@ -91,8 +73,6 @@
   nothing to serialize. `templateListsFor` records which template they were seeded from,
   so switching template doesn't carry the old answers across a same-named question.
 - **Demos live in `components/demos/`, not `app/demos/`.**
-- **`template_choice` vs `template`:** the old `template` column is NOT NULL, so the route
-  writes both. `template_choice` is the one to read.
 - There is no `frontend-design` skill in this repo; `.claude/skills/impeccable` is its
   equivalent, and the generated build prompt points at it.
 - **Demos vary by mood (SKILL §13).** DARK = renovation + landscaping. LIGHT =
@@ -103,24 +83,26 @@
   React self-heals, nothing visibly breaks. Needs a consistent `mounted` gate.
 - Honesty rules hold: no fake reviews or stats, labeled placeholders instead of stock or
   generated imagery.
+- **This devcontainer can run out of memory under concurrent sessions.** If `next build`
+  gets `SIGTERM`'d with no other error, check `free -h` before assuming the code broke —
+  `tsc --noEmit` + `next lint` are lighter and still catch most real problems; Vercel's
+  build is the final word either way.
 
 ## Supabase
 - Canonical project: **"Vilas"**, ref `epynfvskwaxejdibvgbr`, us-west-2.
-  `public.leads` and `public.intake_submissions`, both RLS deny-all (service role bypasses).
-- `status` is plain `text` with **no CHECK constraint**, which is why 'archived' needed no
-  DDL. Migration 0005 records the vocabulary as a column comment; if a CHECK is ever added
-  it has to list all four values.
+  `public.intake_submissions` only now — `public.leads` is dropped (migration 0008).
+  RLS deny-all on the remaining table (service role bypasses).
+- `status` is plain `text` with **no CHECK constraint**. Migration 0005 records the
+  vocabulary as a column comment; if a CHECK is ever added it has to list all four values.
 - Buckets `intake-logos`, `intake-photos`, `intake-videos` all exist and are public.
   Public means anyone holding a URL can view that one file; nothing is listable.
 - Service-role deletes against Storage work — verified by uploading to all three buckets
   and hard-deleting the row, files included.
 - Free tier pauses after ~1wk idle; a cold request just needs a retry.
-- `/api/lead` and `public.leads` are **orphaned** — nothing posts to them since the
-  homepage form was removed. Safe to delete later.
 
 ## Blocked on Noah
 - Confirm `hello@vilas.studio` is a real inbox (it's live in the footer, the closing CTA,
-  and now the /start confirmation).
+  and the /start confirmation).
 - `RESEND_API_KEY` / `NOTIFY_EMAIL` in Vercel, and verify `vilas.studio` with Resend.
 - tagline / instagram / founder still `*_TBD`.
 - Real photos/video across the demos.
