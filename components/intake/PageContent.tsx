@@ -208,9 +208,22 @@ export function PageContent({
           Upload your business&rsquo;s photos here. To make sure each photo ends
           up in the right spot on your site, name each file to match its
           placement.{" "}
-          {tpl
-            ? `On the ${tpl.name} template you chose, hover over any image in the demo to see its name. Use those exact filenames.`
-            : "On the template you chose, hover over any image in the demo to see its name. Use those exact filenames."}{" "}
+          {tpl ? (
+            <>
+              <a
+                href={`/demos/${tpl.key}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-accent underline underline-offset-4"
+              >
+                Open the {tpl.name} template in another tab
+              </a>{" "}
+              and hover over any image to see the name it wants. Use those exact
+              filenames.
+            </>
+          ) : (
+            "On the template you chose, hover over any image in the demo to see its name. Use those exact filenames."
+          )}{" "}
           For example, if the template&rsquo;s hero image is called{" "}
           <code className="font-mono text-ink">hero.jpg</code>, name your version{" "}
           <code className="font-mono text-ink">hero.jpg</code> too. Don&rsquo;t

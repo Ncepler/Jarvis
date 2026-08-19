@@ -6,7 +6,7 @@ import {
   HEX_RE,
   type Upload,
 } from "@/lib/intake";
-import { templateByKey } from "@/lib/templates";
+import { questionsFor, templateByKey } from "@/lib/templates";
 
 // Talks to Supabase's REST API with plain fetch, same pattern as /api/lead:
 // no client lib, and the service role key never leaves the server
@@ -94,6 +94,18 @@ export async function POST(req: Request) {
       ? (raw.templateCustomizations as Record<string, unknown>)
       : null;
 
+  // Only keys this template actually asks about, so the column can't be used
+  // as free storage.
+  const known = new Set(questionsFor(templateChoice).map((q) => q.key));
+  const dropped = (Array.isArray(raw.droppedSections) ? raw.droppedSections : [])
+    .filter((k): k is string => typeof k === "string" && known.has(k))
+    .slice(0, 40);
+
+  // A section that's going doesn't also get content. The form already strips
+  // these, but a stale draft or a retry shouldn't be able to hand the build
+  // prompt an answer and a "remove it" for the same section.
+  if (custom) for (const key of dropped) delete custom[key];
+
   const uploads = (raw.uploads ?? {}) as Record<string, unknown>;
   const photoUrls = asPhotos(uploads.photos);
 
@@ -135,6 +147,7 @@ export async function POST(req: Request) {
       photo_urls: photoUrls.length ? photoUrls : null,
       template_customizations: custom,
       copy_changes: f("copyChanges", 5000) || null,
+      dropped_sections: dropped.length ? dropped : null,
       brain_dump: f("brainDump", 5000) || null,
       status: "new",
     }),

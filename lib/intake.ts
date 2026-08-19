@@ -69,6 +69,10 @@ export type IntakeDraft = {
   // render — and an all-blank row has nothing to serialize.
   templateLists: Record<string, Row[]>;
   templateListsFor: string; // the template templateLists was seeded from
+  // Question keys the client asked us to leave off the site entirely. Nothing
+  // on a template is compulsory — a business with no reason for a scrolling
+  // word strip shouldn't have to fill one in to get past this page.
+  droppedSections: string[];
   copyChanges: string;
 
   // page 5, brain dump
@@ -108,6 +112,7 @@ export const emptyDraft = (): IntakeDraft => ({
   templateCustomizations: {},
   templateLists: {},
   templateListsFor: "",
+  droppedSections: [],
   copyChanges: "",
   brainDump: "",
   uploads: emptyUploads(),
@@ -241,7 +246,8 @@ export function validateStep(id: StepId, d: IntakeDraft): Errors {
 
   if (id === "customize" && usingTemplate) {
     for (const q of questionsFor(d.templateChoice)) {
-      if (!q.list) continue;
+      // A section that's being removed doesn't have to be filled in first.
+      if (!q.list || d.droppedSections.includes(q.key)) continue;
       const rows = padRows(d.templateLists[q.key] ?? [], q.list);
       // The first field is the row's identity — the word, the question, the
       // name of the service. A row without one is an empty box.
@@ -265,8 +271,16 @@ export const mergedCustomizations = (d: IntakeDraft) => {
     );
     if (rows.length) out[q.key] = rowsToText(rows, q.list.fields);
   }
+  // A dropped section's answers are noise — what matters is that it goes.
+  for (const key of d.droppedSections) delete out[key];
   return out;
 };
+
+// What a dropped question is called, for the dashboard and the build prompt.
+export const droppedLabels = (templateKey: string, dropped: string[]) =>
+  questionsFor(templateKey)
+    .filter((q) => dropped.includes(q.key))
+    .map((q) => q.label);
 
 // ── The Supabase row ─────────────────────────────────────────────────────
 // What /api/intake writes and what /d48 + lib/generatePrompt.ts read back.
@@ -309,6 +323,7 @@ export type SubmissionRow = {
   photo_urls: PhotoRef[] | null;
   template_customizations: Record<string, string> | null;
   copy_changes: string | null;
+  dropped_sections: string[] | null;
   brain_dump: string | null;
 };
 

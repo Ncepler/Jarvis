@@ -1,7 +1,7 @@
-# HANDOFF — updated 2026-08-19 (v50)
+# HANDOFF — updated 2026-08-19 (v51)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app (also anotherseason.org) — footer stamp v50.
+- Deployed: https://jarvis-nceplers-projects.vercel.app (also anotherseason.org) — footer stamp v51.
   `npm run build` + `npx tsc --noEmit` + `next lint` all clean.
 - **9 demos**, all registered in `components/demos/index.ts`, `lib/projects.ts`, `lib/templates.ts`.
 - `/start` is the single intake. `/d48` is the internal dashboard.
@@ -42,6 +42,18 @@
 - A successful submit replaces the whole block, heading included. A failed one keeps
   every answer and offers the button again.
 - **localStorage key is now `vilas-intake-draft-v3`.** v2 drafts are ignored.
+
+- **Nothing on a template is compulsory.** Every question on the customize page has a
+  "leave this off my site" tick. Switching one off collapses it, stops it blocking Next,
+  drops its answers from the submission, and turns into a "remove these sections" block
+  in the build prompt. Stored in its own `dropped_sections` column, not in
+  `template_customizations`: that column holds content for the page, this is an
+  instruction about the page.
+- **`/demos/<slug>` renders a template on its own page** so a client can keep the one they
+  picked open in a second tab while filling the form in. The customize page and the photo
+  instructions both link to it. noindex — they're sample brands with invented businesses
+  on them and have no business in search results. The gallery still opens demos inline on
+  the homepage; this route is additional, not a replacement.
 
 ### /d48
 - The list is a table: business, template, submitted, status, actions. Sortable by

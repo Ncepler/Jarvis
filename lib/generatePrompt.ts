@@ -3,7 +3,7 @@
 // can be edited here without touching the /d48 UI that calls it.
 
 import { templateByKey } from "./templates";
-import type { SubmissionRow } from "./intake";
+import { droppedLabels, type SubmissionRow } from "./intake";
 
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 
@@ -78,9 +78,20 @@ function templateSection(row: SubmissionRow) {
     .filter(Boolean);
 
   const head = `Template: ${tpl.name} (${tpl.file}, sample business "${tpl.sample}").`;
-  return rows.length
-    ? `${head}\n\n${rows.join("\n")}`
-    : `${head}\n\nThe client left every template-specific question blank. Keep the template's own structure and personalize it from the business info above.`;
+  const body = rows.length
+    ? rows.join("\n")
+    : "The client left every template-specific question blank. Keep the template's own structure and personalize it from the business info above.";
+
+  // Sections they asked us to drop. Separate from the answers on purpose: it's
+  // an instruction about the page, not content for it.
+  const gone = droppedLabels(str(row.template_choice), row.dropped_sections ?? []);
+  const cut = gone.length
+    ? `\n\nRemove these sections from the template entirely — the client does not want them on the site, so take the section out rather than leaving it thin or filling it in yourself:\n${gone
+        .map((label) => `- ${label}`)
+        .join("\n")}`
+    : "";
+
+  return `${head}\n\n${body}${cut}`;
 }
 
 function contextBlock(row: SubmissionRow) {

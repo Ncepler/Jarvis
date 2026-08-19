@@ -10,7 +10,7 @@ import {
   setStatus,
   type Result,
 } from "@/app/d48/actions";
-import { LIVE_STATUSES, STATUSES, type SubmissionRow } from "@/lib/intake";
+import { LIVE_STATUSES, STATUSES, droppedLabels, type SubmissionRow } from "@/lib/intake";
 import { questionsFor, templateByKey } from "@/lib/templates";
 
 const hairline = "border-b border-line";
@@ -358,6 +358,10 @@ function Detail({ row }: { row: SubmissionRow }) {
             <p className="py-2 text-sm text-muted">No template on this one.</p>
           )}
           <Field label="Copy changes they asked for" value={row.copy_changes} />
+          <Field
+            label="Sections to remove"
+            value={droppedLabels(row.template_choice ?? "", row.dropped_sections ?? []).join("\n")}
+          />
         </Group>
       </div>
 
