@@ -3,9 +3,14 @@ import { isValidDomain, scrubDomain } from "@/lib/intake";
 
 export const runtime = "edge";
 
-// Availability lookup for the /start form's domain field. Vercel's status
-// endpoint is a free read: you only pay if you actually register. The token
-// stays server-side.
+// Availability lookup for the /start form's domain field. Vercel's registrar
+// availability endpoint is a free read: you only pay if you actually
+// register. The token stays server-side.
+//
+// NOTE: this used to hit `v4/domains/status`, which Vercel sunsetted on
+// 2025-11-09 (https://vercel.com/changelog/...) in favor of the `/v1/registrar`
+// endpoint below. If this route starts 502ing again, check Vercel's changelog
+// before assuming it's a token/env problem again.
 export async function GET(req: Request) {
   const domain = scrubDomain(new URL(req.url).searchParams.get("domain") ?? "");
   if (!isValidDomain(domain)) {
@@ -19,8 +24,8 @@ export async function GET(req: Request) {
 
   const team = process.env.VERCEL_TEAM_ID;
   const url =
-    `https://api.vercel.com/v4/domains/status?name=${encodeURIComponent(domain)}` +
-    (team ? `&teamId=${encodeURIComponent(team)}` : "");
+    `https://api.vercel.com/v1/registrar/domains/${encodeURIComponent(domain)}/availability` +
+    (team ? `?teamId=${encodeURIComponent(team)}` : "");
 
   try {
     const res = await fetch(url, {
