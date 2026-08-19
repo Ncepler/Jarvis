@@ -105,7 +105,7 @@ export function PageBrand({
             onBlur("paletteChoice");
           }}
           options={[
-            { value: "template", label: "Keep the template's palette" },
+            { value: "template", label: "Keep this style's palette" },
             { value: "own", label: "Use my own colors" },
           ]}
         />

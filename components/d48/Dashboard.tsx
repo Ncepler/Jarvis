@@ -25,7 +25,7 @@ const statusOf = (row: SubmissionRow) => row.status ?? "new";
 const templateOf = (row: SubmissionRow) =>
   row.is_custom_build
     ? "Custom"
-    : (templateByKey(row.template_choice ?? "")?.name ?? row.template_choice ?? row.template ?? "—");
+    : (templateByKey(row.template_choice ?? "")?.name ?? row.template_choice ?? "—");
 
 // ── Icons ────────────────────────────────────────────────────────────────
 // Line icons rather than emoji (CLAUDE.md §5), sized to the row.

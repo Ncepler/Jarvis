@@ -15,8 +15,11 @@ export const DAYS = [
   "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
 ] as const;
 
+// No pre-filled times and no assumed day off — every business's hours are
+// different, and a default that nobody has to touch is a default that ships.
+// Each day starts blank; the client has to either set a time or tick closed.
 export const defaultHours = (): DayHours[] =>
-  DAYS.map((day) => ({ day, closed: day === "Sunday", open: "09:00", close: "17:00" }));
+  DAYS.map((day) => ({ day, closed: false, open: "", close: "" }));
 
 // A file that's already in Supabase Storage. Uploads happen the moment
 // someone picks a file, not at submit, so what the draft carries is a URL
@@ -239,6 +242,13 @@ export function validateStep(id: StepId, d: IntakeDraft): Errors {
 
   if (id === "content") {
     if (!d.services.trim()) e.services = REQUIRED;
+    // Every day has to be an explicit choice — either a real open/close time
+    // or "closed" ticked. Nothing pre-fills, so nothing ships unedited.
+    d.hours.forEach((h, i) => {
+      if (!h.closed && (!h.open.trim() || !h.close.trim())) {
+        e[`hours.${i}`] = "Set this day's hours, or mark it closed.";
+      }
+    });
     for (const key of ["instagram", "facebook", "googleBusiness"] as const) {
       if (d[key].trim() && !isValidHandle(d[key])) e[key] = BAD_LINK;
     }
@@ -314,7 +324,6 @@ export type SubmissionRow = {
   profile_logo_url: string | null;
   profile_logo_original_url: string | null;
   hero_video_url: string | null;
-  template: string | null;
   services: string | null;
   hours: DayHours[] | null;
   instagram: string | null;

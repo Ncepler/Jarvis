@@ -10,59 +10,81 @@ import {
   type Upload,
 } from "@/lib/intake";
 import { templateByKey } from "@/lib/templates";
-import { FieldError, TextAreaField, TextField, fieldClass, fileInputClass } from "./fields";
+import { FieldError, TextAreaField, TextField, fileInputClass, inputClass } from "./fields";
 import { UploadField, UploadPreview, uploadFile } from "./UploadField";
 
+// No day starts filled in — each one needs a real time or an explicit
+// "closed" before this page will move on (lib/intake.ts validateStep).
 function HoursTable({
   hours,
+  errors,
   onChange,
+  onBlur,
 }: {
   hours: DayHours[];
+  errors: Errors;
   onChange: (hours: DayHours[]) => void;
+  onBlur: (name: string) => void;
 }) {
   const update = (i: number, patch: Partial<DayHours>) =>
     onChange(hours.map((h, idx) => (idx === i ? { ...h, ...patch } : h)));
 
   return (
     <div className="grid gap-3">
-      <span className="text-sm text-muted">Hours</span>
+      <span className="text-sm text-muted">
+        Hours
+        <span className="text-accent"> *</span>
+      </span>
       <div className="grid gap-2">
-        {hours.map((h, i) => (
-          <div
-            key={h.day}
-            className="grid grid-cols-[5.5rem_1fr] items-center gap-3 border-b border-line py-2 sm:grid-cols-[5.5rem_auto_1fr]"
-          >
-            <span className="text-sm text-ink">{h.day}</span>
-            <label className="flex items-center gap-2 text-xs text-muted">
-              <input
-                type="checkbox"
-                checked={h.closed}
-                onChange={(e) => update(i, { closed: e.target.checked })}
-                className="size-4 accent-accent"
-              />
-              Closed
-            </label>
-            {!h.closed && (
-              <div className="col-span-2 flex items-center gap-2 sm:col-span-1">
+        {hours.map((h, i) => {
+          const name = `hours.${i}`;
+          const error = errors[name];
+          return (
+            <div
+              key={h.day}
+              data-field={name}
+              className="grid grid-cols-[5.5rem_1fr] items-start gap-3 border-b border-line py-2 sm:grid-cols-[5.5rem_auto_1fr]"
+            >
+              <span className="pt-1 text-sm text-ink">{h.day}</span>
+              <label className="flex items-center gap-2 pt-1 text-xs text-muted">
                 <input
-                  type="time"
-                  value={h.open}
-                  onChange={(e) => update(i, { open: e.target.value })}
-                  className={`${fieldClass} text-sm`}
-                  aria-label={`${h.day} opens`}
+                  type="checkbox"
+                  checked={h.closed}
+                  onChange={(e) => update(i, { closed: e.target.checked })}
+                  onBlur={() => onBlur(name)}
+                  className="size-4 accent-accent"
                 />
-                <span className="text-xs text-muted">to</span>
-                <input
-                  type="time"
-                  value={h.close}
-                  onChange={(e) => update(i, { close: e.target.value })}
-                  className={`${fieldClass} text-sm`}
-                  aria-label={`${h.day} closes`}
-                />
-              </div>
-            )}
-          </div>
-        ))}
+                Closed
+              </label>
+              {!h.closed && (
+                <div className="col-span-2 grid gap-1 sm:col-span-1">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="time"
+                      value={h.open}
+                      onChange={(e) => update(i, { open: e.target.value })}
+                      onBlur={() => onBlur(name)}
+                      aria-invalid={Boolean(error)}
+                      className={`${inputClass(error)} text-sm`}
+                      aria-label={`${h.day} opens`}
+                    />
+                    <span className="text-xs text-muted">to</span>
+                    <input
+                      type="time"
+                      value={h.close}
+                      onChange={(e) => update(i, { close: e.target.value })}
+                      onBlur={() => onBlur(name)}
+                      aria-invalid={Boolean(error)}
+                      className={`${inputClass(error)} text-sm`}
+                      aria-label={`${h.day} closes`}
+                    />
+                  </div>
+                  <FieldError error={error} />
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -170,7 +192,12 @@ export function PageContent({
         onBlur={() => onBlur("services")}
       />
 
-      <HoursTable hours={draft.hours} onChange={(hours) => onChange({ hours })} />
+      <HoursTable
+        hours={draft.hours}
+        errors={errors}
+        onChange={(hours) => onChange({ hours })}
+        onBlur={onBlur}
+      />
 
       <div className="grid gap-6 md:grid-cols-3">
         <TextField
@@ -216,15 +243,15 @@ export function PageContent({
                 rel="noreferrer"
                 className="text-accent underline underline-offset-4"
               >
-                Open the {tpl.name} template in another tab
+                Open the {tpl.name} style in another tab
               </a>{" "}
               and hover over any image to see the name it wants. Use those exact
               filenames.
             </>
           ) : (
-            "On the template you chose, hover over any image in the demo to see its name. Use those exact filenames."
+            "On the style you chose, hover over any image to see its name. Use those exact filenames."
           )}{" "}
-          For example, if the template&rsquo;s hero image is called{" "}
+          For example, if the style&rsquo;s hero image is called{" "}
           <code className="font-mono text-ink">hero.jpg</code>, name your version{" "}
           <code className="font-mono text-ink">hero.jpg</code> too. Don&rsquo;t
           worry about matching perfectly. We&rsquo;ll adjust anything that&rsquo;s

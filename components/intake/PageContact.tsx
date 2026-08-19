@@ -105,7 +105,7 @@ export function PageContact({
 
   return (
     <div className="grid gap-10">
-      <FieldSet legend="Are you using one of our templates?">
+      <FieldSet legend="How do you want your site built?">
         <RadioCards
           name="usingTemplate"
           value={draft.usingTemplate}
@@ -118,8 +118,8 @@ export function PageContact({
             onBlur("usingTemplate");
           }}
           options={[
-            { value: "yes", label: "Yes, I want to use a template" },
-            { value: "no", label: "No, I want a fully custom build" },
+            { value: "yes", label: "Pick a style from our work" },
+            { value: "no", label: "Fully custom, built from scratch" },
           ]}
         />
       </FieldSet>
@@ -129,7 +129,7 @@ export function PageContact({
           name="templateChoice"
           label="Which one?"
           required
-          placeholder="Choose a template"
+          placeholder="Choose a style"
           error={errors.templateChoice}
           value={draft.templateChoice}
           onChange={(e) => {
@@ -176,7 +176,7 @@ export function PageContact({
         onBlur={touch("businessType")}
         hint={
           usingTemplate
-            ? "Only fill this in if it's not obvious from the template you picked."
+            ? "Only fill this in if it's not obvious from the style you picked."
             : undefined
         }
       />

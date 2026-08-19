@@ -47,6 +47,11 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
   const [loadingContent, setLoadingContent] = useState(false);
   const honeypotRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  // A second click event can land before React's re-render disables the
+  // button — this ref blocks it synchronously, the instant the handler
+  // runs, rather than waiting on state. Two real rows landed 0.4s apart
+  // from exactly that gap.
+  const sendingRef = useRef(false);
 
   useEffect(() => {
     try {
@@ -182,6 +187,7 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
             : "That didn't send. Give it another try in a minute.",
         );
         setStage("form");
+        sendingRef.current = false;
         return;
       }
 
@@ -204,6 +210,7 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
     } catch {
       setError("That didn't send. Check your connection and try again — nothing you typed is lost.");
       setStage("form");
+      sendingRef.current = false;
     }
   };
 
@@ -220,6 +227,11 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
       setError("The form isn't wired up on this deploy yet, the backend env vars are missing.");
       return;
     }
+    // Blocked synchronously, not through `busy`/`disabled` — a second click
+    // fired before React re-renders the disabled button shouldn't slip a
+    // second request through.
+    if (sendingRef.current) return;
+    sendingRef.current = true;
     void send();
   };
 

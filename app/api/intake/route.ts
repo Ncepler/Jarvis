@@ -8,11 +8,10 @@ import {
 } from "@/lib/intake";
 import { questionsFor, templateByKey } from "@/lib/templates";
 
-// Talks to Supabase's REST API with plain fetch, same pattern as /api/lead:
-// no client lib, and the service role key never leaves the server
-// (CLAUDE.md §14). Files are already in Storage by the time this runs —
-// /api/intake/upload puts them there as they're picked — so this handler only
-// records where they landed.
+// Talks to Supabase's REST API directly with fetch — no client lib, and the
+// service role key never leaves the server (CLAUDE.md §14). Files are
+// already in Storage by the time this runs — /api/intake/upload puts them
+// there as they're picked — so this handler only records where they landed.
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -128,9 +127,6 @@ export async function POST(req: Request) {
       desired_domain: desiredDomain,
       template_choice: isCustomBuild ? null : templateChoice,
       is_custom_build: isCustomBuild,
-      // `template` predates template_choice and is NOT NULL on the table,
-      // so it keeps getting the same value.
-      template: isCustomBuild ? "custom" : templateChoice,
       palette_choice: paletteChoice || "template",
       main_color: paletteChoice === "own" ? mainColor : null,
       accent_color: paletteChoice === "own" ? accentColor : null,

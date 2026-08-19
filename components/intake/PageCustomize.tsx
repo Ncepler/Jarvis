@@ -59,7 +59,7 @@ export function PageCustomize({
   if (!tpl) {
     return (
       <p className="text-sm text-muted">
-        Go back to the first page and pick a template and this page will fill in.
+        Go back to the first page and pick a style and this page will fill in.
       </p>
     );
   }
@@ -77,7 +77,7 @@ export function PageCustomize({
 
   const body = (q: TplQuestion) => {
     if (q.list) {
-      if (loading) return <p className="text-sm text-muted">Reading the template…</p>;
+      if (loading) return <p className="text-sm text-muted">Reading the style…</p>;
       return (
         <ListEditor
           name={q.key}
@@ -112,7 +112,7 @@ export function PageCustomize({
     <div className="grid gap-14">
       <div className="grid gap-3 border border-line bg-surface/50 p-4">
         <p className="text-sm leading-relaxed text-muted">
-          Everything below is what the {tpl.name} template says right now. Change
+          Everything below is what the {tpl.name} style says right now. Change
           what you want changed, and leave the rest — we&rsquo;ll rewrite
           anything you keep so it sounds like you. Nothing here is compulsory:
           tick <span className="text-ink">leave this off my site</span> on any
@@ -126,7 +126,7 @@ export function PageCustomize({
             rel="noreferrer"
             className="text-accent underline underline-offset-4"
           >
-            open the {tpl.name} template in another tab
+            open the {tpl.name} style in another tab
           </a>{" "}
           and keep it next to you, so you can see the section each question is
           asking about.
@@ -160,11 +160,11 @@ export function PageCustomize({
                     Right now it says: <span className="text-ink">{q.current}</span>
                   </p>
                 )}
-                {/* One-line lists get the template's version named up front. The
+                {/* One-line lists get the style's version named up front. The
                     longer ones don't need it: the boxes below are the content. */}
                 {q.list?.inline && shipped.length > 0 && first && (
                   <p className="max-w-lg text-sm text-muted">
-                    The template&rsquo;s:{" "}
+                    Right now it&rsquo;s:{" "}
                     <span className="text-ink">
                       {shipped.map((r) => r[first]).filter(Boolean).join(", ")}
                     </span>

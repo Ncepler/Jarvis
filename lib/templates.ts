@@ -67,7 +67,7 @@ const marquee: TplQuestion = {
 const faq: TplQuestion = {
   key: "faq",
   label: "Questions and answers",
-  hint: "Your site has a section of questions customers ask, with the answers. These are the ones the template ships with. Edit any of them, delete the ones that don't apply to you, and add the questions you actually get asked. Leave one as-is and we'll rewrite it in your voice.",
+  hint: "Your site has a section of questions customers ask, with the answers. These are the ones this style ships with. Edit any of them, delete the ones that don't apply to you, and add the questions you actually get asked. Leave one as-is and we'll rewrite it in your voice.",
   list: {
     from: "FAQ",
     fields: [
@@ -82,7 +82,7 @@ const faq: TplQuestion = {
 const work = (from = "WORK"): TplQuestion => ({
   key: "workCaptions",
   label: "Captions under your work photos",
-  hint: "Every photo in the work grid has a short caption under it. These are the template's. Rewrite them to describe the photos you uploaded — the job and the town beats anything clever.",
+  hint: "Every photo in the work grid has a short caption under it. These are what's there now. Rewrite them to describe the photos you uploaded — the job and the town beats anything clever.",
   list: {
     from,
     fields: [
@@ -160,7 +160,7 @@ const beforeAfter: TplQuestion = {
 // the limit of what a client can ask for.
 export const CATCH_ALL: TplQuestion = {
   key: "anythingElse",
-  label: "Anything on this template you want changed that we didn't ask about?",
+  label: "Anything on this style you want changed that we didn't ask about?",
   hint: "Copy changes, sections you'd rather drop, layout tweaks. Anything.",
   type: "textarea",
 };
@@ -202,7 +202,7 @@ export const TEMPLATES: Template[] = [
       {
         key: "lighting",
         label: "The day/night lighting section",
-        hint: "This template has a slider that flips a yard from daylight to landscape lighting. Do you do lighting work? If not we'll swap the section for something you do.",
+        hint: "This style has a slider that flips a yard from daylight to landscape lighting. Do you do lighting work? If not we'll swap the section for something you do.",
         type: "textarea",
       },
       chips,
