@@ -69,9 +69,9 @@ const BOUQUETS = [
 ];
 
 const FAQ = [
-  { q: "Do you deliver?", a: "Yes — same-day across Rockville Centre and nearby towns for orders placed by 2pm, and scheduled delivery beyond that." },
+  { q: "Do you deliver?", a: "Yes, same-day across Rockville Centre and nearby towns for orders placed by 2pm, and scheduled delivery beyond that." },
   { q: "How far ahead should I book a wedding?", a: "The best dates book a season out. Reach out early with the venue and the month and we'll bring ideas to a first call." },
-  { q: "Can I just say a budget and let you design?", a: "Absolutely — that's most of what we do. Give us a number and a vibe and we'll run with it." },
+  { q: "Can I just say a budget and let you design?", a: "Absolutely. That's most of what we do. Give us a number and a vibe and we'll run with it." },
   { q: "Do you do sympathy arrangements on short notice?", a: "We do, same-day when we can. Call the shop and we'll handle it gently." },
   { q: "Can I set up weekly flowers?", a: "Yes. A standing weekly order for the house or a business, billed simply, skip any week by text." },
 ];
@@ -79,7 +79,7 @@ const FAQ = [
 const VALUES = [
   { h: "Arranged the morning it ships", p: "Nothing sits in a cooler for a week. We build it the day it goes out." },
   { h: "Seasonal & local where we can", p: "We buy what's actually good that week, so it looks picked, never produced." },
-  { h: "A real local florist", p: "You talk to the people holding the shears on Maple Ave — not a 1-800 order desk." },
+  { h: "A real local florist", p: "You talk to the people holding the shears on Maple Ave, not a 1-800 order desk." },
 ];
 
 // ── What we do — occasion tiles, the occasion name in the serif (§14h). ──────
@@ -100,7 +100,7 @@ function OccasionTiles() {
                 className="overflow-hidden transition-transform duration-500 group-hover:-translate-y-1"
                 style={{ borderRadius: "var(--d-radius)", boxShadow: "0 8px 24px rgba(42,38,34,.06)" }}
               >
-                <Media label={`OCCASION — ${o.name} (3:4)`} ratio="3/4" rounded={false} />
+                <Media label={`OCCASION: ${o.name} (3:4)`} ratio="3/4" rounded={false} />
               </div>
               <figcaption className="mt-3">
                 <h3 className="text-[22px] font-semibold leading-[1.1]" style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}>
@@ -141,7 +141,7 @@ function BouquetGallery() {
             <figure className="group">
               <div className="overflow-hidden" style={{ borderRadius: "var(--d-radius)" }}>
                 <div className="transition-transform duration-500 group-hover:scale-[1.03]">
-                  <Media label={`BOUQUET — ${b.name} (4:5)`} ratio="4/5" rounded={false} />
+                  <Media label={`BOUQUET: ${b.name} (4:5)`} ratio="4/5" rounded={false} />
                 </div>
               </div>
               <figcaption className="mt-3 flex items-baseline justify-between gap-3">
@@ -183,7 +183,7 @@ function Subscription() {
           </span>
         </Rise>
         <Rise delay={0.1}>
-          <Media label="WEEKLY — standing arrangement (4:3)" />
+          <Media label="WEEKLY: standing arrangement (4:3)" />
         </Rise>
       </div>
     </Section>
@@ -230,7 +230,7 @@ export function FloristDemo() {
         sub="Seasonal stems, arranged the morning you order them. Walk in, call ahead, or set up weekly flowers for the house."
         primaryCta="Order for pickup"
         phone={PHONE}
-        mediaLabel="HERO VIDEO — shop & blooms (16:9)"
+        mediaLabel="HERO VIDEO: shop & blooms (16:9)"
       />
       <DemoMarquee terms={["Weddings", "Events", "Daily", "Weekly", "Sympathy"]} />
       <Intro
@@ -239,7 +239,7 @@ export function FloristDemo() {
         line2="Real flowers."
         paragraphs={[
           "We're a working flower shop, not a website that ships boxes. What's in the cooler is what came in good that week.",
-          "Tell us the person and the occasion and we'll design around it — loose, seasonal, and arranged the day it goes out.",
+          "Tell us the person and the occasion and we'll design around it: loose, seasonal, and arranged the day it goes out.",
         ]}
         badges={[
           ["Daily to weddings", "Full range"],
@@ -261,7 +261,7 @@ export function FloristDemo() {
           "From two tables to the whole room",
         ]}
         cta="Start a wedding inquiry"
-        mediaLabel="GALLERY — wedding & event florals (16:9)"
+        mediaLabel="GALLERY: wedding & event florals (16:9)"
       />
       <BouquetGallery />
       <Subscription />
@@ -292,7 +292,7 @@ export function FloristDemo() {
       />
       <DemoFooter
         name={NAME}
-        descriptor="A working flower shop — daily arrangements, weddings, and weekly flowers."
+        descriptor="A working flower shop: daily arrangements, weddings, and weekly flowers."
         area="Rockville Centre & nearby Long Island towns"
         services={["Daily arrangements", "Weddings & events", "Weekly flowers", "Sympathy"]}
         phone={PHONE}

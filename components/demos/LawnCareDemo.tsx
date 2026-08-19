@@ -83,7 +83,7 @@ const PLANS = [
 const WORK = [
   { tag: "Mowing", caption: "Weekly cut with clean edges" },
   { tag: "Stripes", caption: "Straight mow lines, front to back" },
-  { tag: "Cleanup", caption: "Fall leaf cleanup — beds cleared" },
+  { tag: "Cleanup", caption: "Fall leaf cleanup: beds cleared" },
   { tag: "Mulch", caption: "Fresh mulch & re-cut bed lines" },
   { tag: "Treatment", caption: "Seasonal fertilizer application" },
   { tag: "Edging", caption: "Crisp walkway & driveway edges" },
@@ -91,7 +91,7 @@ const WORK = [
 
 const FAQ = [
   { q: "What areas do you serve?", a: "The South Shore of Nassau County and nearby towns. Send your address and we'll confirm you're on the route." },
-  { q: "Do I need a contract?", a: "No. We run week to week. Skip a cut or cancel entirely by text — no penalty, no paperwork." },
+  { q: "Do I need a contract?", a: "No. We run week to week. Skip a cut or cancel entirely by text, no penalty, no paperwork." },
   { q: "How do I get a price?", a: "Text a photo of the yard and your address. You'll have a firm weekly number that night, no site visit required." },
   { q: "What day will you come?", a: "You get a set day each week with the same crew. If weather pushes it, we'll text you the new day." },
   { q: "Are you insured?", a: "Yes, fully insured. Happy to send proof before your first visit." },
@@ -294,7 +294,7 @@ export function LawnCareDemo() {
         sub="Weekly mowing, cleanups, and edging for homes on the South Shore. No contracts, no voicemail tag. Text a photo, get a price."
         primaryCta="Get a free quote"
         phone={PHONE}
-        mediaLabel="HERO VIDEO — fresh-cut lawn (16:9)"
+        mediaLabel="HERO VIDEO: fresh-cut lawn (16:9)"
       />
       <DemoMarquee terms={["Mowing", "Cleanups", "Edging", "Mulch", "Fertilizing"]} />
       <Intro
@@ -302,7 +302,7 @@ export function LawnCareDemo() {
         line1="Show up."
         line2="Cut it right."
         paragraphs={[
-          "Lawn care isn't complicated — it's whether the crew shows up, does it right, and you never have to chase them. That's the whole job.",
+          "Lawn care isn't complicated. It's whether the crew shows up, does it right, and you never have to chase them. That's the whole job.",
           "Fresh Cut runs a tight weekly route with the same crew, a firm price up front, and no contract to trap you if we don't earn it.",
         ]}
         badges={[
@@ -318,7 +318,7 @@ export function LawnCareDemo() {
         eyebrow="How it works"
         line1="Text a photo."
         line2="Get a price that night."
-        paragraph="Send a picture of the yard and your address — that's the whole form. We reply with a firm weekly number, then put you on the route with the same crew, same day."
+        paragraph="Send a picture of the yard and your address: that's the whole form. We reply with a firm weekly number, then put you on the route with the same crew, same day."
         checklist={[
           "Firm price, no site visit",
           "Same crew, same day",
@@ -326,7 +326,7 @@ export function LawnCareDemo() {
           "Fully insured",
         ]}
         cta="Text us a photo"
-        mediaLabel="ON THE JOB — crew & route (16:9)"
+        mediaLabel="ON THE JOB: crew & route (16:9)"
       />
       <WorkGrid
         eyebrow="Recent work"
@@ -341,7 +341,7 @@ export function LawnCareDemo() {
         claims={[
           { label: "Same crew each week", sub: "The same people, the same set day." },
           { label: "We text before we come", sub: "No surprise visits, no chasing us down." },
-          { label: "Easy to cancel", sub: "No contract — skip or stop by text." },
+          { label: "Easy to cancel", sub: "No contract, skip or stop by text." },
           { label: "We show up", sub: "When we say we'll be there, we're there." },
         ]}
       />

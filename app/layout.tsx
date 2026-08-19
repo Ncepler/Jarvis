@@ -77,7 +77,7 @@ const spaceMono = Space_Mono({
 // cold email Googles the name to check it's real (CLAUDE.md §1). So the meta
 // reads like a plain, real business and links unfurl with title + description.
 // TODO(name): real OG image + favicon still pending (needs a designed asset, §12).
-const META_TITLE = `${SITE.name} — web design studio for small businesses`;
+const META_TITLE = `${SITE.name}: web design studio for small businesses`;
 const META_DESCRIPTION = `A small, fully remote web design studio. We build websites for local businesses that look like they cost as much as a villa.`;
 
 export const metadata: Metadata = {

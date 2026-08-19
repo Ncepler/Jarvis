@@ -79,18 +79,18 @@ const WASH = [
 ];
 
 const WORK = [
-  { tag: "House", caption: "Vinyl siding soft wash — full exterior" },
-  { tag: "Driveway", caption: "Concrete driveway — grease & algae lifted" },
+  { tag: "House", caption: "Vinyl siding soft wash: full exterior" },
+  { tag: "Driveway", caption: "Concrete driveway: grease & algae lifted" },
   { tag: "Deck", caption: "Cedar deck brightened before staining" },
-  { tag: "Patio", caption: "Paver patio — sand re-set after wash" },
-  { tag: "Roof", caption: "Roof soft wash — streaks gone" },
+  { tag: "Patio", caption: "Paver patio: sand re-set after wash" },
+  { tag: "Roof", caption: "Roof soft wash: streaks gone" },
   { tag: "Fence", caption: "Vinyl fence line restored" },
 ];
 
 const FAQ = [
-  { q: "What areas do you serve?", a: "Suffolk County — Sayville, Patchogue, Bayport, Blue Point, Oakdale, Bohemia, Holbrook, and nearby towns." },
+  { q: "What areas do you serve?", a: "Suffolk County: Sayville, Patchogue, Bayport, Blue Point, Oakdale, Bohemia, Holbrook, and nearby towns." },
   { q: "Will pressure washing damage my siding?", a: "Not the way we do it. Houses get a low-pressure soft wash that cleans the surface without forcing water behind it." },
-  { q: "Can I just text a photo for a price?", a: "Yes — that's the fastest way. Send a picture of the house or driveway and we'll send back a flat quote, usually the same day." },
+  { q: "Can I just text a photo for a price?", a: "Yes, that's the fastest way. Send a picture of the house or driveway and we'll send back a flat quote, usually the same day." },
   { q: "Are you licensed and insured?", a: "Fully licensed and insured. We'll send proof before we start if you'd like to see it." },
   { q: "How long does a wash take?", a: "Most homes and driveways are a single morning. We'll give you a real time window when we quote it." },
 ];
@@ -118,7 +118,7 @@ function WashProofRows() {
               <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
                 {/* one representative shot */}
                 <div className={flip ? "md:order-2" : ""}>
-                  <Media label={`RESULT — ${s.title} (4:3)`} ratio="4/3" />
+                  <Media label={`RESULT: ${s.title} (4:3)`} ratio="4/3" />
                 </div>
                 {/* text */}
                 <div className={flip ? "md:order-1" : ""}>
@@ -156,12 +156,12 @@ function WashTransformation() {
           </div>
           <p className="mt-6 max-w-xl text-[17px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
             Same driveway, two hours apart. Drag the handle. Then send a photo of
-            yours and we&apos;ll tell you exactly what it&apos;ll cost — no walkthrough required.
+            yours and we&apos;ll tell you exactly what it&apos;ll cost, no walkthrough required.
           </p>
         </Rise>
         <Rise delay={0.1}>
           <div className="mt-10">
-            <BeforeAfterSlider beforeLabel="BEFORE — driveway (16:9)" afterLabel="AFTER — driveway (16:9)" />
+            <BeforeAfterSlider beforeLabel="BEFORE: driveway (16:9)" afterLabel="AFTER: driveway (16:9)" />
           </div>
         </Rise>
         <Rise delay={0.15}>
@@ -189,7 +189,7 @@ export function PowerWashDemo() {
         sub="Houses, driveways, decks, and fences washed back to new in one visit. Flat quotes, no surprises."
         primaryCta="Get a free quote"
         phone={PHONE}
-        mediaLabel="HERO VIDEO — wash footage (16:9)"
+        mediaLabel="HERO VIDEO: wash footage (16:9)"
       />
       <DemoMarquee terms={["Houses", "Driveways", "Decks", "Patios", "Fences"]} />
       <Intro
@@ -197,7 +197,7 @@ export function PowerWashDemo() {
         line1="One visit."
         line2="Back to new."
         paragraphs={[
-          "Most of what looks worn out is just dirty. Siding, concrete, decks — a proper wash buys you years before you ever think about replacing anything.",
+          "Most of what looks worn out is just dirty. Siding, concrete, decks: a proper wash buys you years before you ever think about replacing anything.",
           "Tide Line does it in one visit, with the right pressure for each surface, and a flat number you agree to before we start.",
         ]}
         badges={[

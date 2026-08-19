@@ -56,7 +56,7 @@ const NAME = "Stone & Sage Landscapes";
 const firstLandscapingImage = "/previews/firstLandscapingImage.webp";
 
 const SERVICES = [
-  { title: "Design", copy: "A measured plan for the whole property — plantings, stone, lighting, grading — before anything is dug." },
+  { title: "Design", copy: "A measured plan for the whole property (plantings, stone, lighting, grading) before anything is dug." },
   { title: "Patios & walkways", copy: "Bluestone, pavers, and gravel laid on a base built to outlast the freeze-thaw, not just look good in spring." },
   { title: "Retaining walls", copy: "Engineered to hold the grade and drain right, so the wall is still plumb a decade out." },
   { title: "Garden & planting", copy: "Native and seasonal plantings chosen for your light and soil, set to fill in instead of fight the site." },
@@ -67,19 +67,19 @@ const SERVICES = [
 // "Our process" — a short Design → Build → Grow stepper (§14f).
 const PROCESS = [
   { title: "Design", what: "We walk the property, take measurements, and draw a plan you can see before anything's dug.", duration: "2–3 weeks" },
-  { title: "Build", what: "Grading, drainage, stone, and structure — the base you can't see, done right first.", duration: "2–6 weeks" },
+  { title: "Build", what: "Grading, drainage, stone, and structure: the base you can't see, done right first.", duration: "2–6 weeks" },
   { title: "Grow", what: "Planting, then seasonal care by the same crew, so it fills in and keeps looking right.", duration: "Ongoing" },
 ];
 
 // Work grid is filterable by type (§14f). Tags match the chip set below.
 const WORK_CHIPS = ["Patios", "Walls", "Gardens", "Lighting", "Fire pits"];
 const WORK = [
-  { tag: "Patios", caption: "Bayside bluestone terrace — Port Washington" },
-  { tag: "Walls", caption: "Tiered retaining wall & steps — Huntington" },
-  { tag: "Gardens", caption: "Native meadow front yard — Northport" },
+  { tag: "Patios", caption: "Bayside bluestone terrace: Port Washington" },
+  { tag: "Walls", caption: "Tiered retaining wall & steps: Huntington" },
+  { tag: "Gardens", caption: "Native meadow front yard: Northport" },
   { tag: "Lighting", caption: "Low-voltage path & garden lighting" },
-  { tag: "Fire pits", caption: "Sunken fire pit & seating wall — Cold Spring Harbor" },
-  { tag: "Patios", caption: "Pool surround in bluestone — Huntington" },
+  { tag: "Fire pits", caption: "Sunken fire pit & seating wall: Cold Spring Harbor" },
+  { tag: "Patios", caption: "Pool surround in bluestone: Huntington" },
   { tag: "Gardens", caption: "Pollinator border & gravel garden" },
   { tag: "Lighting", caption: "Uplit specimen trees & façade wash" },
   { tag: "Walls", caption: "Dry-stack stone wall & planted terrace" },
@@ -94,9 +94,9 @@ const PROPS = [
 ];
 
 const FAQ = [
-  { q: "What areas do you serve?", a: "The North Shore of Long Island — Huntington, Northport, Port Washington, Cold Spring Harbor, and nearby towns." },
+  { q: "What areas do you serve?", a: "The North Shore of Long Island: Huntington, Northport, Port Washington, Cold Spring Harbor, and nearby towns." },
   { q: "Do you do design and build, or just one?", a: "Both, and we prefer to do both. When the crew that builds it drew it, far less gets lost between the plan and the ground." },
-  { q: "Do you install landscape lighting?", a: "Yes — low-voltage path, uplighting, and fixtures for fire and water features. It's the part of a project most people underestimate, and the part you enjoy most after dark." },
+  { q: "Do you install landscape lighting?", a: "Yes, low-voltage path, uplighting, and fixtures for fire and water features. It's the part of a project most people underestimate, and the part you enjoy most after dark." },
   { q: "How long does a project take?", a: "A patio is usually a couple of weeks; a full property runs a season. We give you a real schedule before we start." },
   { q: "Do you give free estimates?", a: "Yes. We walk the property, talk through what you want, and put a written number in front of you. No pressure." },
   { q: "Do you maintain what you build?", a: "We do, and we'd rather. Seasonal care by the people who built it keeps it looking right for years." },
@@ -122,7 +122,7 @@ function DayNight() {
           style={{ background: "var(--d-surface)", opacity: night ? 0 : 1, transition: fade }}
         >
           <span className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--d-muted)" }}>
-            FEATURED — patio, DAY (16:9)
+            FEATURED: patio, DAY (16:9)
           </span>
         </div>
         {/* NIGHT — landscape lighting on */}
@@ -131,7 +131,7 @@ function DayNight() {
           style={{ background: "var(--d-bg)", opacity: night ? 1 : 0, transition: fade }}
         >
           <span className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--d-accent)" }}>
-            FEATURED — patio, NIGHT, lights on (16:9)
+            FEATURED: patio, NIGHT, lights on (16:9)
           </span>
         </div>
       </div>
@@ -192,7 +192,7 @@ function LightingServices() {
           </h3>
           <p className="mt-4 text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
             Flip it to dusk and the same patio turns into a place you actually
-            use at night — warm uplighting in the trees, low path lights, and the
+            use at night: warm uplighting in the trees, low path lights, and the
             fire feature glowing. We design the night view alongside the day one,
             because that&apos;s when most people fall for it.
           </p>
@@ -229,10 +229,10 @@ export function LandscapingDemo() {
         eyebrow="Landscape design & build · North Shore"
         line1="Built to be lived in."
         line2="Built to stay."
-        sub="We design and build the whole property — stone, plantings, lighting, water — then we keep it. One studio, one crew, one standard."
+        sub="We design and build the whole property (stone, plantings, lighting, water), then we keep it. One studio, one crew, one standard."
         primaryCta="Book a consultation"
         phone={PHONE}
-        mediaLabel="HERO VIDEO — finished property b-roll (16:9)"
+        mediaLabel="HERO VIDEO: finished property b-roll (16:9)"
       />
       <DemoMarquee terms={["Patios", "Retaining Walls", "Gardens", "Lighting", "Fire Pits"]} />
       <Intro
@@ -241,7 +241,7 @@ export function LandscapingDemo() {
         line2="One crew."
         paragraphs={[
           "Most yards get passed between a designer, a mason, and a landscaper who never talk. The seams show.",
-          "Stone & Sage draws it, builds it, and maintains it with our own people — so the property reads as one finished idea, not three.",
+          "Stone & Sage draws it, builds it, and maintains it with our own people, so the property reads as one finished idea, not three.",
         ]}
         badges={[
           ["Design through maintenance", "Full scope"],
@@ -270,7 +270,7 @@ export function LandscapingDemo() {
           "Licensed & insured",
         ]}
         cta="Walk the property with us"
-        mediaLabel="TRANSFORMATION — before/after (16:9)"
+        mediaLabel="TRANSFORMATION: before/after (16:9)"
       />
       <FilterableWorkGrid
         eyebrow="Recent work"
@@ -311,14 +311,14 @@ export function LandscapingDemo() {
       />
       <DemoFooter
         name={NAME}
-        descriptor="Landscape design, build, and maintenance — one crew from drawing to care."
+        descriptor="Landscape design, build, and maintenance: one crew from drawing to care."
         area="Serving the North Shore of Long Island"
         services={["Design", "Patios & walkways", "Retaining walls", "Garden & planting", "Lighting", "Maintenance"]}
         phone={PHONE}
         email="hello@stoneandsage.demo"
         location="North Shore, Long Island, NY"
         hours="Mon–Sat, 7am–6pm"
-        strip="Licensed & Insured · Free Consultations · Design–Build"
+        strip="Licensed & Insured · Free Consultations · Design-Build"
       />
     </DemoShell>
   );

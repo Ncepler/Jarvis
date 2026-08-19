@@ -60,20 +60,20 @@ const MENU = [
 ];
 
 const WORK = [
-  { tag: "Bread", caption: "Sourdough loaf — out of the oven at 7am" },
-  { tag: "Pastry", caption: "Cardamom morning buns — gone by 10" },
-  { tag: "Bread", caption: "Seeded rye — dense, dark, keeps all week" },
+  { tag: "Bread", caption: "Sourdough loaf: out of the oven at 7am" },
+  { tag: "Pastry", caption: "Cardamom morning buns: gone by 10" },
+  { tag: "Bread", caption: "Seeded rye: dense, dark, keeps all week" },
   { tag: "Sweet", caption: "Brown-butter chocolate chip cookie" },
   { tag: "Savory", caption: "Rosemary focaccia, baked in sheets" },
-  { tag: "Cake", caption: "Whole birthday cake — order two days ahead" },
+  { tag: "Cake", caption: "Whole birthday cake: order two days ahead" },
 ];
 
 const FAQ = [
   { q: "What days are you open?", a: "Wed–Sun, 7am until sold out. We post the morning's bake so you know what's in the case before you come." },
-  { q: "Can I order ahead?", a: "Yes — order by 8pm and your bag is on the shelf with your name on it the next morning." },
+  { q: "Can I order ahead?", a: "Yes, order by 8pm and your bag is on the shelf with your name on it the next morning." },
   { q: "How much notice for a cake?", a: "Two days for whole cakes. Tell us vanilla or chocolate and the size and we'll have it ready." },
-  { q: "Do you sell wholesale to cafés?", a: "We do — standing morning deliveries of bread and pastry. Reach out and we'll talk about a route." },
-  { q: "Do you do gluten-free?", a: "Not yet — we're a small flour-and-water shop and can't promise a clean kitchen for it. We'd rather be honest than careless." },
+  { q: "Do you sell wholesale to cafés?", a: "We do, with standing morning deliveries of bread and pastry. Reach out and we'll talk about a route." },
+  { q: "Do you do gluten-free?", a: "Not yet. We're a small flour-and-water shop and can't promise a clean kitchen for it. We'd rather be honest than careless." },
 ];
 
 // ── What we bake — the menu beside the case, like stepping to the counter (§14b).
@@ -117,7 +117,7 @@ function BakeryMenu() {
         {/* the case */}
         <Rise delay={0.1}>
           <div className="md:sticky md:top-10">
-            <Media label="THE CASE — morning bake (3:2)" ratio="3/2" />
+            <Media label="THE CASE: morning bake (3:2)" ratio="3/2" />
             <p className="mt-3 text-[13px]" style={{ color: "var(--d-muted)" }}>
               The case at 7am. When it&apos;s empty, that&apos;s the day.
             </p>
@@ -140,7 +140,7 @@ function WarmNarrative() {
           </div>
           <div className="mt-7 space-y-6">
             {[
-              ["Everything's from this morning.", "Nothing in the case carried over from yesterday — we bake it, you eat it the same day, and the empty shelf at noon is the point."],
+              ["Everything's from this morning.", "Nothing in the case carried over from yesterday. We bake it, you eat it the same day, and the empty shelf at noon is the point."],
               ["We bake a short list, well.", "Sourdough on a 36-hour rise, pastry out before the rush, cakes to order. A few things every day instead of a long menu we phone in."],
               ["Reserve a bag the night before.", "Order by 8pm and it's on the shelf with your name on it. The regulars never gamble on the morning."],
             ].map(([h, p]) => (
@@ -156,7 +156,7 @@ function WarmNarrative() {
           </div>
         </Rise>
         <Rise delay={0.1}>
-          <Media label="THE BAKEHOUSE — morning light (4:5)" ratio="4/5" />
+          <Media label="THE BAKEHOUSE: morning light (4:5)" ratio="4/5" />
         </Rise>
       </div>
     </Section>
@@ -175,7 +175,7 @@ export function BakeryDemo() {
         sub="Sourdough, morning buns, and one very good cookie, baked in small batches every morning. When the case is empty, that's the day."
         primaryCta="Order ahead"
         phone={PHONE}
-        mediaLabel="HERO VIDEO — the case at 7am (16:9)"
+        mediaLabel="HERO VIDEO: the case at 7am (16:9)"
       />
       <DemoMarquee terms={["Sourdough", "Pastry", "Cakes", "Focaccia", "Cookies"]} />
       <Intro
@@ -198,7 +198,7 @@ export function BakeryDemo() {
         eyebrow="Order ahead"
         line1="Skip the line,"
         line2="not the bread."
-        paragraph="Order by 8pm and your bag is on the shelf with your name on it the next morning. Cakes need two days' notice — tell us vanilla or chocolate."
+        paragraph="Order by 8pm and your bag is on the shelf with your name on it the next morning. Cakes need two days' notice; tell us vanilla or chocolate."
         checklist={[
           "Reserved with your name",
           "Out of the oven that morning",
@@ -206,7 +206,7 @@ export function BakeryDemo() {
           "Pickup from 7am",
         ]}
         cta="Place an order"
-        mediaLabel="THE CASE — morning bake (16:9)"
+        mediaLabel="THE CASE: morning bake (16:9)"
       />
       <WorkGrid
         eyebrow="The daily case"
@@ -240,7 +240,7 @@ export function BakeryDemo() {
       />
       <DemoFooter
         name={NAME}
-        descriptor="A small bakehouse — sourdough, pastry, and cakes baked fresh every morning."
+        descriptor="A small bakehouse: sourdough, pastry, and cakes baked fresh every morning."
         area="22 Main St, Sayville, Long Island"
         services={["Daily bread", "Morning pastry", "Cakes to order", "Wholesale"]}
         phone={PHONE}

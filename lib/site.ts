@@ -82,16 +82,16 @@ export const COPY = {
     q2: {
       pre: "Say a slow or missing site costs you just",
       post: "a month", // component prepends "client"/"clients" based on the count
-      sub: "A hypothetical you set — not a number we're claiming about your business.",
+      sub: "A hypothetical you set, not a number we're claiming about your business.",
     },
     readoutSuffix: "a year",
     readoutCaption: "walking to whoever's easier to find online.",
     kicker: "A site that fixes that is about $300, once.",
     // {n} is replaced with the rounded multiple in the component.
-    multiple: "That's roughly {n}× the site's cost — in year one alone.",
+    multiple: "That's roughly {n}× the site's cost, in year one alone.",
     honest: "Your numbers, not ours. We're just doing the multiplication.",
     jsOff:
-      "Miss one $300 customer a month and that's $3,600 a year — the site's about $300, once.",
+      "Miss one $300 customer a month and that's $3,600 a year. The site's about $300, once.",
   },
   // Small note near the work section — sets expectations before anyone
   // starts dragging through the gallery.
@@ -105,7 +105,7 @@ export const COPY = {
     intro:
       "Every site starts from a foundation. What you get is nothing like the starting point.",
     rows: ["demo-landscaping", "demo-florist", "demo-barber"],
-    note: "You upload your own photos at intake — each just needs to be named to match its slot in the template (we tell you how).",
+    note: "You upload your own photos at intake. Each just needs to be named to match its slot in the template (we tell you how).",
   },
   // Two tiers, flat and public. No feature lists — the tiers are the same
   // work at a different starting point, not different levels of effort.
@@ -114,8 +114,8 @@ export const COPY = {
       { title: "Template", build: "$300 build", monthly: "$50/month" },
       { title: "Custom", build: "$500 build", monthly: "$80/month" },
     ],
-    flagship: "Flagship work — let's talk.",
-    note: "Your monthly covers hosting, the domain, and updates when you need them. If a payment lapses, the site pauses until it's caught up — nothing gets deleted, your content and domain are safe.",
+    flagship: "Flagship work: let's talk.",
+    note: "Your monthly covers hosting, the domain, and updates when you need them. If a payment lapses, the site pauses until it's caught up, but nothing gets deleted. Your content and domain are safe.",
   },
   // Final CTA band before the form.
   closing: {
@@ -155,7 +155,7 @@ export const COPY = {
     },
     how: {
       heading: "How we work",
-      body: "Direct, no middlemen. You tell us what you want, we build it, and it's live in about a week — no ongoing meetings.",
+      body: "Direct, no middlemen. You tell us what you want, we build it, and it's live in about a week, with no ongoing meetings.",
     },
     what: {
       heading: "What you get",
@@ -207,9 +207,9 @@ export const COPY = {
     reassurance: "No obligation, and you'll hear back within a day.",
     nearSubmit: "Nothing to pay today.",
     step2Intro:
-      "Two more questions if you've got 30 seconds — or skip, we'll ask later.",
+      "Two more questions if you've got 30 seconds, or skip and we'll ask later.",
     success:
-      "Got it — we'll reply within a day. Have your logo and a few photos handy.",
+      "Got it. We'll reply within a day, so have your logo and a few photos handy.",
     errorSave: "That didn't send. Give it another try in a minute.",
   },
 } as const;

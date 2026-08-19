@@ -62,12 +62,12 @@ export function Contact({ hasBackend }: { hasBackend: boolean }) {
         );
         return;
       }
-      const subject = `Project inquiry — ${data.get("business") || data.get("name")}`;
+      const subject = `Project inquiry: ${data.get("business") || data.get("name")}`;
       const body = [
         `Name: ${data.get("name")}`,
         `Business: ${data.get("business")}`,
         `Email: ${data.get("email")}`,
-        `Path: ${data.get("path") || "—"}`,
+        `Path: ${data.get("path") || "n/a"}`,
         data.get("style_slug") ? `Style: ${data.get("style_slug")}` : "",
         data.get("colors") ? `Colors: ${data.get("colors")}` : "",
         data.get("links") ? `Links: ${data.get("links")}` : "",

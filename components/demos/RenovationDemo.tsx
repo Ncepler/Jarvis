@@ -36,10 +36,10 @@ const NAME = "Maple & Main Renovation Co.";
 const firstRenovationImage = "/previews/firstRenovationImage.webp";
 
 const SERVICES = [
-  { title: "Kitchens", copy: "Full gut to finish — cabinets, counters, tile, lighting. We handle the whole room, not just the pretty part." },
+  { title: "Kitchens", copy: "Full gut to finish: cabinets, counters, tile, lighting. We handle the whole room, not just the pretty part." },
   { title: "Bathrooms", copy: "Walk-in showers, tile, vanities, plumbing. Built to handle water and last decades, not seasons." },
   { title: "Additions & extensions", copy: "More room without moving. Framed, wired, insulated, and finished to match the house you already have." },
-  { title: "Basements", copy: "Dry, warm, finished space — living rooms, suites, gyms. Moisture handled first, drywall second." },
+  { title: "Basements", copy: "Dry, warm, finished space: living rooms, suites, gyms. Moisture handled first, drywall second." },
   { title: "Whole-home renovations", copy: "Top to bottom, one crew, one schedule. We live in your house's mess so you don't have to manage five trades." },
   { title: "Trim & finish carpentry", copy: "Crown, baseboard, built-ins, doors. The details that make a renovation read as custom instead of contractor-grade." },
 ];
@@ -48,26 +48,26 @@ const SERVICES = [
 const PROCESS = [
   { title: "Design", what: "We measure, talk through the scope, and put a real written number in front of you.", duration: "1–2 weeks" },
   { title: "Demolition", what: "Floors covered, the old room out clean, and any surprises found before they cost you.", duration: "2–4 days" },
-  { title: "Build", what: "Framing, plumbing, electric, and tile — our own crew, held to the drawing.", duration: "2–4 weeks" },
+  { title: "Build", what: "Framing, plumbing, electric, and tile, done by our own crew, held to the drawing.", duration: "2–4 weeks" },
   { title: "Finish", what: "Trim, paint, fixtures, and a walk-through. We don't leave you a punch list.", duration: "3–5 days" },
 ];
 
 // Work grid is filterable by room (§14e). Tags match the chip set below.
 const WORK_CHIPS = ["Kitchen", "Bath", "Addition", "Whole-home", "Exterior"];
 const WORK = [
-  { tag: "Kitchen", caption: "Kitchen — full gut renovation", img: "/previews/renovation3.1.webp" },
-  { tag: "Bath", caption: "Primary bath — walk-in tile shower", img: "/previews/renovation3.2.webp" },
-  { tag: "Addition", caption: "Rear addition — framed & finished", img: "/previews/renovation3.3.webp" },
-  { tag: "Whole-home", caption: "1920s colonial — full restoration", img: "/previews/renovation3.4.webp" },
+  { tag: "Kitchen", caption: "Kitchen: full gut renovation", img: "/previews/renovation3.1.webp" },
+  { tag: "Bath", caption: "Primary bath: walk-in tile shower", img: "/previews/renovation3.2.webp" },
+  { tag: "Addition", caption: "Rear addition: framed & finished", img: "/previews/renovation3.3.webp" },
+  { tag: "Whole-home", caption: "1920s colonial: full restoration", img: "/previews/renovation3.4.webp" },
   { tag: "Exterior", caption: "Front entry & porch rebuild", img: "/previews/renovation3.5.webp" },
-  { tag: "Kitchen", caption: "Galley kitchen — opened to the dining room", img: "/previews/renovation3.6.webp" },
-  { tag: "Bath", caption: "Guest bath — floating vanity & tile", img: "/previews/renovation3.7.webp" },
-  { tag: "Whole-home", caption: "Cape — second-story gut & rebuild", img: "/previews/renovation3.8.webp" },
+  { tag: "Kitchen", caption: "Galley kitchen: opened to the dining room", img: "/previews/renovation3.6.webp" },
+  { tag: "Bath", caption: "Guest bath: floating vanity & tile", img: "/previews/renovation3.7.webp" },
+  { tag: "Whole-home", caption: "Cape: second-story gut & rebuild", img: "/previews/renovation3.8.webp" },
   { tag: "Exterior", caption: "Cedar siding & new windows", img: "/previews/renovation3.9.webp" },
 ];
 
 const PROPS = [
-  { title: "One crew, every trade", copy: "Carpentry, tile, plumbing, electric — our people, not a rotating cast of subs you've never met." },
+  { title: "One crew, every trade", copy: "Carpentry, tile, plumbing, electric: our people, not a rotating cast of subs you've never met." },
   { title: "Built to last", copy: "We fix what's behind the wall before we close it up. The work holds because the bones do." },
   { title: "Straight, written pricing", copy: "A real number on paper before we start. No surprise line items halfway through the job." },
   { title: "Local & responsive", copy: "We're on the North Shore and we answer our phone. You deal with the people doing the work." },
@@ -75,12 +75,12 @@ const PROPS = [
 ];
 
 const FAQ = [
-  { q: "What areas do you serve?", a: "The North Shore of Long Island — Huntington, Northport, Cold Spring Harbor, Port Washington, and the surrounding towns. If you're nearby, just ask." },
-  { q: "Do you handle small remodels and whole-home?", a: "Both. A single bathroom or a full gut down to the studs — same crew, same standard. Tell us the scope and we'll tell you straight." },
+  { q: "What areas do you serve?", a: "The North Shore of Long Island: Huntington, Northport, Cold Spring Harbor, Port Washington, and the surrounding towns. If you're nearby, just ask." },
+  { q: "Do you handle small remodels and whole-home?", a: "Both. A single bathroom or a full gut down to the studs, same crew, same standard. Tell us the scope and we'll tell you straight." },
   { q: "Are you licensed and insured?", a: "Yes. Fully licensed and insured, and happy to send proof before any work starts." },
   { q: "Do you give free estimates?", a: "Always. We walk the house, talk through what you want, and put a real written number in front of you. No pressure." },
   { q: "How long does a renovation take?", a: "A bathroom is usually a few weeks; a whole-home runs a few months. We give you a real schedule up front and keep you posted as we go." },
-  { q: "Do you use your own crew?", a: "Yes — no subs. The people who quote the job are the people doing it. That's how the quality stays consistent." },
+  { q: "Do you use your own crew?", a: "Yes, no subs. The people who quote the job are the people doing it. That's how the quality stays consistent." },
 ];
 
 // ── Services — room before/after sliders carry the visual weight, with the
@@ -101,24 +101,24 @@ function RoomTransforms() {
       <div className="mt-12 grid gap-10 lg:grid-cols-2">
         <Rise>
           <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
-            Kitchen — full gut
+            Kitchen: full gut
           </p>
           <BeforeAfterSlider
             beforeImg="/previews/renovation1.before.webp"
             afterImg="/previews/renovation1.after.webp"
-            beforeLabel="BEFORE — kitchen (16:9)"
-            afterLabel="AFTER — kitchen (16:9)"
+            beforeLabel="BEFORE: kitchen (16:9)"
+            afterLabel="AFTER: kitchen (16:9)"
           />
         </Rise>
         <Rise delay={0.1}>
           <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
-            Bath — walk-in tile shower
+            Bath: walk-in tile shower
           </p>
           <BeforeAfterSlider
             beforeImg="/previews/renovation2.before.webp"
             afterImg="/previews/renovation2.after.webp"
-            beforeLabel="BEFORE — bath (16:9)"
-            afterLabel="AFTER — bath (16:9)"
+            beforeLabel="BEFORE: bath (16:9)"
+            afterLabel="AFTER: bath (16:9)"
           />
         </Rise>
       </div>
@@ -156,7 +156,7 @@ export function RenovationDemo() {
         sub="Kitchens, baths, additions, and whole-home renovations across the North Shore. One crew, start to finish."
         primaryCta="Get a free estimate"
         phone={PHONE}
-        mediaLabel="HERO VIDEO — renovation b-roll (16:9)"
+        mediaLabel="HERO VIDEO: renovation b-roll (16:9)"
       />
       <DemoMarquee terms={["Kitchens", "Bathrooms", "Additions", "Basements", "Whole-Home", "Trim & Carpentry"]} />
       <Intro
@@ -165,7 +165,7 @@ export function RenovationDemo() {
         line2="One crew."
         paragraphs={[
           "Most renovation headaches come from juggling five contractors who each blame the other four. We don't work that way.",
-          "Maple & Main runs the whole job with our own crew — framing through finish carpentry — so there's one number, one schedule, and one person to call.",
+          "Maple & Main runs the whole job with our own crew, framing through finish carpentry, so there's one number, one schedule, and one person to call.",
         ]}
         badges={[
           ["Small remodels to whole-home", "Full scope"],
@@ -194,7 +194,7 @@ export function RenovationDemo() {
           "Licensed & insured",
         ]}
         cta="Meet the crew"
-        mediaLabel="TRANSFORMATION — before/after (16:9)"
+        mediaLabel="TRANSFORMATION: before/after (16:9)"
       />
       <FilterableWorkGrid
         eyebrow="Recent work"

@@ -568,7 +568,7 @@ export function ServiceCards({
                 borderRadius: "var(--d-radius)",
               }}
             >
-              <Media label={`${thumbPrefix} — ${s.title} (4:3)`} className="mb-6" />
+              <Media label={`${thumbPrefix}: ${s.title} (4:3)`} className="mb-6" />
               <span
                 className="text-[13px] font-semibold tracking-[0.1em]"
                 style={{ color: "var(--d-muted)" }}
@@ -896,7 +896,7 @@ export function WorkGrid({
             <figure className="group">
               <div className="overflow-hidden rounded-[var(--d-radius)]">
                 <div className="transition-transform duration-500 group-hover:scale-[1.03]">
-                  <Media label={`WORK — ${w.caption} (4:3)`} img={w.img} rounded={false} />
+                  <Media label={`WORK: ${w.caption} (4:3)`} img={w.img} rounded={false} />
                 </div>
               </div>
               <figcaption className="mt-3">
@@ -977,7 +977,7 @@ export function FilterableWorkGrid({
             <figure className="group">
               <div className="overflow-hidden rounded-[var(--d-radius)]">
                 <div className="transition-transform duration-500 group-hover:scale-[1.03]">
-                  <Media label={`WORK — ${w.caption} (4:3)`} img={w.img} rounded={false} />
+                  <Media label={`WORK: ${w.caption} (4:3)`} img={w.img} rounded={false} />
                 </div>
               </div>
               <figcaption className="mt-3">
@@ -1367,7 +1367,7 @@ export function Contact({
                 className="text-[15px]"
                 style={{ color: "var(--d-accent)" }}
               >
-                Got it — we&apos;ll get back to you the same day.
+                Got it. We&apos;ll get back to you the same day.
               </motion.p>
             )}
             {state === "err" && (

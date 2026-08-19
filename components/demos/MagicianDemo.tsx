@@ -52,7 +52,7 @@ const SANS = "var(--font-tight)"; // clean quiet body sans
 const NAME = "Elias Vane";
 const PHONE = "(516) 555-0199";
 const EMAIL = "hello@eliasvane.demo";
-const AREA = "Based on Long Island, NY — available across the tri-state area";
+const AREA = "Based on Long Island, NY, available across the tri-state area";
 
 const wrap = "mx-auto w-full max-w-[1160px] px-6 md:px-16";
 
@@ -458,7 +458,7 @@ function Hero() {
             className="mb-8 inline-block rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]"
             style={{ color: MUTED, border: `1px solid ${LINE}` }}
           >
-            Demo build — sample act
+            Demo build: sample act
           </span>
           <h1
             className="text-[15vw] uppercase leading-[0.92] tracking-[0.02em] sm:text-[9vw] md:text-[6.5rem]"
@@ -501,7 +501,7 @@ function Hero() {
 // five already revealed, statically, in a plain readable row. ───────────────
 const SHOWS = [
   { label: "Close-up & strolling", desc: "Cards and coins, inches from your eyes, table to table." },
-  { label: "Stage illusions", desc: "Built for a room, not a table — the big-stage set." },
+  { label: "Stage illusions", desc: "Built for a room, not a table: the big-stage set." },
   { label: "Mentalism", desc: "Predictions and mind-reading that shouldn't be possible." },
   { label: "Corporate & galas", desc: "A room full of strangers, talking about one thing after." },
   { label: "Private & weddings", desc: "The moment everyone still brings up months later." },
@@ -596,7 +596,7 @@ function TheExperience() {
       <Embers density={16} />
       <RiseFromDark className="relative">
         <span className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: GOLD }}>
-          — The Experience —
+          ◆ The Experience ◆
         </span>
         <h2
           className="mt-4 text-[38px] uppercase leading-[1.02] tracking-[0.01em] md:text-[56px]"
@@ -639,14 +639,14 @@ function Reel() {
       <div className={`${wrap} relative py-[96px] text-center md:py-[150px]`}>
         <RiseFromDark>
           <span className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: GOLD }}>
-            — The Reel —
+            ◆ The Reel ◆
           </span>
           <h2 className="mx-auto mt-4 max-w-2xl text-[34px] uppercase leading-[1.05] md:text-[50px]" style={{ color: FG, fontFamily: DISPLAY }}>
             Watch it happen.
           </h2>
         </RiseFromDark>
         <RiseFromDark delay={0.12} className="relative mx-auto mt-12 max-w-3xl">
-          <Placeholder label="REEL — live performance (16:9)" glow />
+          <Placeholder label="REEL: live performance (16:9)" glow />
           <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -692,13 +692,13 @@ function Witnessed() {
       />
       <RiseFromDark>
         <span className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: GOLD }}>
-          — Witnessed —
+          ◆ Witnessed ◆
         </span>
         <h2 className="mt-4 text-[34px] uppercase leading-[1.05] md:text-[50px]" style={{ color: FG, fontFamily: DISPLAY }}>
           What the room says after.
         </h2>
         <p className="mt-3 text-[13px]" style={{ color: MUTED }}>
-          Illustrative reactions for this demo — not real client quotes.
+          Illustrative reactions for this demo, not real client quotes.
         </p>
       </RiseFromDark>
       <div className="mt-14 grid gap-8 md:grid-cols-3">
@@ -710,7 +710,7 @@ function Witnessed() {
                 {r.line}
               </p>
               <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.12em]" style={{ color: MUTED }}>
-                — {r.who}
+                {r.who}
               </p>
             </div>
           </RiseFromDark>
@@ -726,11 +726,11 @@ function About() {
     <Section className="" id="magician-about">
       <div className="grid items-center gap-12 md:grid-cols-[0.85fr_1fr] md:gap-16">
         <RiseFromDark>
-          <Placeholder label="PORTRAIT — the magician, low key (4:5)" ratio="4/5" glow />
+          <Placeholder label="PORTRAIT: the magician, low key (4:5)" ratio="4/5" glow />
         </RiseFromDark>
         <RiseFromDark delay={0.1}>
           <span className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: GOLD }}>
-            — About —
+            ◆ About ◆
           </span>
           <h2 className="mt-4 text-[32px] uppercase leading-[1.08] md:text-[44px]" style={{ color: FG, fontFamily: DISPLAY }}>
             Not a trick.
@@ -738,7 +738,7 @@ function About() {
             <span style={{ color: BODY }}>A decision, made in front of you.</span>
           </h2>
           <p className="mt-6 max-w-md text-[16px] leading-[1.7]" style={{ color: BODY }}>
-            Elias started with a deck of cards and an audience of one — himself,
+            Elias started with a deck of cards and an audience of one: himself,
             in a mirror, for longer than he&apos;d like to admit. These days it&apos;s
             close-up rooms, full stages, and the occasional wedding, but the
             method never changes: get close enough that the audience stops
@@ -761,7 +761,7 @@ function WhereItWorks() {
     <Section className="text-center">
       <RiseFromDark>
         <span className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: GOLD }}>
-          — Where It Works —
+          ◆ Where It Works ◆
         </span>
         <h2 className="mx-auto mt-4 max-w-2xl text-[32px] uppercase leading-[1.1] md:text-[46px]" style={{ color: FG, fontFamily: DISPLAY }}>
           Any room with people paying attention.
@@ -800,13 +800,13 @@ function Booking() {
       <div className="grid gap-12 md:grid-cols-2 md:gap-16">
         <RiseFromDark>
           <span className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: GOLD }}>
-            — Booking —
+            ◆ Booking ◆
           </span>
           <h2 className="mt-4 text-[34px] uppercase leading-[1.05] md:text-[50px]" style={{ color: FG, fontFamily: DISPLAY }}>
             Book the show.
           </h2>
           <p className="mt-6 max-w-md text-[16px] leading-[1.6]" style={{ color: BODY }}>
-            Tell me the date and the room. I&apos;ll tell you what fits — close-up
+            Tell me the date and the room. I&apos;ll tell you what fits: close-up
             for cocktail hour, a stage set for the main event, or both.
           </p>
           <div className="mt-8 space-y-3 text-[15px]">
@@ -855,7 +855,7 @@ function Booking() {
             </div>
             <div>
               <span className={label} style={{ color: MUTED }}>Anything else?</span>
-              <textarea rows={4} className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="Cocktail hour, sit-down dinner, stage available — whatever you've got." />
+              <textarea rows={4} className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="Cocktail hour, sit-down dinner, stage available, whatever you've got." />
             </div>
             <div className="flex flex-wrap items-center gap-4">
               <button
@@ -886,7 +886,7 @@ function Booking() {
                   className="text-[15px]"
                   style={{ color: GOLD }}
                 >
-                  Got it — I&apos;ll get back to you within a day.
+                  Got it. I&apos;ll get back to you within a day.
                 </motion.p>
               )}
               {state === "err" && (
@@ -928,7 +928,7 @@ function MagicianFooter() {
           <span style={{ color: MUTED }}>Instagram</span>
         </div>
         <p className="mt-8 text-[12px]" style={{ color: MUTED }}>
-          © 2026 {NAME} — demo build / sample site, not a real performer.
+          © 2026 {NAME}: demo build / sample site, not a real performer.
         </p>
       </div>
     </footer>

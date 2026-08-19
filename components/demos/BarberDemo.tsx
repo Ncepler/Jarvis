@@ -57,7 +57,7 @@ const BOARD = [
   { name: "Skin Fade", price: "$40", note: "Clean taper to the skin, blended by hand." },
   { name: "Beard & Line-up", price: "$20", note: "Trimmed, shaped, lined up sharp." },
   { name: "Hot-towel Shave", price: "$45", note: "Straight razor, hot towel, the full ritual." },
-  { name: "The Works", price: "$70", note: "Cut, shave, and towel — the whole chair." },
+  { name: "The Works", price: "$70", note: "Cut, shave, and towel: the whole chair." },
   { name: "Kids (12 & under)", price: "$25", note: "Quick and easy, first cuts welcome." },
 ];
 
@@ -71,10 +71,10 @@ const WORK = [
 ];
 
 const FAQ = [
-  { q: "Do I need an appointment?", a: "No — walk-ins are always welcome. But booking online takes under a minute and skips the wait." },
+  { q: "Do I need an appointment?", a: "No, walk-ins are always welcome. But booking online takes under a minute and skips the wait." },
   { q: "What are your hours?", a: "Tue–Sat, 9am to 7pm. If the pole out front is spinning, we're open and cutting." },
-  { q: "Do you cut kids' hair?", a: "We do — kids 12 and under are $25, and we keep it quick and easy for the first-timers." },
-  { q: "How much is a cut?", a: "Haircut $35, skin fade $40, beard line-up $20, hot-towel shave $45. The works — cut, shave, towel — is $70." },
+  { q: "Do you cut kids' hair?", a: "We do. Kids 12 and under are $25, and we keep it quick and easy for the first-timers." },
+  { q: "How much is a cut?", a: "Haircut $35, skin fade $40, beard line-up $20, hot-towel shave $45. The works (cut, shave, towel) is $70." },
   { q: "Cash or card?", a: "Either. And if you rebook on the way out, your next chair's already on the calendar." },
 ];
 
@@ -144,14 +144,14 @@ function TheChair() {
     <Section dark>
       <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
         <Rise>
-          <Media label="THE CHAIR — where you sit (4:5)" ratio="4/5" />
+          <Media label="THE CHAIR: where you sit (4:5)" ratio="4/5" />
         </Rise>
         <Rise delay={0.1}>
           <Eyebrow>Why this chair</Eyebrow>
           <div className="mt-6 space-y-6">
             {[
               "No rush. We take the time the cut needs and you leave looking like you, sharper.",
-              "No upsell. You asked for a haircut, you get a haircut — not a shelf of product.",
+              "No upsell. You asked for a haircut, you get a haircut, not a shelf of product.",
               "Same barbers, every visit. The same hands, so your cut comes out the same every time.",
             ].map((line) => (
               <p
@@ -191,7 +191,7 @@ export function BarberDemo() {
         sub="Four chairs, no rush, no upsell. Book online or walk in; either way you leave sharp."
         primaryCta="Book a chair"
         phone={PHONE}
-        mediaLabel="HERO VIDEO — the shop floor (16:9)"
+        mediaLabel="HERO VIDEO: the shop floor (16:9)"
       />
       <DemoMarquee terms={["Cuts", "Fades", "Beards", "Shaves", "Kids"]} />
       <Intro
@@ -200,7 +200,7 @@ export function BarberDemo() {
         line2="No nonsense."
         paragraphs={[
           "No app trying to upsell you pomade, no rotating stranger who's never seen your hairline. Just a good cut from the same barbers.",
-          "Standard runs four chairs in Patchogue. Book online in a minute or walk in — if the pole's spinning, we're cutting.",
+          "Standard runs four chairs in Patchogue. Book online in a minute or walk in. If the pole's spinning, we're cutting.",
         ]}
         badges={[
           ["Cuts to shaves", "Full menu"],
@@ -214,7 +214,7 @@ export function BarberDemo() {
         eyebrow="The shop"
         line1="Leather, brass,"
         line2="and warm light."
-        paragraph="Standard is built to feel like a room you'd actually sit in — worn leather, a little brass, lamplight, and no one rushing you toward the door."
+        paragraph="Standard is built to feel like a room you'd actually sit in: worn leather, a little brass, lamplight, and no one rushing you toward the door."
         checklist={[
           "Walk-ins always welcome",
           "Book online in under a minute",
@@ -222,7 +222,7 @@ export function BarberDemo() {
           "Cash or card",
         ]}
         cta="Book a chair"
-        mediaLabel="THE SHOP — chairs, brass, lamplight (16:9)"
+        mediaLabel="THE SHOP: chairs, brass, lamplight (16:9)"
       />
       <WorkGrid
         eyebrow="Recent work"
@@ -256,7 +256,7 @@ export function BarberDemo() {
       />
       <DemoFooter
         name={NAME}
-        descriptor="A four-chair barbershop — cuts, fades, beards, and hot-towel shaves."
+        descriptor="A four-chair barbershop: cuts, fades, beards, and hot-towel shaves."
         area="311 Main St, Patchogue, Long Island"
         services={["Haircut", "Skin fade", "Beard & line-up", "Hot-towel shave"]}
         phone={PHONE}

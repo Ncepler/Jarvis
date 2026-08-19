@@ -115,7 +115,7 @@ function HeroCarReveal() {
               className="text-[11px] font-semibold uppercase tracking-[0.18em]"
               style={{ color: "var(--d-muted)" }}
             >
-              HERO — car reveal sequence (16:9)
+              HERO: car reveal sequence (16:9)
             </span>
           </div>
         )}
@@ -149,7 +149,7 @@ function HeroCarReveal() {
             Like it never happened.
           </h1>
           <p className="mt-6 max-w-xl text-[17px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-            Collision repair, refinishing, and glass — done to factory spec. We
+            Collision repair, refinishing, and glass: done to factory spec. We
             handle the insurance claim, you get your car back right.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-3">
@@ -201,7 +201,7 @@ const HOTSPOTS: Hotspot[] = [
     key: "fender",
     panel: "Fender",
     service: "Dent removal (PDR)",
-    desc: "Dings and creases massaged out paintless — no filler, no respray when the paint's intact.",
+    desc: "Dings and creases massaged out paintless: no filler, no respray when the paint's intact.",
     x: 26,
     y: 60,
   },
@@ -233,7 +233,7 @@ const HOTSPOTS: Hotspot[] = [
     key: "rocker",
     panel: "Body & finish",
     service: "Detailing & paint correction",
-    desc: "Wash, clay, machine polish — the car leaves looking better than it came in.",
+    desc: "Wash, clay, machine polish: the car leaves looking better than it came in.",
     x: 55,
     y: 82,
   },
@@ -265,7 +265,7 @@ function DamageMap() {
                   onMouseEnter={() => setActive(i)}
                   onFocus={() => setActive(i)}
                   onClick={() => setActive(i)}
-                  aria-label={`${h.panel} — ${h.service}`}
+                  aria-label={`${h.panel}: ${h.service}`}
                   aria-pressed={on}
                   className="absolute -translate-x-1/2 -translate-y-1/2"
                   style={{ left: `${h.x}%`, top: `${h.y}%` }}
@@ -371,8 +371,8 @@ function BeforeAfter() {
             <TwoLine a="Same car." b="You'd never know." />
           </div>
           <p className="mt-6 max-w-xl text-[17px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-            Drag the handle. Wrecked on one side, back to factory on the other —
-            that gap is the whole job.
+            Drag the handle. Wrecked on one side, back to factory on the other.
+            That gap is the whole job.
           </p>
         </Rise>
         <Rise delay={0.1}>
@@ -380,8 +380,8 @@ function BeforeAfter() {
             <BeforeAfterSlider
               beforeImg="/previews/carBefore.webp"
               afterImg="/previews/carAfter.webp"
-              beforeLabel="BEFORE — collision (16:9)"
-              afterLabel="AFTER — restored (16:9)"
+              beforeLabel="BEFORE: collision (16:9)"
+              afterLabel="AFTER: restored (16:9)"
             />
           </div>
         </Rise>
@@ -610,7 +610,7 @@ function SpecStrip() {
       {/* honest cert placeholder — never a faked credential (§12) */}
       <Rise delay={0.1}>
         <div className="mt-6 flex flex-wrap gap-3">
-          {["CERT — I-CAR (placeholder)", "CERT — manufacturer (placeholder)"].map((c) => (
+          {["CERT: I-CAR (placeholder)", "CERT: manufacturer (placeholder)"].map((c) => (
             <span
               key={c}
               className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em]"
@@ -629,7 +629,7 @@ function SpecStrip() {
 // Noah's 6 booth photos — reading order, top row then bottom (car1.1 → car1.6:
 // into the booth on the left, back out on the right).
 const WORK = [
-  { tag: "Collision", caption: "Front-end collision — bumper & hood rebuilt", img: "/previews/car1.1.webp" },
+  { tag: "Collision", caption: "Front-end collision: bumper & hood rebuilt", img: "/previews/car1.1.webp" },
   { tag: "Paint", caption: "Full panel respray, color-matched", img: "/previews/car1.2.webp" },
   { tag: "Dent", caption: "Door crease pulled paintless (PDR)", img: "/previews/car1.3.webp" },
   { tag: "Frame", caption: "Unibody pulled back to spec", img: "/previews/car1.4.webp" },
@@ -638,12 +638,12 @@ const WORK = [
 ];
 
 const FAQ = [
-  { q: "What areas do you serve?", a: "All of Nassau County — Hicksville, Levittown, Bethpage, Plainview, Westbury, Syosset, and nearby towns." },
+  { q: "What areas do you serve?", a: "All of Nassau County: Hicksville, Levittown, Bethpage, Plainview, Westbury, Syosset, and nearby towns." },
   { q: "Do you work with my insurance?", a: "Yes. We work with every major carrier, handle the claim directly with your adjuster, and keep you out of the back-and-forth." },
   { q: "Do you offer loaner cars?", a: "We keep a few loaners on hand and can help set up a rental through your claim. Ask when you drop the car off." },
   { q: "How long will my repair take?", a: "A bumper or small panel is usually a few days; heavier collision and frame work runs one to two weeks. You get a real timeline at drop-off." },
   { q: "Is your work guaranteed?", a: "Our paint and refinishing carry a lifetime warranty for as long as you own the vehicle, and body and structural repairs are guaranteed too." },
-  { q: "Do you give free estimates?", a: "Always. Bring the car by or send photos and we'll write up a free estimate — no obligation." },
+  { q: "Do you give free estimates?", a: "Always. Bring the car by or send photos and we'll write up a free estimate, no obligation." },
 ];
 
 export function AutoBodyDemo() {
@@ -658,7 +658,7 @@ export function AutoBodyDemo() {
         line2="Claim and all."
         paragraphs={[
           "A collision shop is mostly about two things: getting the car right, and not making the claim your problem. We do both.",
-          "Apex repairs, refinishes, and reglasses every make in Hicksville — laser-measured frames, booth-baked paint, and an estimate you can read.",
+          "Apex repairs, refinishes, and reglasses every make in Hicksville: laser-measured frames, booth-baked paint, and an estimate you can read.",
         ]}
         badges={[
           ["Collision to refinishing", "Full service"],
@@ -700,7 +700,7 @@ export function AutoBodyDemo() {
       <CtaBand line1="Wrecked?" line2="Let's make it disappear." cta="Get a free estimate" phone={PHONE} />
       <DemoFooter
         name={NAME}
-        descriptor="Collision repair, refinishing, and glass — insurance claims handled."
+        descriptor="Collision repair, refinishing, and glass: insurance claims handled."
         area="Serving Nassau County, Long Island"
         services={["Collision repair", "Auto painting & refinishing", "Dent removal (PDR)", "Frame & glass"]}
         phone={PHONE}
