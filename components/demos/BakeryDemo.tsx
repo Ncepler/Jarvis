@@ -117,7 +117,7 @@ function BakeryMenu() {
         {/* the case */}
         <Rise delay={0.1}>
           <div className="md:sticky md:top-10">
-            <Media label="THE CASE: morning bake (3:2)" ratio="3/2" />
+            <Media label="THE CASE: morning bake (3:2)" file="the-case.jpg" ratio="3/2" />
             <p className="mt-3 text-[13px]" style={{ color: "var(--d-muted)" }}>
               The case at 7am. When it&apos;s empty, that&apos;s the day.
             </p>
@@ -156,7 +156,7 @@ function WarmNarrative() {
           </div>
         </Rise>
         <Rise delay={0.1}>
-          <Media label="THE BAKEHOUSE: morning light (4:5)" ratio="4/5" />
+          <Media label="THE BAKEHOUSE: morning light (4:5)" file="bakehouse.jpg" ratio="4/5" />
         </Rise>
       </div>
     </Section>

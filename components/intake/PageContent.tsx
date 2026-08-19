@@ -1,6 +1,16 @@
-import { styleDemos } from "@/lib/projects";
-import type { DayHours, IntakeDraft } from "@/lib/intake";
-import { TextAreaField, TextField, fieldClass } from "./fields";
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  MAX_VIDEO_BYTES,
+  VIDEO_TYPES,
+  type DayHours,
+  type Errors,
+  type IntakeDraft,
+  type IntakeFiles,
+} from "@/lib/intake";
+import { templateByKey } from "@/lib/templates";
+import { FieldError, TextAreaField, TextField, fieldClass, fileInputClass } from "./fields";
 
 function HoursTable({
   hours,
@@ -9,9 +19,9 @@ function HoursTable({
   hours: DayHours[];
   onChange: (hours: DayHours[]) => void;
 }) {
-  const update = (i: number, patch: Partial<DayHours>) => {
+  const update = (i: number, patch: Partial<DayHours>) =>
     onChange(hours.map((h, idx) => (idx === i ? { ...h, ...patch } : h)));
-  };
+
   return (
     <div className="grid gap-3">
       <span className="text-sm text-muted">Hours</span>
@@ -38,6 +48,7 @@ function HoursTable({
                   value={h.open}
                   onChange={(e) => update(i, { open: e.target.value })}
                   className={`${fieldClass} text-sm`}
+                  aria-label={`${h.day} opens`}
                 />
                 <span className="text-xs text-muted">to</span>
                 <input
@@ -45,6 +56,7 @@ function HoursTable({
                   value={h.close}
                   onChange={(e) => update(i, { close: e.target.value })}
                   className={`${fieldClass} text-sm`}
+                  aria-label={`${h.day} closes`}
                 />
               </div>
             )}
@@ -55,97 +67,152 @@ function HoursTable({
   );
 }
 
+const mb = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)}MB`;
+
+function VideoField({
+  file,
+  error,
+  onFile,
+}: {
+  file: File | null;
+  error?: string;
+  onFile: (f: File | null) => void;
+}) {
+  const [url, setUrl] = useState("");
+  const [tooBig, setTooBig] = useState("");
+
+  useEffect(() => {
+    if (!file) return setUrl("");
+    const u = URL.createObjectURL(file);
+    setUrl(u);
+    return () => URL.revokeObjectURL(u);
+  }, [file]);
+
+  return (
+    <label data-field="heroVideo" className="grid gap-2 text-sm text-muted">
+      <span>Hero background video (optional)</span>
+      <p className="text-xs text-muted/80">
+        Some businesses upload a short video of themselves working, under 30
+        seconds. A few quick clips edited together, or one continuous shot. It
+        plays behind your hero section on desktop, muted, on loop. Skip it if
+        you&rsquo;d rather stick with a still image.
+      </p>
+      <input
+        type="file"
+        accept={VIDEO_TYPES}
+        onChange={(e) => {
+          const f = e.target.files?.[0] ?? null;
+          if (f && f.size > MAX_VIDEO_BYTES) {
+            setTooBig(`That file is ${mb(f.size)}. The limit is 25MB, so trim it or export it smaller.`);
+            onFile(null);
+            e.target.value = "";
+            return;
+          }
+          setTooBig("");
+          onFile(f);
+        }}
+        className={fileInputClass}
+      />
+      <span className="text-xs text-muted/80">MP4, MOV, or WebM. 25MB max.</span>
+      {url && (
+        <video src={url} controls muted playsInline className="mt-1 w-full max-w-sm border border-line" />
+      )}
+      <FieldError error={tooBig || error} />
+    </label>
+  );
+}
+
 export function PageContent({
   draft,
+  files,
+  errors,
   onChange,
-  photoFileNames,
-  onPhotos,
+  onFiles,
+  onBlur,
 }: {
   draft: IntakeDraft;
+  files: IntakeFiles;
+  errors: Errors;
   onChange: (patch: Partial<IntakeDraft>) => void;
-  photoFileNames: string[];
-  onPhotos: (files: File[]) => void;
+  onFiles: (patch: Partial<IntakeFiles>) => void;
+  onBlur: (name: string) => void;
 }) {
+  const tpl = templateByKey(draft.templateChoice);
+
   return (
     <div className="grid gap-10">
-      <label className="grid gap-2 text-sm text-muted">
-        <span>
-          Which template did you pick?<span className="text-accent"> *</span>
-        </span>
-        <select
-          required
-          value={draft.template}
-          onChange={(e) => onChange({ template: e.target.value })}
-          className={`${fieldClass} cursor-pointer`}
-        >
-          <option value="" className="bg-bg" disabled>
-            Choose one
-          </option>
-          {styleDemos.map((p) => (
-            <option key={p.slug} value={p.slug} className="bg-bg">
-              {p.name}
-            </option>
-          ))}
-          <option value="custom" className="bg-bg">
-            Custom build
-          </option>
-        </select>
-      </label>
-
       <TextAreaField
+        name="services"
         label="Services or products you offer"
         required
         rows={4}
+        error={errors.services}
         value={draft.services}
         onChange={(e) => onChange({ services: e.target.value })}
+        onBlur={() => onBlur("services")}
       />
 
       <HoursTable hours={draft.hours} onChange={(hours) => onChange({ hours })} />
 
       <div className="grid gap-6 md:grid-cols-3">
         <TextField
+          name="instagram"
           label="Instagram"
+          hint="Optional."
           value={draft.instagram}
           onChange={(e) => onChange({ instagram: e.target.value })}
-          hint="Optional."
         />
         <TextField
+          name="facebook"
           label="Facebook"
+          hint="Optional."
           value={draft.facebook}
           onChange={(e) => onChange({ facebook: e.target.value })}
-          hint="Optional."
         />
         <TextField
+          name="googleBusiness"
           label="Google Business"
+          hint="Optional."
           value={draft.googleBusiness}
           onChange={(e) => onChange({ googleBusiness: e.target.value })}
-          hint="Optional."
         />
       </div>
 
-      <div className="grid gap-2">
-        <p className="text-sm text-muted">
-          Upload your own photos. Name each file to match the section it
-          should appear in — for example: hero.jpg, service-1.jpg,
-          service-2.jpg. If you&rsquo;re not sure which name matches which
-          spot, we&rsquo;ll figure it out on our end.
+      <div className="grid gap-3">
+        <span className="text-sm text-muted">Photos</span>
+        <p className="text-xs leading-relaxed text-muted/80">
+          Upload your business&rsquo;s photos here. To make sure each photo ends
+          up in the right spot on your site, name each file to match its
+          placement.{" "}
+          {tpl
+            ? `On the ${tpl.name} template you chose, hover over any image in the demo to see its name. Use those exact filenames.`
+            : "On the template you chose, hover over any image in the demo to see its name. Use those exact filenames."}{" "}
+          For example, if the template&rsquo;s hero image is called{" "}
+          <code className="font-mono text-ink">hero.jpg</code>, name your version{" "}
+          <code className="font-mono text-ink">hero.jpg</code> too. Don&rsquo;t
+          worry about matching perfectly. We&rsquo;ll adjust anything that&rsquo;s
+          unclear on our end.
         </p>
-        <label className="grid gap-2 text-sm text-muted">
-          <span>Photos</span>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => onPhotos(Array.from(e.target.files ?? []))}
-            className="text-sm text-muted file:mr-4 file:cursor-pointer file:border file:border-line file:bg-transparent file:px-4 file:py-2 file:text-sm file:text-ink hover:file:border-ink"
-          />
-          {photoFileNames.length > 0 && (
-            <span className="text-xs text-muted/80">
-              Selected: {photoFileNames.join(", ")}
-            </span>
-          )}
-        </label>
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => onFiles({ photos: Array.from(e.target.files ?? []) })}
+          className={fileInputClass}
+          aria-label="Photos"
+        />
+        {files.photos.length > 0 && (
+          <span className="text-xs text-muted/80">
+            {files.photos.length} selected: {files.photos.map((f) => f.name).join(", ")}
+          </span>
+        )}
       </div>
+
+      <VideoField
+        file={files.heroVideo}
+        error={errors.heroVideo}
+        onFile={(f) => onFiles({ heroVideo: f })}
+      />
     </div>
   );
 }

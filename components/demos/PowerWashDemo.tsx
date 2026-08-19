@@ -118,7 +118,7 @@ function WashProofRows() {
               <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
                 {/* one representative shot */}
                 <div className={flip ? "md:order-2" : ""}>
-                  <Media label={`RESULT: ${s.title} (4:3)`} ratio="4/3" />
+                  <Media label={`RESULT: ${s.title} (4:3)`} file={`result-${i + 1}.jpg`} ratio="4/3" />
                 </div>
                 {/* text */}
                 <div className={flip ? "md:order-1" : ""}>
@@ -161,7 +161,7 @@ function WashTransformation() {
         </Rise>
         <Rise delay={0.1}>
           <div className="mt-10">
-            <BeforeAfterSlider beforeLabel="BEFORE: driveway (16:9)" afterLabel="AFTER: driveway (16:9)" />
+            <BeforeAfterSlider beforeLabel="BEFORE: driveway (16:9)" afterLabel="AFTER: driveway (16:9)" beforeFile="before-1.jpg" afterFile="after-1.jpg" />
           </div>
         </Rise>
         <Rise delay={0.15}>

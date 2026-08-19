@@ -101,20 +101,31 @@ function RiseFromDark({
 // ── Labeled placeholder — no real footage/photos exist yet (§10/§16f). ───────
 function Placeholder({
   label,
+  file,
   ratio = "16/9",
   className = "",
   glow = false,
 }: {
   label: string;
+  file?: string; // filename a client should give their own media
   ratio?: string;
   className?: string;
   glow?: boolean;
 }) {
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-[6px] ${className}`}
+      className={`group/media relative w-full overflow-hidden rounded-[6px] ${className}`}
       style={{ aspectRatio: ratio, background: SURFACE, border: `1px solid ${LINE}` }}
     >
+      {file && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-2 top-2 z-10 hidden rounded-[3px] px-1.5 py-0.5 font-mono text-[10px] leading-tight opacity-0 transition-opacity duration-200 group-hover/media:opacity-100 md:inline-block"
+          style={{ background: BG, color: MUTED, border: `1px solid ${LINE}` }}
+        >
+          {file}
+        </span>
+      )}
       {glow && (
         <div
           aria-hidden
@@ -646,7 +657,7 @@ function Reel() {
           </h2>
         </RiseFromDark>
         <RiseFromDark delay={0.12} className="relative mx-auto mt-12 max-w-3xl">
-          <Placeholder label="REEL: live performance (16:9)" glow />
+          <Placeholder label="REEL: live performance (16:9)" file="reel.mp4" glow />
           <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -726,7 +737,7 @@ function About() {
     <Section className="" id="magician-about">
       <div className="grid items-center gap-12 md:grid-cols-[0.85fr_1fr] md:gap-16">
         <RiseFromDark>
-          <Placeholder label="PORTRAIT: the magician, low key (4:5)" ratio="4/5" glow />
+          <Placeholder label="PORTRAIT: the magician, low key (4:5)" file="portrait.jpg" ratio="4/5" glow />
         </RiseFromDark>
         <RiseFromDark delay={0.1}>
           <span className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: GOLD }}>

@@ -108,6 +108,8 @@ function RoomTransforms() {
             afterImg="/previews/renovation1.after.webp"
             beforeLabel="BEFORE: kitchen (16:9)"
             afterLabel="AFTER: kitchen (16:9)"
+            beforeFile="before-1.jpg"
+            afterFile="after-1.jpg"
           />
         </Rise>
         <Rise delay={0.1}>
@@ -119,6 +121,8 @@ function RoomTransforms() {
             afterImg="/previews/renovation2.after.webp"
             beforeLabel="BEFORE: bath (16:9)"
             afterLabel="AFTER: bath (16:9)"
+            beforeFile="before-2.jpg"
+            afterFile="after-2.jpg"
           />
         </Rise>
       </div>

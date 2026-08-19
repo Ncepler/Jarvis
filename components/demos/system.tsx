@@ -172,22 +172,46 @@ export function TwoLine({
 // ── Labeled media placeholder (Noah drops real photos in later — §10). ───────
 // Solid surface fill, hairline border, centered label naming slot + ratio.
 // NO stock, NO AI imagery committed; just the correct aspect box.
+// ── Filename badge on every image slot. ─────────────────────────────────────
+// Clients naming their photo uploads need to know what each slot is called
+// (the /start form tells them to hover a demo image to find out). Subtle by
+// design: invisible until the pointer is over the slot, gone on touch.
+export function FileBadge({ file }: { file?: string }) {
+  if (!file) return null;
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute left-2 top-2 z-10 hidden px-1.5 py-0.5 font-mono text-[10px] leading-tight opacity-0 transition-opacity duration-200 group-hover/media:opacity-100 md:inline-block"
+      style={{
+        background: "var(--d-bg)",
+        color: "var(--d-muted)",
+        border: "1px solid var(--d-line)",
+        borderRadius: "3px",
+      }}
+    >
+      {file}
+    </span>
+  );
+}
+
 export function Media({
   label,
   img,
+  file,
   ratio = "4/3",
   className = "",
   rounded = true,
 }: {
   label: string;
   img?: string;
+  file?: string; // the filename a client should give their own photo
   ratio?: string;
   className?: string;
   rounded?: boolean;
 }) {
   return (
     <div
-      className={`relative w-full overflow-hidden ${rounded ? "rounded-[var(--d-radius)]" : ""} ${className}`}
+      className={`group/media relative w-full overflow-hidden ${rounded ? "rounded-[var(--d-radius)]" : ""} ${className}`}
       style={{
         aspectRatio: ratio,
         background: img
@@ -196,6 +220,7 @@ export function Media({
         border: "1px solid var(--d-line)",
       }}
     >
+      <FileBadge file={file} />
       {!img && (
         <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
           <span
@@ -301,7 +326,7 @@ export function DemoHero({
     <section className="relative w-full" style={{ minHeight: "640px" }}>
       {/* full-bleed background media slot — real image if given, else label */}
       <div
-        className="absolute inset-0"
+        className="group/media absolute inset-0"
         style={{
           backgroundColor: heroImage ? undefined : "var(--d-surface)",
           backgroundImage: heroImage ? `url("${heroImage}")` : undefined,
@@ -309,6 +334,7 @@ export function DemoHero({
           backgroundPosition: "center",
         }}
       >
+        <FileBadge file="hero.jpg" />
         {!heroImage && (
           <div className="flex h-full w-full items-center justify-center">
             <span
@@ -568,7 +594,7 @@ export function ServiceCards({
                 borderRadius: "var(--d-radius)",
               }}
             >
-              <Media label={`${thumbPrefix}: ${s.title} (4:3)`} className="mb-6" />
+              <Media label={`${thumbPrefix}: ${s.title} (4:3)`} file={`service-${i + 1}.jpg`} className="mb-6" />
               <span
                 className="text-[13px] font-semibold tracking-[0.1em]"
                 style={{ color: "var(--d-muted)" }}
@@ -676,12 +702,16 @@ export function BeforeAfterSlider({
   afterImg,
   beforeLabel,
   afterLabel,
+  beforeFile = "before.jpg",
+  afterFile = "after.jpg",
   ratio = "16/9",
 }: {
   beforeImg?: string;
   afterImg?: string;
   beforeLabel: string;
   afterLabel: string;
+  beforeFile?: string; // filename a client should use for their own photo
+  afterFile?: string;
   ratio?: string;
 }) {
   const reduced = useReducedMotion();
@@ -710,15 +740,16 @@ export function BeforeAfterSlider({
     dragging.current = false;
   };
 
-  const Slot = ({ img, label }: { img?: string; label: string }) => (
+  const Slot = ({ img, label, file }: { img?: string; label: string; file: string }) => (
     <div
-      className="flex h-full w-full items-center justify-center p-4 text-center"
+      className="group/media relative flex h-full w-full items-center justify-center p-4 text-center"
       style={{
         background: img
           ? `var(--d-surface) url("${img}") center/cover no-repeat`
           : "var(--d-surface)",
       }}
     >
+      <FileBadge file={file} />
       {!img && (
         <span
           className="text-[11px] font-semibold uppercase tracking-[0.18em]"
@@ -735,10 +766,10 @@ export function BeforeAfterSlider({
     return (
       <div className="grid gap-4 sm:grid-cols-2">
         <div style={{ aspectRatio: ratio, border: "1px solid var(--d-line)" }}>
-          <Slot img={beforeImg} label={beforeLabel} />
+          <Slot img={beforeImg} label={beforeLabel} file={beforeFile} />
         </div>
         <div style={{ aspectRatio: ratio, border: "1px solid var(--d-line)" }}>
-          <Slot img={afterImg} label={afterLabel} />
+          <Slot img={afterImg} label={afterLabel} file={afterFile} />
         </div>
       </div>
     );
@@ -761,11 +792,11 @@ export function BeforeAfterSlider({
     >
       {/* BEFORE (under) */}
       <div className="absolute inset-0">
-        <Slot img={beforeImg} label={beforeLabel} />
+        <Slot img={beforeImg} label={beforeLabel} file={beforeFile} />
       </div>
       {/* AFTER (over), clipped to the handle */}
       <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
-        <Slot img={afterImg} label={afterLabel} />
+        <Slot img={afterImg} label={afterLabel} file={afterFile} />
       </div>
       <span className="absolute bottom-3 left-3 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
         Before
@@ -896,7 +927,7 @@ export function WorkGrid({
             <figure className="group">
               <div className="overflow-hidden rounded-[var(--d-radius)]">
                 <div className="transition-transform duration-500 group-hover:scale-[1.03]">
-                  <Media label={`WORK: ${w.caption} (4:3)`} img={w.img} rounded={false} />
+                  <Media label={`WORK: ${w.caption} (4:3)`} img={w.img} file={`work-${i + 1}.jpg`} rounded={false} />
                 </div>
               </div>
               <figcaption className="mt-3">
@@ -972,12 +1003,12 @@ export function FilterableWorkGrid({
         ))}
       </div>
       <div className="mt-10 grid grid-cols-2 gap-5 lg:grid-cols-3">
-        {shown.map((w) => (
+        {shown.map((w, i) => (
           <Rise key={w.caption}>
             <figure className="group">
               <div className="overflow-hidden rounded-[var(--d-radius)]">
                 <div className="transition-transform duration-500 group-hover:scale-[1.03]">
-                  <Media label={`WORK: ${w.caption} (4:3)`} img={w.img} rounded={false} />
+                  <Media label={`WORK: ${w.caption} (4:3)`} img={w.img} file={`work-${i + 1}.jpg`} rounded={false} />
                 </div>
               </div>
               <figcaption className="mt-3">

@@ -46,10 +46,13 @@ function formatPhotos(photos: unknown) {
     .join("\n");
 }
 
-// A precise deep link to one row isn't reliably constructible from the URL
-// alone — this links to the project's table editor and the row id is in
-// the body text to search for. (Flagged as a guess in the build report.)
+// The /d48 dashboard is the real place to read a submission now, so the
+// email points there. Falls back to Supabase's table editor if the deploy
+// URL isn't in the environment.
 function dashboardLink() {
+  const host =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL ?? null;
+  if (host) return `https://${host}/d48`;
   if (!SUPABASE_URL) return null;
   const ref = new URL(SUPABASE_URL).hostname.split(".")[0];
   return `https://supabase.com/dashboard/project/${ref}/editor`;
@@ -97,15 +100,19 @@ export async function POST(req: Request) {
       line("Business", row.business_name),
       line("Your name", row.your_name),
       line("Business email", row.business_email),
+      line("Type of business", row.business_type),
       line("Phone", row.phone),
       line("Address", row.address),
+      line("Domain they want", row.desired_domain),
+      line("Build", row.is_custom_build ? "custom build" : row.template_choice),
       "",
       "— Brand —",
       line("Palette", row.palette_choice),
       line("Main color", row.main_color),
       line("Accent color", row.accent_color),
       line("Has logo", row.has_logo),
-      line("Logo", row.logo_url),
+      line("Main logo", row.main_logo_url ?? row.logo_url),
+      line("Profile logo (cropped)", row.profile_logo_url),
       "",
       "— Content —",
       line("Template", row.template),
@@ -117,13 +124,15 @@ export async function POST(req: Request) {
       formatPhotos(row.photo_urls)
         ? `Photos:\n${formatPhotos(row.photo_urls)}`
         : null,
+      line("Hero video", row.hero_video_url),
+      "",
+      "— Copy changes —",
+      row.copy_changes || "(none)",
       "",
       "— Anything else —",
       row.brain_dump || "(nothing)",
       "",
-      link
-        ? `Row (id ${id}) — open the table and search that id:\n${link}`
-        : `Row id: ${id}`,
+      link ? `Open it in the dashboard:\n${link}` : `Row id: ${id}`,
     ]
       .filter((l) => l !== null)
       .join("\n");

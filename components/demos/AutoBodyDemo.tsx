@@ -382,6 +382,8 @@ function BeforeAfter() {
               afterImg="/previews/carAfter.webp"
               beforeLabel="BEFORE: collision (16:9)"
               afterLabel="AFTER: restored (16:9)"
+              beforeFile="before-1.jpg"
+              afterFile="after-1.jpg"
             />
           </div>
         </Rise>

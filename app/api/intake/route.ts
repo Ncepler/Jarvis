@@ -1,206 +1,184 @@
 import { NextResponse } from "next/server";
+import {
+  MAX_VIDEO_BYTES,
+  isValidDomain,
+  isValidEmail,
+  scrubDomain,
+  HEX_RE,
+} from "@/lib/intake";
+import { templateByKey } from "@/lib/templates";
 
-// Talks to Supabase's REST + Storage APIs directly with fetch, same pattern
-// as /api/lead — no client lib, service role key never leaves the server
-// (CLAUDE.md §14). Handles both the DB write and the file uploads for the
-// /start intake form (lib/intake.ts defines the shared shape).
+// Talks to Supabase's REST + Storage APIs with plain fetch, same pattern as
+// /api/lead: no client lib, and the service role key never leaves the server
+// (CLAUDE.md §14). Handles the DB write and every upload for /start.
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-const isValidEmail = (v: string) => /^\S+@\S+\.\S+$/.test(v);
-const HEX_RE = /^#(?:[0-9a-f]{3}){1,2}$/i;
 
 const clip = (v: unknown, max: number) =>
   typeof v === "string" ? v.trim().slice(0, max) : "";
 
-function slugifyBusiness(name: string) {
-  const s = name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return s || "business";
-}
+const slugify = (name: string) =>
+  name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "business";
 
-function sanitizeFilename(name: string) {
-  return name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(0, 200) || "file";
-}
+const safeName = (name: string) =>
+  name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(0, 200) || "file";
 
-function rest(path: string, init: RequestInit & { prefer?: string }) {
-  return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    method: init.method,
-    body: init.body,
+const bad = (error: string, status = 400) => NextResponse.json({ error }, { status });
+
+async function uploadFile(bucket: string, path: string, file: File) {
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`, {
+    method: "POST",
     headers: {
       apikey: SERVICE_KEY as string,
       Authorization: `Bearer ${SERVICE_KEY}`,
-      "Content-Type": "application/json",
-      ...(init.prefer ? { Prefer: init.prefer } : {}),
+      "Content-Type": file.type || "application/octet-stream",
+      "x-upsert": "true",
     },
-    cache: "no-store",
+    body: await file.arrayBuffer(),
   });
-}
-
-// Uploads to Supabase Storage's raw REST endpoint (POST .../storage/v1/object/<bucket>/<path>)
-// and returns the public URL. Both buckets need `public: true` set in
-// Supabase (see the build report) so that URL resolves without a signed token.
-async function uploadFile(bucket: string, path: string, file: File) {
-  const buf = await file.arrayBuffer();
-  const res = await fetch(
-    `${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`,
-    {
-      method: "POST",
-      headers: {
-        apikey: SERVICE_KEY as string,
-        Authorization: `Bearer ${SERVICE_KEY}`,
-        "Content-Type": file.type || "application/octet-stream",
-        "x-upsert": "true",
-      },
-      body: buf,
-    },
-  );
-  if (!res.ok) {
-    throw new Error(`upload failed: ${bucket}/${path} (${res.status})`);
-  }
+  if (!res.ok) throw new Error(`upload failed: ${bucket}/${path} (${res.status})`);
   return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
 }
 
 export async function POST(req: Request) {
   if (!SUPABASE_URL || !SERVICE_KEY) {
-    return NextResponse.json(
-      { error: "The form isn't wired up on this deploy." },
-      { status: 503 },
-    );
+    return bad("The form isn't wired up on this deploy.", 503);
   }
 
   let form: FormData;
-  try {
-    form = await req.formData();
-  } catch {
-    return NextResponse.json({ error: "Bad request." }, { status: 400 });
-  }
-
   let raw: Record<string, unknown>;
   try {
+    form = await req.formData();
     raw = JSON.parse(String(form.get("data") ?? "{}"));
   } catch {
-    return NextResponse.json({ error: "Bad request." }, { status: 400 });
+    return bad("Bad request.");
   }
 
-  const businessName = clip(raw.businessName, 200);
-  const yourName = clip(raw.yourName, 200);
-  const businessEmail = clip(raw.businessEmail, 320);
-  const phone = clip(raw.phone, 50);
-  const address = clip(raw.address, 300);
-  const paletteChoice = clip(raw.paletteChoice, 20);
-  const mainColor = clip(raw.mainColor, 10);
-  const accentColor = clip(raw.accentColor, 10);
-  const hasLogo = clip(raw.hasLogo, 10);
-  const template = clip(raw.template, 100);
-  const services = clip(raw.services, 5000);
-  const instagram = clip(raw.instagram, 300);
-  const facebook = clip(raw.facebook, 300);
-  const googleBusiness = clip(raw.googleBusiness, 300);
-  const brainDump = clip(raw.brainDump, 5000);
+  const f = (key: string, max: number) => clip(raw[key], max);
 
-  if (!businessName || !yourName || !isValidEmail(businessEmail) || !address) {
-    return NextResponse.json(
-      {
-        error:
-          "We need the business name, your name, a working business email, and an address (or “not local”).",
-      },
-      { status: 400 },
-    );
-  }
-  if (
-    paletteChoice === "own" &&
-    !(HEX_RE.test(mainColor) && HEX_RE.test(accentColor))
-  ) {
-    return NextResponse.json(
-      { error: "Those color codes don't look right." },
-      { status: 400 },
-    );
-  }
-  if (!template || !services) {
-    return NextResponse.json(
-      { error: "We need the template and a list of your services." },
-      { status: 400 },
-    );
-  }
+  const businessName = f("businessName", 200);
+  const businessType = f("businessType", 200);
+  const yourName = f("yourName", 200);
+  const businessEmail = f("businessEmail", 320);
+  const address = f("address", 300);
+  const desiredDomain = scrubDomain(f("desiredDomain", 253));
+  const usingTemplate = f("usingTemplate", 10);
+  const templateChoice = f("templateChoice", 100);
+  const paletteChoice = f("paletteChoice", 20);
+  const mainColor = f("mainColor", 10);
+  const accentColor = f("accentColor", 10);
+  const services = f("services", 5000);
 
-  // hours — pass through if it looks like the right shape (array of day
-  // objects), otherwise just drop it rather than fail the whole submission
+  const isCustomBuild = usingTemplate === "no";
+
+  // Mirrors lib/intake.ts's validateStep. The client already checked all of
+  // this; re-checking here is what actually protects the table.
+  if (!businessName || !businessType || !yourName || !address) {
+    return bad("We need the business name, what kind of business it is, your name, and where you work out of.");
+  }
+  if (!isValidEmail(businessEmail)) return bad("That email address doesn't look right.");
+  if (!desiredDomain || !isValidDomain(desiredDomain)) {
+    return bad("That domain doesn't look right. Something like yourshop.com.");
+  }
+  if (!isCustomBuild && !templateByKey(templateChoice)) {
+    return bad("Pick a template, or switch to a custom build.");
+  }
+  if (paletteChoice === "own" && !(HEX_RE.test(mainColor) && HEX_RE.test(accentColor))) {
+    return bad("Those color codes don't look right.");
+  }
+  if (!services) return bad("We need at least a rough list of what you do.");
+
   const hours = Array.isArray(raw.hours) ? raw.hours.slice(0, 14) : null;
+  const custom =
+    raw.templateCustomizations && typeof raw.templateCustomizations === "object"
+      ? (raw.templateCustomizations as Record<string, unknown>)
+      : null;
 
-  const prefix = `${slugifyBusiness(businessName)}-${Date.now()}`;
+  const prefix = `${slugify(businessName)}-${Date.now()}`;
 
-  let logoUrl: string | null = null;
-  const logo = form.get("logo");
-  if (logo instanceof File && logo.size > 0) {
-    try {
-      logoUrl = await uploadFile(
-        "intake-logos",
-        `${prefix}/${sanitizeFilename(logo.name)}`,
-        logo,
-      );
-    } catch {
-      return NextResponse.json(
-        {
-          error:
-            "The logo upload failed. Try again, or skip it for now and email it to us instead.",
-        },
-        { status: 502 },
-      );
+  // One upload slot. A failed logo or video is worth telling someone about;
+  // a failed photo out of thirty isn't worth sinking the submission over.
+  const put = async (key: string, bucket: string, as?: string) => {
+    const file = form.get(key);
+    if (!(file instanceof File) || file.size === 0) return null;
+    if (key === "heroVideo" && file.size > MAX_VIDEO_BYTES) {
+      throw new Error("video-too-big");
     }
+    return uploadFile(bucket, `${prefix}/${as ?? safeName(file.name)}`, file);
+  };
+
+  let mainLogoUrl: string | null = null;
+  let profileLogoUrl: string | null = null;
+  let profileLogoOriginalUrl: string | null = null;
+  let heroVideoUrl: string | null = null;
+  try {
+    mainLogoUrl = await put("mainLogo", "intake-logos");
+    profileLogoUrl = await put("profileLogo", "intake-logos");
+    profileLogoOriginalUrl = await put("profileLogoOriginal", "intake-logos", "profile-original");
+    heroVideoUrl = await put("heroVideo", "intake-videos");
+  } catch (e) {
+    return e instanceof Error && e.message === "video-too-big"
+      ? bad("That video is over 25MB. Trim it or export it smaller.")
+      : bad("An upload failed. Try again, or email us the files instead.", 502);
   }
 
   const photoUrls: { name: string; url: string }[] = [];
-  const photoFiles = form
-    .getAll("photos")
-    .filter((f): f is File => f instanceof File && f.size > 0);
-  for (const file of photoFiles.slice(0, 30)) {
+  const photos = form.getAll("photos").filter((p): p is File => p instanceof File && p.size > 0);
+  for (const file of photos.slice(0, 30)) {
     try {
-      const url = await uploadFile(
-        "intake-photos",
-        `${prefix}/${sanitizeFilename(file.name)}`,
-        file,
-      );
-      photoUrls.push({ name: file.name, url });
+      photoUrls.push({
+        name: file.name,
+        url: await uploadFile("intake-photos", `${prefix}/${safeName(file.name)}`, file),
+      });
     } catch {
-      // one bad photo upload shouldn't sink the whole submission
+      // one bad photo shouldn't sink the whole submission
     }
   }
 
-  const res = await rest("intake_submissions?select=id", {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/intake_submissions?select=id`, {
     method: "POST",
-    prefer: "return=representation",
+    headers: {
+      apikey: SERVICE_KEY,
+      Authorization: `Bearer ${SERVICE_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    cache: "no-store",
     body: JSON.stringify({
       business_name: businessName,
+      business_type: businessType,
       your_name: yourName,
       business_email: businessEmail,
-      phone: phone || null,
+      phone: f("phone", 50) || null,
       address,
-      palette_choice: paletteChoice || null,
+      desired_domain: desiredDomain,
+      template_choice: isCustomBuild ? null : templateChoice,
+      is_custom_build: isCustomBuild,
+      // `template` predates template_choice and is NOT NULL on the table,
+      // so it keeps getting the same value.
+      template: isCustomBuild ? "custom" : templateChoice,
+      palette_choice: paletteChoice || "template",
       main_color: paletteChoice === "own" ? mainColor : null,
       accent_color: paletteChoice === "own" ? accentColor : null,
-      has_logo: hasLogo || null,
-      logo_url: logoUrl,
-      template,
+      has_logo: f("hasLogo", 10) || "no",
+      main_logo_url: mainLogoUrl,
+      profile_logo_url: profileLogoUrl,
+      profile_logo_original_url: profileLogoOriginalUrl,
+      hero_video_url: heroVideoUrl,
       services,
       hours,
-      instagram: instagram || null,
-      facebook: facebook || null,
-      google_business: googleBusiness || null,
+      instagram: f("instagram", 300) || null,
+      facebook: f("facebook", 300) || null,
+      google_business: f("googleBusiness", 300) || null,
       photo_urls: photoUrls.length ? photoUrls : null,
-      brain_dump: brainDump || null,
+      template_customizations: custom,
+      copy_changes: f("copyChanges", 5000) || null,
+      brain_dump: f("brainDump", 5000) || null,
+      status: "new",
     }),
   });
 
-  if (!res.ok) {
-    return NextResponse.json(
-      { error: "Couldn't save that just now." },
-      { status: 502 },
-    );
-  }
+  if (!res.ok) return bad("Couldn't save that just now.", 502);
   const [row] = (await res.json()) as { id: string }[];
   return NextResponse.json({ id: row.id });
 }

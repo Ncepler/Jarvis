@@ -1,18 +1,27 @@
-import { isValidHex, type IntakeDraft } from "@/lib/intake";
-import { FieldSet, RadioCards, fieldClass } from "./fields";
+"use client";
+
+import { useEffect, useState } from "react";
+import { isValidHex, type Errors, type IntakeDraft, type IntakeFiles } from "@/lib/intake";
+import { FieldError, FieldSet, RadioCards, fileInputClass, inputClass } from "./fields";
+import { LogoCropper } from "./LogoCropper";
 
 function ColorField({
+  name,
   label,
   value,
+  error,
   onChange,
+  onBlur,
 }: {
+  name: string;
   label: string;
   value: string;
+  error?: string;
   onChange: (hex: string) => void;
+  onBlur: () => void;
 }) {
-  const valid = isValidHex(value);
   return (
-    <label className="grid gap-2 text-sm text-muted">
+    <label data-field={name} className="grid gap-2 text-sm text-muted">
       <span>
         {label}
         <span className="text-accent"> *</span>
@@ -20,47 +29,80 @@ function ColorField({
       <div className="flex items-center gap-3">
         <input
           type="color"
-          value={valid ? value : "#000000"}
+          value={isValidHex(value) ? value : "#000000"}
           onChange={(e) => onChange(e.target.value)}
           className="h-10 w-10 shrink-0 cursor-pointer border border-line bg-transparent p-0"
-          aria-label={`${label} — picker`}
+          aria-label={`${label}, color picker`}
         />
         <input
           type="text"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
           placeholder="#8A5A2B"
-          className={`${fieldClass} font-mono uppercase`}
           maxLength={7}
+          aria-invalid={Boolean(error)}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
+          className={`${inputClass(error)} font-mono uppercase`}
         />
       </div>
-      {!valid && value !== "" && (
-        <span className="text-xs text-accent">
-          That doesn&rsquo;t look like a hex code (e.g. #8A5A2B).
-        </span>
-      )}
+      <FieldError error={error} />
     </label>
+  );
+}
+
+// Shows the picked file with a thumbnail so someone can see they grabbed the
+// right one before moving on.
+function Preview({ file, round }: { file: File; round?: boolean }) {
+  const [url, setUrl] = useState("");
+  useEffect(() => {
+    const u = URL.createObjectURL(file);
+    setUrl(u);
+    return () => URL.revokeObjectURL(u);
+  }, [file]);
+  if (!url) return null;
+  return (
+    <span className="flex items-center gap-3">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt=""
+        className={`size-12 border border-line bg-surface object-contain ${round ? "rounded-full" : ""}`}
+      />
+      <span className="text-xs text-muted/80">{file.name}</span>
+    </span>
   );
 }
 
 export function PageBrand({
   draft,
+  files,
+  errors,
   onChange,
-  logoFileName,
-  onLogoFile,
+  onFiles,
+  onBlur,
 }: {
   draft: IntakeDraft;
+  files: IntakeFiles;
+  errors: Errors;
   onChange: (patch: Partial<IntakeDraft>) => void;
-  logoFileName: string | null;
-  onLogoFile: (file: File | null) => void;
+  onFiles: (patch: Partial<IntakeFiles>) => void;
+  onBlur: (name: string) => void;
 }) {
+  // The image waiting to be cropped. Set when someone picks a profile logo,
+  // cleared once they save or cancel.
+  const [cropping, setCropping] = useState<File | null>(null);
+
   return (
     <div className="grid gap-10">
       <FieldSet legend="Colors">
         <RadioCards
           name="paletteChoice"
           value={draft.paletteChoice}
-          onChange={(v) => onChange({ paletteChoice: v })}
+          error={errors.paletteChoice}
+          onChange={(v) => {
+            onChange({ paletteChoice: v });
+            onBlur("paletteChoice");
+          }}
           options={[
             { value: "template", label: "Keep the template's palette" },
             { value: "own", label: "Use my own colors" },
@@ -71,14 +113,20 @@ export function PageBrand({
       {draft.paletteChoice === "own" && (
         <div className="grid gap-6 md:grid-cols-2">
           <ColorField
+            name="mainColor"
             label="Main color"
             value={draft.mainColor}
+            error={errors.mainColor}
             onChange={(hex) => onChange({ mainColor: hex })}
+            onBlur={() => onBlur("mainColor")}
           />
           <ColorField
+            name="accentColor"
             label="Accent color"
             value={draft.accentColor}
+            error={errors.accentColor}
             onChange={(hex) => onChange({ accentColor: hex })}
+            onBlur={() => onBlur("accentColor")}
           />
         </div>
       )}
@@ -87,31 +135,80 @@ export function PageBrand({
         <RadioCards
           name="hasLogo"
           value={draft.hasLogo}
-          onChange={(v) => onChange({ hasLogo: v })}
+          error={errors.hasLogo}
+          onChange={(v) => {
+            onChange({ hasLogo: v });
+            onBlur("hasLogo");
+            if (v === "no") {
+              onFiles({ mainLogo: null, profileLogo: null, profileLogoOriginal: null });
+            }
+          }}
           options={[
             { value: "yes", label: "Yes, I'll upload one" },
-            { value: "no", label: "No — use text" },
+            { value: "no", label: "No, use text" },
           ]}
         />
       </FieldSet>
 
       {draft.hasLogo === "yes" && (
-        <label className="grid gap-2 text-sm text-muted">
-          <span>
-            Logo file<span className="text-accent"> *</span>
-          </span>
-          <input
-            type="file"
-            accept="image/*"
-            required
-            onChange={(e) => onLogoFile(e.target.files?.[0] ?? null)}
-            className="text-sm text-muted file:mr-4 file:cursor-pointer file:border file:border-line file:bg-transparent file:px-4 file:py-2 file:text-sm file:text-ink hover:file:border-ink"
-          />
-          {logoFileName && (
-            <span className="text-xs text-muted/80">Selected: {logoFileName}</span>
-          )}
-        </label>
+        <>
+          <label data-field="mainLogo" className="grid gap-2 text-sm text-muted">
+            <span>
+              Main logo<span className="text-accent"> *</span>
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                onFiles({ mainLogo: e.target.files?.[0] ?? null });
+                onBlur("mainLogo");
+              }}
+              className={fileInputClass}
+            />
+            <span className="text-xs text-muted/80">
+              Any shape. This is the one that goes in your header and footer.
+            </span>
+            {files.mainLogo && <Preview file={files.mainLogo} />}
+            <FieldError error={errors.mainLogo} />
+          </label>
+
+          <label data-field="profileLogo" className="grid gap-2 text-sm text-muted">
+            <span>Profile logo</span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) setCropping(f);
+                e.target.value = "";
+              }}
+              className={fileInputClass}
+            />
+            <span className="text-xs text-muted/80">
+              The square, cropped version. It becomes your favicon and anywhere
+              the site shows your logo in a circle. Pick a file and you&rsquo;ll get a
+              crop step.
+            </span>
+            {files.profileLogo && <Preview file={files.profileLogo} round />}
+          </label>
+        </>
       )}
+
+      {cropping && (
+        <LogoCropper
+          file={cropping}
+          onCancel={() => setCropping(null)}
+          onSave={(cropped) => {
+            onFiles({ profileLogo: cropped, profileLogoOriginal: cropping });
+            setCropping(null);
+          }}
+        />
+      )}
+
+      <p className="text-xs text-muted/80">
+        No logo yet? Pick &ldquo;use text&rdquo; and we&rsquo;ll set your name in
+        type. It looks better than a rushed logo.
+      </p>
     </div>
   );
 }

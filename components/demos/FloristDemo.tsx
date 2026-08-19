@@ -100,7 +100,7 @@ function OccasionTiles() {
                 className="overflow-hidden transition-transform duration-500 group-hover:-translate-y-1"
                 style={{ borderRadius: "var(--d-radius)", boxShadow: "0 8px 24px rgba(42,38,34,.06)" }}
               >
-                <Media label={`OCCASION: ${o.name} (3:4)`} ratio="3/4" rounded={false} />
+                <Media label={`OCCASION: ${o.name} (3:4)`} file={`occasion-${i + 1}.jpg`} ratio="3/4" rounded={false} />
               </div>
               <figcaption className="mt-3">
                 <h3 className="text-[22px] font-semibold leading-[1.1]" style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}>
@@ -141,7 +141,7 @@ function BouquetGallery() {
             <figure className="group">
               <div className="overflow-hidden" style={{ borderRadius: "var(--d-radius)" }}>
                 <div className="transition-transform duration-500 group-hover:scale-[1.03]">
-                  <Media label={`BOUQUET: ${b.name} (4:5)`} ratio="4/5" rounded={false} />
+                  <Media label={`BOUQUET: ${b.name} (4:5)`} file={`bouquet-${i + 1}.jpg`} ratio="4/5" rounded={false} />
                 </div>
               </div>
               <figcaption className="mt-3 flex items-baseline justify-between gap-3">
@@ -183,7 +183,7 @@ function Subscription() {
           </span>
         </Rise>
         <Rise delay={0.1}>
-          <Media label="WEEKLY: standing arrangement (4:3)" />
+          <Media label="WEEKLY: standing arrangement (4:3)" file="subscription.jpg" />
         </Rise>
       </div>
     </Section>

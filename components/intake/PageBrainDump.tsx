@@ -1,3 +1,5 @@
+"use client";
+
 import type { IntakeDraft } from "@/lib/intake";
 import { fieldClass } from "./fields";
 
@@ -9,17 +11,23 @@ export function PageBrainDump({
   onChange: (patch: Partial<IntakeDraft>) => void;
 }) {
   return (
-    <label className="grid gap-2 text-sm text-muted">
-      <span>
-        Anything else we should know? Anything specific you want, or
-        anything we didn&rsquo;t ask about?
-      </span>
+    <div className="grid gap-4">
+      <h2 className="font-display text-2xl text-ink">
+        One last thing. Tell us anything else.
+      </h2>
+      <p className="max-w-md text-sm text-muted">
+        Anything the form didn&rsquo;t cover, anything specific you want,
+        anything you&rsquo;re unsure about. Don&rsquo;t worry about being
+        organized. We read every word of these.
+      </p>
       <textarea
-        rows={8}
+        name="brainDump"
+        rows={10}
         value={draft.brainDump}
         onChange={(e) => onChange({ brainDump: e.target.value })}
-        className={fieldClass}
+        className={`${fieldClass} mt-2`}
+        aria-label="Anything else"
       />
-    </label>
+    </div>
   );
 }
