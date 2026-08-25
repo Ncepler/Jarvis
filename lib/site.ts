@@ -10,6 +10,8 @@ export const SITE = {
   founder: "FOUNDER_NAME_TBD", // Noah's display name on the business card
   domain: "vilas.studio",
   tagline: "TAGLINE_TBD",
+  // TODO: hello@vilas.studio bounces until the domain is registered and the
+  // mailbox actually exists. Don't point anything real at it before then.
   email: "hello@vilas.studio",
   instagram: "INSTAGRAM_URL_TBD",
   region: "United States", // studio is fully remote — works with businesses anywhere in the US
@@ -18,6 +20,17 @@ export const SITE = {
 // True while a SITE value is still a placeholder — components use this to
 // avoid rendering broken links/strings before the brand exists.
 export const isTBD = (value: string) => value.endsWith("_TBD");
+
+// The one place the deployed base URL lives. Every actual link on the page
+// is already relative (`/start`, `#work`, …), so this only feeds canonical /
+// og:url / metadataBase — but centralizing it here means flipping domains
+// later (this site is live at www.anotherseason.org today; vilas.studio is
+// being purchased) is a one-line change instead of a hunt through the repo.
+// Deliberately left pointed at vilas.studio for now (Noah, 2026-08-25) — the
+// canonical tag and OG image should already claim the real future domain,
+// not the temporary one.
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || `https://${SITE.domain}`;
 
 // All persuasion copy lives here so the voice is editable in one file
 // (Noah 2026-06-12). §8 voice: casual, plain, specific, confident. The job:
@@ -32,20 +45,16 @@ export const COPY = {
     services: { a: "Three ways in.", b: "Pick the one that fits." },
     gallery: { a: "Sites we built.", b: "Step inside one." },
     process: { a: "How it works.", b: "Five steps, about a week." },
-    sites: { a: "Every site,", b: "one tap away." },
     // was "A small studio. Wherever you are." — dropped "small" per the house
     // rule against referencing studio size (found while rewriting About).
     about: { a: "How we build.", b: "And what you get." },
     faq: { a: "Fair questions.", b: "Straight answers." },
     contact: { a: "Start a project.", b: "It takes two minutes." },
-    templateVsPersonalized: {
-      a: "Here's the template.",
-      b: "Here's what it becomes.",
-    },
+    clientSites: { a: "Out in the world.", b: "Real, and live right now." },
     pricing: { a: "Pricing.", b: "No surprises later." },
   },
   hero: {
-    positioning: "Websites for local businesses. Live in under a week.",
+    positioning: "Websites for local businesses. Live in about a week.",
     outcome:
       "People Google you before they hire you. What they find decides who gets the call.",
   },
@@ -61,20 +70,15 @@ export const COPY = {
     "Contractors",
     "Pet groomers",
   ],
-  // Mid-page full-bleed break: one line over a full-width moment, one CTA.
-  fullBleed: {
-    line: "People decide in five seconds. Give them something good to look at.",
-    cta: "See the work",
-  },
   // "Do the math" ROI beat (the section before #why). The interactive
   // calculator runs on the visitor's OWN numbers — opportunity cost, never a
-  // promise of returns. Default state (300 × 1 × 12 = 3,600) renders
-  // server-side so even with JS off a real sentence shows.
+  // promise of returns. Default state (300 × 1 × 12 = 3,600 vs a $900 style
+  // year one) renders server-side so even with JS off a real sentence shows.
   math: {
     eyebrow: "The math",
     heading: { a: "Do the math.", b: "One customer covers it." },
     intro:
-      "A good site is the difference between getting the call and watching it go next door.",
+      "Someone searches for what you do before they call. A site that's slow, missing, or looks off is how that search ends without you.",
     q1: {
       label: "What's one new customer worth to you?",
       sub: "A typical job, sale, or first visit.",
@@ -86,32 +90,32 @@ export const COPY = {
     },
     readoutSuffix: "a year",
     readoutCaption: "walking to whoever's easier to find online.",
-    kicker: "A site that fixes that is about $300, once.",
-    // {n} is replaced with the rounded multiple in the component.
-    multiple: "That's roughly {n}× the site's cost, in year one alone.",
+    // {cost} is the live year-one figure ($300 build + 12 months at $50).
+    kicker: "A style site runs {cost} in year one: the build, plus the monthly.",
+    // {n} is replaced with the computed multiple in the component (annual
+    // missed revenue ÷ that $900 year-one figure). Computed live from the
+    // calculator inputs above, never hardcoded.
+    multiple: "That's {n} the site's year-one cost.",
+    multipleUnder: "That's under the site's year-one cost at these numbers, so the math doesn't favor it yet. Try dragging the numbers up to where it does.",
     honest: "Your numbers, not ours. We're just doing the multiplication.",
     jsOff:
-      "Miss one $300 customer a month and that's $3,600 a year. The site's about $300, once.",
+      "Miss one $300 customer a month and that's $3,600 a year. Year one of the site is $900.",
   },
   // Small note near the work section — sets expectations before anyone
   // starts dragging through the gallery.
   workNote:
-    "Live in under a week. You fill out a short intake, we build, you review, it ships.",
-  // Before/after rows: the shared starting template on the left, the actual
-  // finished site on the right — real work, not a description of the
-  // process. Slugs reference lib/projects.ts; "Template" stays a labeled
-  // placeholder until there's a real generic-template screenshot to show.
-  templateVsPersonalized: {
-    intro:
-      "Every site starts from a foundation. What you get is nothing like the starting point.",
-    rows: ["demo-landscaping", "demo-florist", "demo-barber"],
-    note: "You upload your own photos at intake. Each just needs to be named to match its slot in the template (we tell you how).",
+    "Live in about a week. You fill out a short intake, we build, you review, it ships.",
+  // "Out in the world" — real client sites, replacing the old before/after
+  // section. Data comes from the client_sites table (lib/clientSites.ts);
+  // this is just the section's fixed copy.
+  clientSites: {
+    sub: "Real businesses, live right now. Click one to open it.",
   },
   // Two tiers, flat and public. No feature lists — the tiers are the same
   // work at a different starting point, not different levels of effort.
   pricing: {
     tiers: [
-      { title: "Template", build: "$300 build", monthly: "$50/month" },
+      { title: "Style", build: "$300 build", monthly: "$50/month" },
       { title: "Custom", build: "$500 build", monthly: "$80/month" },
     ],
     flagship: "Flagship work: let's talk.",
@@ -194,7 +198,7 @@ export const COPY = {
       },
       {
         q: "How long does it take?",
-        a: "About a week if you pick a style. Custom takes longer, and we'll give you a real date before we start.",
+        a: "Usually less than a week. If you're picking one of our styles and you have your photos and hours ready, it's often faster. A custom build takes longer, and so does any round of changes you want after seeing the first version. Once we know what you're asking for we'll give you a real date instead of a range.",
       },
       {
         q: "What do you need from me?",

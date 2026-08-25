@@ -24,7 +24,6 @@ export type Project = {
   screenshotFull: string; // full-length homepage capture, last-resort fallback
   preview: string; // /previews/<slug>.html — mirrored homepage served from our origin
   tier: "template" | "custom" | "flagship";
-  priceLabel: string;
   order: number; // card position; lower = earlier
   embeddable: boolean; // verified manually — default false until tested
   isStyleDemo: boolean; // true = our own template demo, not a client site
@@ -44,7 +43,6 @@ export const projects: Project[] = [
     screenshotFull: "",
     preview: "",
     tier: "flagship",
-    priceLabel: "let's talk",
     order: 1,
     embeddable: false,
     isStyleDemo: true,
@@ -59,7 +57,6 @@ export const projects: Project[] = [
     screenshotFull: "",
     preview: "",
     tier: "flagship",
-    priceLabel: "let's talk",
     order: 2,
     embeddable: false,
     isStyleDemo: true,
@@ -74,7 +71,6 @@ export const projects: Project[] = [
     screenshotFull: "",
     preview: "",
     tier: "template",
-    priceLabel: "~$300",
     order: 3,
     embeddable: false,
     isStyleDemo: true,
@@ -89,7 +85,6 @@ export const projects: Project[] = [
     screenshotFull: "",
     preview: "",
     tier: "custom",
-    priceLabel: "from $500",
     order: 4,
     embeddable: false,
     isStyleDemo: true,
@@ -104,7 +99,6 @@ export const projects: Project[] = [
     screenshotFull: "",
     preview: "",
     tier: "template",
-    priceLabel: "~$300",
     order: 5,
     embeddable: false,
     isStyleDemo: true,
@@ -119,7 +113,6 @@ export const projects: Project[] = [
     screenshotFull: "",
     preview: "",
     tier: "template",
-    priceLabel: "~$300",
     order: 6,
     embeddable: false,
     isStyleDemo: true,
@@ -134,7 +127,6 @@ export const projects: Project[] = [
     screenshotFull: "",
     preview: "",
     tier: "custom",
-    priceLabel: "from $500",
     order: 7,
     embeddable: false,
     isStyleDemo: true,
@@ -149,7 +141,6 @@ export const projects: Project[] = [
     screenshotFull: "",
     preview: "",
     tier: "custom",
-    priceLabel: "from $500",
     order: 0,
     embeddable: false,
     isStyleDemo: true,
@@ -166,7 +157,6 @@ export const projects: Project[] = [
     screenshotFull: "",
     preview: "",
     tier: "flagship",
-    priceLabel: "let's talk",
     order: 8,
     embeddable: false,
     isStyleDemo: true,

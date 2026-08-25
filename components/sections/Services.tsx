@@ -13,13 +13,13 @@ const PATHS = [
   {
     key: "style",
     title: "Pick a style",
-    price: "~$300",
+    price: "$300 + $50/month",
     copy: COPY.services.paths.style,
   },
   {
     key: "custom",
     title: "Custom build",
-    price: "from $500",
+    price: "$500 + $80/month",
     copy: COPY.services.paths.custom,
   },
   {

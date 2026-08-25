@@ -24,7 +24,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const tpl = templateByKey(slug);
   return {
-    title: tpl ? `${tpl.name} template` : "Template",
+    title: tpl ? `${tpl.name} style` : "Style",
     robots: { index: false, follow: false },
   };
 }

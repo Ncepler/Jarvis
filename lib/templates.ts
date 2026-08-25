@@ -488,7 +488,7 @@ export const TEMPLATES: Template[] = [
     questions: [
       {
         ...marquee,
-        hint: "The line of phrases that drifts across the dark section. On this template they're short atmospheric lines rather than a service list. One per box, at least three.",
+        hint: "The line of phrases that drifts across the dark section. On this style they're short atmospheric lines rather than a service list. One per box, at least three.",
         list: { ...marquee.list!, from: "PHRASES" },
       },
       {

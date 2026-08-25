@@ -9,7 +9,7 @@ import {
   Space_Grotesk,
   Space_Mono,
 } from "next/font/google";
-import { SITE } from "@/lib/site";
+import { SITE, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -81,7 +81,7 @@ const META_TITLE = `${SITE.name}: web design studio for small businesses`;
 const META_DESCRIPTION = `A small, fully remote web design studio. We build websites for local businesses that look like they cost as much as a villa.`;
 
 export const metadata: Metadata = {
-  metadataBase: new URL(`https://${SITE.domain}`),
+  metadataBase: new URL(SITE_URL),
   title: META_TITLE,
   description: META_DESCRIPTION,
   applicationName: SITE.name,

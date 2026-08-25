@@ -9,6 +9,7 @@ import {
   isAuthed,
   signIn,
   signOut,
+  updateRequestStatus,
   updateStatus,
 } from "@/lib/d48";
 import { generatePrompt } from "@/lib/generatePrompt";
@@ -77,6 +78,16 @@ export async function copyTemplateCode(templateKey: string) {
     const src = await readFile(path.join(process.cwd(), tpl.file), "utf8");
     const stamp = new Date().toISOString();
     return `// Original template: ${tpl.name} (${tpl.file}) — copied from live repo at ${stamp}\n\n${src}`;
+  });
+}
+
+// The only status change update_requests needs — new to done. If a richer
+// workflow shows up later, follow updateStatus's select-dropdown pattern
+// instead of adding more one-off actions here.
+export async function markRequestHandled(id: string) {
+  return run(async () => {
+    await updateRequestStatus(id, "done");
+    revalidatePath("/d48");
   });
 }
 

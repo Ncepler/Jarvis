@@ -11,6 +11,9 @@ import {
 import { TEMPLATES } from "@/lib/templates";
 import { FieldSet, RadioCards, SelectField, TextField, Wrap, inputClass } from "./fields";
 
+const YOUR_EMAIL_HINT =
+  "Where we send your reference code and anything we need to ask you. This is you, not the business inbox.";
+
 type DomainState = "idle" | "checking" | "available" | "taken" | "unknown";
 
 const DOMAIN_NOTE: Record<DomainState, { text: string; tone: string } | null> = {
@@ -105,7 +108,19 @@ export function PageContact({
 
   return (
     <div className="grid gap-10">
-      <FieldSet legend="How do you want your site built?">
+      <TextField
+        name="personalEmail"
+        label="Your email"
+        type="email"
+        required
+        error={errors.personalEmail}
+        value={draft.personalEmail}
+        onChange={(e) => onChange({ personalEmail: e.target.value })}
+        onBlur={touch("personalEmail")}
+        hint={YOUR_EMAIL_HINT}
+      />
+
+      <FieldSet legend="Are you picking one of our styles?">
         <RadioCards
           name="usingTemplate"
           value={draft.usingTemplate}
@@ -118,8 +133,8 @@ export function PageContact({
             onBlur("usingTemplate");
           }}
           options={[
-            { value: "yes", label: "Pick a style from our work" },
-            { value: "no", label: "Fully custom, built from scratch" },
+            { value: "yes", label: "Yes, I want to use one of your styles" },
+            { value: "no", label: "No, I want a fully custom build" },
           ]}
         />
       </FieldSet>

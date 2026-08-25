@@ -6,8 +6,8 @@ const NAV = [
   { href: "#work", label: "The work" },
   { href: "#services", label: "What you get" },
   { href: "#process", label: "How it works" },
-  { href: "#sites", label: "Every site" },
   { href: "/start", label: "Start a project" },
+  { href: "/updates", label: "Send us changes" },
 ] as const;
 
 // Small monoline marks for the "what we do" row — no boxes, no fills, just a

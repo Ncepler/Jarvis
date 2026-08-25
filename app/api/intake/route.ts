@@ -14,6 +14,7 @@ import { questionsFor, templateByKey } from "@/lib/templates";
 // there as they're picked — so this handler only records where they landed.
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 const clip = (v: unknown, max: number) =>
   typeof v === "string" ? v.trim().slice(0, max) : "";
@@ -50,6 +51,7 @@ export async function POST(req: Request) {
 
   const f = (key: string, max: number) => clip(raw[key], max);
 
+  const personalEmail = f("personalEmail", 320);
   const businessName = f("businessName", 200);
   const businessType = f("businessType", 200);
   const yourName = f("yourName", 200);
@@ -67,6 +69,9 @@ export async function POST(req: Request) {
 
   // Mirrors lib/intake.ts's validateStep. The client already checked all of
   // this; re-checking here is what actually protects the table.
+  if (!isValidEmail(personalEmail)) {
+    return bad("That personal email address doesn't look right.");
+  }
   if (!businessName || !yourName || !address) {
     return bad("We need the business name, your name, and where you work out of.");
   }
@@ -108,7 +113,7 @@ export async function POST(req: Request) {
   const uploads = (raw.uploads ?? {}) as Record<string, unknown>;
   const photoUrls = asPhotos(uploads.photos);
 
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/intake_submissions?select=id`, {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/intake_submissions?select=id,ref_code`, {
     method: "POST",
     headers: {
       apikey: SERVICE_KEY,
@@ -118,6 +123,7 @@ export async function POST(req: Request) {
     },
     cache: "no-store",
     body: JSON.stringify({
+      personal_email: personalEmail,
       business_name: businessName,
       business_type: businessType || null,
       your_name: yourName,
@@ -150,6 +156,33 @@ export async function POST(req: Request) {
   });
 
   if (!res.ok) return bad("Couldn't save that just now.", 502);
-  const [row] = (await res.json()) as { id: string }[];
-  return NextResponse.json({ id: row.id });
+  const [row] = (await res.json()) as { id: string; ref_code: string | null }[];
+
+  // Best effort, same as /api/notify-intake: the row is already saved, so a
+  // mail outage never blocks the person who just submitted. Reuses the
+  // Resend path notify-intake already established rather than building a
+  // second one.
+  if (row.ref_code && RESEND_API_KEY) {
+    fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "hello@vilas.studio",
+        to: personalEmail,
+        subject: `Your reference code: ${row.ref_code}`,
+        text: [
+          `Got it — we're on it.`,
+          "",
+          `Your reference code is ${row.ref_code}.`,
+          "",
+          "Write it down somewhere you'll actually find it again. You'll need this code and this email address any time you want to send us changes to your site, at /updates.",
+        ].join("\n"),
+      }),
+    }).catch(() => {});
+  }
+
+  return NextResponse.json({ id: row.id, refCode: row.ref_code });
 }

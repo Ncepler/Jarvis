@@ -42,6 +42,8 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
   const [showAll, setShowAll] = useState(false);
   const [stage, setStage] = useState<Stage>("form");
   const [error, setError] = useState("");
+  const [refCode, setRefCode] = useState("");
+  const [copied, setCopied] = useState(false);
   // The chosen template's real content, read off its source server-side.
   const [content, setContent] = useState<Record<string, Row[]>>({});
   const [loadingContent, setLoadingContent] = useState(false);
@@ -201,6 +203,8 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
         }).catch(() => {});
       }
 
+      if (typeof json.refCode === "string") setRefCode(json.refCode);
+
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch {
@@ -237,20 +241,51 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
 
   if (stage === "done") {
     return (
-      <div className="grid gap-5 py-10">
-        <h1 className="font-display text-title text-ink">Got it — we&rsquo;re on it.</h1>
-        <p className="max-w-md leading-relaxed text-muted">
-          We&rsquo;ll reach out within 48 hours to confirm details and get
-          started. If you don&rsquo;t hear back, check your spam folder or email
-          us at{" "}
-          <a
-            href={`mailto:${SITE.email}`}
-            className="text-accent underline underline-offset-4"
-          >
-            {SITE.email}
-          </a>
-          .
-        </p>
+      <div className="grid gap-8 py-10">
+        <div className="grid gap-5">
+          <h1 className="font-display text-title text-ink">Got it — we&rsquo;re on it.</h1>
+          <p className="max-w-md leading-relaxed text-muted">
+            We&rsquo;ll reach out within 48 hours to confirm details and get
+            started. If you don&rsquo;t hear back, check your spam folder or email
+            us at{" "}
+            <a
+              href={`mailto:${SITE.email}`}
+              className="text-accent underline underline-offset-4"
+            >
+              {SITE.email}
+            </a>
+            .
+          </p>
+        </div>
+
+        {refCode && (
+          <div className="grid max-w-md gap-3 border border-line bg-surface p-6">
+            <span className="text-sm text-muted">Your reference code</span>
+            <span className="font-display text-3xl tracking-[-0.01em] text-ink">
+              {refCode}
+            </span>
+            <p className="text-sm leading-relaxed text-muted">
+              Write this down somewhere you&rsquo;ll actually find it again.
+              You&rsquo;ll need this code and the email you just gave us any
+              time you want to send us changes to your site.
+            </p>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(refCode);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2400);
+                } catch {
+                  // clipboard blocked — the code is right there to select
+                }
+              }}
+              className={ghostButtonClass}
+            >
+              {copied ? "Copied" : "Copy code"}
+            </button>
+          </div>
+        )}
       </div>
     );
   }

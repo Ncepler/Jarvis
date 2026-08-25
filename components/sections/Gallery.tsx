@@ -151,7 +151,7 @@ function GalleryCard({
   return (
     <motion.button
       type="button"
-      aria-label={`${project.name}, ${project.category}, ${project.priceLabel}`}
+      aria-label={`${project.name}, ${project.category}`}
       className={
         reduced
           ? "relative shrink-0 cursor-pointer overflow-hidden border border-line bg-surface"
@@ -201,12 +201,7 @@ function GalleryCard({
         <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
           {project.category}
         </span>
-        <span className="mt-1.5 flex items-baseline justify-between gap-3">
-          <span className="text-sm">{project.name}</span>
-          <span className="shrink-0 text-xs text-accent">
-            {project.priceLabel}
-          </span>
-        </span>
+        <span className="mt-1.5 block text-sm">{project.name}</span>
         <span className="mt-1 block text-xs text-muted">{project.caption}</span>
       </motion.div>
     </motion.button>
@@ -272,15 +267,6 @@ function HomepagePanel({
           >
             {project.name}
           </motion.span>
-          <motion.span
-            className="text-sm text-accent"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={stagger(2)}
-          >
-            {project.priceLabel}
-          </motion.span>
-
           <span className="ml-auto flex items-baseline gap-6">
             {project.url && (
               <motion.a
@@ -442,21 +428,6 @@ export function Gallery() {
     setOpenSlug(null);
     regionRef.current?.focus();
   }, []);
-
-  // the "Every site" index (AllSites) dispatches this to step straight into a
-  // demo: center that card, then open it into its live panel.
-  useEffect(() => {
-    const onOpen = (e: Event) => {
-      const slug = (e as CustomEvent<string>).detail;
-      const idx = projects.findIndex((p) => p.slug === slug);
-      if (idx < 0) return;
-      snapTo(idx);
-      window.setTimeout(() => openCard(idx), reduced ? 0 : 420);
-    };
-    window.addEventListener("vilas:open-demo", onOpen as EventListener);
-    return () =>
-      window.removeEventListener("vilas:open-demo", onOpen as EventListener);
-  }, [projects, snapTo, openCard, reduced]);
 
   // a pointer-up at the end of a drag also lands on a card — ignore it
   const dragging = useRef(false);

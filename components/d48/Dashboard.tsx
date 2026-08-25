@@ -7,9 +7,11 @@ import {
   copyTemplateCode,
   destroy,
   logout,
+  markRequestHandled,
   setStatus,
   type Result,
 } from "@/app/d48/actions";
+import type { UpdateRequestRow } from "@/lib/d48";
 import { LIVE_STATUSES, STATUSES, droppedLabels, type SubmissionRow } from "@/lib/intake";
 import { questionsFor, templateByKey } from "@/lib/templates";
 
@@ -318,10 +320,12 @@ function Detail({ row }: { row: SubmissionRow }) {
 
       <div className="grid gap-8 md:grid-cols-2">
         <Group title="Contact">
+          <Field label="Reference code" value={row.ref_code} />
           <Field label="Business" value={row.business_name} />
           <Field label="Type of business" value={row.business_type} />
           <Field label="Contact person" value={row.your_name} />
-          <Field label="Email" value={row.business_email} />
+          <Field label="Personal email" value={row.personal_email} />
+          <Field label="Business email" value={row.business_email} />
           <Field label="Phone" value={row.phone} />
           <Field label="Address" value={row.address} />
           <Field label="Domain they want" value={row.desired_domain} />
@@ -417,7 +421,16 @@ function SortHeader({
   );
 }
 
-export function Dashboard({ rows, error }: { rows: SubmissionRow[]; error?: string }) {
+export function Dashboard({
+  rows,
+  requests,
+  error,
+}: {
+  rows: SubmissionRow[];
+  requests: UpdateRequestRow[];
+  error?: string;
+}) {
+  const [view, setView] = useState<"submissions" | "updates">("submissions");
   const [open, setOpen] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" }>({
@@ -463,10 +476,14 @@ export function Dashboard({ rows, error }: { rows: SubmissionRow[]; error?: stri
     });
   };
 
+  const newRequests = requests.filter((r) => r.status !== "done").length;
+
   return (
     <div className="grid gap-8">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <h1 className="font-display text-title text-ink">Intake submissions</h1>
+        <h1 className="font-display text-title text-ink">
+          {view === "submissions" ? "Intake submissions" : "Update requests"}
+        </h1>
         <form action={logout}>
           <button type="submit" className="cursor-pointer text-sm text-muted hover:text-ink">
             Sign out
@@ -474,31 +491,61 @@ export function Dashboard({ rows, error }: { rows: SubmissionRow[]; error?: stri
         </form>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className={meta}>
-          {STATUSES.map((s) => `${counts[s] ?? 0} ${s}`).join(" · ")}
-        </p>
-        <label className="flex items-center gap-2 text-sm text-muted">
-          Show
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="cursor-pointer border border-line bg-bg px-2 py-1 text-sm text-ink"
+      {/* Following the existing dashboard's own pattern of a filter control
+          rather than separate routes — /d48 has no nav to extend. */}
+      <div className="flex gap-2" role="tablist" aria-label="Dashboard view">
+        {(
+          [
+            ["submissions", `Submissions (${rows.length})`],
+            ["updates", `Update requests (${newRequests})`],
+          ] as const
+        ).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={view === key}
+            onClick={() => setView(key)}
+            className={`cursor-pointer border px-4 py-2 text-sm transition-colors duration-200 ${
+              view === key
+                ? "border-accent text-ink"
+                : "border-line text-muted hover:text-ink"
+            }`}
           >
-            <option value="all">All</option>
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </option>
-            ))}
-          </select>
-        </label>
+            {label}
+          </button>
+        ))}
       </div>
 
-      {error && <p className="text-sm text-accent">{error}</p>}
+      {view === "updates" ? (
+        <UpdateRequestsPanel requests={requests} error={error} />
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p className={meta}>
+              {STATUSES.map((s) => `${counts[s] ?? 0} ${s}`).join(" · ")}
+            </p>
+            <label className="flex items-center gap-2 text-sm text-muted">
+              Show
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="cursor-pointer border border-line bg-bg px-2 py-1 text-sm text-ink"
+              >
+                <option value="all">All</option>
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
 
-      {!error && shown.length === 0 && (
-        <p className="text-sm text-muted">
+          {error && <p className="text-sm text-accent">{error}</p>}
+
+          {!error && shown.length === 0 && (
+            <p className="text-sm text-muted">
           {filter === "all" ? "Nothing has come in yet." : `No ${filter} submissions yet.`}
         </p>
       )}
@@ -510,6 +557,9 @@ export function Dashboard({ rows, error }: { rows: SubmissionRow[]; error?: stri
               <tr className={hairline}>
                 <th scope="col" className={th}>
                   Business
+                </th>
+                <th scope="col" className={th}>
+                  Code
                 </th>
                 <th scope="col" className={th}>
                   Template
@@ -557,6 +607,7 @@ export function Dashboard({ rows, error }: { rows: SubmissionRow[]; error?: stri
                           {name}
                         </button>
                       </th>
+                      <td className="px-3 font-mono text-xs text-muted">{row.ref_code || "—"}</td>
                       <td className="px-3 text-muted">{templateOf(row)}</td>
                       <td className="px-3 tabular-nums text-muted">{fmtDate(row.created_at)}</td>
                       <td className="px-3">
@@ -597,7 +648,7 @@ export function Dashboard({ rows, error }: { rows: SubmissionRow[]; error?: stri
                     </tr>
                     {isOpen && (
                       <tr>
-                        <td colSpan={5} className="p-0">
+                        <td colSpan={6} className="p-0">
                           <Detail row={row} />
                         </td>
                       </tr>
@@ -633,6 +684,86 @@ export function Dashboard({ rows, error }: { rows: SubmissionRow[]; error?: stri
           }}
         />
       )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Update requests view ────────────────────────────────────────────────
+function RequestRow({ row }: { row: UpdateRequestRow }) {
+  const [status, setLocal] = useState(row.status);
+  const [pending, start] = useTransition();
+  const [error, setError] = useState("");
+  const handled = status === "done";
+
+  return (
+    <tr className={hairline}>
+      <td className="px-3 py-3 align-top font-mono text-xs text-muted">{row.ref_code}</td>
+      <td className="max-w-[12rem] truncate px-3 py-3 align-top">
+        {row.intake_submissions?.business_name || "—"}
+      </td>
+      <td className="max-w-md px-3 py-3 align-top whitespace-pre-wrap text-sm text-ink">
+        {row.body}
+      </td>
+      <td className="px-3 py-3 align-top tabular-nums text-muted">{fmtDate(row.created_at)}</td>
+      <td className="px-3 py-3 align-top">
+        <StatusBadge status={status} />
+      </td>
+      <td className="px-3 py-3 align-top text-right">
+        {!handled && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() =>
+              start(async () => {
+                setError("");
+                const result = await markRequestHandled(row.id);
+                if (!result.ok) return setError(result.error);
+                setLocal("done");
+              })
+            }
+            className="press cursor-pointer border border-line px-3 py-1.5 text-xs text-ink transition-colors duration-200 hover:border-ink disabled:opacity-40"
+          >
+            {pending ? "Working…" : "Mark as handled"}
+          </button>
+        )}
+        {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      </td>
+    </tr>
+  );
+}
+
+function UpdateRequestsPanel({
+  requests,
+  error,
+}: {
+  requests: UpdateRequestRow[];
+  error?: string;
+}) {
+  if (error) return <p className="text-sm text-accent">{error}</p>;
+  if (requests.length === 0) {
+    return <p className="text-sm text-muted">Nothing has come in yet.</p>;
+  }
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[46rem] border-collapse text-sm">
+        <thead>
+          <tr className={hairline}>
+            <th scope="col" className={th}>Code</th>
+            <th scope="col" className={th}>Business</th>
+            <th scope="col" className={th}>Request</th>
+            <th scope="col" className={th}>Sent</th>
+            <th scope="col" className={th}>Status</th>
+            <th scope="col" className={`${th} text-right`}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {requests.map((row) => (
+            <RequestRow key={row.id} row={row} />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

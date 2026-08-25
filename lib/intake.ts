@@ -40,6 +40,7 @@ export type IntakeUploads = {
 
 export type IntakeDraft = {
   // page 1, contact + what they're building
+  personalEmail: string;
   usingTemplate: UsingTemplate;
   templateChoice: string;
   desiredDomain: string;
@@ -94,6 +95,7 @@ export const emptyUploads = (): IntakeUploads => ({
 });
 
 export const emptyDraft = (): IntakeDraft => ({
+  personalEmail: "",
   usingTemplate: "",
   templateChoice: "",
   desiredDomain: "",
@@ -213,6 +215,8 @@ export function validateStep(id: StepId, d: IntakeDraft): Errors {
   const usingTemplate = d.usingTemplate === "yes";
 
   if (id === "contact") {
+    if (!d.personalEmail.trim()) e.personalEmail = REQUIRED;
+    else if (!isValidEmail(d.personalEmail)) e.personalEmail = BAD_EMAIL;
     if (!d.usingTemplate) e.usingTemplate = "Pick one so we know where to start.";
     if (usingTemplate && !d.templateChoice) e.templateChoice = "Pick the template you want to build on.";
     if (!d.businessName.trim()) e.businessName = REQUIRED;
@@ -306,6 +310,8 @@ export type SubmissionRow = {
   id: string;
   created_at: string;
   status: string | null;
+  ref_code: string | null;
+  personal_email: string | null;
   business_name: string | null;
   business_type: string | null;
   your_name: string | null;

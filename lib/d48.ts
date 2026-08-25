@@ -93,6 +93,37 @@ export async function updateStatus(id: string, status: string) {
   if (!res.ok) throw new Error(`Couldn't save that status (${res.status}).`);
 }
 
+// ── Update requests (from /updates) ─────────────────────────────────────
+export type UpdateRequestRow = {
+  id: string;
+  ref_code: string;
+  submission_id: string | null;
+  body: string;
+  status: string;
+  created_at: string;
+  // PostgREST embed via the submission_id FK — null if the submission was
+  // since deleted.
+  intake_submissions: { business_name: string | null } | null;
+};
+
+export async function listUpdateRequests(): Promise<UpdateRequestRow[]> {
+  if (!hasBackend()) return [];
+  const res = await sb(
+    "update_requests?select=*,intake_submissions(business_name)&order=created_at.desc",
+  );
+  if (!res.ok) throw new Error(`Supabase read failed (${res.status})`);
+  return res.json();
+}
+
+export async function updateRequestStatus(id: string, status: string) {
+  if (!hasBackend()) throw new Error("Supabase isn't configured on this deploy.");
+  const res = await sb(`update_requests?id=eq.${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error(`Couldn't save that status (${res.status}).`);
+}
+
 // ── Permanent delete ─────────────────────────────────────────────────────
 // Every file a submission uploaded, as bucket → paths. Anything that isn't a
 // URL we wrote is ignored rather than guessed at.
