@@ -307,6 +307,23 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
         A few questions about your business so we can start building. Takes
         about five minutes, and nothing here locks you in.
       </p>
+      <p className="mt-3 max-w-md text-sm text-muted">
+        By submitting this form you agree to our{" "}
+        <a
+          href="/terms"
+          className="underline underline-offset-2 transition-colors duration-200 hover:text-ink"
+        >
+          Terms
+        </a>{" "}
+        and{" "}
+        <a
+          href="/privacy"
+          className="underline underline-offset-2 transition-colors duration-200 hover:text-ink"
+        >
+          Privacy Policy
+        </a>
+        .
+      </p>
 
       {!hasBackend && (
         <p className="mt-6 max-w-md text-sm text-accent">

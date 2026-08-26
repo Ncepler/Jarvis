@@ -8,6 +8,8 @@ const NAV = [
   { href: "#process", label: "How it works" },
   { href: "/start", label: "Start a project" },
   { href: "/updates", label: "Send us changes" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
 ] as const;
 
 // Small monoline marks for the "what we do" row — no boxes, no fills, just a
