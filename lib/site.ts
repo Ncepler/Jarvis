@@ -7,7 +7,6 @@ const BRAND = "Vilas";
 export const SITE = {
   brand: BRAND, // the bare word the wordmark reveal is built from
   name: `${BRAND} Studio`, // full wordmark + SEO name — the ONLY place "Studio" is written
-  founder: "FOUNDER_NAME_TBD", // Noah's display name on the business card
   domain: "vilas.studio",
   tagline: "TAGLINE_TBD",
   // TODO: hello@vilas.studio bounces until the domain is registered and the
@@ -72,11 +71,14 @@ export const COPY = {
   ],
   // "Do the math" ROI beat (the section before #why). The interactive
   // calculator runs on the visitor's OWN numbers — opportunity cost, never a
-  // promise of returns. Default state (300 × 1 × 12 = 3,600 vs a $900 style
-  // year one) renders server-side so even with JS off a real sentence shows.
+  // promise of returns, and never weighed against what the site costs (that
+  // would require an annual figure, which the site never states — see the
+  // no-yearly-cost rule). It just shows what missed customers cost, full
+  // stop. Default state (300 × 1 × 12 = 3,600) renders server-side so even
+  // with JS off a real sentence shows.
   math: {
     eyebrow: "The math",
-    heading: { a: "Do the math.", b: "One customer covers it." },
+    heading: { a: "Do the math.", b: "See what it's costing you." },
     intro:
       "Someone searches for what you do before they call. A site that's slow, missing, or looks off is how that search ends without you.",
     q1: {
@@ -90,16 +92,9 @@ export const COPY = {
     },
     readoutSuffix: "a year",
     readoutCaption: "walking to whoever's easier to find online.",
-    // {cost} is the live year-one figure ($300 build + 12 months at $50).
-    kicker: "A style site runs {cost} in year one: the build, plus the monthly.",
-    // {n} is replaced with the computed multiple in the component (annual
-    // missed revenue ÷ that $900 year-one figure). Computed live from the
-    // calculator inputs above, never hardcoded.
-    multiple: "That's {n} the site's year-one cost.",
-    multipleUnder: "That's under the site's year-one cost at these numbers, so the math doesn't favor it yet. Try dragging the numbers up to where it does.",
     honest: "Your numbers, not ours. We're just doing the multiplication.",
-    jsOff:
-      "Miss one $300 customer a month and that's $3,600 a year. Year one of the site is $900.",
+    cta: "Start a project",
+    jsOff: "Miss one $300 customer a month and that's $3,600 a year.",
   },
   // Small note near the work section — sets expectations before anyone
   // starts dragging through the gallery.
@@ -111,15 +106,60 @@ export const COPY = {
   clientSites: {
     sub: "Real businesses, live right now. Click one to open it.",
   },
-  // Two tiers, flat and public. No feature lists — the tiers are the same
-  // work at a different starting point, not different levels of effort.
+  // Three tiers, flat and public. No feature lists, no "most popular" badge —
+  // Premium gets more visual weight (center position, bigger card) because
+  // it's the one we think fits most businesses, not because of a fabricated
+  // popularity claim. Each tier gets one sentence on why it exists: buyers
+  // justify a purchase to themselves, and a tier with no obvious reason loses
+  // to the extremes either side of it.
   pricing: {
     tiers: [
-      { title: "Style", build: "$300 build", monthly: "$50/month" },
-      { title: "Custom", build: "$500 build", monthly: "$80/month" },
-    ],
-    flagship: "Flagship work: let's talk.",
+      {
+        key: "basic",
+        title: "Basic",
+        build: "$300 build",
+        monthly: "$50/month",
+        why: "A still hero image, done well. For a business that wants a clean, fast site without paying for motion.",
+      },
+      {
+        key: "premium",
+        title: "Premium",
+        build: "$500 build",
+        monthly: "$80/month",
+        why: "A moving hero — video, or a scene that builds as people scroll. The one people remember.",
+      },
+      {
+        key: "custom",
+        title: "Custom",
+        build: "let's talk",
+        monthly: "",
+        why: "Built from nothing, to spec, for a business the other two tiers don't fit.",
+      },
+    ] as const,
     note: "Your monthly covers hosting, the domain, and updates when you need them. If a payment lapses, the site pauses until it's caught up, but nothing gets deleted. Your content and domain are safe.",
+  },
+  // The attribute-first choice on /start (before any price is shown). The
+  // visitor picks based on what they want, not what it costs — price follows
+  // as a confirmation line once they've answered. Custom sits outside this
+  // two-way choice, reachable as a plain link rather than a third option.
+  startChoice: {
+    heading: "What matters more for your site?",
+    premium: {
+      title: "The stronger first impression",
+      body: "A moving hero. Video, or a scene that builds as people scroll. This is the one people remember.",
+    },
+    basic: {
+      title: "The lower starting cost",
+      body: "A still hero, done well. Same build everywhere else.",
+    },
+    customPrompt: "Want something fully custom instead?",
+    customLink: "Tell us what you need →",
+    change: "Change",
+    confirm: {
+      basic: "Basic: $300 build, $50/month.",
+      premium: "Premium: $500 build, $80/month.",
+      custom: "Custom: let's talk pricing.",
+    },
   },
   // Final CTA band before the form.
   closing: {
@@ -132,11 +172,12 @@ export const COPY = {
       "Live in about a week. All we need from you is a logo, a few photos, and your hours.",
     riskReversal: "Half up front. The rest when you're happy with it.",
     paths: {
-      style:
-        "Pick a style from the work below and we fit it to your business. A week later, you're the company with the nice website.",
+      basic:
+        "A still hero image, done well. Pick a style from the work below and we fit it to your business.",
+      premium:
+        "A moving hero — video, or a scene that builds as people scroll. The one people remember.",
       custom:
-        "Designed from scratch around how your business actually works and what makes customers pick it.",
-      flagship: "The full treatment. We scope it together.",
+        "Built from nothing, to spec, around how your business actually works.",
     },
   },
   howItWorks: {

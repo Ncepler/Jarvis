@@ -25,8 +25,14 @@ import {
   TwoLine,
   ValueProps,
 } from "./system";
+import { heroConceptFor } from "@/lib/heroConcepts";
 
 const ACCENT = "#C8893F"; // warm finished-wood caramel
+// Reference wiring for the Premium hero mechanism (round 2, job 5) — proves
+// DemoHero's `premium` prop end to end. No video asset exists yet, so this
+// renders PremiumHeroMedia's labeled placeholder until one lands at
+// /public/premium/demo-renovation.mp4 (see lib/heroConcepts.ts).
+const PREMIUM_HERO = heroConceptFor("demo-renovation");
 const PHONE = "(516) 555-0000";
 const NAME = "Maple & Main Renovation Co.";
 
@@ -154,6 +160,7 @@ export function RenovationDemo() {
       <DemoHeader name={NAME} phone={PHONE} />
       <DemoHero
         heroImage={firstRenovationImage}
+        premium={PREMIUM_HERO}
         eyebrow="Renovation & remodeling · North Shore"
         line1="Old house."
         line2="New everything."

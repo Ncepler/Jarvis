@@ -11,22 +11,22 @@ const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const PATHS = [
   {
-    key: "style",
-    title: "Pick a style",
+    key: "basic",
+    title: "Basic",
     price: "$300 + $50/month",
-    copy: COPY.services.paths.style,
+    copy: COPY.services.paths.basic,
+  },
+  {
+    key: "premium",
+    title: "Premium",
+    price: "$500 + $80/month",
+    copy: COPY.services.paths.premium,
   },
   {
     key: "custom",
-    title: "Custom build",
-    price: "$500 + $80/month",
-    copy: COPY.services.paths.custom,
-  },
-  {
-    key: "flagship",
-    title: "Flagship",
+    title: "Custom",
     price: "let's talk",
-    copy: COPY.services.paths.flagship,
+    copy: COPY.services.paths.custom,
   },
 ] as const;
 

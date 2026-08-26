@@ -1,125 +1,110 @@
-# HANDOFF — updated 2026-08-25 (v53)
+# HANDOFF — updated 2026-08-26 (v54)
 
 ## Current state
-- Deployed: https://jarvis-nceplers-projects.vercel.app (also anotherseason.org) — footer
-  stamp v53 once pushed. `npx tsc --noEmit`, `next lint`, and `next build` all clean
-  locally this session (build ran fine — devcontainer had memory this time).
-- **12-job ticket completed this session** (see below). Live-tested against the real
-  "Vilas" Supabase project (ref `epynfvskwaxejdibvgbr`) via the Supabase MCP connector —
-  not just typechecked. A temporary debug route was used to exercise `/updates`'
-  server actions end-to-end, then deleted; the one test intake row + update request it
-  created were deleted from the live table afterward. Nothing test-related was left
-  behind.
+- Builds clean locally this session: `npx tsc --noEmit`, `next lint`, `next build` all
+  pass with no errors. Not yet pushed/deployed by this session — Noah pushes when ready.
+- **Round 2 ticket (9 jobs) completed this session.** Screenshot capture (job 4) was
+  verified for real: ran `/api/capture-sites` against a local dev server, captured real
+  screenshots of all 3 live `client_sites` rows, confirmed the PNGs in Supabase Storage,
+  and confirmed the homepage renders them via `next/image`. That data is now live in the
+  "Vilas" Supabase project (ref `epynfvskwaxejdibvgbr`) — not test data, the real feature
+  working. See "Gotchas" below for the one thing that's still unverified (Vercel itself).
 
-## This session's work (v53)
-1. **"Template" → "style" everywhere visible.** Fixed the `/start` style question, the
-   `/demos/[slug]` browser-tab title (`"X template"` → `"X style"`), and a `lib/templates.ts`
-   hint string. Internal identifiers (`templateChoice`, `TEMPLATES`, `/d48`'s "Copy
-   template code") stay as-is on purpose — `/d48` is password-gated, not visitor-facing.
-2. **`SITE_URL`** (`lib/site.ts`) — one constant, `NEXT_PUBLIC_SITE_URL` env var with a
-   `vilas.studio` fallback, feeding `metadataBase`. Internal links were already relative
-   (`/start`, `#work`), so there was nothing else to rewire. TODO comment added next to
-   `SITE.email` about the mailbox not existing yet.
-3. **Deleted the VAL section and the "Every site" index** (`FullBleed.tsx`,
-   `AllSites.tsx`, both removed). Dropped the dead `vilas:open-demo` CustomEvent listener
-   from `Gallery.tsx` that only AllSites ever dispatched. Removed the `#sites` footer nav
-   link; added a `/updates` one in its place.
-4. **New "Out in the world" section** (`components/sections/ClientSites.tsx`) replaces
-   the deleted before/after section. Two-row CSS grid (`grid-auto-flow: column`),
-   live-window tiles: desktop mounts a real `<iframe>` (1440×900, scaled via transform,
-   `pointer-events:none`, IntersectionObserver-gated, 4s load timeout → falls back to
-   `screenshot_url` → falls back to a plain name+link card) once it's near the viewport;
-   mobile skips iframes entirely and goes straight to the screenshot/card. Data comes
-   from the new `client_sites` table, read server-side in `app/page.tsx` (now `async`)
-   via `lib/clientSites.ts`, revalidated every 5 minutes (`next: { revalidate: 300 }`) so
-   the homepage stays statically served rather than going fully dynamic. Seeded with the
-   3 real sites (Jonah Shapiro Magic, PackPerfect, Val's Elegant Barbershop).
-5. **Price tags removed from all 9 gallery cards** (`lib/projects.ts`'s `priceLabel`
-   field deleted entirely — nothing read it anymore). Services cards now show
-   `$300 + $50/month` / `$500 + $80/month` instead of the old one-time numbers. Pricing
-   section's "Template" tier renamed "Style".
-6. **Do-the-math section fixed**: year-one cost is a real `$900` (`$300` build + 12 ×
-   `$50`), not the old `~$300, once`. The multiplier is computed live from the calculator
-   inputs (`annual / 900`), never hardcoded, and an honest message shows when it's under
-   1× instead of hiding the line. Replaced the vague "difference between getting the call
-   and watching it go next door" line with something concrete about search.
-7. **Turnaround standardized to "about a week"** everywhere (was split between "under"
-   and "about"). FAQ's "How long does it take?" rewritten to the longer, more specific
-   answer from the ticket.
-8. **FAQ check**: all 5 answers exist in `COPY.faq.items` — it's genuinely just accordion
-   collapse (`openIdx` defaults to `0`), not missing content. Nothing to fix.
-9. **`/start` changes**: new required "Your email" field (`personalEmail`) at the top of
-   step 1, stored in a new `personal_email` column. Style question reworded per the
-   ticket's exact copy. Every submission now gets a `ref_code` (`VS-4817`, `VS-4818`, …)
-   generated **server-side by a column default** (`'VS-' || nextval('vilas_ref_seq')`) —
-   no app code computes it, so `POST /api/intake` just asks for it back via
-   `select=id,ref_code`. Confirmation screen shows the code with a copy button. If
-   `RESEND_API_KEY` is set, `/api/intake` also emails the code to `personalEmail` (best
-   effort, reuses the Resend pattern `/api/notify-intake` already established) — this
-   won't actually deliver yet since `vilas.studio`'s Resend sending domain is still
-   unverified, same standing issue as `/api/notify-intake`.
-10. **New `/updates` page** (4 steps: look up by ref code + email → confirm → free-text
-    request → done). `app/updates/actions.ts` (server actions) + `lib/updates.ts` (the
-    Supabase REST reads/writes, same pattern as `lib/d48.ts`) + `lib/rateLimit.ts` (an
-    in-memory per-IP cap, 6/min — module-scoped, so it's per-instance not global, noted
-    as a real limitation, not a hard guarantee). Lookup requires **both** `ref_code` and
-    `personal_email` to match (case-insensitive via PostgREST `ilike`), one generic error
-    either way. `noindex, nofollow`, linked from the footer.
-11. **`/d48` admin**: `ref_code` + `personal_email` now show in the submission detail
-    panel and `ref_code` got its own table column. New "Update requests" tab (same page,
-    no new route — `/d48` had no multi-page nav to extend, so this follows its existing
-    filter/tab pattern) lists `update_requests` newest-first with the business name
-    joined in via a PostgREST embed (`select=*,intake_submissions(business_name)`),
-    verified working against real data. Single "Mark as handled" button flips
-    `status` → `'done'`.
-12. **Version bumped to v53.**
+## This session's work (v54)
+1. **Rule 0 (no yearly cost) audited site-wide** — nothing was multiplying the monthly
+   fee out to an annual site cost anywhere. The one place that logic used to live
+   (`DoTheMath.tsx`'s `YEAR_ONE_COST`/multiplier) is gone — see #3.
+2. **Pricing restructured to 3 tiers**: Basic ($300 + $50/mo, still hero) / Premium
+   ($500 + $80/mo, moving hero, **center + heavier visual weight**, no "most popular"
+   badge) / Custom (let's talk, built from scratch). `lib/site.ts`'s `COPY.pricing`,
+   `Pricing.tsx`, and `Services.tsx`'s 3 cards all rewritten. "Flagship" removed
+   everywhere, including `lib/projects.ts`'s now-dead `tier` field and the landscaping
+   card's "shown at full flagship scale" caption.
+3. **`/start`'s first real question is now attribute-first**: "What matters more for
+   your site?" → stronger first impression (Premium) vs. lower starting cost (Basic),
+   with Custom reached as a plain link, not a third button. Price shows only *after* the
+   pick, as a confirmation line. New `tier` field end to end: `lib/intake.ts` →
+   `PageContact.tsx`'s new `TierChoice` component → `/api/intake` (validates + persists)
+   → `intake_submissions.tier` column → shown in `/d48`'s detail panel.
+4. **`DoTheMath.tsx` rewritten**: the cost-comparison kicker/multiplier is gone entirely
+   (that's what Rule 0 actually required removing). The calculator still shows the
+   missed-customer annual figure — that's the visitor's own lost-revenue estimate, not a
+   site-price comparison, so it stays. Section now ends with a "Start a project" CTA
+   into `/start` instead of a price line.
+5. **"Out in the world" (`ClientSites.tsx`) rebuilt without iframes.** The old approach
+   couldn't reliably detect a blocked cross-origin embed and was rendering a plain
+   name+link card on every tile. Replaced with real screenshots: `app/api/capture-sites`
+   (puppeteer-core + `@sparticuz/chromium`) captures each site's viewport at 1440×900 and
+   writes the PNG to a new `client-site-captures` Storage bucket, keyed by site id + date.
+   A manual `screenshot_url` (existing column) always wins over a generated capture.
+   Tiles show a skeleton while loading and hide entirely if no image exists at all —
+   never an empty box. Triggered on a schedule (`vercel.json` cron, daily 8am UTC), never
+   on page load. **Verified working end to end this session** (see above) — but that was
+   this devcontainer, not Vercel's actual function environment; see Gotchas.
+6. **Premium hero mechanism built**: `lib/heroConcepts.ts` documents a concrete
+   scroll/loop concept for all 9 styles (dented panel straightens, gutted room finishes
+   out, etc.). `components/demos/PremiumHeroMedia.tsx` plays it — looping video or
+   scroll-scrubbed (IntersectionObserver + rAF driving `currentTime`, never a raw scroll
+   listener), with a 3-tier fallback (video → poster → labeled text placeholder) and
+   skips straight to still on reduced-motion/mobile/slow-connection. Wired into
+   `DemoHero` via a new optional `premium` prop; **only `RenovationDemo.tsx` actually
+   passes one**, as a reference wiring — the other 8 demos still render their plain
+   still hero. No video/poster assets exist yet (`lib/heroConcepts.ts` points at
+   `/public/premium/<slug>.mp4`/`.jpg`, which 404 gracefully to the text placeholder
+   today).
+7. **Favicon wired via Next's file convention**: `app/icon.png` + `app/apple-icon.png`
+   (180×180). Started as geometric placeholders, then Noah dropped a real logo file
+   into `public/favicon.PNG` mid-session (a bone-circle "VS" monogram) — used that for
+   both instead of shipping a placeholder. `public/favicon.PNG` itself is now an unused
+   duplicate; safe to delete. **Note**: this "VS" mark is a different design from
+   `public/vilas-mark.webp` (the dark-disc "V" used by the header/footer/sticky logo
+   everywhere else) — didn't touch that one without being asked, see Noah's-eyes-needed
+   item below.
+8. **Sticky corner mark**: `PinnedLogo.tsx`'s card now shows "Vilas Studio" + "A small
+   web design studio." — no founder name. `SITE.founder` deleted from `lib/site.ts`
+   (nothing else referenced it).
+9. **Job-8 verification**: everything from the previous ticket had already landed
+   (checked each item against the actual code, not just HANDOFF's word for it) except
+   the "flagship"/tier cleanup this session's job 1 required anyway. See chat for the
+   full checklist.
 
-## SQL run this session (all via the Supabase MCP connector against ref
-`epynfvskwaxejdibvgbr` — nothing had to be appended for Noah to run by hand)
-- `0009_create_client_sites.sql` — `client_sites` table + RLS + the 3 seed rows.
-- `0010_ref_codes_and_update_requests.sql` — `vilas_ref_seq`, `intake_submissions.ref_code`
-  / `.personal_email`, backfill of `ref_code` on the 7 pre-existing rows (their
-  `personal_email` stayed null — they predate the field, so they can't use `/updates`
-  until resubmitted), and the `update_requests` table + RLS.
-Both migration files are also committed to `supabase/migrations/` so the schema is
-reproducible from the repo, matching the existing convention.
+## SQL run this session (via the Supabase MCP connector against ref
+`epynfvskwaxejdibvgbr` — both also committed to `supabase/migrations/`)
+- `0011_pricing_tier.sql` — `intake_submissions.tier` (basic/premium/custom check
+  constraint). Confirmed first that no pricing tier was ever persisted before this — the
+  7 pre-existing rows just get `tier = null`, nothing to migrate.
+- `0012_client_site_captures.sql` — `client_sites.captured_at` / `.capture_error`
+  columns + the `client-site-captures` public Storage bucket.
 
 ## Gotchas & decisions (this session)
-- **`app/api/<name>` folders starting with `_` are Next.js "private folders" and are
-  excluded from routing** — cost some time debugging a 404 on a temp test route. Not
-  relevant to any real route in this repo, just a note for next time.
-- **PostgREST FK embedding works as expected**: `update_requests?select=*,intake_submissions(business_name)`
-  resolves via the `submission_id` foreign key with no extra config, confirmed against
-  live data, not just assumed.
-- `app/page.tsx` is now `async` (fetches `client_sites` server-side). Still statically
-  served — see `next: { revalidate: 300 }` above — so this didn't cost the performance
-  budget (CLAUDE.md §9).
-- `lib/rateLimit.ts`'s cap is per-server-instance, not a true global limit on Vercel's
-  multi-instance serverless model. Fine for "stop someone walking the sequence from one
-  IP" (the actual threat — codes are sequential after the first), not a hard guarantee
-  against a distributed attempt. Documented in the file itself.
-
-## Next up (ordered)
-1. Eyes on the live deploy: the new "Out in the world" gallery (embed vs. screenshot
-   fallback on a few different networks/browsers), `/start`'s new email field, `/updates`
-   end to end with a real submission, `/d48`'s new tab.
-2. Noah to pick a replacement heading for the 9-style carousel above "Out in the world" —
-   "Sites we built. Step inside one." reads oddly once real client sites sit right below
-   it. Suggested in this session's chat: something like "Styles to start from." / "Step
-   inside one." — Noah's call, not changed without asking.
-3. `/api/check-domain` still hasn't been exercised against a real token on the deploy.
-4. Resend sending domain for `vilas.studio` is still unverified, so both
-   `/api/notify-intake` and the new ref-code confirmation email swallow their errors
-   silently until that's fixed.
-5. `hello@vilas.studio` still isn't a real inbox — TODO comment now sits next to it in
-   `lib/site.ts`.
+- **Screenshot capture is verified working in this devcontainer, NOT on Vercel.**
+  `@sparticuz/chromium`'s bundled binary is ~65MB uncompressed (`bin/chromium.br` alone
+  is 62MB) — a real risk of exceeding Vercel's function size limit depending on the plan.
+  Added an `outputFileTracingIncludes` entry for `/api/capture-sites` so the binary
+  actually ships (Next's tracer can't see it via static analysis otherwise — it's read
+  by a computed path at runtime), but that doesn't guarantee it fits. **First thing to
+  check after deploying: hit `/api/capture-sites` once by hand and read the JSON
+  response** (`{captured, total, errors}`) — if it 500s or times out, the manual
+  `screenshot_url` column is the fallback and always wins anyway, no code changes needed
+  to use it.
+- The 3 real `client_sites` rows now have real captures as of this session (see
+  `captured_at`). Jonah Shapiro Magic's capture genuinely shows an "Under Construction"
+  page — that's the site's real current state, not a bug in the capture.
+- `next dev` got confused once this session after a `next build` ran in the same `.next`
+  directory — a stale prerendered `/` kept serving with an empty client-site list even
+  after real data existed. `rm -rf .next` before `next dev` fixed it. Not a code bug,
+  just a mixed-artifacts trap worth remembering.
+- `PremiumHeroMedia` only proves itself on the Renovation demo. Pointing another style at
+  it is a one-line change (pass `heroConceptFor("demo-<slug>")` to that demo's
+  `DemoHero`) but wasn't done for all 9 to keep this session's blast radius sane on a
+  mechanism that's still asset-less.
 
 ## Gotchas & decisions (standing, from earlier sessions)
 - **Version stamp (standing rule):** bump `lib/version.ts` every push; the session's last
   message states the new version.
-- **`outputFileTracingIncludes` in `next.config.ts` covers `/start` and `/d48`.** Both
-  read demo source off disk at request time. Delete it and both 404 on Vercel while
-  working fine locally.
+- **`outputFileTracingIncludes` in `next.config.ts`** now covers `/start`, `/d48` (demo
+  source read off disk) and `/api/capture-sites` (the chromium binary) — delete any of
+  these and that route breaks on Vercel while working fine locally.
 - List answers are stored as one string per question — see `lib/intake.ts` if touching
   `templateCustomizations`/`templateLists`.
 - **Demos live in `components/demos/`, not `app/demos/`.**
@@ -132,8 +117,7 @@ reproducible from the repo, matching the existing convention.
   active at first paint, `Marquee.tsx` throws a React hydration mismatch in the console.
   React self-heals, nothing visibly breaks.
 - **Known pre-existing dead reference, still not fixed:** `app/api/notify-intake/route.ts`
-  reads `row.template`, a column dropped in migration 0007. Silently prints nothing for
-  that line rather than erroring — low priority, but worth a real fix sometime.
+  reads `row.template`, a column dropped in migration 0007.
 - Honesty rules hold: no fake reviews or stats, labeled placeholders instead of stock or
   generated imagery.
 - **This devcontainer can run out of memory under concurrent sessions.** If `next build`
@@ -143,17 +127,32 @@ reproducible from the repo, matching the existing convention.
 - Canonical project: **"Vilas"**, ref `epynfvskwaxejdibvgbr`, us-west-2.
   `public.intake_submissions`, `public.client_sites`, `public.update_requests`. RLS
   deny-all on `intake_submissions`/`update_requests` (service role bypasses); `client_sites`
-  has one public-read policy for `published = true` (unused by the app today — it reads
-  server-side with the service role like everything else — but there if a client-side
-  read is ever wired up).
-- Buckets `intake-logos`, `intake-photos`, `intake-videos` all exist and are public.
+  has one public-read policy for `published = true` (unused by the app — reads
+  server-side with the service role).
+- Buckets: `intake-logos`, `intake-photos`, `intake-videos`, `client-site-captures` (new
+  this session) — all public.
 - Free tier pauses after ~1wk idle; a cold request just needs a retry.
 
+## Next up (ordered)
+1. Deploy, then hit `/api/capture-sites` by hand once and read the response — see the
+   Gotchas item above. If it fails, upload the 3 real sites' screenshots to
+   `client_sites.screenshot_url` by hand; the section otherwise renders nothing until one
+   of those two happens (currently true on the yet-undeployed build).
+2. Noah's call: should the sticky corner mark / header / footer logo (`vilas-mark.webp`,
+   the dark-disc "V") switch to match the new "VS" monogram he dropped in for the
+   favicon? Left alone this session since only the favicon was asked for.
+3. Real Higgsfield hero clips for Premium, at `/public/premium/<slug>.mp4` +
+   `<slug>.jpg` per `lib/heroConcepts.ts` — start with `demo-renovation` since it's
+   already wired.
+4. Wire `premium` into the other 8 demos' `DemoHero` calls once assets exist for them.
+5. `/api/check-domain` still hasn't been exercised against a real token on the deploy.
+6. Resend sending domain for `vilas.studio` is still unverified.
+7. `hello@vilas.studio` still isn't a real inbox.
+
 ## Blocked on Noah
-- Confirm `hello@vilas.studio` is a real inbox.
-- `RESEND_API_KEY` / `NOTIFY_EMAIL` in Vercel, and verify `vilas.studio` with Resend —
-  this now also blocks the new ref-code confirmation email, not just the intake alert.
-- tagline / instagram / founder still `*_TBD`.
-- Real photos/video across the demos, and a `screenshot_url` for the 3 client sites
-  (currently null on all 3 — they fall back to the plain name+link card).
-- Pick a replacement heading for the 9-style carousel (see "Next up" #2).
+- Confirm `hello@vilas.studio` is a real inbox; `RESEND_API_KEY`/`NOTIFY_EMAIL` in Vercel.
+- tagline / instagram still `*_TBD`.
+- Real photos/video across the demos, and real Premium hero clips (job 5 above).
+- Whether `vilas-mark.webp` (the persistent header/footer/sticky-corner mark) should be
+  replaced with the new "VS" monogram he dropped in for the favicon this session — see
+  "Next up" #2.

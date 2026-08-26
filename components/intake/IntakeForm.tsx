@@ -70,7 +70,15 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
     // /start?template=demo-bakery. An explicit choice beats a stored draft.
     const wanted = new URLSearchParams(window.location.search).get("template");
     if (wanted && templateByKey(wanted)) {
-      setDraft((d) => ({ ...d, usingTemplate: "yes", templateChoice: wanted }));
+      // Arriving with a style already picked doesn't answer the "what
+      // matters more" question — default to Basic (the visitor can change
+      // it) rather than leaving tier blank with a style already chosen.
+      setDraft((d) => ({
+        ...d,
+        tier: d.tier || "basic",
+        usingTemplate: "yes",
+        templateChoice: wanted,
+      }));
     }
     setHydrated(true);
   }, []);

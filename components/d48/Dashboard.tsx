@@ -329,6 +329,10 @@ function Detail({ row }: { row: SubmissionRow }) {
           <Field label="Phone" value={row.phone} />
           <Field label="Address" value={row.address} />
           <Field label="Domain they want" value={row.desired_domain} />
+          <Field
+            label="Tier"
+            value={row.tier ? row.tier.charAt(0).toUpperCase() + row.tier.slice(1) : null}
+          />
           <Field label="Build" value={row.is_custom_build ? "Custom build, no template" : templateOf(row)} />
         </Group>
 

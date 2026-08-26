@@ -9,6 +9,15 @@ export type PaletteChoice = "template" | "own" | "";
 export type HasLogoChoice = "yes" | "no" | "";
 export type UsingTemplate = "yes" | "no" | "";
 
+// The attribute-first choice at the top of /start (CLAUDE.md-adjacent ticket,
+// job 2): "what matters more" rather than "what does it cost". Basic/premium
+// pick which of the two style-based tiers they want; custom is reached as a
+// plain link out of that choice, not a third button in it. This drives
+// `usingTemplate` (basic/premium both build on a style; custom doesn't) but
+// is kept as its own field because it's what actually gets billed —
+// `usingTemplate` alone can't tell Basic from Premium.
+export type TierChoice = "basic" | "premium" | "custom" | "";
+
 export type DayHours = { day: string; closed: boolean; open: string; close: string };
 
 export const DAYS = [
@@ -41,6 +50,7 @@ export type IntakeUploads = {
 export type IntakeDraft = {
   // page 1, contact + what they're building
   personalEmail: string;
+  tier: TierChoice;
   usingTemplate: UsingTemplate;
   templateChoice: string;
   desiredDomain: string;
@@ -96,6 +106,7 @@ export const emptyUploads = (): IntakeUploads => ({
 
 export const emptyDraft = (): IntakeDraft => ({
   personalEmail: "",
+  tier: "",
   usingTemplate: "",
   templateChoice: "",
   desiredDomain: "",
@@ -217,8 +228,8 @@ export function validateStep(id: StepId, d: IntakeDraft): Errors {
   if (id === "contact") {
     if (!d.personalEmail.trim()) e.personalEmail = REQUIRED;
     else if (!isValidEmail(d.personalEmail)) e.personalEmail = BAD_EMAIL;
-    if (!d.usingTemplate) e.usingTemplate = "Pick one so we know where to start.";
-    if (usingTemplate && !d.templateChoice) e.templateChoice = "Pick the template you want to build on.";
+    if (!d.tier) e.tier = "Pick one so we know where to start.";
+    if (usingTemplate && !d.templateChoice) e.templateChoice = "Pick the style you want to build on.";
     if (!d.businessName.trim()) e.businessName = REQUIRED;
     if (!d.yourName.trim()) e.yourName = REQUIRED;
     // Optional on a template build: the template already says what kind of
@@ -312,6 +323,7 @@ export type SubmissionRow = {
   status: string | null;
   ref_code: string | null;
   personal_email: string | null;
+  tier: string | null;
   business_name: string | null;
   business_type: string | null;
   your_name: string | null;

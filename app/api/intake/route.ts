@@ -58,6 +58,7 @@ export async function POST(req: Request) {
   const businessEmail = f("businessEmail", 320);
   const address = f("address", 300);
   const desiredDomain = scrubDomain(f("desiredDomain", 253));
+  const tier = f("tier", 10);
   const usingTemplate = f("usingTemplate", 10);
   const templateChoice = f("templateChoice", 100);
   const paletteChoice = f("paletteChoice", 20);
@@ -69,6 +70,15 @@ export async function POST(req: Request) {
 
   // Mirrors lib/intake.ts's validateStep. The client already checked all of
   // this; re-checking here is what actually protects the table.
+  if (!["basic", "premium", "custom"].includes(tier)) {
+    return bad("Pick what matters more for your site before continuing.");
+  }
+  // usingTemplate is derived from tier client-side, but re-derived here too
+  // rather than trusted, since it's what the rest of this handler branches
+  // on (§ style vs. custom fields, below).
+  if ((tier === "custom") !== isCustomBuild) {
+    return bad("That choice didn't come through right. Try again.");
+  }
   if (!isValidEmail(personalEmail)) {
     return bad("That personal email address doesn't look right.");
   }
@@ -131,6 +141,7 @@ export async function POST(req: Request) {
       phone: f("phone", 50) || null,
       address,
       desired_domain: desiredDomain,
+      tier,
       template_choice: isCustomBuild ? null : templateChoice,
       is_custom_build: isCustomBuild,
       palette_choice: paletteChoice || "template",

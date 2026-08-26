@@ -7,12 +7,73 @@ import {
   scrubPhone,
   type Errors,
   type IntakeDraft,
+  type TierChoice,
 } from "@/lib/intake";
 import { TEMPLATES } from "@/lib/templates";
-import { FieldSet, RadioCards, SelectField, TextField, Wrap, inputClass } from "./fields";
+import { COPY } from "@/lib/site";
+import { FieldError, FieldSet, SelectField, TextField, Wrap, inputClass } from "./fields";
 
 const YOUR_EMAIL_HINT =
   "Where we send your reference code and anything we need to ask you. This is you, not the business inbox.";
+
+// The attribute-first choice (job 2): the visitor picks what they want
+// before any price shows, and price follows as a confirmation line once
+// they've answered. Custom sits outside the two-way choice — a plain link,
+// never a third button next to it.
+function TierChoice({
+  tier,
+  error,
+  onChange,
+}: {
+  tier: TierChoice;
+  error?: string;
+  onChange: (t: TierChoice) => void;
+}) {
+  const c = COPY.startChoice;
+
+  if (tier === "basic" || tier === "premium" || tier === "custom") {
+    return (
+      <div data-field="tier" className="flex items-center justify-between gap-4 border border-line bg-surface px-5 py-4">
+        <p className="text-sm text-ink">{c.confirm[tier]}</p>
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className="shrink-0 text-xs text-muted underline underline-offset-4 transition-colors duration-200 hover:text-ink"
+        >
+          {c.change}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <FieldSet legend={c.heading}>
+      <div data-field="tier" className="grid gap-4 sm:grid-cols-2">
+        {(["premium", "basic"] as const).map((key) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onChange(key)}
+            className={`flex flex-col gap-2 border p-5 text-left transition-colors duration-200 ${
+              error ? "border-red-500" : "border-line hover:border-ink"
+            }`}
+          >
+            <span className="text-lg text-ink">{c[key].title}</span>
+            <span className="text-sm leading-relaxed text-muted">{c[key].body}</span>
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => onChange("custom")}
+        className="mt-3 text-sm text-muted underline underline-offset-4 transition-colors duration-200 hover:text-ink"
+      >
+        {c.customPrompt} {c.customLink}
+      </button>
+      <FieldError error={error} />
+    </FieldSet>
+  );
+}
 
 type DomainState = "idle" | "checking" | "available" | "taken" | "unknown";
 
@@ -120,24 +181,22 @@ export function PageContact({
         hint={YOUR_EMAIL_HINT}
       />
 
-      <FieldSet legend="Are you picking one of our styles?">
-        <RadioCards
-          name="usingTemplate"
-          value={draft.usingTemplate}
-          error={errors.usingTemplate}
-          onChange={(v) => {
-            onChange({
-              usingTemplate: v,
-              ...(v === "no" ? { templateChoice: "" } : null),
-            });
-            onBlur("usingTemplate");
-          }}
-          options={[
-            { value: "yes", label: "Yes, I want to use one of your styles" },
-            { value: "no", label: "No, I want a fully custom build" },
-          ]}
-        />
-      </FieldSet>
+      <TierChoice
+        tier={draft.tier}
+        error={errors.tier}
+        onChange={(t) => {
+          // Basic and Premium both build on a style; Custom doesn't, and an
+          // unanswered tier ("Change" was just clicked) leaves usingTemplate
+          // unanswered too, rather than defaulting it to a stale "no".
+          const usingTemplate = t === "" ? "" : t === "custom" ? "no" : "yes";
+          onChange({
+            tier: t,
+            usingTemplate,
+            ...(usingTemplate !== "yes" ? { templateChoice: "" } : null),
+          });
+          onBlur("tier");
+        }}
+      />
 
       {usingTemplate && (
         <SelectField

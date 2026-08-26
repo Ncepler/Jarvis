@@ -23,7 +23,6 @@ export type Project = {
   screenshot: string; // /public/work/<slug>.webp — 16:10, supplied by Noah
   screenshotFull: string; // full-length homepage capture, last-resort fallback
   preview: string; // /previews/<slug>.html — mirrored homepage served from our origin
-  tier: "template" | "custom" | "flagship";
   order: number; // card position; lower = earlier
   embeddable: boolean; // verified manually — default false until tested
   isStyleDemo: boolean; // true = our own template demo, not a client site
@@ -42,7 +41,6 @@ export const projects: Project[] = [
     screenshot: "/previews/firstRenovationImage.webp",
     screenshotFull: "",
     preview: "",
-    tier: "flagship",
     order: 1,
     embeddable: false,
     isStyleDemo: true,
@@ -51,12 +49,11 @@ export const projects: Project[] = [
     slug: "demo-landscaping",
     name: "Landscaping",
     category: "Landscaping",
-    caption: "A design-build studio shown at full flagship scale.",
+    caption: "A design-build studio, shown at full scale.",
     url: "",
     screenshot: "/previews/firstLandscapingImage.webp",
     screenshotFull: "",
     preview: "",
-    tier: "flagship",
     order: 2,
     embeddable: false,
     isStyleDemo: true,
@@ -70,7 +67,6 @@ export const projects: Project[] = [
     screenshot: "/previews/firstPowerWashImage.webp",
     screenshotFull: "",
     preview: "",
-    tier: "template",
     order: 3,
     embeddable: false,
     isStyleDemo: true,
@@ -84,7 +80,6 @@ export const projects: Project[] = [
     screenshot: "/previews/firstFloristImage.webp",
     screenshotFull: "",
     preview: "",
-    tier: "custom",
     order: 4,
     embeddable: false,
     isStyleDemo: true,
@@ -98,7 +93,6 @@ export const projects: Project[] = [
     screenshot: "/previews/firstLawnCareImage.webp",
     screenshotFull: "",
     preview: "",
-    tier: "template",
     order: 5,
     embeddable: false,
     isStyleDemo: true,
@@ -112,7 +106,6 @@ export const projects: Project[] = [
     screenshot: "/previews/firstBakeryImage.webp",
     screenshotFull: "",
     preview: "",
-    tier: "template",
     order: 6,
     embeddable: false,
     isStyleDemo: true,
@@ -126,7 +119,6 @@ export const projects: Project[] = [
     screenshot: "/previews/firstBarberImage.webp",
     screenshotFull: "",
     preview: "",
-    tier: "custom",
     order: 7,
     embeddable: false,
     isStyleDemo: true,
@@ -140,7 +132,6 @@ export const projects: Project[] = [
     screenshot: "/previews/firstAutoBodyImage.webp",
     screenshotFull: "",
     preview: "",
-    tier: "custom",
     order: 0,
     embeddable: false,
     isStyleDemo: true,
@@ -156,7 +147,6 @@ export const projects: Project[] = [
     screenshot: "",
     screenshotFull: "",
     preview: "",
-    tier: "flagship",
     order: 8,
     embeddable: false,
     isStyleDemo: true,

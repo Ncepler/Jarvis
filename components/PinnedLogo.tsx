@@ -8,9 +8,11 @@ import { Logo } from "./Logo";
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 // Brand mark pinned bottom-left, visible the ENTIRE time (Noah 2026-06-20 —
-// this is now the site's only persistent logo; the top-left header was dropped).
-// Clicking it morphs the mark into a small personal business card
-// (Noah 2026-06-11) — same element, layoutId morph, not a swap.
+// this is now the site's only persistent logo; the top-left header was
+// dropped). Clicking it morphs the mark into a small studio card (Noah
+// 2026-06-11) — same element, layoutId morph, not a swap. The card names the
+// studio only, never a person: no founder name, no "founded by" (Noah,
+// 2026-08-26 — a placeholder person is worse than no person).
 export function PinnedLogo() {
   const reduced = useReducedMotion() ?? false;
   const [open, setOpen] = useState(false);
@@ -37,7 +39,7 @@ export function PinnedLogo() {
   }, [open]);
 
   // reduced motion: fade between the two states instead of morphing
-  const layoutId = reduced ? undefined : "founder-card";
+  const layoutId = reduced ? undefined : "studio-card";
 
   return (
     <div className="fixed bottom-6 left-6 z-40 hidden sm:block">
@@ -48,7 +50,7 @@ export function PinnedLogo() {
             ref={cardRef}
             layoutId={layoutId}
             role="dialog"
-            aria-label={`Business card of ${SITE.founder}`}
+            aria-label={`About ${SITE.name}`}
             className="flex w-[300px] min-h-[180px] flex-col border border-line bg-surface p-5 shadow-[0_12px_40px_rgba(20,53,57,0.14)]"
             initial={reduced ? { opacity: 0 } : undefined}
             animate={reduced ? { opacity: 1 } : undefined}
@@ -64,7 +66,7 @@ export function PinnedLogo() {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3, delay: reduced ? 0 : 0.2 }}
               >
-                {SITE.founder}
+                {SITE.name}
               </motion.span>
               <button
                 type="button"
@@ -88,7 +90,7 @@ export function PinnedLogo() {
                 ease: EASE,
               }}
             >
-              <span className="text-ink">Designer · {SITE.name}</span>
+              <span className="text-ink">A small web design studio.</span>
               <span>{SITE.region}</span>
               {!isTBD(SITE.email) && (
                 <a
@@ -116,7 +118,7 @@ export function PinnedLogo() {
             ref={buttonRef}
             layoutId={layoutId}
             type="button"
-            aria-label={`About ${SITE.founder}`}
+            aria-label={`About ${SITE.name}`}
             onClick={() => setOpen(true)}
             className="block cursor-pointer opacity-35 transition-opacity duration-300 hover:opacity-70"
             initial={reduced ? { opacity: 0 } : undefined}

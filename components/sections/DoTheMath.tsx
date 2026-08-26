@@ -7,17 +7,13 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { COPY } from "@/lib/site";
 
 // The "do the math" ROI beat. The whole point is honesty: it multiplies the
-// VISITOR'S OWN numbers — a single recurring missed customer vs. a style
-// site's real year-one cost (the $300 build plus 12 months at $50, not just
-// the build). It never promises returns; it's opportunity cost, and the
-// "your numbers, not ours" line says so out loud. Kept on the light field as
-// a raised surface panel, big readout in accent.
-
-// Style-tier build + monthly (must match COPY.pricing.tiers' "Style" row) —
-// year one is the build plus 12 months, not just the one-time build cost.
-const STYLE_BUILD = 300;
-const STYLE_MONTHLY = 50;
-const YEAR_ONE_COST = STYLE_BUILD + STYLE_MONTHLY * 12; // $900
+// VISITOR'S OWN numbers — a single recurring missed customer, projected over
+// a year. It never promises returns and it never compares that figure
+// against what a site costs: a comparison like that would require an annual
+// site cost, and the site never states one (no-yearly-cost rule — pricing is
+// always upfront-plus-monthly, never summed). The "your numbers, not ours"
+// line says the honesty part out loud. Kept on the light field as a raised
+// surface panel, big readout in accent.
 const CV_MIN = 50;
 const CV_MAX = 2500;
 const CV_STEP = 50;
@@ -65,19 +61,11 @@ function AnnualReadout({
 
 export function DoTheMath() {
   const reduced = useReducedMotion();
-  const [cv, setCv] = useState(STYLE_BUILD); // one new customer is worth…
+  const [cv, setCv] = useState(300); // one new customer is worth…
   const [mpm, setMpm] = useState(MPM_MIN); // …missed per month (hypothetical)
   const cvId = useId();
 
   const annual = cv * mpm * 12;
-  const multiple = annual / YEAR_ONE_COST;
-  // Round sensibly: whole numbers once the gap is wide, one decimal while
-  // it's close, and an honest "under" message rather than hiding anything
-  // below 1×.
-  const multipleLabel =
-    multiple >= 3
-      ? `${Math.round(multiple)}×`
-      : `${multiple.toFixed(1).replace(/\.0$/, "")}×`;
   const m = COPY.math;
 
   const setCvSafe = (n: number) =>
@@ -197,16 +185,6 @@ export function DoTheMath() {
               <p className="max-w-xs text-lg leading-snug text-muted">
                 {m.readoutCaption}
               </p>
-              <div className="mt-2 border-t border-line pt-6">
-                <p className="text-base leading-relaxed text-ink">
-                  {m.kicker.replace("{cost}", usd(YEAR_ONE_COST))}
-                </p>
-                <p className="mt-1 text-base leading-relaxed text-muted">
-                  {multiple < 1
-                    ? m.multipleUnder
-                    : m.multiple.replace("{n}", multipleLabel)}
-                </p>
-              </div>
             </div>
           </div>
         </Reveal>
@@ -222,6 +200,15 @@ export function DoTheMath() {
             {m.jsOff}
           </p>
         </noscript>
+
+        <Reveal delay={0.1}>
+          <a
+            href="/start"
+            className="mt-12 inline-block border border-accent bg-accent px-6 py-3 text-sm text-white transition-colors duration-200 hover:bg-accent/90"
+          >
+            {m.cta} →
+          </a>
+        </Reveal>
       </div>
     </section>
   );

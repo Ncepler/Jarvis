@@ -25,6 +25,8 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+import type { HeroConcept } from "@/lib/heroConcepts";
+import { PremiumHeroMedia } from "./PremiumHeroMedia";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -312,6 +314,7 @@ export function DemoHero({
   phone,
   mediaLabel,
   heroImage,
+  premium,
 }: {
   eyebrow: string;
   line1: string;
@@ -321,29 +324,39 @@ export function DemoHero({
   phone: string;
   mediaLabel: string;
   heroImage?: string; // drop a real hero background image path here (else placeholder)
+  // Premium tier only (round 2, job 5): a moving hero instead of the still
+  // `heroImage` above. Pass a lib/heroConcepts.ts entry to swap the static
+  // background for PremiumHeroMedia's video (looping or scroll-driven,
+  // per the concept's `mode`) — everything else about the hero is unchanged.
+  premium?: HeroConcept;
 }) {
   return (
     <section className="relative w-full" style={{ minHeight: "640px" }}>
-      {/* full-bleed background media slot — real image if given, else label */}
+      {/* full-bleed background media slot — Premium's moving hero if given,
+          else a real image, else the placeholder label */}
       <div
         className="group/media absolute inset-0"
         style={{
-          backgroundColor: heroImage ? undefined : "var(--d-surface)",
-          backgroundImage: heroImage ? `url("${heroImage}")` : undefined,
+          backgroundColor: heroImage || premium ? undefined : "var(--d-surface)",
+          backgroundImage: !premium && heroImage ? `url("${heroImage}")` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <FileBadge file="hero.jpg" />
-        {!heroImage && (
-          <div className="flex h-full w-full items-center justify-center">
-            <span
-              className="text-[11px] font-semibold uppercase tracking-[0.18em]"
-              style={{ color: "var(--d-muted)" }}
-            >
-              {mediaLabel}
-            </span>
-          </div>
+        <FileBadge file={premium ? undefined : "hero.jpg"} />
+        {premium ? (
+          <PremiumHeroMedia concept={premium} />
+        ) : (
+          !heroImage && (
+            <div className="flex h-full w-full items-center justify-center">
+              <span
+                className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+                style={{ color: "var(--d-muted)" }}
+              >
+                {mediaLabel}
+              </span>
+            </div>
+          )
         )}
       </div>
       {/* scrim so headlines stay readable on real footage — light demos pass a
