@@ -5,9 +5,10 @@ type LogoProps = {
   className?: string;
 };
 
-// The Vilas mark — the dark "V" disc. Source is /public/vilas-mark.webp
-// (a transparent, circle-cropped build of Noah's vilasLogo). Swap that one
-// file to change the mark everywhere.
+// The Vilas mark — the bone-circle "VS" monogram (Noah's real logo, dropped
+// in 2026-08-26 and now used everywhere: header, footer, sticky corner mark,
+// and the favicon/apple-icon — see app/icon.png). Source is
+// /public/vilas-mark.webp. Swap that one file to change the mark everywhere.
 export function Logo({ size = 28, className }: LogoProps) {
   return (
     <Image

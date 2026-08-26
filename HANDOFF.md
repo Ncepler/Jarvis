@@ -52,14 +52,18 @@
    still hero. No video/poster assets exist yet (`lib/heroConcepts.ts` points at
    `/public/premium/<slug>.mp4`/`.jpg`, which 404 gracefully to the text placeholder
    today).
-7. **Favicon wired via Next's file convention**: `app/icon.png` + `app/apple-icon.png`
-   (180×180). Started as geometric placeholders, then Noah dropped a real logo file
-   into `public/favicon.PNG` mid-session (a bone-circle "VS" monogram) — used that for
-   both instead of shipping a placeholder. `public/favicon.PNG` itself is now an unused
-   duplicate; safe to delete. **Note**: this "VS" mark is a different design from
-   `public/vilas-mark.webp` (the dark-disc "V" used by the header/footer/sticky logo
-   everywhere else) — didn't touch that one without being asked, see Noah's-eyes-needed
-   item below.
+7. **Favicon + the site's one logo mark are now the same file.** `app/icon.png` +
+   `app/apple-icon.png` (180×180) and `public/vilas-mark.webp` (header/footer/sticky
+   corner mark, via `Logo.tsx`) all derive from the real logo Noah dropped in mid-session
+   (`public/favicon.PNG` — a bone-circle "VS" monogram; now an unused duplicate, safe to
+   delete). Replaced the old dark-disc "V" everywhere. **Verified live and flagged one
+   real issue**: the mark's circle color is nearly identical to `--color-bg` (bone), so
+   on the page itself (not browser chrome) the circle disappears and only the bare "VS"
+   glyph shows — most noticeable on the sticky corner mark, which also sits at 35%
+   opacity by default. Screenshotted via a local prod build to confirm this isn't a
+   rendering bug. Left as-is since it's Noah's actual asset and not mine to recolor —
+   worth a look before calling it done (a stroke, a filled/darker circle, or a bump in
+   the pinned mark's opacity would all fix it).
 8. **Sticky corner mark**: `PinnedLogo.tsx`'s card now shows "Vilas Studio" + "A small
    web design studio." — no founder name. `SITE.founder` deleted from `lib/site.ts`
    (nothing else referenced it).
@@ -138,9 +142,9 @@
    Gotchas item above. If it fails, upload the 3 real sites' screenshots to
    `client_sites.screenshot_url` by hand; the section otherwise renders nothing until one
    of those two happens (currently true on the yet-undeployed build).
-2. Noah's call: should the sticky corner mark / header / footer logo (`vilas-mark.webp`,
-   the dark-disc "V") switch to match the new "VS" monogram he dropped in for the
-   favicon? Left alone this session since only the favicon was asked for.
+2. Done this session (was open, Noah answered): the sticky corner/header/footer mark now
+   matches the favicon. See the low-contrast note in Gotchas above — probably wants a
+   fix before this ships.
 3. Real Higgsfield hero clips for Premium, at `/public/premium/<slug>.mp4` +
    `<slug>.jpg` per `lib/heroConcepts.ts` — start with `demo-renovation` since it's
    already wired.
@@ -153,6 +157,5 @@
 - Confirm `hello@vilas.studio` is a real inbox; `RESEND_API_KEY`/`NOTIFY_EMAIL` in Vercel.
 - tagline / instagram still `*_TBD`.
 - Real photos/video across the demos, and real Premium hero clips (job 5 above).
-- Whether `vilas-mark.webp` (the persistent header/footer/sticky-corner mark) should be
-  replaced with the new "VS" monogram he dropped in for the favicon this session — see
-  "Next up" #2.
+- The logo mark's contrast against the bone page background (see Gotchas) — Noah's call
+  on whether/how to fix it.
