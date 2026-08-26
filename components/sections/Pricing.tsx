@@ -61,6 +61,24 @@ export function Pricing() {
             {COPY.pricing.note}
           </p>
         </Reveal>
+
+        {/* What the upfront vs. monthly cost each actually pay for. */}
+        <Reveal delay={0.3}>
+          <div className="mt-16 max-w-2xl border-t border-line pt-10">
+            <h3 className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-accent">
+              {COPY.pricing.costExplainer.heading}
+            </h3>
+            <p className="mt-4 text-base leading-relaxed text-ink/85">
+              {COPY.pricing.costExplainer.upfront}
+            </p>
+            <p className="mt-4 text-base leading-relaxed text-ink/85">
+              {COPY.pricing.costExplainer.monthly}
+            </p>
+            <p className="mt-6 text-sm text-muted">
+              {COPY.pricing.costExplainer.annual}
+            </p>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

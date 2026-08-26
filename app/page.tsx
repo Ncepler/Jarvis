@@ -12,6 +12,7 @@ import { Gallery } from "@/components/sections/Gallery";
 import { Hero } from "@/components/sections/Hero";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { Pricing } from "@/components/sections/Pricing";
+import { Seo } from "@/components/sections/Seo";
 import { Services } from "@/components/sections/Services";
 import { WorkNote } from "@/components/sections/WorkNote";
 import { listClientSites } from "@/lib/clientSites";
@@ -37,6 +38,7 @@ export default async function Home() {
         <HowItWorks />
         <DoTheMath />
         <Pricing />
+        <Seo />
         <About />
         <Faq />
         <ClosingCta />

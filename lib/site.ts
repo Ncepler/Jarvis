@@ -137,6 +137,47 @@ export const COPY = {
       },
     ] as const,
     note: "Your monthly covers hosting, the domain, and updates when you need them. If a payment lapses, the site pauses until it's caught up, but nothing gets deleted. Your content and domain are safe.",
+    // Cost explainer, directly under the tier cards — splits the two line
+    // items (upfront vs. monthly) apart from the "why" copy above.
+    costExplainer: {
+      heading: "What you're paying for",
+      upfront:
+        "The upfront cost is the site itself — design, build, copy, photos, launch. One time, done.",
+      monthly:
+        "The monthly keeps your domain and hosting running, and covers the SEO work below. Sites that get left alone stop showing up on Google. This keeps yours from doing that.",
+      annual: "Pay for the year up front and get two months free.",
+    },
+  },
+  // "Getting found on Google" — sits right after pricing, since the monthly
+  // fee is what funds this work. Two equal-weight groups: what's set up at
+  // launch, and what's ongoing every month.
+  seo: {
+    heading: "Getting found on Google",
+    intro:
+      "A website nobody finds is a business card in a drawer. Building the site is half the job. The other half is making sure Google knows it exists.",
+    launch: {
+      heading: "Set up when we launch",
+      items: [
+        "Google Search Console and your sitemap submitted, so Google indexes every page",
+        "Google Analytics, so you can see who's actually visiting",
+        "Page titles and descriptions built around what people search — your service plus your town",
+        "LocalBusiness schema, so Google reads your hours, address and services correctly",
+        "Compressed images and a fast build, because slow sites get buried",
+        "Internal links, so Google can crawl the whole site",
+      ],
+    },
+    ongoing: {
+      heading: "What we keep doing every month",
+      items: [
+        "Google Business Profile — posts, photos, review replies, hours kept current. For local search this moves more than the website does.",
+        "Keeping your name, address and phone identical everywhere online",
+        "New pages when you add a service or want to show up in a neighbouring town",
+        "Watching what's ranking and adjusting",
+      ],
+    },
+    closing:
+      "Local SEO isn't instant. Most of this takes three to six months to show up in rankings. Anyone promising you page one next week is lying.",
+    cta: "Get started",
   },
   // The attribute-first choice on /start (before any price is shown). The
   // visitor picks based on what they want, not what it costs — price follows
