@@ -32,9 +32,9 @@ export default async function Home() {
         <Hero />
         <Marquee />
         <Services />
-        <Gallery />
-        <WorkNote />
         <ClientSites sites={clientSites} />
+        <WorkNote />
+        <Gallery />
         <HowItWorks />
         <DoTheMath />
         <Pricing />
