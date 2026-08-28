@@ -162,10 +162,10 @@ export default function PrivacyPage() {
 
             <Section heading="Contact">
               <a
-                href="mailto:hello@vilas.studio"
+                href={`mailto:${SITE.email}`}
                 className="text-ink/80 transition-colors duration-200 hover:text-accent"
               >
-                hello@vilas.studio
+                {SITE.email}
               </a>
             </Section>
           </div>

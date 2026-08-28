@@ -20,7 +20,7 @@ The site has two jobs:
 
 ## 2. Brand name — RESOLVED 2026-06-17: **Vilas** (placeholder rules still apply to the rest)
 
-The name is **Vilas** (VEE-las, from "visual"), domain **vilas.studio**, wordmark "Vilas Studio". `lib/site.ts` now holds `BRAND = "Vilas"`; `SITE.name = "${BRAND} Studio"` is the ONE place "Studio" is written, and the hero's ".studio" line derives from `SITE.domain`. **Still never hardcode "Studio" elsewhere.** `email` and `founder` remain `*_TBD` — placeholder discipline below still governs them. `tagline` is resolved ("A website that looks expensive. It wasn't."). `instagram` has no real account yet, so it's an empty string rather than a `_TBD` placeholder — `isTBD()` treats `""` the same way, so the gated components that hide it still work.
+The name is **Vilas** (VEE-las, from "visual"), domain **vilas.studio**, wordmark "Vilas Studio". `lib/site.ts` now holds `BRAND = "Vilas"`; `SITE.name = "${BRAND} Studio"` is the ONE place "Studio" is written, and the hero's ".studio" line derives from `SITE.domain`. **Still never hardcode "Studio" elsewhere.** `email` is resolved (2026-08-28) to `hello.vilasstudio@gmail.com` — a real inbox, standing in for `hello@vilas.studio` until the domain is registered. `founder` remains `*_TBD` — placeholder discipline below still governs it. `tagline` is resolved ("A website that looks expensive. It wasn't."). `instagram` has no real account yet, so it's an empty string rather than a `_TBD` placeholder — `isTBD()` treats `""` the same way, so the gated components that hide it still work.
 
 - All brand strings live in **one file**: `lib/site.ts`
 
@@ -31,7 +31,7 @@ export const SITE = {
   name: `${BRAND} Studio`,        // full wordmark + SEO name — only place "Studio" is written
   domain: "vilas.studio",
   tagline: "A website that looks expensive. It wasn't.",
-  email: "CONTACT_EMAIL_TBD",
+  email: "hello.vilasstudio@gmail.com",
   instagram: "",
   founder: "FOUNDER_NAME_TBD",
   region: "Long Island, NY",
@@ -162,7 +162,7 @@ Goal: read a clear tier above the templates we sell (Axel's/Sallem's skeleton ×
 - **ValueProps** (`components/sections/ValueProps.tsx`): numbered 01–04 honest differentiators (`COPY.why`). No stats, no client counts.
 - **Faq** is now a numbered accordion (Q01–, one open at a time) — `components/sections/Faq.tsx`.
 - **ClosingCta** (`components/sections/ClosingCta.tsx`): final oversized two-line CTA band (`COPY.closing`) → `#contact`, sits just above the form.
-- **Footer** restructured into Navigate / What we do / Contact columns (still TBD-aware on email/Instagram).
+- **Footer** restructured into Navigate / What we do / Contact columns (email now resolved and always shown; Instagram stays TBD-aware).
 
 #### 6.9 Demo design system — the "Axel's / Sallem" look (2026-06-19)
 The gallery demos no longer use decorative geometric shapes — they were restyled to a **full-bleed, photographic, editorial system** so they read like real hired-contractor sites instead of abstract AI pages. **The spec is `.claude/skills/local-service-design-system/SKILL.md` — read it before touching any demo, and follow its prescribed values; do not improvise demo visuals.** Key rules:

@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { rateLimited } from "@/lib/rateLimit";
 import { findSubmission, insertUpdateRequest, type LookupResult } from "@/lib/updates";
+import { SITE } from "@/lib/site";
 
 export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 const fail = (error: string): Result<never> => ({ ok: false, error });
@@ -19,7 +20,7 @@ async function callerIp() {
 // One generic message either way — it doesn't say which field was wrong, so
 // walking the ref-code sequence doesn't tell you anything either.
 const NO_MATCH =
-  "That code and email don't match anything on our end. Check both and try again, or email us at hello@vilas.studio.";
+  `That code and email don't match anything on our end. Check both and try again, or email us at ${SITE.email}.`;
 
 export async function lookupSubmission(
   refCodeRaw: string,

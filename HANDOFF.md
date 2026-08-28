@@ -5,17 +5,27 @@
   pass with no errors. Committed and **pushed straight to `main`** (standing instruction
   from Noah: push + sync to main whenever work is build-clean and ready, don't wait to be
   asked). Not yet checked on the actual Vercel deploy this round.
-- This session ran four tickets back to back: a legal-patch + copy-fixes pass (19 tasks,
-  run twice), an SEO/UX checklist pass (9 tasks), a brand-copy scrub (removed a
-  name/villa FAQ pun, fixed a leftover tagline-prefix string a prior pass missed, cleaned
-  the meta description), and this round — **a placeholder cleanup pass**: a false
-  `/privacy` collection claim removed, the real tagline filled in, the Instagram
-  placeholder resolved to "no account yet" instead of a dead link, and a repo-wide
-  re-verify of the earlier tagline fix (which did land this time — confirmed by grep, not
-  just claimed). See git log for exact commits; this file only covers what's still
-  relevant to pick up work, not a full diary.
+- **Email placeholder resolved (latest, this round):** `SITE.email` is now a real inbox,
+  `hello.vilasstudio@gmail.com` (Noah, 2026-08-28) — standing in for `hello@vilas.studio`
+  until the domain is registered and that mailbox exists. Every hardcoded
+  `hello@vilas.studio` reference (Footer, `/terms`, `/privacy`, `/updates` error copy) now
+  reads `SITE.email` instead, and the TBD-branch in `Footer.tsx` was removed since the
+  gate is no longer needed. **Not changed:** `app/api/notify-intake/route.ts`'s
+  `from: "intake@vilas.studio"` — that's an internal sender label for the Noah-only
+  notification email (goes to `NOTIFY_EMAIL`), not the public contact address, so it was
+  left alone. **Flagged, not fully fixed:** `app/api/intake/route.ts`'s confirmation-email
+  `from` now also reads `SITE.email`, but Resend can't actually send `from` a bare Gmail
+  address (no domain to verify) — that send stays non-functional until there's a
+  Resend-verified sending domain; see Blocked on Noah.
+- This session ran four tickets back to back before the email pass: a legal-patch +
+  copy-fixes pass (19 tasks, run twice), an SEO/UX checklist pass (9 tasks), a brand-copy
+  scrub (removed a name/villa FAQ pun, fixed a leftover tagline-prefix string a prior pass
+  missed, cleaned the meta description), and a placeholder cleanup pass (false `/privacy`
+  collection claim removed, real tagline filled in, Instagram placeholder resolved to "no
+  account yet" instead of a dead link). See git log for exact commits; this file only
+  covers what's still relevant to pick up work, not a full diary.
 
-## This session's work — placeholder cleanup (most recent)
+## This session's work — placeholder cleanup (previous round)
 1. `app/privacy/page.tsx` — dropped the "your current website" clause from "What we
    collect": the intake form has no such field, so the policy shouldn't claim to collect
    it. The field itself is still deferred, separate work (see Blocked on Noah).
@@ -80,11 +90,16 @@
    `<slug>.jpg` per `lib/heroConcepts.ts` — start with `demo-renovation` since it's
    already wired.
 5. `/api/check-domain` still hasn't been exercised against a real token on the deploy.
-6. Resend sending domain for `vilas.studio` is still unverified.
-7. `hello@vilas.studio` still isn't a real inbox.
+6. Resend sending domain still unverified — needed before `/api/intake`'s confirmation
+   email or `/api/notify-intake`'s internal notification can actually send (see Current
+   state above; both `from` addresses are placeholders until a real domain is verified
+   with Resend).
 
 ## Blocked on Noah
-- Confirm `hello@vilas.studio` is a real inbox; `RESEND_API_KEY`/`NOTIFY_EMAIL` in Vercel.
+- Decide/confirm the Resend sending domain (once `vilas.studio` is registered and
+  verified there) so the intake confirmation + internal notify emails actually send;
+  `hello.vilasstudio@gmail.com` works as the reply-to/display inbox in the meantime, but
+  Resend can't send `from` a Gmail address. `RESEND_API_KEY`/`NOTIFY_EMAIL` in Vercel.
 - A real Instagram account, when one exists — `SITE.instagram` is `""` until then.
 - Real photos/video across the demos, real Premium hero clips, a real high-res logo
   export for the icon set, and a designed OG image.

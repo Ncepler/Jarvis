@@ -7,6 +7,7 @@ import {
   type Upload,
 } from "@/lib/intake";
 import { questionsFor, templateByKey } from "@/lib/templates";
+import { SITE } from "@/lib/site";
 
 // Talks to Supabase's REST API directly with fetch — no client lib, and the
 // service role key never leaves the server (CLAUDE.md §14). Files are
@@ -175,6 +176,10 @@ export async function POST(req: Request) {
   // mail outage never blocks the person who just submitted. Reuses the
   // Resend path notify-intake already established rather than building a
   // second one.
+  // NOTE: Resend only sends "from" a domain verified with them — a bare
+  // Gmail address can never be verified there, so this "from" will need to
+  // move to a domain Resend can verify (vilas.studio, once it's registered)
+  // before this send actually works. SITE.email is the real reply-to inbox.
   if (row.ref_code && RESEND_API_KEY) {
     fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -183,7 +188,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "hello@vilas.studio",
+        from: SITE.email,
         to: personalEmail,
         subject: `Your reference code: ${row.ref_code}`,
         text: [
