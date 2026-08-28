@@ -53,7 +53,7 @@ export const COPY = {
     pricing: { a: "Pricing.", b: "No surprises later." },
   },
   hero: {
-    positioning: "Websites for local businesses. Live in about a week.",
+    positioning: "A website that looks expensive. It wasn't.",
     outcome:
       "People Google you before they hire you. What they find decides who gets the call.",
   },
@@ -184,7 +184,7 @@ export const COPY = {
   },
   services: {
     bridge:
-      "Live in about a week. All we need from you is a logo, a few photos, and your hours.",
+      "All we need from you is a logo, a few photos, and your hours.",
     riskReversal: "Half up front. The rest when you're happy with it.",
     paths: {
       basic:
@@ -259,10 +259,6 @@ export const COPY = {
       {
         q: "What do you need from me?",
         a: "Send your logo, photos, and hours. We write everything else.",
-      },
-      {
-        q: "Why \"Vilas\"?",
-        a: "Like villas, one L — say it vee-lahs. We build sites that look like they cost as much as one.",
       },
     ],
   },

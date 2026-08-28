@@ -4,18 +4,36 @@
 - Builds clean locally this session: `npx tsc --noEmit`, `next lint`, `next build` all
   pass with no errors. Committed and **pushed straight to `main`** (standing instruction
   from Noah: push + sync to main whenever work is build-clean and ready, don't wait to be
-  asked). Verified locally against a production build (`next start`) that `/robots.txt`,
-  `/manifest.webmanifest`, `/opengraph-image`, and the JSON-LD `<script>` all resolve —
-  not yet checked on the actual Vercel deploy.
-- This session ran two tickets back to back: a **legal-patch + copy-fixes pass** (19
+  asked). Not yet checked on the actual Vercel deploy this round.
+- This session ran three tickets back to back: a **legal-patch + copy-fixes pass** (19
   tasks, run twice — the second run replaced task 19's /terms + /privacy spec with a more
-  detailed one, and that's the version live now) and an **SEO/UX checklist pass** (9
-  tasks: robots.txt, Organization JSON-LD, Vercel Analytics, favicon/manifest icons, a
-  placeholder OG image, gallery + client-site alt text, a response-time line, a /start
-  thank-you state, and a custom 404). See git log for exact commits — this file only
-  covers what's still relevant to pick up work, not a full diary.
+  detailed one), an **SEO/UX checklist pass** (9 tasks: robots.txt, Organization JSON-LD,
+  Vercel Analytics, favicon/manifest icons, a placeholder OG image, gallery + client-site
+  alt text, a response-time line, a /start thank-you state, a custom 404), and a **third
+  legal-patch re-run** that walked back the brand-name FAQ item and scrubbed "villa" +
+  the old "Live in about a week" tagline site-wide. See git log for exact commits — this
+  file only covers what's still relevant to pick up work, not a full diary.
 
-## This session's work — SEO/UX pass (most recent)
+## This session's work — brand-copy scrub (most recent)
+1. **Removed the "Why 'Vilas'?" FAQ item** (`lib/site.ts`) added in an earlier pass —
+   Noah's call: no villa/name pun anywhere on the site.
+2. **`COPY.hero.positioning`** ("Websites for local businesses. Live in about a week.")
+   → "A website that looks expensive. It wasn't." One shared source, three render sites
+   that all picked it up automatically: `Hero.tsx`, `Footer.tsx`, and
+   `opengraph-image.tsx` (which uses this line as its tagline stand-in — the generated
+   OG image's subline changed along with this).
+3. **Caught a miss from an earlier pass**: `COPY.services.bridge` still had the old
+   "Live in about a week." prefix — task 3 back in the first legal-patch run should have
+   dropped it and apparently didn't land. Fixed now: reads "All we need from you is a
+   logo, a few photos, and your hours."
+4. **`app/layout.tsx`'s `META_DESCRIPTION`** — dropped the "cost as much as a villa"
+   line for "look expensive — and aren't." Single shared const, feeds
+   `metadata.description` + `openGraph.description` + `twitter.description` all at once
+   — confirmed via grep there was no second copy anywhere else.
+5. Verified zero remaining hits for "villa" (any case) and "Live in about a week"
+   repo-wide, per the ticket's own verify step.
+
+## This session's work — SEO/UX pass
 1. `app/robots.ts` — allow all, no sitemap line (none exists yet). `/start`, `/updates`,
    and `/demos/[slug]` already had per-page `robots: { index: false, follow: false }` in
    their own metadata before this session — nothing new needed there.
