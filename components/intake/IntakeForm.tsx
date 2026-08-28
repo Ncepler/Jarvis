@@ -44,6 +44,7 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
   const [error, setError] = useState("");
   const [refCode, setRefCode] = useState("");
   const [copied, setCopied] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   // The chosen template's real content, read off its source server-side.
   const [content, setContent] = useState<Record<string, Row[]>>({});
   const [loadingContent, setLoadingContent] = useState(false);
@@ -230,6 +231,7 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
     e.preventDefault();
     if (problems > 0) return reveal();
     if (!isLast) return goTo(step + 1);
+    if (!termsAccepted) return;
     if (honeypotRef.current?.value) {
       // bots fill hidden fields. Answer like a normal success, send nothing.
       setStage("done");
@@ -307,24 +309,6 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
         A few questions about your business so we can start building. Takes
         about five minutes, and nothing here locks you in.
       </p>
-      <p className="mt-3 max-w-md text-sm text-muted">
-        By submitting this form you agree to our{" "}
-        <a
-          href="/terms"
-          className="underline underline-offset-2 transition-colors duration-200 hover:text-ink"
-        >
-          Terms
-        </a>{" "}
-        and{" "}
-        <a
-          href="/privacy"
-          className="underline underline-offset-2 transition-colors duration-200 hover:text-ink"
-        >
-          Privacy Policy
-        </a>
-        .
-      </p>
-
       {!hasBackend && (
         <p className="mt-6 max-w-md text-sm text-accent">
           Heads up: this form isn&rsquo;t wired up to save submissions on this
@@ -392,6 +376,38 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
             </div>
           )}
 
+          {isLast && (
+            <label className="flex cursor-pointer items-start gap-2 text-sm text-muted">
+              <input
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                className="mt-0.5 size-4 shrink-0 cursor-pointer accent-accent"
+              />
+              <span>
+                I agree to the{" "}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 transition-colors duration-200 hover:text-ink"
+                >
+                  Terms
+                </a>{" "}
+                and{" "}
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 transition-colors duration-200 hover:text-ink"
+                >
+                  Privacy Policy
+                </a>
+                .
+              </span>
+            </label>
+          )}
+
           <div className="flex flex-wrap items-center gap-5">
             {step > 0 && (
               <button
@@ -403,7 +419,11 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
                 Back
               </button>
             )}
-            <button type="submit" disabled={busy} className={primaryButtonClass}>
+            <button
+              type="submit"
+              disabled={busy || (isLast && !termsAccepted)}
+              className={primaryButtonClass}
+            >
               {isLast ? (busy ? "Sending…" : error ? "Try again" : "Submit") : "Next"}
             </button>
           </div>

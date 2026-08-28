@@ -163,6 +163,8 @@ export async function POST(req: Request) {
       dropped_sections: dropped.length ? dropped : null,
       brain_dump: f("brainDump", 5000) || null,
       status: "new",
+      terms_accepted_at: new Date().toISOString(),
+      terms_version: "2026-08-27",
     }),
   });
 
