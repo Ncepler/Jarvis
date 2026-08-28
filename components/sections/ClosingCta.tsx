@@ -49,8 +49,9 @@ export function ClosingCta() {
           >
             {COPY.closing.cta} →
           </Link>
+          <p className="mt-6 text-sm text-muted">{COPY.closing.responseTime}</p>
           {!isTBD(SITE.email) && (
-            <p className="mt-8 text-sm text-muted">
+            <p className="mt-3 text-sm text-muted">
               Or email us:{" "}
               <a
                 href={`mailto:${SITE.email}`}

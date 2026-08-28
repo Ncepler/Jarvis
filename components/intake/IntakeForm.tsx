@@ -255,7 +255,7 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
         <div className="grid gap-5">
           <h1 className="font-display text-title text-ink">Got it — we&rsquo;re on it.</h1>
           <p className="max-w-md leading-relaxed text-muted">
-            We&rsquo;ll reach out within 48 hours to confirm details and get
+            We reply within one business day to confirm details and get
             started. If you don&rsquo;t hear back, check your spam folder or email
             us at{" "}
             <a

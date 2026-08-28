@@ -180,6 +180,7 @@ export const COPY = {
     a: "Let's build the site",
     b: "that gets you the call.",
     cta: "Start a project",
+    responseTime: "We reply within one business day.",
   },
   services: {
     bridge:

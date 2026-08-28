@@ -44,7 +44,7 @@ function CardFace({
   return (
     <Image
       src={project.screenshot}
-      alt={`Screenshot of ${project.name}`}
+      alt={`${project.category} website style — ${project.name}`}
       fill
       sizes={sizes}
       className="object-cover"
@@ -320,7 +320,7 @@ function HomepagePanel({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={project.screenshotFull}
-              alt={`Full homepage of ${project.name}`}
+              alt={`${project.category} website style — ${project.name}`}
               className="w-full"
               loading="lazy"
             />

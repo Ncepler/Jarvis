@@ -19,6 +19,15 @@ function label(site: ClientSite) {
     : `Built from the ${site.style_name} style`;
 }
 
+// Descriptive alt text for the screenshot itself — the overlay text (name +
+// label) is a pointer-events-none caption, not tied to the image via `alt`,
+// so screen readers need this separately.
+function altText(site: ClientSite) {
+  return site.style_name
+    ? `${site.name} — built from the ${site.style_name} style`
+    : `${site.name} — custom build`;
+}
+
 // The screenshot fills the tile, anchored to the top so the hero — not
 // whatever's below the fold — is what shows. Round 2, job 4: this replaced
 // an iframe embed that rendered as a blank white card on every tile, because
@@ -46,7 +55,7 @@ function Shot({ site }: { site: ClientSite }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={image.url}
-          alt=""
+          alt={altText(site)}
           loading="lazy"
           onLoad={() => setLoaded(true)}
           className="h-full w-full object-cover object-top"
@@ -55,7 +64,7 @@ function Shot({ site }: { site: ClientSite }) {
       ) : (
         <Image
           src={image.url}
-          alt=""
+          alt={altText(site)}
           fill
           sizes="(min-width: 768px) 340px, 78vw"
           className="object-cover object-top"
