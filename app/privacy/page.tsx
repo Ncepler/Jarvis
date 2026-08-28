@@ -56,8 +56,8 @@ export default function PrivacyPage() {
                 When you fill out our intake form, we collect your business
                 name, your name, your business email, your phone number if
                 you give it, your business address or service area, the
-                domain you want, your current website if you have one, and
-                whatever else you tell us about your business. When you use
+                domain you want, and whatever else you tell us about your
+                business. When you use
                 our project lookup, we collect the reference code and email
                 you enter.
               </p>

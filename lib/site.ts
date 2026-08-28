@@ -8,17 +8,20 @@ export const SITE = {
   brand: BRAND, // the bare word the wordmark reveal is built from
   name: `${BRAND} Studio`, // full wordmark + SEO name — the ONLY place "Studio" is written
   domain: "vilas.studio",
-  tagline: "TAGLINE_TBD",
+  tagline: "A website that looks expensive. It wasn't.",
   // TODO: hello@vilas.studio bounces until the domain is registered and the
   // mailbox actually exists. Don't point anything real at it before then.
   email: "hello@vilas.studio",
-  instagram: "INSTAGRAM_URL_TBD",
+  // No real Instagram account yet — empty, not a "_TBD" placeholder, since
+  // there's nothing to name it after. isTBD() below treats "" the same way.
+  instagram: "",
   region: "United States", // studio is fully remote — works with businesses anywhere in the US
 } as const;
 
 // True while a SITE value is still a placeholder — components use this to
-// avoid rendering broken links/strings before the brand exists.
-export const isTBD = (value: string) => value.endsWith("_TBD");
+// avoid rendering broken links/strings before the brand exists. Empty string
+// counts too (e.g. SITE.instagram, which has no real account to point at).
+export const isTBD = (value: string) => value === "" || value.endsWith("_TBD");
 
 // The one place the deployed base URL lives. Every actual link on the page
 // is already relative (`/start`, `#work`, …), so this only feeds canonical /

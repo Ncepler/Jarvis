@@ -20,7 +20,7 @@ The site has two jobs:
 
 ## 2. Brand name — RESOLVED 2026-06-17: **Vilas** (placeholder rules still apply to the rest)
 
-The name is **Vilas** (VEE-las, from "visual"), domain **vilas.studio**, wordmark "Vilas Studio". `lib/site.ts` now holds `BRAND = "Vilas"`; `SITE.name = "${BRAND} Studio"` is the ONE place "Studio" is written, and the hero's ".studio" line derives from `SITE.domain`. **Still never hardcode "Studio" elsewhere.** `tagline`, `email`, `instagram`, `founder` remain `*_TBD` — placeholder discipline below still governs them.
+The name is **Vilas** (VEE-las, from "visual"), domain **vilas.studio**, wordmark "Vilas Studio". `lib/site.ts` now holds `BRAND = "Vilas"`; `SITE.name = "${BRAND} Studio"` is the ONE place "Studio" is written, and the hero's ".studio" line derives from `SITE.domain`. **Still never hardcode "Studio" elsewhere.** `email` and `founder` remain `*_TBD` — placeholder discipline below still governs them. `tagline` is resolved ("A website that looks expensive. It wasn't."). `instagram` has no real account yet, so it's an empty string rather than a `_TBD` placeholder — `isTBD()` treats `""` the same way, so the gated components that hide it still work.
 
 - All brand strings live in **one file**: `lib/site.ts`
 
@@ -30,9 +30,9 @@ export const SITE = {
   brand: BRAND,                   // bare word the wordmark reveal is built from
   name: `${BRAND} Studio`,        // full wordmark + SEO name — only place "Studio" is written
   domain: "vilas.studio",
-  tagline: "TAGLINE_TBD",
+  tagline: "A website that looks expensive. It wasn't.",
   email: "CONTACT_EMAIL_TBD",
-  instagram: "INSTAGRAM_URL_TBD",
+  instagram: "",
   founder: "FOUNDER_NAME_TBD",
   region: "Long Island, NY",
 } as const;
