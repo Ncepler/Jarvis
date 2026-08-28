@@ -42,7 +42,7 @@ export default function PrivacyPage() {
         <div className="mt-8">
           <h1 className="text-title font-display text-ink">Privacy Policy</h1>
           <p className="mt-3 font-mono text-sm text-muted">
-            Last updated: August 26, 2026
+            Last updated: August 27, 2026
           </p>
           <p className="mt-6 max-w-xl text-muted leading-relaxed">
             This is a plain explanation of what we collect, why, and what we
@@ -83,6 +83,7 @@ export default function PrivacyPage() {
                 <li>Vercel, which hosts this site and keeps standard server logs</li>
                 <li>Supabase, which stores intake submissions and project records</li>
                 <li>Resend, which sends the emails our forms generate</li>
+                <li>Stripe, which processes payments when you pay an invoice</li>
               </ul>
             </Section>
 

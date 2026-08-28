@@ -169,7 +169,6 @@ export function DoTheMath() {
                   </span>{" "}
                   {mpm === 1 ? "client" : "clients"} {m.q2.post}
                 </p>
-                <p className="mt-2 text-sm text-muted">{m.q2.sub}</p>
               </div>
             </div>
 

@@ -40,7 +40,7 @@ export default function TermsPage() {
         <div className="mt-8">
           <h1 className="text-title font-display text-ink">Terms of Service</h1>
           <p className="mt-3 font-mono text-sm text-muted">
-            Last updated: August 26, 2026
+            Last updated: August 27, 2026
           </p>
           <p className="mt-6 max-w-xl text-muted leading-relaxed">
             These are the terms for working with Vilas Studio. Plain
@@ -60,7 +60,11 @@ export default function TermsPage() {
             <Section heading="Payment">
               <p className="max-w-xl text-muted leading-relaxed">
                 Half the build fee up front, half when the site is ready to
-                go live. The monthly fee starts when the site launches.
+                go live. The monthly fee starts when the site launches. We
+                send invoices through Stripe — you pay by card. If you cancel
+                after we&rsquo;ve started building, the deposit isn&rsquo;t
+                refunded; it covers the work already done. If we can&rsquo;t
+                deliver a site you approve, we refund it.
               </p>
             </Section>
 
@@ -70,6 +74,9 @@ export default function TermsPage() {
                 need them, and the ongoing SEO work described on our site.
                 If a payment lapses, the site pauses until it&rsquo;s caught
                 up. Nothing gets deleted, and your domain stays registered.
+                Pay for the year up front and you get two months free.
+                Annual payments don&rsquo;t auto-renew — we invoice you
+                before year two.
               </p>
             </Section>
 
@@ -91,12 +98,34 @@ export default function TermsPage() {
               </p>
             </Section>
 
+            <Section heading="Showing the work">
+              <p className="max-w-xl text-muted leading-relaxed">
+                Once your site is live, we may show it — the name,
+                screenshots, and a link — in our portfolio and marketing. If
+                you&rsquo;d rather we didn&rsquo;t, tell us and we&rsquo;ll
+                take it down.
+              </p>
+            </Section>
+
             <Section heading="Your content">
               <p className="max-w-xl text-muted leading-relaxed">
                 You&rsquo;re responsible for having the right to use
                 anything you send us, and for the accuracy of your hours,
                 prices, services, and claims. We&rsquo;ll build what you
-                give us. We won&rsquo;t verify it.
+                give us. We won&rsquo;t verify it. If something you gave us
+                — a photo you didn&rsquo;t have rights to, a claim that
+                wasn&rsquo;t true — leads to a legal complaint, that&rsquo;s
+                yours to resolve, and you&rsquo;ll cover any costs that land
+                on us because of it.
+              </p>
+            </Section>
+
+            <Section heading="Licensed assets">
+              <p className="max-w-xl text-muted leading-relaxed">
+                Stock photos, fonts, and generated media we use in your
+                build are licensed for your website. Using them anywhere
+                else — print, ads, merch — may need a different license.
+                Ask us first.
               </p>
             </Section>
 
@@ -104,7 +133,9 @@ export default function TermsPage() {
               <p className="max-w-xl text-muted leading-relaxed">
                 We revise until you&rsquo;re happy with the build we agreed
                 on. New sections, new pages, or a change in direction after
-                approval is new work, quoted separately.
+                approval is new work, quoted separately. If we send a
+                preview and don&rsquo;t hear back for 14 days, we&rsquo;ll
+                treat it as approved and send the final invoice.
               </p>
             </Section>
 
@@ -141,6 +172,14 @@ export default function TermsPage() {
               </p>
             </Section>
 
+            <Section heading="Outages">
+              <p className="max-w-xl text-muted leading-relaxed">
+                We host on solid infrastructure, but no host is perfect.
+                Brief outages happen and aren&rsquo;t refundable. When
+                something breaks, we fix it fast.
+              </p>
+            </Section>
+
             <Section heading="Liability">
               <p className="max-w-xl text-muted leading-relaxed">
                 Our total liability for anything related to this work is
@@ -150,7 +189,10 @@ export default function TermsPage() {
             </Section>
 
             <Section heading="Governing law">
-              <p className="max-w-xl text-muted leading-relaxed">New York.</p>
+              <p className="max-w-xl text-muted leading-relaxed">
+                New York. Any dispute gets handled in the state or federal
+                courts in Nassau County, New York.
+              </p>
             </Section>
 
             <Section heading="Contact">

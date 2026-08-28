@@ -1,6 +1,5 @@
 import { Logo } from "@/components/Logo";
 import { COPY, SITE, isTBD } from "@/lib/site";
-import { VERSION } from "@/lib/version";
 
 const NAV = [
   { href: "#work", label: "The work" },
@@ -129,7 +128,6 @@ export function Footer() {
         <span>
           © {new Date().getFullYear()} {SITE.name}
         </span>
-        <span className="tabular-nums">{VERSION}</span>
       </div>
     </footer>
   );

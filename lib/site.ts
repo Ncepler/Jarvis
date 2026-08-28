@@ -42,7 +42,7 @@ export const COPY = {
   // mask reveal.
   headings: {
     services: { a: "Three ways in.", b: "Pick the one that fits." },
-    gallery: { a: "Sites we built.", b: "Step inside one." },
+    gallery: { a: "The styles.", b: "Step inside one." },
     process: { a: "How it works.", b: "Five steps, about a week." },
     // was "A small studio. Wherever you are." — dropped "small" per the house
     // rule against referencing studio size (found while rewriting About).
@@ -67,7 +67,7 @@ export const COPY = {
     "Bakeries",
     "Barbershops",
     "Contractors",
-    "Pet groomers",
+    "Auto body",
   ],
   // "Do the math" ROI beat (the section before #why). The interactive
   // calculator runs on the visitor's OWN numbers — opportunity cost, never a
@@ -88,7 +88,6 @@ export const COPY = {
     q2: {
       pre: "Say a slow or missing site costs you just",
       post: "a month", // component prepends "client"/"clients" based on the count
-      sub: "A hypothetical you set, not a number we're claiming about your business.",
     },
     readoutSuffix: "a year",
     readoutCaption: "walking to whoever's easier to find online.",
@@ -99,12 +98,12 @@ export const COPY = {
   // Small note near the work section — sets expectations before anyone
   // starts dragging through the gallery.
   workNote:
-    "Live in about a week. You fill out a short intake, we build, you review, it ships.",
+    "You fill out a short intake, we build, you review, it ships.",
   // "Out in the world" — real client sites, replacing the old before/after
   // section. Data comes from the client_sites table (lib/clientSites.ts);
   // this is just the section's fixed copy.
   clientSites: {
-    sub: "Real businesses, live right now. Click one to open it.",
+    sub: "Client sites. Click one to open it.",
   },
   // Three tiers, flat and public. No feature lists, no "most popular" badge —
   // Premium gets more visual weight (center position, bigger card) because
@@ -113,40 +112,14 @@ export const COPY = {
   // justify a purchase to themselves, and a tier with no obvious reason loses
   // to the extremes either side of it.
   pricing: {
-    tiers: [
-      {
-        key: "basic",
-        title: "Basic",
-        build: "$300 build",
-        monthly: "$50/month",
-        why: "A still hero image, done well. For a business that wants a clean, fast site without paying for motion.",
-      },
-      {
-        key: "premium",
-        title: "Premium",
-        build: "$500 build",
-        monthly: "$80/month",
-        why: "A moving hero — video, or a scene that builds as people scroll. The one people remember.",
-      },
-      {
-        key: "custom",
-        title: "Custom",
-        build: "let's talk",
-        monthly: "",
-        why: "Built from nothing, to spec, for a business the other two tiers don't fit.",
-      },
-    ] as const,
-    note: "Your monthly covers hosting, the domain, and updates when you need them. If a payment lapses, the site pauses until it's caught up, but nothing gets deleted. Your content and domain are safe.",
-    // Cost explainer, directly under the tier cards — splits the two line
-    // items (upfront vs. monthly) apart from the "why" copy above.
-    costExplainer: {
-      heading: "What you're paying for",
-      upfront:
-        "The upfront cost is the site itself — design, build, copy, photos, launch. One time, done.",
-      monthly:
-        "The monthly keeps your domain and hosting running, and covers the SEO work below. Sites that get left alone stop showing up on Google. This keeps yours from doing that.",
-      annual: "Pay for the year up front and get two months free.",
-    },
+    recap:
+      "Basic — $300 + $50/month · Premium — $500 + $80/month · Custom — let's talk.",
+    body: [
+      "Half up front, half when you approve the site. We send invoices through Stripe — you pay by card. The monthly starts the day your site goes live.",
+      "The build fee is the site itself — design, build, copy, photos, launch. One time, done.",
+      "The monthly covers hosting, your domain, content updates when you need them, and the SEO work below. Sites that get left alone stop showing up on Google. This keeps yours from doing that. If a payment lapses, the site pauses until it's caught up. Nothing gets deleted, and your content and domain are safe.",
+      "Pay for the year up front and get two months free. Annual payments don't auto-renew — we invoice you before year two.",
+    ],
   },
   // "Getting found on Google" — sits right after pricing, since the monthly
   // fee is what funds this work. Two equal-weight groups: what's set up at
@@ -171,7 +144,7 @@ export const COPY = {
       items: [
         "Google Business Profile — posts, photos, review replies, hours kept current. For local search this moves more than the website does.",
         "Keeping your name, address and phone identical everywhere online",
-        "New pages when you add a service or want to show up in a neighbouring town",
+        "New pages when you add a service or want to show up in a neighboring town",
         "Watching what's ranking and adjusting",
       ],
     },
@@ -187,11 +160,11 @@ export const COPY = {
     heading: "What matters more for your site?",
     premium: {
       title: "The stronger first impression",
-      body: "A moving hero. Video, or a scene that builds as people scroll. This is the one people remember.",
+      body: "A moving hero. Video, or a scene that builds as people scroll. This is the one people remember. Premium — $500 build + $80/month.",
     },
     basic: {
       title: "The lower starting cost",
-      body: "A still hero, done well. Same build everywhere else.",
+      body: "A still hero, done well. Same build everywhere else. Basic — $300 build + $50/month.",
     },
     customPrompt: "Want something fully custom instead?",
     customLink: "Tell us what you need →",
@@ -237,11 +210,11 @@ export const COPY = {
   about: {
     who: {
       heading: "Who we are",
-      body: "We're a web studio focused on local service businesses. Every site is built by hand for the business it belongs to.",
+      body: "We're a web studio focused on local service businesses. Every site is fit by hand to the business it belongs to.",
     },
     how: {
       heading: "How we work",
-      body: "Direct, no middlemen. You tell us what you want, we build it, and it's live in about a week, with no ongoing meetings.",
+      body: "Direct, no middlemen. You tell us what you want, we build it. No ongoing meetings.",
     },
     what: {
       heading: "What you get",
@@ -251,8 +224,8 @@ export const COPY = {
   // Footer "what we do" row — icon + 2-word label + one-line description.
   footerWhatWeDo: [
     {
-      label: "Custom builds",
-      body: "Every site built by hand for the business it's for.",
+      label: "Made to fit",
+      body: "Every site fit by hand to the business it's for.",
     },
     {
       label: "Hosted & maintained",
@@ -260,7 +233,7 @@ export const COPY = {
     },
     {
       label: "Fast turnaround",
-      body: "Live in about a week, no long back-and-forth.",
+      body: "One short intake, no long back-and-forth.",
     },
   ],
   faq: {
@@ -285,6 +258,10 @@ export const COPY = {
       {
         q: "What do you need from me?",
         a: "Send your logo, photos, and hours. We write everything else.",
+      },
+      {
+        q: "Why \"Vilas\"?",
+        a: "Like villas, one L — say it vee-lahs. We build sites that look like they cost as much as one.",
       },
     ],
   },

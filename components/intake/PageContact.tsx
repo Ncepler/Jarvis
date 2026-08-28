@@ -14,7 +14,7 @@ import { COPY } from "@/lib/site";
 import { FieldError, FieldSet, SelectField, TextField, Wrap, inputClass } from "./fields";
 
 const YOUR_EMAIL_HINT =
-  "Where we send your reference code and anything we need to ask you. This is you, not the business inbox.";
+  "Where we send your reference code and any questions. Use the email you actually check.";
 
 // The attribute-first choice (job 2): the visitor picks what they want
 // before any price shows, and price follows as a confirmation line once
@@ -264,7 +264,7 @@ export function PageContact({
         value={draft.businessEmail}
         onChange={(e) => onChange({ businessEmail: e.target.value })}
         onBlur={touch("businessEmail")}
-        hint="This is where your live site's contact form will send new leads. Not a login, just the inbox messages land in."
+        hint="Where your live site's contact form will send new leads."
       />
 
       <TextField
