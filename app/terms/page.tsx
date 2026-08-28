@@ -70,13 +70,18 @@ export default function TermsPage() {
 
             <Section heading="What the monthly covers">
               <p className="max-w-xl text-muted leading-relaxed">
-                Hosting, your domain registration, content updates when you
-                need them, and the ongoing SEO work described on our site.
+                Hosting, your domain registration, reasonable content
+                updates — text, photos, hours, prices, new services, and
+                the ongoing SEO work described on our site.
+              </p>
+              <p className="max-w-xl text-muted leading-relaxed">
                 If a payment lapses, the site pauses until it&rsquo;s caught
                 up. Nothing gets deleted, and your domain stays registered.
-                Pay for the year up front and you get two months free.
-                Annual payments don&rsquo;t auto-renew — we invoice you
-                before year two.
+                After twelve months unpaid we may take the site offline and
+                release the domain, and we&rsquo;ll email you first. Pay for
+                the year up front and you get two months free. Annual
+                payments don&rsquo;t auto-renew — we invoice you before year
+                two.
               </p>
             </Section>
 
@@ -96,14 +101,15 @@ export default function TermsPage() {
                 code patterns we use across projects, and we reuse them on
                 other builds.
               </p>
-            </Section>
-
-            <Section heading="Showing the work">
               <p className="max-w-xl text-muted leading-relaxed">
-                Once your site is live, we may show it — the name,
-                screenshots, and a link — in our portfolio and marketing. If
-                you&rsquo;d rather we didn&rsquo;t, tell us and we&rsquo;ll
-                take it down.
+                We show finished work in our portfolio, on this site, and
+                on social media. Tell us you&rsquo;d rather we didn&rsquo;t
+                and we&rsquo;ll take it down.
+              </p>
+              <p className="max-w-xl text-muted leading-relaxed">
+                Some parts of a site are licensed from other people —
+                fonts, stock photos, generated video. Those licences cover
+                your site. They don&rsquo;t transfer to you for other uses.
               </p>
             </Section>
 
@@ -112,20 +118,9 @@ export default function TermsPage() {
                 You&rsquo;re responsible for having the right to use
                 anything you send us, and for the accuracy of your hours,
                 prices, services, and claims. We&rsquo;ll build what you
-                give us. We won&rsquo;t verify it. If something you gave us
-                — a photo you didn&rsquo;t have rights to, a claim that
-                wasn&rsquo;t true — leads to a legal complaint, that&rsquo;s
-                yours to resolve, and you&rsquo;ll cover any costs that land
-                on us because of it.
-              </p>
-            </Section>
-
-            <Section heading="Licensed assets">
-              <p className="max-w-xl text-muted leading-relaxed">
-                Stock photos, fonts, and generated media we use in your
-                build are licensed for your website. Using them anywhere
-                else — print, ads, merch — may need a different license.
-                Ask us first.
+                give us. We won&rsquo;t verify it. If someone comes after us
+                over something you supplied, that&rsquo;s on you, and
+                you&rsquo;ll cover what it costs us.
               </p>
             </Section>
 
@@ -152,6 +147,11 @@ export default function TermsPage() {
                 accessibility standard unless we&rsquo;ve agreed to that in
                 writing as part of the scope.
               </p>
+              <p className="max-w-xl text-muted leading-relaxed">
+                We can&rsquo;t promise the site is never down. Hosting,
+                domains, and email run on services we don&rsquo;t own, and
+                they occasionally fail. We&rsquo;ll get it back up.
+              </p>
             </Section>
 
             <Section heading="Your legal pages">
@@ -172,14 +172,6 @@ export default function TermsPage() {
               </p>
             </Section>
 
-            <Section heading="Outages">
-              <p className="max-w-xl text-muted leading-relaxed">
-                We host on solid infrastructure, but no host is perfect.
-                Brief outages happen and aren&rsquo;t refundable. When
-                something breaks, we fix it fast.
-              </p>
-            </Section>
-
             <Section heading="Liability">
               <p className="max-w-xl text-muted leading-relaxed">
                 Our total liability for anything related to this work is
@@ -191,7 +183,7 @@ export default function TermsPage() {
             <Section heading="Governing law">
               <p className="max-w-xl text-muted leading-relaxed">
                 New York. Any dispute gets handled in the state or federal
-                courts in Nassau County, New York.
+                courts of Nassau County, New York.
               </p>
             </Section>
 

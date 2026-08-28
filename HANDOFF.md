@@ -2,14 +2,16 @@
 
 ## Current state
 - Builds clean locally this session: `npx tsc --noEmit`, `next lint`, `next build` all
-  pass with no errors. Committed and pushed to
-  `claude/legal-patch-copy-fixes-ch3pgs`. Not deployed/verified on Vercel by this
-  session — Noah checks the live deploy.
-- This session did a **legal-patch + copy-fixes pass** (19-task ticket): typo fixes,
-  wording tightens, a footer-version-indicator removal, a pricing-section rework, and
-  /terms + /privacy additions (Stripe payment terms, portfolio-showcase clause,
-  licensed-assets clause, outages clause, governing-law venue, 14-day approval clause,
-  annual-discount clause). See git log for the exact commit.
+  pass with no errors. Committed and **pushed straight to `main`** (this session's
+  standing instruction from Noah: push + sync to main whenever work is build-clean and
+  ready, don't wait to be asked). Not deployed/verified on Vercel by this session — Noah
+  checks the live deploy.
+- This session did a **legal-patch + copy-fixes pass** (19-task ticket, run twice — the
+  second pass replaced task 19's /terms + /privacy spec with a more detailed one; the
+  terms/privacy sections below reflect the FINAL, second-pass wording): typo fixes,
+  wording tightens, a footer-version-indicator removal, a pricing-section rework, /terms
+  + /privacy additions, and a new `/not-found` 404 page (separate small ticket, same
+  session). See git log for the exact commits.
 
 ## This session's work
 1. Copy fixes across `lib/site.ts` (gallery heading, marquee niche list, workNote,
@@ -30,13 +32,29 @@
    separate component.
 5. `/start` intake helper-text edits in `PageContact.tsx` (personal-email + business-email
    hints reworded, shorter).
-6. `/terms` + `/privacy`: both "Last updated" dates bumped to Aug 27, 2026. Terms gained
-   Stripe/refund language in Payment, an annual-discount line in "What the monthly
-   covers", a 14-day-auto-approval line in Revisions, a new "Showing the work" section
-   (right after "Who owns what"), a liability-shift sentence in "Your content", a new
-   "Licensed assets" section (right after "Your content"), a new "Outages" section (right
-   before "Liability"), and a Nassau County venue clause in "Governing law". Privacy
-   gained a Stripe bullet in the provider list (after Resend).
+6. `/terms` + `/privacy`, final wording (second pass superseded the first):
+   - Both "Last updated" dates: Aug 27, 2026.
+   - Terms Payment: Stripe/refund language appended (unchanged between passes).
+   - Terms "What the monthly covers": now 2 paragraphs — "content updates" reworded to
+     "reasonable content updates — text, photos, hours, prices, new services"; the
+     lapse/annual-discount language moved into its own closing paragraph with an added
+     12-months-unpaid → offline-and-release-domain clause (with an email-first promise).
+   - Terms "Who owns what": now 3 paragraphs — original ownership text, + a
+     portfolio/social-showcase paragraph, + a licensed-third-party-assets paragraph.
+     (The first pass had put these in standalone "Showing the work" / "Licensed assets"
+     sections — removed; content now lives inside "Who owns what" instead.)
+   - Terms "Your content": closing liability sentence reworded to "If someone comes
+     after us over something you supplied, that's on you, and you'll cover what it
+     costs us."
+   - Terms "Revisions": 14-day-auto-approval line appended (unchanged between passes).
+   - Terms "What we don't promise": gained a 3rd paragraph on outages/uptime. (The first
+     pass had a standalone "Outages" section before "Liability" — removed, folded in
+     here instead.)
+   - Terms "Governing law": "...courts of Nassau County, New York." (was "in" Nassau
+     County in the first pass — fixed to "of").
+   - Privacy: a new unheaded scope paragraph ("This policy covers vilas.studio only...")
+     inserted directly before "Who else sees it"; that section gained a closing
+     no-third-party-marketing sentence and (both passes) a Stripe bullet after Resend.
 
 ## Flagged — not done
 - **Task 16 (optional "Website" field on /start)** was skipped. The ticket's locator

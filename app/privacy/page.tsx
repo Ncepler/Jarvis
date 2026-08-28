@@ -74,6 +74,11 @@ export default function PrivacyPage() {
               </p>
             </Section>
 
+            <p className="max-w-xl text-muted leading-relaxed">
+              This policy covers vilas.studio only. Sites we build for
+              clients are run by those clients and have their own policies.
+            </p>
+
             <Section heading="Who else sees it">
               <p className="max-w-xl text-muted leading-relaxed">
                 We use a small number of service providers to run the
@@ -85,6 +90,10 @@ export default function PrivacyPage() {
                 <li>Resend, which sends the emails our forms generate</li>
                 <li>Stripe, which processes payments when you pay an invoice</li>
               </ul>
+              <p className="max-w-xl text-muted leading-relaxed">
+                We don&rsquo;t share personal information with anyone for
+                their own direct marketing.
+              </p>
             </Section>
 
             <Section heading="Cold outreach">
