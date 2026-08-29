@@ -46,7 +46,7 @@ export const COPY = {
   headings: {
     services: { a: "Three ways in.", b: "Pick the one that fits." },
     gallery: { a: "The styles.", b: "Step inside one." },
-    process: { a: "How it works.", b: "Five steps, about a week." },
+    process: { a: "How it works.", b: "Five steps. Live in days, not months." },
     // was "A small studio. Wherever you are." — dropped "small" per the house
     // rule against referencing studio size (found while rewriting About).
     about: { a: "How we build.", b: "And what you get." },
@@ -257,7 +257,7 @@ export const COPY = {
       },
       {
         q: "How long does it take?",
-        a: "Usually less than a week. If you're picking one of our styles and you have your photos and hours ready, it's often faster. A custom build takes longer, and so does any round of changes you want after seeing the first version. Once we know what you're asking for we'll give you a real date instead of a range.",
+        a: "Usually just days, not months. If you're picking one of our styles and you have your photos and hours ready, it's often faster. A custom build takes longer, and so does any round of changes you want after seeing the first version. Once we know what you're asking for we'll give you a real date instead of a range.",
       },
       {
         q: "What do you need from me?",

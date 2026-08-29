@@ -79,7 +79,7 @@ const spaceMono = Space_Mono({
 // reads like a plain, real business and links unfurl with title + description.
 // TODO(name): real OG image + favicon still pending (needs a designed asset, §12).
 const META_TITLE = `${SITE.name}: web design studio for small businesses`;
-const META_DESCRIPTION = `A small, fully remote web design studio. We build websites for local businesses that look expensive — and aren't.`;
+const META_DESCRIPTION = `A web design studio. We build websites for local businesses that look expensive — and aren't.`;
 
 // Organization, not LocalBusiness — Vilas has no physical location, so no
 // address/geo claims. Rendered as a plain <script> in the body; JSON-LD is
