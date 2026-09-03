@@ -19,7 +19,7 @@ async function callerIp() {
 // One generic message either way — it doesn't say which field was wrong, so
 // walking the ref-code sequence doesn't tell you anything either.
 const NO_MATCH =
-  "That code and email don't match anything on our end. Check both and try again, or email us at hello@vilas.studio.";
+  "That code and email don't match anything on our end. Check both and try again, or email us at hello.vilasstudio@gmail.com.";
 
 export async function lookupSubmission(
   refCodeRaw: string,

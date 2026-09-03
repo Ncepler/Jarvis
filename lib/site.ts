@@ -9,9 +9,9 @@ export const SITE = {
   name: `${BRAND} Studio`, // full wordmark + SEO name — the ONLY place "Studio" is written
   domain: "vilas.studio",
   tagline: "A website that looks expensive. It wasn't.",
-  // TODO: hello@vilas.studio bounces until the domain is registered and the
-  // mailbox actually exists. Don't point anything real at it before then.
-  email: "hello@vilas.studio",
+  // Working inbox — hello.vilasstudio@gmail.com — until vilas.studio's own
+  // domain mailbox exists.
+  email: "hello.vilasstudio@gmail.com",
   // No real Instagram account yet — empty, not a "_TBD" placeholder, since
   // there's nothing to name it after. isTBD() below treats "" the same way.
   instagram: "",

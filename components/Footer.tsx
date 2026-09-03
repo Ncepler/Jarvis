@@ -64,15 +64,15 @@ export function Footer() {
           <span className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-muted">
             Contact
           </span>
-          {/* real email pending (SITE.email TBD) — hello@vilas.studio is a
-              working placeholder that steps aside automatically once the
-              real address is set */}
+          {/* real domain mailbox pending (SITE.email TBD) —
+              hello.vilasstudio@gmail.com is a working placeholder that
+              steps aside automatically once the real address is set */}
           {isTBD(SITE.email) ? (
             <a
-              href="mailto:hello@vilas.studio"
+              href="mailto:hello.vilasstudio@gmail.com"
               className="text-ink/80 transition-colors duration-200 hover:text-accent"
             >
-              hello@vilas.studio
+              hello.vilasstudio@gmail.com
             </a>
           ) : (
             <a
