@@ -183,7 +183,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "hello@vilas.studio",
+        from: "hello.vilasstudio@gmail.com",
         to: personalEmail,
         subject: `Your reference code: ${row.ref_code}`,
         text: [

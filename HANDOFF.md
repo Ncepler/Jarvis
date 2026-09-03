@@ -81,10 +81,12 @@
    already wired.
 5. `/api/check-domain` still hasn't been exercised against a real token on the deploy.
 6. Resend sending domain for `vilas.studio` is still unverified.
-7. `hello@vilas.studio` still isn't a real inbox.
+7. Contact address is now `hello.vilasstudio@gmail.com` (updated 2026-09-03,
+   including the Resend `from` fields in `/api/intake` and `/api/notify-intake`)
+   until a real `vilas.studio` mailbox + verified sending domain exist.
 
 ## Blocked on Noah
-- Confirm `hello@vilas.studio` is a real inbox; `RESEND_API_KEY`/`NOTIFY_EMAIL` in Vercel.
+- Confirm `hello.vilasstudio@gmail.com` stays the working inbox; `RESEND_API_KEY`/`NOTIFY_EMAIL` in Vercel.
 - A real Instagram account, when one exists — `SITE.instagram` is `""` until then.
 - Real photos/video across the demos, real Premium hero clips, a real high-res logo
   export for the icon set, and a designed OG image.
