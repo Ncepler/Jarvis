@@ -6,6 +6,7 @@
 // "Wildstem Florals" is a sample brand for the demo, not a client.
 
 import {
+  ANCHOR_SCROLL_CLASS,
   Contact,
   CtaBand,
   DemoFooter,
@@ -238,22 +239,26 @@ export function FloristDemo({ tier = "basic" }: { tier?: Tier }) {
         premium={tier === "premium" ? PREMIUM_HERO : undefined}
       />
       <DemoMarquee terms={["Weddings", "Events", "Daily", "Weekly", "Sympathy"]} />
-      <Intro
-        eyebrow="Who we are"
-        line1="A small shop."
-        line2="Real flowers."
-        paragraphs={[
-          "We're a working flower shop, not a website that ships boxes. What's in the cooler is what came in good that week.",
-          "Tell us the person and the occasion and we'll design around it: loose, seasonal, and arranged the day it goes out.",
-        ]}
-        badges={[
-          ["Daily to weddings", "Full range"],
-          ["Arranged same morning", "Never pre-made"],
-          ["Same-day until 2pm", "Local delivery"],
-          ["Family-run", "Talk to the maker"],
-        ]}
-      />
-      <OccasionTiles />
+      <div id="about" className={ANCHOR_SCROLL_CLASS}>
+        <Intro
+          eyebrow="Who we are"
+          line1="A small shop."
+          line2="Real flowers."
+          paragraphs={[
+            "We're a working flower shop, not a website that ships boxes. What's in the cooler is what came in good that week.",
+            "Tell us the person and the occasion and we'll design around it: loose, seasonal, and arranged the day it goes out.",
+          ]}
+          badges={[
+            ["Daily to weddings", "Full range"],
+            ["Arranged same morning", "Never pre-made"],
+            ["Same-day until 2pm", "Local delivery"],
+            ["Family-run", "Talk to the maker"],
+          ]}
+        />
+      </div>
+      <div id="services" className={ANCHOR_SCROLL_CLASS}>
+        <OccasionTiles />
+      </div>
       <FullBleedBreak
         eyebrow="Weddings & events"
         line1="Getting married?"
@@ -268,7 +273,9 @@ export function FloristDemo({ tier = "basic" }: { tier?: Tier }) {
         cta="Start a wedding inquiry"
         mediaLabel="GALLERY: wedding & event florals (16:9)"
       />
-      <BouquetGallery />
+      <div id="work" className={ANCHOR_SCROLL_CLASS}>
+        <BouquetGallery />
+      </div>
       <Subscription />
       <SoftValues />
       <Faq
@@ -279,16 +286,18 @@ export function FloristDemo({ tier = "basic" }: { tier?: Tier }) {
       />
       {/* kept to 3 fields — name, email, message. Occasion/timing is easy
           enough to say in the message, and walk-ins/calls cover the rest */}
-      <Contact
-        eyebrow="Get in touch"
-        line1="Come smell"
-        line2="the shop."
-        copy="14 Maple Ave, Rockville Centre · Tue–Sat 9–6, Sun 10–2 · or call and we'll have it wrapped when you arrive."
-        phone={PHONE}
-        email="hello@wildstem.demo"
-        location="14 Maple Ave, Rockville Centre, NY"
-        minimal
-      />
+      <div id="contact" className={ANCHOR_SCROLL_CLASS}>
+        <Contact
+          eyebrow="Get in touch"
+          line1="Come smell"
+          line2="the shop."
+          copy="14 Maple Ave, Rockville Centre · Tue–Sat 9–6, Sun 10–2 · or call and we'll have it wrapped when you arrive."
+          phone={PHONE}
+          email="hello@wildstem.demo"
+          location="14 Maple Ave, Rockville Centre, NY"
+          minimal
+        />
+      </div>
       <CtaBand
         line1="Need flowers?"
         line2="We're here for it."

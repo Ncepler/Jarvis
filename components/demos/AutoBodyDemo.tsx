@@ -12,6 +12,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
 import {
+  ANCHOR_SCROLL_CLASS,
   BeforeAfterSlider,
   Contact,
   CtaBand,
@@ -709,32 +710,38 @@ const FAQ = [
 export function AutoBodyDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
-      <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free estimate" />
+      <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free estimate" contactId="apex-contact" />
       <HeroCarReveal tier={tier} />
       <DemoMarquee terms={["Collision", "Paint", "Dents", "Frame", "Glass", "Detailing"]} />
-      <Intro
-        eyebrow="Who we are"
-        line1="Back to factory."
-        line2="Claim and all."
-        paragraphs={[
-          "A collision shop is mostly about two things: getting the car right, and not making the claim your problem. We do both.",
-          "Apex repairs, refinishes, and reglasses every make in Hicksville: laser-measured frames, booth-baked paint, and an estimate you can read.",
-        ]}
-        badges={[
-          ["Collision to refinishing", "Full service"],
-          ["We handle the claim", "Insurance"],
-          ["Lifetime paint warranty", "Guaranteed"],
-          ["Free written estimates", "No pressure"],
-        ]}
-      />
-      <DamageMap />
+      <div id="about" className={ANCHOR_SCROLL_CLASS}>
+        <Intro
+          eyebrow="Who we are"
+          line1="Back to factory."
+          line2="Claim and all."
+          paragraphs={[
+            "A collision shop is mostly about two things: getting the car right, and not making the claim your problem. We do both.",
+            "Apex repairs, refinishes, and reglasses every make in Hicksville: laser-measured frames, booth-baked paint, and an estimate you can read.",
+          ]}
+          badges={[
+            ["Collision to refinishing", "Full service"],
+            ["We handle the claim", "Insurance"],
+            ["Lifetime paint warranty", "Guaranteed"],
+            ["Free written estimates", "No pressure"],
+          ]}
+        />
+      </div>
+      <div id="services" className={ANCHOR_SCROLL_CLASS}>
+        <DamageMap />
+      </div>
       <BeforeAfter />
       <PaintMatch />
-      <WorkGrid eyebrow="Recent work" line1="In the booth," line2="and back out." items={WORK} />
+      <div id="work" className={ANCHOR_SCROLL_CLASS}>
+        <WorkGrid eyebrow="Recent work" line1="In the booth," line2="and back out." items={WORK} />
+      </div>
       <EstimateWidget />
       <SpecStrip />
       <Faq eyebrow="Questions" line1="The stuff" line2="people ask." items={FAQ} />
-      <div id="apex-contact">
+      <div id="apex-contact" className={ANCHOR_SCROLL_CLASS}>
         <Contact
           eyebrow="Free estimate"
           line1="Send us the damage."
@@ -768,6 +775,7 @@ export function AutoBodyDemo({ tier = "basic" }: { tier?: Tier }) {
         location="Hicksville, Nassau County, NY"
         hours="Mon–Fri 8am–6pm · Sat 9am–1pm"
         strip="Free Estimates · Insurance Claims Handled · Lifetime Paint Warranty"
+        contactId="apex-contact"
       />
     </DemoShell>
   );

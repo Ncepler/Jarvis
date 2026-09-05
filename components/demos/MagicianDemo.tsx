@@ -34,6 +34,7 @@ import { useCanHover } from "@/lib/hooks";
 import { heroConceptFor } from "@/lib/heroConcepts";
 import { MagicianCursor } from "./MagicianCursor";
 import { PremiumHeroMedia } from "./PremiumHeroMedia";
+import { VilasCredit } from "./system";
 import type { Tier } from "./VilasDemoBar";
 
 const MAGICIAN_HERO = heroConceptFor("demo-magician");
@@ -955,6 +956,7 @@ function MagicianFooter() {
           © 2026 {NAME}: demo build / sample site, not a real performer.
         </p>
       </div>
+      <VilasCredit />
     </footer>
   );
 }

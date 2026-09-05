@@ -9,6 +9,7 @@
 
 import { useState } from "react";
 import {
+  ANCHOR_SCROLL_CLASS,
   Contact,
   CtaBand,
   DemoFooter,
@@ -288,7 +289,7 @@ function EstimateWidget() {
 export function LawnCareDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
-      <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" />
+      <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" contactId="freshcut-contact" />
       <DemoHero
         heroImage={firstLawnCareImage}
         eyebrow="Lawn care · Nassau County"
@@ -301,22 +302,26 @@ export function LawnCareDemo({ tier = "basic" }: { tier?: Tier }) {
         premium={tier === "premium" ? PREMIUM_HERO : undefined}
       />
       <DemoMarquee terms={["Mowing", "Cleanups", "Edging", "Mulch", "Fertilizing"]} />
-      <Intro
-        eyebrow="Who we are"
-        line1="Show up."
-        line2="Cut it right."
-        paragraphs={[
-          "Lawn care isn't complicated. It's whether the crew shows up, does it right, and you never have to chase them. That's the whole job.",
-          "Fresh Cut runs a tight weekly route with the same crew, a firm price up front, and no contract to trap you if we don't earn it.",
-        ]}
-        badges={[
-          ["Mowing to fertilizing", "Full season"],
-          ["Same crew every week", "Consistent"],
-          ["No contracts", "Skip anytime"],
-          ["Fully insured", "Quotes same day"],
-        ]}
-      />
-      <PlanCards />
+      <div id="about" className={ANCHOR_SCROLL_CLASS}>
+        <Intro
+          eyebrow="Who we are"
+          line1="Show up."
+          line2="Cut it right."
+          paragraphs={[
+            "Lawn care isn't complicated. It's whether the crew shows up, does it right, and you never have to chase them. That's the whole job.",
+            "Fresh Cut runs a tight weekly route with the same crew, a firm price up front, and no contract to trap you if we don't earn it.",
+          ]}
+          badges={[
+            ["Mowing to fertilizing", "Full season"],
+            ["Same crew every week", "Consistent"],
+            ["No contracts", "Skip anytime"],
+            ["Fully insured", "Quotes same day"],
+          ]}
+        />
+      </div>
+      <div id="services" className={ANCHOR_SCROLL_CLASS}>
+        <PlanCards />
+      </div>
       <EstimateWidget />
       <FullBleedBreak
         eyebrow="How it works"
@@ -332,12 +337,14 @@ export function LawnCareDemo({ tier = "basic" }: { tier?: Tier }) {
         cta="Text us a photo"
         mediaLabel="ON THE JOB: crew & route (16:9)"
       />
-      <WorkGrid
-        eyebrow="Recent work"
-        line1="Yards we"
-        line2="keep sharp."
-        items={WORK}
-      />
+      <div id="work" className={ANCHOR_SCROLL_CLASS}>
+        <WorkGrid
+          eyebrow="Recent work"
+          line1="Yards we"
+          line2="keep sharp."
+          items={WORK}
+        />
+      </div>
       <ProofStrip
         eyebrow="Why homeowners pick us"
         line1="Reasons they"
@@ -355,7 +362,7 @@ export function LawnCareDemo({ tier = "basic" }: { tier?: Tier }) {
         line2="people ask."
         items={FAQ}
       />
-      <div id="freshcut-contact">
+      <div id="freshcut-contact" className={ANCHOR_SCROLL_CLASS}>
         <Contact
           eyebrow="Free quote"
           line1="Get your quote"
@@ -385,6 +392,7 @@ export function LawnCareDemo({ tier = "basic" }: { tier?: Tier }) {
         location="South Shore, Nassau County, NY"
         hours="Mon–Sat, 7am–5pm"
         strip="Fully Insured · No Contracts · Same-Day Quotes"
+        contactId="freshcut-contact"
       />
     </DemoShell>
   );

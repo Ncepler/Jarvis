@@ -6,6 +6,7 @@
 // — not the numbered grid. "Tide Line Power Washing" is a sample brand, not a client.
 
 import {
+  ANCHOR_SCROLL_CLASS,
   BeforeAfterSlider,
   Contact,
   CtaBand,
@@ -196,29 +197,35 @@ export function PowerWashDemo({ tier = "basic" }: { tier?: Tier }) {
         premium={tier === "premium" ? PREMIUM_HERO : undefined}
       />
       <DemoMarquee terms={["Houses", "Driveways", "Decks", "Patios", "Fences"]} />
-      <Intro
-        eyebrow="Who we are"
-        line1="One visit."
-        line2="Back to new."
-        paragraphs={[
-          "Most of what looks worn out is just dirty. Siding, concrete, decks: a proper wash buys you years before you ever think about replacing anything.",
-          "Tide Line does it in one visit, with the right pressure for each surface, and a flat number you agree to before we start.",
-        ]}
-        badges={[
-          ["Soft wash to high pressure", "Right for each surface"],
-          ["Flat written quotes", "No surprises"],
-          ["Licensed & insured", "Fully covered"],
-          ["Same-day quotes", "Text a photo"],
-        ]}
-      />
-      <WashProofRows />
+      <div id="about" className={ANCHOR_SCROLL_CLASS}>
+        <Intro
+          eyebrow="Who we are"
+          line1="One visit."
+          line2="Back to new."
+          paragraphs={[
+            "Most of what looks worn out is just dirty. Siding, concrete, decks: a proper wash buys you years before you ever think about replacing anything.",
+            "Tide Line does it in one visit, with the right pressure for each surface, and a flat number you agree to before we start.",
+          ]}
+          badges={[
+            ["Soft wash to high pressure", "Right for each surface"],
+            ["Flat written quotes", "No surprises"],
+            ["Licensed & insured", "Fully covered"],
+            ["Same-day quotes", "Text a photo"],
+          ]}
+        />
+      </div>
+      <div id="services" className={ANCHOR_SCROLL_CLASS}>
+        <WashProofRows />
+      </div>
       <WashTransformation />
-      <WorkGrid
-        eyebrow="Recent work"
-        line1="Before, after,"
-        line2="and done."
-        items={WORK}
-      />
+      <div id="work" className={ANCHOR_SCROLL_CLASS}>
+        <WorkGrid
+          eyebrow="Recent work"
+          line1="Before, after,"
+          line2="and done."
+          items={WORK}
+        />
+      </div>
       <ProofStrip
         eyebrow="Why hire us"
         line1="Clean, without"
@@ -236,18 +243,20 @@ export function PowerWashDemo({ tier = "basic" }: { tier?: Tier }) {
         line2="people ask."
         items={FAQ}
       />
-      <Contact
-        eyebrow="Free quote"
-        line1="Text a photo."
-        line2="Get a price."
-        copy="Send a picture of the house or driveway, call, or fill out the form. We reply with a flat quote, usually the same day. No pressure."
-        phone={PHONE}
-        email="hello@tideline.demo"
-        location="Suffolk County, Long Island, NY"
-        serviceLabel="What needs washing"
-        serviceOptions={["House soft wash", "Driveway / walkway", "Deck / fence / patio", "Roof / gutters", "Multiple", "Not sure yet"]}
-        propertyTypes={["Residential", "Commercial"]}
-      />
+      <div id="contact" className={ANCHOR_SCROLL_CLASS}>
+        <Contact
+          eyebrow="Free quote"
+          line1="Text a photo."
+          line2="Get a price."
+          copy="Send a picture of the house or driveway, call, or fill out the form. We reply with a flat quote, usually the same day. No pressure."
+          phone={PHONE}
+          email="hello@tideline.demo"
+          location="Suffolk County, Long Island, NY"
+          serviceLabel="What needs washing"
+          serviceOptions={["House soft wash", "Driveway / walkway", "Deck / fence / patio", "Roof / gutters", "Multiple", "Not sure yet"]}
+          propertyTypes={["Residential", "Commercial"]}
+        />
+      </div>
       <CtaBand
         line1="Ready when you are."
         line2="Text us a photo."

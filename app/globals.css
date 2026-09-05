@@ -169,3 +169,16 @@ body {
     animation: none;
   }
 }
+
+/* Demo nav/footer anchor links (components/demos/system.tsx) — native CSS
+   smooth scroll, since demo pages don't run the main site's Lenis. Scoped via
+   :has() to pages that actually render a demo (the .demo-shell root DemoShell
+   sets), so it never touches the main site's own scrolling. */
+html:has(.demo-shell) {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:has(.demo-shell) {
+    scroll-behavior: auto;
+  }
+}

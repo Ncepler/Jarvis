@@ -6,6 +6,7 @@
 // Bakehouse" is a sample brand for the demo, not a client.
 
 import {
+  ANCHOR_SCROLL_CLASS,
   Contact,
   CtaBand,
   DemoFooter,
@@ -182,22 +183,26 @@ export function BakeryDemo({ tier = "basic" }: { tier?: Tier }) {
         premium={tier === "premium" ? PREMIUM_HERO : undefined}
       />
       <DemoMarquee terms={["Sourdough", "Pastry", "Cakes", "Focaccia", "Cookies"]} />
-      <Intro
-        eyebrow="Who we are"
-        line1="Small batches."
-        line2="Every morning."
-        paragraphs={[
-          "We're a small bakehouse that does a few things and does them every day, instead of a long menu we phone in.",
-          "Sourdough on a long ferment, pastry out before the morning rush, and cakes to order. When the case is empty, we're proud of it.",
-        ]}
-        badges={[
-          ["Bread, pastry & cakes", "Daily"],
-          ["36-hour ferment", "No shortcuts"],
-          ["Order ahead", "Reserved by name"],
-          ["Open from 7am", "Until sold out"],
-        ]}
-      />
-      <BakeryMenu />
+      <div id="about" className={ANCHOR_SCROLL_CLASS}>
+        <Intro
+          eyebrow="Who we are"
+          line1="Small batches."
+          line2="Every morning."
+          paragraphs={[
+            "We're a small bakehouse that does a few things and does them every day, instead of a long menu we phone in.",
+            "Sourdough on a long ferment, pastry out before the morning rush, and cakes to order. When the case is empty, we're proud of it.",
+          ]}
+          badges={[
+            ["Bread, pastry & cakes", "Daily"],
+            ["36-hour ferment", "No shortcuts"],
+            ["Order ahead", "Reserved by name"],
+            ["Open from 7am", "Until sold out"],
+          ]}
+        />
+      </div>
+      <div id="services" className={ANCHOR_SCROLL_CLASS}>
+        <BakeryMenu />
+      </div>
       <FullBleedBreak
         eyebrow="Order ahead"
         line1="Skip the line,"
@@ -212,12 +217,14 @@ export function BakeryDemo({ tier = "basic" }: { tier?: Tier }) {
         cta="Place an order"
         mediaLabel="THE CASE: morning bake (16:9)"
       />
-      <WorkGrid
-        eyebrow="The daily case"
-        line1="What's here"
-        line2="most days."
-        items={WORK}
-      />
+      <div id="work" className={ANCHOR_SCROLL_CLASS}>
+        <WorkGrid
+          eyebrow="The daily case"
+          line1="What's here"
+          line2="most days."
+          items={WORK}
+        />
+      </div>
       <WarmNarrative />
       <Faq
         eyebrow="Questions"
@@ -225,17 +232,19 @@ export function BakeryDemo({ tier = "basic" }: { tier?: Tier }) {
         line2="people ask."
         items={FAQ}
       />
-      <Contact
-        eyebrow="Visit or order"
-        line1="Come smell"
-        line2="the bakehouse."
-        copy="22 Main St, Sayville · Wed–Sun from 7am · or order ahead and we'll have your bag with your name on it. Cakes need two days."
-        phone={PHONE}
-        email="hello@goldenhour.demo"
-        location="22 Main St, Sayville, NY"
-        serviceLabel="What you're after"
-        serviceOptions={["Daily bread", "Morning pastry", "Cake to order", "Wholesale", "Not sure yet"]}
-      />
+      <div id="contact" className={ANCHOR_SCROLL_CLASS}>
+        <Contact
+          eyebrow="Visit or order"
+          line1="Come smell"
+          line2="the bakehouse."
+          copy="22 Main St, Sayville · Wed–Sun from 7am · or order ahead and we'll have your bag with your name on it. Cakes need two days."
+          phone={PHONE}
+          email="hello@goldenhour.demo"
+          location="22 Main St, Sayville, NY"
+          serviceLabel="What you're after"
+          serviceOptions={["Daily bread", "Morning pastry", "Cake to order", "Wholesale", "Not sure yet"]}
+        />
+      </div>
       <CtaBand
         line1="Hungry yet?"
         line2="Order for the morning."
