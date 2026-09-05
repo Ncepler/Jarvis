@@ -28,6 +28,10 @@ import {
   TwoLine,
   ValueProps,
 } from "./system";
+import { heroConceptFor } from "@/lib/heroConcepts";
+import type { Tier } from "./VilasDemoBar";
+
+const PREMIUM_HERO = heroConceptFor("demo-landscaping");
 
 const ACCENT = "#6E9A5C"; // moss / sage green, nudged brighter to pop on green-black
 
@@ -220,7 +224,7 @@ function LightingServices() {
   );
 }
 
-export function LandscapingDemo() {
+export function LandscapingDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free consult" />
@@ -233,6 +237,7 @@ export function LandscapingDemo() {
         primaryCta="Book a consultation"
         phone={PHONE}
         mediaLabel="HERO VIDEO: finished property b-roll (16:9)"
+        premium={tier === "premium" ? PREMIUM_HERO : undefined}
       />
       <DemoMarquee terms={["Patios", "Retaining Walls", "Gardens", "Lighting", "Fire Pits"]} />
       <Intro

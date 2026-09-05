@@ -31,7 +31,12 @@ import {
   type ReactNode,
 } from "react";
 import { useCanHover } from "@/lib/hooks";
+import { heroConceptFor } from "@/lib/heroConcepts";
 import { MagicianCursor } from "./MagicianCursor";
+import { PremiumHeroMedia } from "./PremiumHeroMedia";
+import type { Tier } from "./VilasDemoBar";
+
+const MAGICIAN_HERO = heroConceptFor("demo-magician");
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -428,12 +433,20 @@ function PhraseBand() {
 // theatrical CSS placeholder (glow + vignette + label) — drop a real clip in
 // `HERO_VIDEO_SRC` later and it slots straight in. ───────────────────────────
 const HERO_VIDEO_SRC = ""; // set to a real clip path when Noah has one
-function Hero() {
+// tier (Demo bar ticket, job 5/6): $500 layers the shared PremiumHeroMedia
+// mechanism in underneath the existing velvet field — additive, so the
+// theatrical layers on top (gradient, embers, vignette) are untouched and
+// simply gain a moving/zoomed backdrop showing through their transparent
+// parts. $300 renders exactly as before.
+function Hero({ tier = "basic" }: { tier?: Tier }) {
   return (
     <section
       className="relative flex w-full items-end overflow-hidden"
       style={{ minHeight: "100svh", background: BG }}
     >
+      {tier === "premium" && MAGICIAN_HERO && (
+        <PremiumHeroMedia concept={MAGICIAN_HERO} />
+      )}
       {/* velvet field + spotlight glow + vignette — the "dark house" */}
       <div
         aria-hidden
@@ -946,7 +959,7 @@ function MagicianFooter() {
   );
 }
 
-export function MagicianDemo() {
+export function MagicianDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     // wraps ALL of the magician's content, only this demo — see
     // MagicianCursor.tsx for exactly how the wand cursor stays scoped here
@@ -956,7 +969,7 @@ export function MagicianDemo() {
             total height — mounted once, absolute, behind section content */}
         <DriftingCards />
         <div className="relative">
-          <Hero />
+          <Hero tier={tier} />
           <PhraseBand />
           <TheExperience />
           <Reel />

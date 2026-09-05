@@ -24,7 +24,10 @@ import {
   TwoLine,
   WorkGrid,
 } from "./system";
+import { heroConceptFor } from "@/lib/heroConcepts";
+import type { Tier } from "./VilasDemoBar";
 
+const PREMIUM_HERO = heroConceptFor("demo-bakery");
 const ACCENT = "#C9802F"; // warm crust amber
 
 // Warm & inviting bakery mood (SKILL §13b).
@@ -163,7 +166,7 @@ function WarmNarrative() {
   );
 }
 
-export function BakeryDemo() {
+export function BakeryDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Order ahead" />
@@ -176,6 +179,7 @@ export function BakeryDemo() {
         primaryCta="Order ahead"
         phone={PHONE}
         mediaLabel="HERO VIDEO: the case at 7am (16:9)"
+        premium={tier === "premium" ? PREMIUM_HERO : undefined}
       />
       <DemoMarquee terms={["Sourdough", "Pastry", "Cakes", "Focaccia", "Cookies"]} />
       <Intro

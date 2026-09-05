@@ -304,6 +304,31 @@ export function DemoHeader({
   );
 }
 
+// ── Premium-only staggered entrance (Demo bar ticket, job 6): the headline
+// group, then the CTA row, each fading/rising in with an increasing delay.
+// Callers `key` this by tier so React remounts it — and replays it — exactly
+// once per switch INTO premium, never on a loop. The $300 hero keeps the
+// plain single-fade <Rise> untouched below. Reduced motion drops the
+// animation (children render immediately) but never the content.
+export function HeroReveal({ children }: { children: ReactNode[] }) {
+  const reduced = useReducedMotion();
+  if (reduced) return <>{children}</>;
+  return (
+    <>
+      {children.map((child, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: EASE, delay: i * 0.15 }}
+        >
+          {child}
+        </motion.div>
+      ))}
+    </>
+  );
+}
+
 // ── Hero: full-bleed media placeholder + scrim, two-line H1, two CTAs. ───────
 export function DemoHero({
   eyebrow,
@@ -345,7 +370,7 @@ export function DemoHero({
       >
         <FileBadge file={premium ? undefined : "hero.jpg"} />
         {premium ? (
-          <PremiumHeroMedia concept={premium} />
+          <PremiumHeroMedia concept={premium} fallbackImage={heroImage} />
         ) : (
           !heroImage && (
             <div className="flex h-full w-full items-center justify-center">
@@ -366,43 +391,90 @@ export function DemoHero({
         className="absolute inset-0"
         style={{ background: "var(--d-hero-scrim)" }}
       />
-      <div className={`${wrap} relative flex min-h-[640px] flex-col justify-end pb-16 pt-28`}>
-        <Rise>
-          <div className="mb-6">
-            <Eyebrow>{eyebrow}</Eyebrow>
-          </div>
-          <h1
-            className="max-w-3xl text-[40px] font-bold leading-[1.04] tracking-[-0.02em] md:text-[72px]"
-            style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
-          >
-            {line1}
-            <br />
-            {line2}
-          </h1>
-          <p
-            className="mt-6 max-w-xl text-[17px] leading-[1.6]"
-            style={{ color: "var(--d-body)" }}
-          >
-            {sub}
-          </p>
-          <div className="mt-9 flex flex-wrap items-center gap-3">
-            <span
-              className="px-6 py-3.5 text-[14px] font-semibold"
-              style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
+      <div
+        className={`${wrap} relative flex min-h-[640px] flex-col justify-end ${
+          premium ? "pb-20 pt-32" : "pb-16 pt-28"
+        }`}
+      >
+        {premium ? (
+          <HeroReveal key="premium-hero">
+            {[
+              <div key="headline">
+                <div className="mb-6">
+                  <Eyebrow>{eyebrow}</Eyebrow>
+                </div>
+                <h1
+                  className="max-w-3xl text-[40px] font-bold leading-[1.04] tracking-[-0.02em] md:text-[72px]"
+                  style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
+                >
+                  {line1}
+                  <br />
+                  {line2}
+                </h1>
+                <p
+                  className="mt-6 max-w-xl text-[17px] leading-[1.6]"
+                  style={{ color: "var(--d-body)" }}
+                >
+                  {sub}
+                </p>
+              </div>,
+              <div key="cta" className="mt-9 flex flex-wrap items-center gap-3">
+                <span
+                  className="px-6 py-3.5 text-[14px] font-semibold"
+                  style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
+                >
+                  {primaryCta}
+                </span>
+                <span
+                  className="px-6 py-3.5 text-[14px] font-semibold"
+                  style={{
+                    border: "1px solid var(--d-line)",
+                    color: "var(--d-fg)",
+                  }}
+                >
+                  Call {phone}
+                </span>
+              </div>,
+            ]}
+          </HeroReveal>
+        ) : (
+          <Rise>
+            <div className="mb-6">
+              <Eyebrow>{eyebrow}</Eyebrow>
+            </div>
+            <h1
+              className="max-w-3xl text-[40px] font-bold leading-[1.04] tracking-[-0.02em] md:text-[72px]"
+              style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
             >
-              {primaryCta}
-            </span>
-            <span
-              className="px-6 py-3.5 text-[14px] font-semibold"
-              style={{
-                border: "1px solid var(--d-line)",
-                color: "var(--d-fg)",
-              }}
+              {line1}
+              <br />
+              {line2}
+            </h1>
+            <p
+              className="mt-6 max-w-xl text-[17px] leading-[1.6]"
+              style={{ color: "var(--d-body)" }}
             >
-              Call {phone}
-            </span>
-          </div>
-        </Rise>
+              {sub}
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <span
+                className="px-6 py-3.5 text-[14px] font-semibold"
+                style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
+              >
+                {primaryCta}
+              </span>
+              <span
+                className="px-6 py-3.5 text-[14px] font-semibold"
+                style={{
+                  border: "1px solid var(--d-line)",
+                  color: "var(--d-fg)",
+                }}
+              >
+                Call {phone}
+              </span>
+            </div>
+          </Rise>
+        )}
         <div
           className="mt-14 text-[12px] font-semibold uppercase tracking-[0.18em]"
           style={{ color: "var(--d-muted)" }}

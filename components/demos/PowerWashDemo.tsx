@@ -25,7 +25,10 @@ import {
   TwoLine,
   WorkGrid,
 } from "./system";
+import { heroConceptFor } from "@/lib/heroConcepts";
+import type { Tier } from "./VilasDemoBar";
 
+const PREMIUM_HERO = heroConceptFor("demo-powerwash");
 const ACCENT = "#1E86C4"; // clean water blue (deeper for contrast on white)
 
 // Clean & crisp power-washing mood (SKILL §13d).
@@ -177,7 +180,7 @@ function WashTransformation() {
   );
 }
 
-export function PowerWashDemo() {
+export function PowerWashDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" />
@@ -190,6 +193,7 @@ export function PowerWashDemo() {
         primaryCta="Get a free quote"
         phone={PHONE}
         mediaLabel="HERO VIDEO: wash footage (16:9)"
+        premium={tier === "premium" ? PREMIUM_HERO : undefined}
       />
       <DemoMarquee terms={["Houses", "Driveways", "Decks", "Patios", "Fences"]} />
       <Intro

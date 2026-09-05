@@ -27,7 +27,10 @@ import {
   TwoLine,
   WorkGrid,
 } from "./system";
+import { heroConceptFor } from "@/lib/heroConcepts";
+import type { Tier } from "./VilasDemoBar";
 
+const PREMIUM_HERO = heroConceptFor("demo-lawncare");
 const ACCENT = "#4E9A4A"; // fresh grass green
 
 // Fresh daylight lawn-care mood (SKILL §13e).
@@ -282,7 +285,7 @@ function EstimateWidget() {
   );
 }
 
-export function LawnCareDemo() {
+export function LawnCareDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" />
@@ -295,6 +298,7 @@ export function LawnCareDemo() {
         primaryCta="Get a free quote"
         phone={PHONE}
         mediaLabel="HERO VIDEO: fresh-cut lawn (16:9)"
+        premium={tier === "premium" ? PREMIUM_HERO : undefined}
       />
       <DemoMarquee terms={["Mowing", "Cleanups", "Edging", "Mulch", "Fertilizing"]} />
       <Intro

@@ -26,12 +26,14 @@ import {
   ValueProps,
 } from "./system";
 import { heroConceptFor } from "@/lib/heroConcepts";
+import type { Tier } from "./VilasDemoBar";
 
 const ACCENT = "#C8893F"; // warm finished-wood caramel
-// Reference wiring for the Premium hero mechanism (round 2, job 5) — proves
-// DemoHero's `premium` prop end to end. No video asset exists yet, so this
-// renders PremiumHeroMedia's labeled placeholder until one lands at
-// /public/premium/demo-renovation.mp4 (see lib/heroConcepts.ts).
+// Premium hero mechanism (round 2, job 5), now driven by the demo bar's tier
+// toggle (Demo bar ticket, job 5/6) instead of always-on. No video asset
+// exists yet, so the $500 state renders PremiumHeroMedia's zoom/stagger
+// fallback until one lands at /public/premium/demo-renovation.mp4 (see
+// lib/heroConcepts.ts).
 const PREMIUM_HERO = heroConceptFor("demo-renovation");
 const PHONE = "(516) 555-0000";
 const NAME = "Maple & Main Renovation Co.";
@@ -154,13 +156,13 @@ function RoomTransforms() {
   );
 }
 
-export function RenovationDemo() {
+export function RenovationDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT}>
       <DemoHeader name={NAME} phone={PHONE} />
       <DemoHero
         heroImage={firstRenovationImage}
-        premium={PREMIUM_HERO}
+        premium={tier === "premium" ? PREMIUM_HERO : undefined}
         eyebrow="Renovation & remodeling · North Shore"
         line1="Old house."
         line2="New everything."

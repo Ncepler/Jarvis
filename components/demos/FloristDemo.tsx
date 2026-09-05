@@ -23,6 +23,10 @@ import {
   Section,
   TwoLine,
 } from "./system";
+import { heroConceptFor } from "@/lib/heroConcepts";
+import type { Tier } from "./VilasDemoBar";
+
+const PREMIUM_HERO = heroConceptFor("demo-florist");
 
 const ACCENT = "#B14A63"; // deep bloom rose
 
@@ -218,7 +222,7 @@ function SoftValues() {
   );
 }
 
-export function FloristDemo() {
+export function FloristDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Order flowers" />
@@ -231,6 +235,7 @@ export function FloristDemo() {
         primaryCta="Order for pickup"
         phone={PHONE}
         mediaLabel="HERO VIDEO: shop & blooms (16:9)"
+        premium={tier === "premium" ? PREMIUM_HERO : undefined}
       />
       <DemoMarquee terms={["Weddings", "Events", "Daily", "Weekly", "Sympathy"]} />
       <Intro

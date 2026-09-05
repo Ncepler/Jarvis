@@ -24,7 +24,10 @@ import {
   TwoLine,
   WorkGrid,
 } from "./system";
+import { heroConceptFor } from "@/lib/heroConcepts";
+import type { Tier } from "./VilasDemoBar";
 
+const PREMIUM_HERO = heroConceptFor("demo-barber");
 const ACCENT = "#B0833F"; // brass / gold — warm lamplight (primary)
 const OXBLOOD = "#9A3B33"; // deep oxblood (secondary, used sparingly)
 
@@ -179,7 +182,7 @@ function TheChair() {
   );
 }
 
-export function BarberDemo() {
+export function BarberDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Book a chair" />
@@ -192,6 +195,7 @@ export function BarberDemo() {
         primaryCta="Book a chair"
         phone={PHONE}
         mediaLabel="HERO VIDEO: the shop floor (16:9)"
+        premium={tier === "premium" ? PREMIUM_HERO : undefined}
       />
       <DemoMarquee terms={["Cuts", "Fades", "Beards", "Shaves", "Kids"]} />
       <Intro

@@ -22,12 +22,18 @@ import {
   type DemoTheme,
   Eyebrow,
   Faq,
+  HeroReveal,
   Intro,
   Rise,
   Section,
   TwoLine,
   WorkGrid,
 } from "./system";
+import { heroConceptFor } from "@/lib/heroConcepts";
+import { PremiumHeroMedia } from "./PremiumHeroMedia";
+import type { Tier } from "./VilasDemoBar";
+
+const AUTO_BODY_HERO = heroConceptFor("demo-autobody");
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -95,28 +101,37 @@ function CarOutline({
 }
 
 // ── 1. HERO — car reveal with a clear-coat shine sweep. ──────────────────────
-function HeroCarReveal() {
+// tier (Demo bar ticket, job 5/6): $500 swaps the still photo for the shared
+// PremiumHeroMedia mechanism (zoom/stagger fallback until a real video lands
+// at lib/heroConcepts.ts's demo-autobody path) — everything else is unchanged.
+function HeroCarReveal({ tier = "basic" }: { tier?: Tier }) {
   const reduced = useReducedMotion();
   return (
     <section className="relative w-full overflow-hidden" style={{ minHeight: "640px" }}>
-      {/* full-bleed media slot — real photo if present, else labeled placeholder */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundColor: firstAutoBodyImage ? undefined : "var(--d-surface)",
-          backgroundImage: firstAutoBodyImage ? `url("${firstAutoBodyImage}")` : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        {!firstAutoBodyImage && (
-          <div className="flex h-full w-full items-center justify-center">
-            <span
-              className="text-[11px] font-semibold uppercase tracking-[0.18em]"
-              style={{ color: "var(--d-muted)" }}
-            >
-              HERO: car reveal sequence (16:9)
-            </span>
+      {/* full-bleed media slot — premium mechanism, else real photo, else placeholder */}
+      <div className="absolute inset-0">
+        {tier === "premium" && AUTO_BODY_HERO ? (
+          <PremiumHeroMedia concept={AUTO_BODY_HERO} fallbackImage={firstAutoBodyImage} />
+        ) : (
+          <div
+            className="h-full w-full"
+            style={{
+              backgroundColor: firstAutoBodyImage ? undefined : "var(--d-surface)",
+              backgroundImage: firstAutoBodyImage ? `url("${firstAutoBodyImage}")` : undefined,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            {!firstAutoBodyImage && (
+              <div className="flex h-full w-full items-center justify-center">
+                <span
+                  className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+                  style={{ color: "var(--d-muted)" }}
+                >
+                  HERO: car reveal sequence (16:9)
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -135,39 +150,82 @@ function HeroCarReveal() {
         />
       )}
       <div aria-hidden className="absolute inset-0" style={{ background: "var(--d-hero-scrim)" }} />
-      <div className="relative mx-auto flex min-h-[640px] w-full max-w-[1200px] flex-col justify-end px-6 pb-16 pt-28 md:px-16">
-        <Rise>
-          <div className="mb-6">
-            <Eyebrow>Collision center · Nassau County</Eyebrow>
-          </div>
-          <h1
-            className="max-w-3xl text-[40px] font-bold leading-[1.04] tracking-[-0.02em] md:text-[72px]"
-            style={{ color: "var(--d-fg)" }}
-          >
-            Wrecked.
-            <br />
-            Like it never happened.
-          </h1>
-          <p className="mt-6 max-w-xl text-[17px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-            Collision repair, refinishing, and glass: done to factory spec. We
-            handle the insurance claim, you get your car back right.
-          </p>
-          <div className="mt-9 flex flex-wrap items-center gap-3">
-            <a
-              href="#apex-contact"
-              className="px-6 py-3.5 text-[14px] font-semibold"
-              style={{ background: ACCENT2, color: "#0A0C0F" }}
+      <div
+        className={`relative mx-auto flex min-h-[640px] w-full max-w-[1200px] flex-col justify-end px-6 md:px-16 ${
+          tier === "premium" ? "pb-20 pt-32" : "pb-16 pt-28"
+        }`}
+      >
+        {tier === "premium" ? (
+          <HeroReveal key="premium-hero">
+            {[
+              <div key="headline">
+                <div className="mb-6">
+                  <Eyebrow>Collision center · Nassau County</Eyebrow>
+                </div>
+                <h1
+                  className="max-w-3xl text-[40px] font-bold leading-[1.04] tracking-[-0.02em] md:text-[72px]"
+                  style={{ color: "var(--d-fg)" }}
+                >
+                  Wrecked.
+                  <br />
+                  Like it never happened.
+                </h1>
+                <p className="mt-6 max-w-xl text-[17px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+                  Collision repair, refinishing, and glass: done to factory spec. We
+                  handle the insurance claim, you get your car back right.
+                </p>
+              </div>,
+              <div key="cta" className="mt-9 flex flex-wrap items-center gap-3">
+                <a
+                  href="#apex-contact"
+                  className="px-6 py-3.5 text-[14px] font-semibold"
+                  style={{ background: ACCENT2, color: "#0A0C0F" }}
+                >
+                  Get a free estimate
+                </a>
+                <span
+                  className="px-6 py-3.5 text-[14px] font-semibold"
+                  style={{ border: "1px solid var(--d-line)", color: "var(--d-fg)", fontFamily: MONO }}
+                >
+                  Call {PHONE}
+                </span>
+              </div>,
+            ]}
+          </HeroReveal>
+        ) : (
+          <Rise>
+            <div className="mb-6">
+              <Eyebrow>Collision center · Nassau County</Eyebrow>
+            </div>
+            <h1
+              className="max-w-3xl text-[40px] font-bold leading-[1.04] tracking-[-0.02em] md:text-[72px]"
+              style={{ color: "var(--d-fg)" }}
             >
-              Get a free estimate
-            </a>
-            <span
-              className="px-6 py-3.5 text-[14px] font-semibold"
-              style={{ border: "1px solid var(--d-line)", color: "var(--d-fg)", fontFamily: MONO }}
-            >
-              Call {PHONE}
-            </span>
-          </div>
-        </Rise>
+              Wrecked.
+              <br />
+              Like it never happened.
+            </h1>
+            <p className="mt-6 max-w-xl text-[17px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+              Collision repair, refinishing, and glass: done to factory spec. We
+              handle the insurance claim, you get your car back right.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <a
+                href="#apex-contact"
+                className="px-6 py-3.5 text-[14px] font-semibold"
+                style={{ background: ACCENT2, color: "#0A0C0F" }}
+              >
+                Get a free estimate
+              </a>
+              <span
+                className="px-6 py-3.5 text-[14px] font-semibold"
+                style={{ border: "1px solid var(--d-line)", color: "var(--d-fg)", fontFamily: MONO }}
+              >
+                Call {PHONE}
+              </span>
+            </div>
+          </Rise>
+        )}
         <div
           className="mt-14 text-[12px] font-semibold uppercase tracking-[0.18em]"
           style={{ color: "var(--d-muted)" }}
@@ -648,11 +706,11 @@ const FAQ = [
   { q: "Do you give free estimates?", a: "Always. Bring the car by or send photos and we'll write up a free estimate, no obligation." },
 ];
 
-export function AutoBodyDemo() {
+export function AutoBodyDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free estimate" />
-      <HeroCarReveal />
+      <HeroCarReveal tier={tier} />
       <DemoMarquee terms={["Collision", "Paint", "Dents", "Frame", "Glass", "Detailing"]} />
       <Intro
         eyebrow="Who we are"

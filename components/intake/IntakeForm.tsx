@@ -67,16 +67,22 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
     } catch {
       // corrupt or blocked storage, just start fresh
     }
-    // Arriving from a gallery card's "start with this style" link, e.g.
-    // /start?template=demo-bakery. An explicit choice beats a stored draft.
-    const wanted = new URLSearchParams(window.location.search).get("template");
+    // Arriving from a gallery card or a demo's tier bar, e.g.
+    // /start?style=demo-bakery&tier=premium. `style` is the current param —
+    // "template" never appears anywhere a client sees, address bar included.
+    // `template` stays as a silent alias so any older link keeps working.
+    const searchParams = new URLSearchParams(window.location.search);
+    const wanted = searchParams.get("style") || searchParams.get("template");
+    const tierParam = searchParams.get("tier");
+    const wantedTier = tierParam === "basic" || tierParam === "premium" ? tierParam : undefined;
     if (wanted && templateByKey(wanted)) {
       // Arriving with a style already picked doesn't answer the "what
       // matters more" question — default to Basic (the visitor can change
-      // it) rather than leaving tier blank with a style already chosen.
+      // it) rather than leaving tier blank with a style already chosen,
+      // unless the link itself already said which tier they were looking at.
       setDraft((d) => ({
         ...d,
-        tier: d.tier || "basic",
+        tier: wantedTier || d.tier || "basic",
         usingTemplate: "yes",
         templateChoice: wanted,
       }));
