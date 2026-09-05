@@ -1,746 +1,261 @@
 "use client";
 
+// The styles section: a picker, not a gallery (Styles section ticket).
+// A visitor self-identifies by business type (the chip row), sees one style
+// at a time in a fixed-height stage, and the CTA never leaves the section.
+// Proof is the live embed: a screenshot on load, a real scrollable iframe of
+// the actual demo route once the visitor acts on it.
+
 import Image from "next/image";
-import {
-  AnimatePresence,
-  animate,
-  motion,
-  useMotionValue,
-  useMotionValueEvent,
-  useReducedMotion,
-  useTransform,
-  type MotionValue,
-} from "motion/react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { demos } from "@/components/demos";
+import Link from "next/link";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
 import { useCanHover } from "@/lib/hooks";
 import { COPY } from "@/lib/site";
-import { orderedProjects, type Project } from "@/lib/projects";
+import { stylePickerEntries, type StylePickerEntry } from "@/lib/projects";
 
-const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-const GAP = 24;
-const clamp = (n: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, n));
+type Device = "desktop" | "phone";
 
-// What the card shows in the row — a fast static thumbnail (the demo's hero
-// image), NOT a live mini-render. Mounting all 7 full demos at once was the
-// "takes a second to load" lag; the live homepage now mounts only on open.
-function CardFace({
-  project,
-  sizes,
-}: {
-  project: Project;
-  sizes: string;
-}) {
-  if (!project.screenshot) {
-    return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-surface">
-        <span className="text-sm text-muted">Preview</span>
-      </div>
-    );
-  }
-  return (
-    <Image
-      src={project.screenshot}
-      alt={`${project.category} website style — ${project.name}`}
-      fill
-      sizes={sizes}
-      className="object-cover"
-    />
-  );
-}
-
-// Same-origin mirrored pages: size the iframe to its full content height so
-// it reads as one continuous page — the visitor scrolls OUR page and flows
-// straight through the demo, no inner scrollbar, no tab-in-a-tab. The
-// cross-origin live fallback can't be measured and stays a fixed window.
-function AutoFrame({ src, title }: { src: string; title: string }) {
-  const ref = useRef<HTMLIFrameElement>(null);
-  const [height, setHeight] = useState(0);
-
-  useEffect(() => {
-    const frame = ref.current;
-    if (!frame) return;
-    let ro: ResizeObserver | null = null;
-    const measure = () => {
-      try {
-        const doc = frame.contentDocument;
-        if (!doc) return;
-        const h = Math.max(
-          doc.documentElement?.scrollHeight ?? 0,
-          doc.body?.scrollHeight ?? 0,
-        );
-        if (h > 200) setHeight(h);
-      } catch {
-        // cross-origin — keep the fixed-height fallback
-      }
-    };
-    const onLoad = () => {
-      measure();
-      try {
-        const body = frame.contentDocument?.body;
-        if (body) {
-          ro = new ResizeObserver(measure);
-          ro.observe(body);
-        }
-      } catch {
-        // cross-origin
-      }
-    };
-    frame.addEventListener("load", onLoad);
-    if (frame.contentDocument?.readyState === "complete") onLoad();
-    return () => {
-      frame.removeEventListener("load", onLoad);
-      ro?.disconnect();
-    };
-  }, [src]);
-
-  return (
-    <iframe
-      ref={ref}
-      src={src}
-      title={title}
-      // mirrored copies run the original site's scripts — sandbox without
-      // allow-top-navigation so frame-busting can't hijack our page
-      sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-      scrolling={height ? "no" : "yes"}
-      className="block w-full border-0"
-      style={{ height: height || "85vh" }}
-    />
-  );
-}
-
-function GalleryCard({
-  project,
-  index,
-  x,
-  step,
-  width,
-  isActive,
-  reduced,
-  onSelect,
-}: {
-  project: Project;
-  index: number;
-  x: MotionValue<number>;
-  step: number;
-  width: number;
-  isActive: boolean;
-  reduced: boolean;
-  onSelect: (index: number) => void;
-}) {
-  // Finite coverflow (Noah 2026-06-20 — a bounded list, not an endless loop):
-  // each card sits at its fixed slot offset from the current center; the row
-  // simply ends at the first and last card. d is the signed distance in slots.
-  const d = useTransform(x, (v) => index - -v / step);
-  const tx = useTransform(d, (o) => o * step);
-  const mag = useTransform(d, (o) => Math.min(Math.abs(o), 1));
-  const scale = useTransform(mag, [0, 1], [1, 0.88]);
-  const opacity = useTransform(mag, [0, 1], [1, 0.45]);
-  // hide cards far off either edge so they don't paint outside the row
-  const display = useTransform(d, (o) => (Math.abs(o) > 2.6 ? "none" : "block"));
-  const zIndex = useTransform(mag, (m) => Math.round((1 - m) * 100));
-
-  // hovering the centered card lifts + sharpens it with inertia — the Lusion
-  // "the live one comes forward" beat. Neighbours stay quiet.
-  const [hovered, setHovered] = useState(false);
-  const lift = hovered && isActive && !reduced;
-
-  return (
-    <motion.button
-      type="button"
-      aria-label={`${project.name}, ${project.category}`}
-      className={
-        reduced
-          ? "relative shrink-0 cursor-pointer overflow-hidden border border-line bg-surface"
-          : "absolute left-1/2 top-0 cursor-pointer overflow-hidden border border-line bg-surface"
-      }
-      style={
-        reduced
-          ? { width }
-          : { width, marginLeft: -width / 2, x: tx, scale, opacity, display, zIndex }
-      }
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      onTap={() => onSelect(index)}
-    >
-      {/* static thumbnail box; the hover lift/sharpen rides an INNER element.
-          Opening no longer morphs this box — the live demo slides in below. */}
-      <div className="relative aspect-[16/10] overflow-hidden">
-        <motion.div
-          className="absolute inset-0"
-          initial={false}
-          animate={{
-            scale: lift ? 1.04 : 1,
-            filter: lift
-              ? "saturate(1.08) contrast(1.05)"
-              : "saturate(1) contrast(1)",
-          }}
-          transition={{ type: "spring", stiffness: 260, damping: 28 }}
-        >
-          <CardFace
-            project={project}
-            sizes="(max-width: 768px) 72vw, 480px"
-          />
-        </motion.div>
-      </div>
-      {/* category, name + price, caption — slide in a beat after the card
-          settles into the center (Axel "Recent work" anatomy) */}
-      <motion.div
-        className="border-t border-line px-4 py-3 text-left"
-        initial={false}
-        animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 6 }}
-        transition={{
-          duration: reduced ? 0 : 0.4,
-          delay: isActive && !reduced ? 0.25 : 0,
-          ease: EASE,
-        }}
-      >
-        <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
-          {project.category}
-        </span>
-        <span className="mt-1.5 block text-sm">{project.name}</span>
-        <span className="mt-1 block text-xs text-muted">{project.caption}</span>
-      </motion.div>
-    </motion.button>
-  );
-}
-
-// The opened card's homepage. Clicking the centered card slides this panel up
-// into the page below the row — the live, interactive demo mounts here (and
-// ONLY here, so the row stays light). It stays physically in the page flow (no
-// floating window, §6.3): the visitor scrolls our page straight through it.
-// Source order: registered demo (inline, no iframe) → mirror → live iframe →
-// capture.
-function HomepagePanel({
-  project,
-  reduced,
+// The stage: screenshot first (free to render, costs nothing on load),
+// swapping to a real same-origin iframe once the visitor activates it — on
+// hover for pointer devices, on tap of "Preview it live" for touch. Only one
+// style's frame exists at a time (this component itself), so switching
+// styles is what unmounts the previous iframe. Minimal chrome: no fake
+// traffic lights, no fake URL bar — the one real control is the device width.
+function Stage({
+  entry,
+  device,
+  live,
+  loaded,
   canHover,
-  onClose,
+  onActivate,
+  onDeviceChange,
 }: {
-  project: Project;
-  reduced: boolean;
+  entry: StylePickerEntry;
+  device: Device;
+  live: boolean;
+  loaded: boolean;
   canHover: boolean;
-  onClose: () => void;
+  onActivate: () => void;
+  onDeviceChange: (d: Device) => void;
 }) {
-  const Demo = demos[project.slug];
-  const frameSrc =
-    project.preview ||
-    (canHover && project.embeddable && project.url ? project.url : "");
-  const stagger = (i: number) =>
-    reduced
-      ? { duration: 0.15 }
-      : { duration: 0.4, delay: 0.3 + i * 0.07, ease: EASE };
+  const frameStyle =
+    device === "phone"
+      ? { width: 320, aspectRatio: "9 / 16" }
+      : { width: "100%", maxWidth: 720, aspectRatio: "16 / 10" };
 
   return (
-    // the whole panel slides up into place like a drawer pulling open
-    // (Noah 2026-06-20 — replaced the tall layoutId FLIP morph)
-    <motion.div
-      role="region"
-      aria-label={`${project.name} homepage`}
-      className="w-full"
-      initial={reduced ? { opacity: 0 } : { opacity: 0, y: 56 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{
-        opacity: 0,
-        y: reduced ? 0 : 24,
-        transition: { duration: 0.2, ease: EASE },
-      }}
-      transition={reduced ? { duration: 0.2 } : { duration: 0.55, ease: EASE }}
-    >
-      <div className="border-y border-line bg-surface">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-baseline gap-x-6 gap-y-2 px-6 py-4 md:px-10">
-          <motion.span
-            className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={stagger(0)}
+    <div className="mx-auto max-w-3xl border border-line bg-surface">
+      {/* chrome strip: structure, not decoration — just the device control */}
+      <div className="flex items-center justify-end gap-1 border-b border-line px-3 py-2">
+        <div role="group" aria-label="Preview width" className="flex gap-1">
+          <button
+            type="button"
+            aria-pressed={device === "desktop"}
+            onClick={() => onDeviceChange("desktop")}
+            className={`press px-2 py-1 text-xs font-semibold uppercase tracking-[0.06em] ${
+              device === "desktop" ? "text-ink" : "text-muted hover:text-ink"
+            }`}
           >
-            {project.category}
-          </motion.span>
-          <motion.span
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={stagger(1)}
+            Desktop
+          </button>
+          <button
+            type="button"
+            aria-pressed={device === "phone"}
+            onClick={() => onDeviceChange("phone")}
+            className={`press px-2 py-1 text-xs font-semibold uppercase tracking-[0.06em] ${
+              device === "phone" ? "text-ink" : "text-muted hover:text-ink"
+            }`}
           >
-            {project.name}
-          </motion.span>
-          <span className="ml-auto flex items-baseline gap-6">
-            {project.url && (
-              <motion.a
-                href={project.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm transition-colors duration-200 hover:text-accent"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={stagger(3)}
-              >
-                View live →
-              </motion.a>
-            )}
-            {project.isStyleDemo && (
-              <motion.a
-                href={`/start?template=${project.slug}`}
-                className="text-sm text-accent transition-colors duration-200 hover:text-ink"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={stagger(4)}
-              >
-                Start with this style →
-              </motion.a>
-            )}
-            <motion.button
-              type="button"
-              onClick={onClose}
-              className="press cursor-pointer text-sm text-muted transition-colors duration-200 hover:text-ink"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={stagger(5)}
-            >
-              Close ✕
-            </motion.button>
-          </span>
+            Phone
+          </button>
         </div>
       </div>
 
-      {/* slim gutter of our own bg + hairline around the homepage — a quiet
-          reminder you're browsing it from inside this site (Noah 2026-06-11) */}
-      <div className="border-b border-line bg-bg p-3 md:px-6 md:py-5">
-        <div className="overflow-hidden border border-line bg-surface">
-          {Demo ? (
-            // our own build — the homepage IS part of this page, no iframe
-            <Demo />
-          ) : frameSrc ? (
-            <AutoFrame src={frameSrc} title={`Homepage of ${project.name}`} />
-          ) : project.screenshotFull ? (
-            // full-page capture has an unknown intrinsic height, which next/image requires
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={project.screenshotFull}
-              alt={`${project.category} website style — ${project.name}`}
-              className="w-full"
-              loading="lazy"
-            />
-          ) : (
-            <div className="flex h-[40vh] items-center justify-center text-sm text-muted">
-              Preview unavailable
-            </div>
-          )}
-        </div>
+      <div
+        className="relative mx-auto overflow-hidden bg-bg"
+        style={frameStyle}
+        onMouseEnter={canHover && !live ? onActivate : undefined}
+      >
+        {live && (
+          <iframe
+            key={entry.slug}
+            src={entry.route}
+            title={`${entry.label} style, live preview`}
+            className="h-full w-full border-0"
+            style={{ opacity: loaded ? 1 : 0, transition: "opacity 300ms var(--ease-out-expo)" }}
+          />
+        )}
+        {!live && entry.screenshot && (
+          <Image
+            src={entry.screenshot}
+            alt={`${entry.label} website style`}
+            fill
+            sizes="(max-width: 768px) 90vw, 720px"
+            className="object-cover object-top"
+          />
+        )}
+        {!live && !entry.screenshot && (
+          <div className="flex h-full w-full items-center justify-center text-sm text-muted">
+            Preview
+          </div>
+        )}
+        {!live && !canHover && (
+          <button
+            type="button"
+            onClick={onActivate}
+            className="absolute inset-0 flex items-center justify-center bg-ink/0 transition-colors duration-200 hover:bg-ink/10"
+          >
+            <span className="press border border-line bg-surface px-4 py-2 text-sm font-semibold text-ink">
+              Preview it live
+            </span>
+          </button>
+        )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 export function Gallery() {
-  const reduced = useReducedMotion() ?? false;
   const canHover = useCanHover();
-  const projects = orderedProjects;
+  const entries = stylePickerEntries;
+  const [activeSlug, setActiveSlug] = useState(entries[0]?.slug ?? "");
+  const [device, setDevice] = useState<Device>("desktop");
+  const [live, setLive] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const railRef = useRef<HTMLDivElement>(null);
 
-  const regionRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const [containerW, setContainerW] = useState(0);
-  // which card has been opened into its full demo (null = row only; the
-  // thumbnails are static hero images until you step inside one)
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const active = entries.find((e) => e.slug === activeSlug) ?? entries[0];
 
-  const cardW = Math.min(containerW * 0.72, 480) || 340;
-  const step = cardW + GAP;
-  const count = projects.length;
-  // absolute-positioned coverflow needs an explicit row height (media 16:10 +
-  // the name/caption footer)
-  const rowHeight = Math.round(cardW * 0.625) + 108;
+  const selectStyle = (slug: string) => {
+    if (slug === activeSlug) return;
+    setActiveSlug(slug);
+    setLive(false);
+    setLoaded(false);
+  };
 
-  const x = useMotionValue(0);
-  // current center slot index, clamped to [0, count-1] (finite row); kept so a
-  // resize re-centers on the same card
-  const virtualRef = useRef(0);
-  // the row is bounded: x runs from 0 (first card centered) to the last card
-  const minX = -(count - 1) * step;
-
-  // which card is nearest center RIGHT NOW — tracks continuously during the
-  // drag (not just on snap) so the backdrop and labels follow the scroll
-  const [centerIdx, setCenterIdx] = useState(0);
-  useMotionValueEvent(x, "change", (v) => {
-    const i = clamp(Math.round(-v / step), 0, count - 1);
-    virtualRef.current = i;
-    if (i !== centerIdx) setCenterIdx(i);
-  });
-
-  // the panel follows the center with a short settle delay, so flinging
-  // across the row doesn't mount and unmount every homepage in between
-  const [panelIdx, setPanelIdx] = useState(0);
+  // keep the rail's active thumbnail in view when a chip picks a style
+  // that's scrolled off-screen in the rail
   useEffect(() => {
-    const t = setTimeout(() => setPanelIdx(centerIdx), 160);
-    return () => clearTimeout(t);
-  }, [centerIdx]);
-
-  useEffect(() => {
-    const el = regionRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([entry]) =>
-      setContainerW(entry.contentRect.width),
+    const el = railRef.current?.querySelector<HTMLElement>(
+      `[data-slug="${activeSlug}"]`,
     );
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+    el?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+  }, [activeSlug]);
 
-  // keep the centered card centered when the container resizes
-  useEffect(() => {
-    x.set(-virtualRef.current * step);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
-
-  // snap to a slot, clamped to the finite range [0, count-1]
-  const snapTo = useCallback(
-    (slot: number) => {
-      const i = clamp(slot, 0, count - 1);
-      virtualRef.current = i;
-      animate(x, -i * step, { duration: 0.6, ease: EASE });
-    },
-    [step, x, count],
-  );
-
-  // open the centered card: mount its live demo in the panel below, which
-  // slides up, then bring it into view. the short delay lets the panel mount
-  // before we scroll to it.
-  const openCard = useCallback(
-    (index: number) => {
-      const p = projects[index];
-      if (!p) return;
-      setOpenSlug(p.slug);
-      window.setTimeout(
-        () =>
-          panelRef.current?.scrollIntoView({
-            behavior: reduced ? "auto" : "smooth",
-            block: "nearest",
-          }),
-        reduced ? 0 : 90,
-      );
-    },
-    [projects, reduced],
-  );
-
-  const closeCard = useCallback(() => {
-    setOpenSlug(null);
-    regionRef.current?.focus();
-  }, []);
-
-  // a pointer-up at the end of a drag also lands on a card — ignore it
-  const dragging = useRef(false);
-
-  const onSelect = useCallback(
-    (index: number) => {
-      if (dragging.current) return;
-      const center = clamp(Math.round(-x.get() / step), 0, count - 1);
-      // the centered card steps inside; a side card just centers itself
-      if (index === center) openCard(index);
-      else snapTo(index);
-    },
-    [snapTo, openCard, x, step, count],
-  );
-
-  // manual drag: we drive `x` ourselves so each card can self-position and wrap
-  // around infinitely. (Motion's built-in drag writes its own transform, which
-  // would double up with the per-card wrap math.)
-  const dragState = useRef<{
-    active: boolean;
-    startX: number;
-    startClient: number;
-    lastClient: number;
-    lastT: number;
-    v: number;
-    moved: boolean;
-    move?: (e: PointerEvent) => void;
-    up?: () => void;
-  }>({ active: false, startX: 0, startClient: 0, lastClient: 0, lastT: 0, v: 0, moved: false });
-
-  const startDrag = (e: React.PointerEvent) => {
-    if (reduced) return;
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-    const s = dragState.current;
-    s.active = true;
-    s.moved = false;
-    s.startX = x.get();
-    s.startClient = e.clientX;
-    s.lastClient = e.clientX;
-    s.lastT = performance.now();
-    s.v = 0;
-
-    const move = (ev: PointerEvent) => {
-      if (!s.active) return;
-      const dx = ev.clientX - s.startClient;
-      if (!s.moved && Math.abs(dx) > 4) {
-        s.moved = true;
-        dragging.current = true;
-        setOpenSlug(null); // browsing the row closes the open demo
-      }
-      // finite row: past either end, resist with a soft rubber-band so the
-      // drag clearly "hits" a boundary instead of scrolling on forever
-      const raw = s.startX + dx;
-      const over = raw > 0 ? raw : raw < minX ? raw - minX : 0;
-      x.set(raw - over + over * 0.35);
-      const now = performance.now();
-      const dt = now - s.lastT;
-      if (dt > 0) s.v = ((ev.clientX - s.lastClient) / dt) * 1000;
-      s.lastClient = ev.clientX;
-      s.lastT = now;
-    };
-    const up = () => {
-      s.active = false;
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-      const predicted = x.get() + s.v * 0.2; // flick momentum
-      snapTo(Math.round(-predicted / step));
-      if (s.moved) setTimeout(() => (dragging.current = false), 60);
-    };
-    s.move = move;
-    s.up = up;
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
+  const onChipKeyDown = (e: KeyboardEvent, i: number) => {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    e.preventDefault();
+    const next = e.key === "ArrowRight" ? Math.min(i + 1, entries.length - 1) : Math.max(i - 1, 0);
+    const slug = entries[next]?.slug;
+    if (!slug) return;
+    selectStyle(slug);
+    document.getElementById(`style-chip-${slug}`)?.focus();
   };
 
-  // clean up listeners if we unmount mid-drag
-  useEffect(
-    () => () => {
-      const s = dragState.current;
-      if (s.move) window.removeEventListener("pointermove", s.move);
-      if (s.up) window.removeEventListener("pointerup", s.up);
-    },
-    [],
-  );
-
-  // trackpad horizontal scroll: a two-finger sideways swipe over the row moves
-  // through the cards. We only claim HORIZONTAL-dominant wheel events so a
-  // normal vertical two-finger scroll still scrolls the page straight past the
-  // gallery. The listener is native + non-passive because React's synthetic
-  // onWheel is passive (preventDefault would be a no-op there).
-  useEffect(() => {
-    const el = regionRef.current;
-    if (!el || reduced) return;
-    let snapTimer: number | undefined;
-    const onWheel = (e: WheelEvent) => {
-      // let vertical-dominant gestures fall through to the page scroll
-      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
-      e.preventDefault();
-      setOpenSlug(null); // browsing the row closes the open demo (matches drag)
-      const raw = x.get() - e.deltaX;
-      // rubber-band past either end so it "hits" a boundary like the drag does
-      const over = raw > 0 ? raw : raw < minX ? raw - minX : 0;
-      x.set(raw - over + over * 0.35);
-      // settle onto the nearest card once the swipe stops
-      window.clearTimeout(snapTimer);
-      snapTimer = window.setTimeout(() => {
-        snapTo(Math.round(-x.get() / step));
-      }, 120);
-    };
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => {
-      el.removeEventListener("wheel", onWheel);
-      window.clearTimeout(snapTimer);
-    };
-  }, [reduced, x, minX, step, snapTo]);
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    const vc = Math.round(-x.get() / step);
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      snapTo(vc - 1);
-    } else if (e.key === "ArrowRight") {
-      e.preventDefault();
-      snapTo(vc + 1);
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      openCard(centerIdx);
-    } else if (e.key === "Escape" && openSlug) {
-      e.preventDefault();
-      closeCard();
-    }
-  };
-
-  // prev/next arrow buttons — the explicit, no-guesswork way to move through
-  // the row (drag/wheel/keys all still work). Reduced motion's row is a real
-  // native scroller, so it just scrolls one card; the coverflow snaps.
-  const goPrev = () => {
-    if (reduced) regionRef.current?.scrollBy({ left: -step, behavior: "smooth" });
-    else snapTo(centerIdx - 1);
-  };
-  const goNext = () => {
-    if (reduced) regionRef.current?.scrollBy({ left: step, behavior: "smooth" });
-    else snapTo(centerIdx + 1);
-  };
-
-  // the ambient backdrop follows the settled center index (not the live drag
-  // index) so a fling across the row doesn't mount every demo in between
-  const backdrop = projects[panelIdx];
-  const openProject = projects.find((p) => p.slug === openSlug) ?? null;
+  if (!active) return null;
 
   return (
-    <section
-      id="work"
-      className="relative overflow-hidden border-t border-line py-24 md:py-40"
-    >
-      {/* the active site's homepage fills the screen behind the row,
-          crossfading as cards settle in the center. Clipped to the first
-          screenful — past that the open panel shows the same homepage for
-          real, and a dimmed copy bleeding behind it reads as a duplicate */}
-      {!reduced && (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-svh overflow-hidden"
-        >
-          <AnimatePresence initial={false}>
-            <motion.div
-              key={backdrop.slug}
-              className="absolute inset-0"
-              initial={{ opacity: 0, scale: 1.06 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: EASE }}
-            >
-              {backdrop.screenshot && (
-                <Image
-                  src={backdrop.screenshot}
-                  alt=""
-                  fill
-                  sizes="100vw"
-                  className="object-cover object-top opacity-25"
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
-          <div className="absolute inset-0 bg-linear-to-b from-bg via-bg/40 to-bg" />
-        </div>
-      )}
-
-      <div className="relative mx-auto max-w-6xl px-6 md:px-10">
-        <SectionHeading
-          eyebrow="The work"
-          a={COPY.headings.gallery.a}
-          b={COPY.headings.gallery.b}
-        />
+    <section id="work" className="relative border-t border-line py-24 md:py-40">
+      <div className="mx-auto max-w-6xl px-6 md:px-10">
+        <SectionHeading a={COPY.headings.gallery.a} b={COPY.headings.gallery.b} />
         <Reveal delay={0.1}>
           <p className="mt-6 max-w-md text-muted">
-            Styles we build from, and the sites that came out of them. Drag
-            through and step inside one.
+            Pick the kind of business you run. See that style, live.
           </p>
         </Reveal>
-      </div>
 
-      {reduced ? (
-        // reduced motion: flat scrollable row, no coverflow, no drag physics
+        {/* business-type chips — self-identification, the important control */}
         <div
-          ref={regionRef}
-          className="relative mt-16 flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 pb-4 md:px-10"
-          aria-label="Portfolio gallery"
+          role="tablist"
+          aria-label="Business type"
+          className="no-scrollbar mt-10 -mx-6 flex gap-2 overflow-x-auto px-6 md:mx-0 md:px-0"
         >
-          {projects.map((p, i) => (
-            <div key={p.slug} className="snap-center">
-              <GalleryCard
-                project={p}
-                index={i}
-                x={x}
-                step={step}
-                width={cardW}
-                isActive
-                reduced
-                onSelect={() => openCard(i)}
-              />
-            </div>
-          ))}
+          {entries.map((e, i) => {
+            const selected = e.slug === activeSlug;
+            return (
+              <button
+                key={e.slug}
+                id={`style-chip-${e.slug}`}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                tabIndex={selected ? 0 : -1}
+                onClick={() => selectStyle(e.slug)}
+                onKeyDown={(ev) => onChipKeyDown(ev, i)}
+                className={`shrink-0 whitespace-nowrap border px-4 py-2 text-sm transition-colors duration-200 ${
+                  selected
+                    ? "border-ink bg-ink text-surface"
+                    : "border-line text-muted hover:border-ink hover:text-ink"
+                }`}
+              >
+                {e.label}
+              </button>
+            );
+          })}
         </div>
-      ) : (
+
+        {/* stage */}
+        <div className="mt-8">
+          <Stage
+            entry={active}
+            device={device}
+            live={live}
+            loaded={loaded}
+            canHover={canHover}
+            onActivate={() => {
+              setLive(true);
+              setLoaded(true);
+            }}
+            onDeviceChange={setDevice}
+          />
+        </div>
+
+        {/* CTA — sits with the stage, always reflects the selected style */}
+        <div className="mx-auto mt-6 flex max-w-3xl flex-wrap items-center justify-between gap-4">
+          <span className="text-sm text-muted">{active.label}</span>
+          <Link
+            href={`/start?style=${active.slug}`}
+            className="press border border-ink bg-ink px-5 py-2.5 text-sm font-semibold text-surface transition-opacity duration-200 hover:opacity-85"
+          >
+            Start with this style
+          </Link>
+        </div>
+
+        {/* thumbnail rail — stays in sync with the chips; either one drives
+            the same state */}
         <div
-          ref={regionRef}
-          tabIndex={0}
+          ref={railRef}
           role="group"
-          aria-label="Portfolio gallery. Drag, scroll sideways, or use arrow keys to browse; the centered site opens below."
-          className="relative mt-16 touch-pan-y select-none"
-          // The cards are positioned by motion values that only apply after
-          // hydration + the first width measure; until then they'd pile up at
-          // the row's origin (a visible flash of stacked demos). containerW is 0
-          // through SSR, so this ships opacity:0 in the HTML and fades the row in
-          // once it's actually measured and laid out.
-          style={{
-            height: rowHeight,
-            opacity: containerW > 0 ? 1 : 0,
-            transition: "opacity 0.45s ease",
-          }}
-          onKeyDown={onKeyDown}
-          onPointerDown={startDrag}
+          aria-label="Style thumbnails"
+          className="no-scrollbar mt-8 -mx-6 flex gap-3 overflow-x-auto px-6 md:mx-0 md:px-0"
         >
-          {projects.map((p, i) => (
-            <GalleryCard
-              key={p.slug}
-              project={p}
-              index={i}
-              x={x}
-              step={step}
-              width={cardW}
-              isActive={i === centerIdx}
-              reduced={false}
-              onSelect={onSelect}
-            />
-          ))}
+          {entries.map((e) => {
+            const selected = e.slug === activeSlug;
+            return (
+              <button
+                key={e.slug}
+                data-slug={e.slug}
+                type="button"
+                aria-current={selected}
+                aria-label={e.label}
+                onClick={() => selectStyle(e.slug)}
+                className={`relative aspect-[16/10] w-24 shrink-0 overflow-hidden border sm:w-28 ${
+                  selected ? "border-ink" : "border-line"
+                }`}
+              >
+                {e.screenshot ? (
+                  <Image src={e.screenshot} alt="" fill sizes="112px" className="object-cover" />
+                ) : (
+                  <span className="flex h-full items-center justify-center text-[10px] text-muted">
+                    {e.label}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
-      )}
-
-      {/* explicit prev/next controls — the drag/scroll/keys friction the
-          coverflow had on its own wasn't enough of an affordance */}
-      <div className="mt-6 flex justify-center gap-3">
-        <button
-          type="button"
-          onClick={goPrev}
-          disabled={!reduced && centerIdx <= 0}
-          aria-label="Previous site"
-          className="press flex size-10 items-center justify-center rounded-full border border-line text-ink transition-colors duration-200 hover:border-accent hover:text-accent disabled:opacity-30 disabled:hover:border-line disabled:hover:text-ink"
-        >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M15 5 8 12l7 7" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onClick={goNext}
-          disabled={!reduced && centerIdx >= count - 1}
-          aria-label="Next site"
-          className="press flex size-10 items-center justify-center rounded-full border border-line text-ink transition-colors duration-200 hover:border-accent hover:text-accent disabled:opacity-30 disabled:hover:border-line disabled:hover:text-ink"
-        >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="m9 5 7 7-7 7" />
-          </svg>
-        </button>
-      </div>
-
-      {/* mode="wait" would delay the slide-in; let the panel mount immediately
-          and animate its own entrance */}
-      <div ref={panelRef} className="relative mt-12 scroll-mt-6">
-        <AnimatePresence initial={false}>
-          {openProject ? (
-            <HomepagePanel
-              key={openProject.slug}
-              project={openProject}
-              reduced={reduced}
-              canHover={canHover}
-              onClose={closeCard}
-            />
-          ) : (
-            <motion.p
-              key="hint"
-              className="px-6 text-center text-sm text-muted md:px-10"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.12 } }}
-            >
-              {canHover
-                ? "Click the centered card to step inside."
-                : "Tap a card to step inside."}
-            </motion.p>
-          )}
-        </AnimatePresence>
       </div>
     </section>
   );

@@ -156,3 +156,21 @@ export const projects: Project[] = [
 export const orderedProjects = [...projects].sort((a, b) => a.order - b.order);
 
 export const styleDemos = orderedProjects.filter((p) => p.isStyleDemo);
+
+// ── Styles picker (Styles section ticket, job 1) ────────────────────────────
+// The picker only needs the business label, the screenshot, and where the
+// live style lives — derived from `projects` above, not a second data set to
+// maintain. Adding a fifth style is still just one object in `projects`.
+export type StylePickerEntry = {
+  slug: string;
+  label: string; // the business type a visitor recognizes ("Florist", "Auto body")
+  screenshot: string;
+  route: string; // /demos/<slug>
+};
+
+export const stylePickerEntries: StylePickerEntry[] = styleDemos.map((p) => ({
+  slug: p.slug,
+  label: p.name,
+  screenshot: p.screenshot,
+  route: `/demos/${p.slug}`,
+}));

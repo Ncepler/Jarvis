@@ -61,6 +61,16 @@ body {
   transform: scale(0.98);
 }
 
+/* horizontal-scroll rows with no visible scrollbar (styles picker's chip row
+   and thumbnail rail) — the scroll affordance is the row itself, not a bar */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* custom bronze range slider for the "do the math" calculator — large 28px
    thumb (touch target), hairline track, accent fill. Cross-browser thumb. */
 .range {
