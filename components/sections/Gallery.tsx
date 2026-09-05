@@ -2,58 +2,114 @@
 
 // The styles section: a picker, not a gallery (Styles section ticket).
 // A visitor self-identifies by business type (the chip row), sees one style
-// at a time in a fixed-height stage, and the CTA never leaves the section.
-// Proof is the live embed: a screenshot on load, a real scrollable iframe of
-// the actual demo route once the visitor acts on it.
+// at a time as a screenshot, and steps inside a FULLSCREEN live preview when
+// they want proof — never a small embedded iframe sitting inside the page's
+// own scroll (that fought the page scroll, Noah 2026-09-05). Fullscreen is
+// its own scroll context with the page locked behind it, so there's exactly
+// one thing on screen that can scroll at a time.
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
-import { useCanHover } from "@/lib/hooks";
 import { COPY } from "@/lib/site";
 import { stylePickerEntries, type StylePickerEntry } from "@/lib/projects";
 
 type Device = "desktop" | "phone";
 
-// The stage: screenshot first (free to render, costs nothing on load),
-// swapping to a real same-origin iframe once the visitor activates it — on
-// hover for pointer devices, on tap of "Preview it live" for touch. Only one
-// style's frame exists at a time (this component itself), so switching
-// styles is what unmounts the previous iframe. Minimal chrome: no fake
-// traffic lights, no fake URL bar — the one real control is the device width.
+// The inline stage: always just a screenshot (free on load, never an iframe
+// sitting in the page's own scroll) plus a "Step inside" affordance that
+// opens the fullscreen preview. Same on every device — no hover branching.
 function Stage({
   entry,
-  device,
-  live,
-  loaded,
-  canHover,
-  onActivate,
-  onDeviceChange,
+  onOpen,
 }: {
   entry: StylePickerEntry;
-  device: Device;
-  live: boolean;
-  loaded: boolean;
-  canHover: boolean;
-  onActivate: () => void;
-  onDeviceChange: (d: Device) => void;
+  onOpen: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
-  const frameStyle =
-    device === "phone"
-      ? { width: 320, aspectRatio: "9 / 16" }
-      : { width: "100%", maxWidth: 720, aspectRatio: "16 / 10" };
-
   return (
     <div className="mx-auto max-w-3xl border border-line bg-surface">
-      {/* chrome strip: structure, not decoration — just the device control */}
-      <div className="flex items-center justify-end gap-1 border-b border-line px-3 py-2">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="group relative block aspect-[16/10] w-full overflow-hidden bg-bg"
+      >
+        {entry.screenshot ? (
+          <Image
+            src={entry.screenshot}
+            alt={`${entry.label} website style`}
+            fill
+            sizes="(max-width: 768px) 90vw, 720px"
+            className="object-cover object-top"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-sm text-muted">
+            Preview
+          </div>
+        )}
+        <span
+          aria-hidden
+          className="absolute inset-0 flex items-center justify-center bg-ink/0 transition-colors duration-200 group-hover:bg-ink/10"
+        >
+          <span className="press border border-line bg-surface px-4 py-2 text-sm font-semibold text-ink opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            Step inside →
+          </span>
+        </span>
+      </button>
+    </div>
+  );
+}
+
+// Fullscreen live preview: the ONLY place an iframe of the real demo route
+// ever mounts. Takes over the whole viewport (own scroll context, page
+// scroll locked behind it), so scrolling near the preview never bleeds into
+// the Vilas page. Exit is a floating button, bottom-right, that exists only
+// while this is open.
+function FullscreenPreview({
+  entry,
+  onClose,
+}: {
+  entry: StylePickerEntry;
+  onClose: () => void;
+}) {
+  const [device, setDevice] = useState<Device>("desktop");
+  const exitRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    exitRef.current?.focus();
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${entry.label} style, live preview`}
+      className="fixed inset-0 z-50 flex flex-col bg-bg"
+    >
+      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <span className="text-sm font-semibold text-ink">{entry.label}</span>
         <div role="group" aria-label="Preview width" className="flex gap-1">
           <button
             type="button"
             aria-pressed={device === "desktop"}
-            onClick={() => onDeviceChange("desktop")}
+            onClick={() => setDevice("desktop")}
             className={`press px-2 py-1 text-xs font-semibold uppercase tracking-[0.06em] ${
               device === "desktop" ? "text-ink" : "text-muted hover:text-ink"
             }`}
@@ -63,7 +119,7 @@ function Stage({
           <button
             type="button"
             aria-pressed={device === "phone"}
-            onClick={() => onDeviceChange("phone")}
+            onClick={() => setDevice("phone")}
             className={`press px-2 py-1 text-xs font-semibold uppercase tracking-[0.06em] ${
               device === "phone" ? "text-ink" : "text-muted hover:text-ink"
             }`}
@@ -73,67 +129,51 @@ function Stage({
         </div>
       </div>
 
-      <div
-        className="relative mx-auto overflow-hidden bg-bg"
-        style={frameStyle}
-        onMouseEnter={canHover && !live ? onActivate : undefined}
-      >
-        {live && (
-          <iframe
-            key={entry.slug}
-            src={entry.route}
-            title={`${entry.label} style, live preview`}
-            className="h-full w-full border-0"
-            style={{ opacity: loaded ? 1 : 0, transition: "opacity 300ms var(--ease-out-expo)" }}
-          />
-        )}
-        {!live && entry.screenshot && (
-          <Image
-            src={entry.screenshot}
-            alt={`${entry.label} website style`}
-            fill
-            sizes="(max-width: 768px) 90vw, 720px"
-            className="object-cover object-top"
-          />
-        )}
-        {!live && !entry.screenshot && (
-          <div className="flex h-full w-full items-center justify-center text-sm text-muted">
-            Preview
-          </div>
-        )}
-        {!live && !canHover && (
-          <button
-            type="button"
-            onClick={onActivate}
-            className="absolute inset-0 flex items-center justify-center bg-ink/0 transition-colors duration-200 hover:bg-ink/10"
-          >
-            <span className="press border border-line bg-surface px-4 py-2 text-sm font-semibold text-ink">
-              Preview it live
-            </span>
-          </button>
-        )}
+      <div className="flex flex-1 items-center justify-center overflow-hidden bg-line/40">
+        <iframe
+          src={entry.route}
+          title={`${entry.label} style, live preview`}
+          className="h-full border-0 bg-bg"
+          style={device === "phone" ? { width: 390 } : { width: "100%" }}
+        />
       </div>
+
+      {/* the exit affordance — sticky bottom-right, only exists while open */}
+      <button
+        ref={exitRef}
+        type="button"
+        onClick={onClose}
+        className="press fixed bottom-6 right-6 z-50 border border-line bg-ink px-5 py-3 text-sm font-semibold text-surface shadow-[0_12px_30px_rgba(20,17,12,0.25)] transition-opacity duration-200 hover:opacity-90"
+      >
+        Exit ✕
+      </button>
     </div>
   );
 }
 
 export function Gallery() {
-  const canHover = useCanHover();
   const entries = stylePickerEntries;
   const [activeSlug, setActiveSlug] = useState(entries[0]?.slug ?? "");
-  const [device, setDevice] = useState<Device>("desktop");
-  const [live, setLive] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [open, setOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
+  const openTriggerRef = useRef<HTMLElement | null>(null);
 
   const active = entries.find((e) => e.slug === activeSlug) ?? entries[0];
 
   const selectStyle = (slug: string) => {
     if (slug === activeSlug) return;
     setActiveSlug(slug);
-    setLive(false);
-    setLoaded(false);
   };
+
+  const openPreview = useCallback((trigger?: HTMLElement | null) => {
+    openTriggerRef.current = trigger ?? document.activeElement as HTMLElement;
+    setOpen(true);
+  }, []);
+
+  const closePreview = useCallback(() => {
+    setOpen(false);
+    openTriggerRef.current?.focus();
+  }, []);
 
   // keep the rail's active thumbnail in view when a chip picks a style
   // that's scrolled off-screen in the rail
@@ -198,18 +238,7 @@ export function Gallery() {
 
         {/* stage */}
         <div className="mt-8">
-          <Stage
-            entry={active}
-            device={device}
-            live={live}
-            loaded={loaded}
-            canHover={canHover}
-            onActivate={() => {
-              setLive(true);
-              setLoaded(true);
-            }}
-            onDeviceChange={setDevice}
-          />
+          <Stage entry={active} onOpen={(e) => openPreview(e.currentTarget)} />
         </div>
 
         {/* CTA — sits with the stage, always reflects the selected style */}
@@ -257,6 +286,8 @@ export function Gallery() {
           })}
         </div>
       </div>
+
+      {open && <FullscreenPreview entry={active} onClose={closePreview} />}
     </section>
   );
 }
