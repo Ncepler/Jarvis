@@ -383,6 +383,24 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
           )}
 
           {isLast && (
+            <label className="flex cursor-pointer items-start gap-2 text-sm text-ink">
+              <input
+                type="checkbox"
+                checked={draft.wantsChatAssistant}
+                onChange={(e) => patch({ wantsChatAssistant: e.target.checked })}
+                className="mt-0.5 size-4 shrink-0 cursor-pointer accent-accent"
+              />
+              <span>
+                Add an AI chat assistant — $30/month
+                <span className="mt-1 block text-xs text-muted">
+                  Answers customer questions on your site around the clock.
+                  Optional, and separate from your monthly.
+                </span>
+              </span>
+            </label>
+          )}
+
+          {isLast && (
             <label className="flex cursor-pointer items-start gap-2 text-sm text-muted">
               <input
                 type="checkbox"

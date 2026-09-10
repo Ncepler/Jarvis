@@ -92,6 +92,10 @@ export type IntakeDraft = {
   // page 5, brain dump
   brainDump: string;
 
+  // Optional $30/month add-on, bought separately from the monthly. Asked
+  // right before submit, same as the terms checkbox.
+  wantsChatAssistant: boolean;
+
   uploads: IntakeUploads;
 };
 
@@ -131,6 +135,7 @@ export const emptyDraft = (): IntakeDraft => ({
   droppedSections: [],
   copyChanges: "",
   brainDump: "",
+  wantsChatAssistant: false,
   uploads: emptyUploads(),
 });
 
@@ -352,6 +357,7 @@ export type SubmissionRow = {
   copy_changes: string | null;
   dropped_sections: string[] | null;
   brain_dump: string | null;
+  wants_chat_assistant: boolean | null;
 };
 
 // Re-exported so the form page and the dashboard don't both need to reach

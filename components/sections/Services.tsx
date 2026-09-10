@@ -67,6 +67,14 @@ function PathCard({ path, n }: { path: (typeof PATHS)[number]; n: number }) {
         <span className="shrink-0 text-sm text-accent">{path.price}</span>
       </button>
 
+      {/* the $30/month chat add-on is bought separately — never folded into
+          the monthly above, just noted quietly underneath it */}
+      {path.key !== "custom" && (
+        <p className="mt-1 text-xs text-muted/70">
+          Optional — AI chat assistant on your site. $30/month.
+        </p>
+      )}
+
       <motion.div
         className="overflow-hidden"
         initial={false}
