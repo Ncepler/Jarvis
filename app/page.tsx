@@ -1,3 +1,4 @@
+import { ChatAssistant } from "@/components/ChatAssistant";
 import { Footer } from "@/components/Footer";
 import { Marquee } from "@/components/Marquee";
 import { PinnedLogo } from "@/components/PinnedLogo";
@@ -15,7 +16,9 @@ import { Pricing } from "@/components/sections/Pricing";
 import { Seo } from "@/components/sections/Seo";
 import { Services } from "@/components/sections/Services";
 import { WorkNote } from "@/components/sections/WorkNote";
+import vilasChatFacts from "@/content/chat/vilas.json";
 import { listClientSites } from "@/lib/clientSites";
+import { SITE } from "@/lib/site";
 
 // A server component so the "Out in the world" gallery can read real client
 // sites out of Supabase at request time (Noah adds rows by hand — no
@@ -41,6 +44,17 @@ export default async function Home() {
         <Seo />
         <About />
         <Faq />
+        <section className="px-6 pb-24 md:px-10 md:pb-40">
+          <div className="mx-auto max-w-3xl">
+            <p className="mb-4 text-sm text-muted">Ask us anything.</p>
+            <ChatAssistant
+              mode="inline"
+              siteSlug={vilasChatFacts.siteSlug}
+              businessName={SITE.name}
+              phone={vilasChatFacts.phone}
+            />
+          </div>
+        </section>
         <ClosingCta />
       </main>
       <Footer />
