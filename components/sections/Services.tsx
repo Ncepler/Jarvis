@@ -30,6 +30,16 @@ const PATHS = [
   },
 ] as const;
 
+// Plain scrollIntoView rather than a bare hash link — a hash href depends on
+// Lenis's own anchor handling picking up the click, and "Try it out" needs to
+// reliably land on the assistant every time regardless of that.
+function scrollToAssistant() {
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document
+    .getElementById("assistant")
+    ?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+}
+
 function PathCard({ path, n }: { path: (typeof PATHS)[number]; n: number }) {
   const reduced = useReducedMotion();
   const canHover = useCanHover();
@@ -144,12 +154,13 @@ export function Services() {
                 {COPY.services.chatAddon.body}
               </p>
             </div>
-            <a
-              href="#assistant"
+            <button
+              type="button"
+              onClick={scrollToAssistant}
               className="press shrink-0 border border-ink bg-ink px-5 py-2.5 text-sm font-semibold text-surface transition-opacity duration-200 hover:opacity-85"
             >
               {COPY.services.chatAddon.cta}
-            </a>
+            </button>
           </div>
         </Reveal>
       </div>

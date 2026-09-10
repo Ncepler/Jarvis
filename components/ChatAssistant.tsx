@@ -78,21 +78,37 @@ function useChat({ siteSlug, apiUrl = "/api/chat" }: { siteSlug: string; apiUrl?
   return { messages, pending, limited, remaining, send };
 }
 
-// Bubble shapes lean on a real texting app: rounded all around, with the
-// corner nearest the sender's own edge pulled in tight (the "tail" corner) —
-// user bubbles sit right with a tucked bottom-right, assistant bubbles sit
-// left with a tucked bottom-left.
-function Bubble({ role, children }: { role: Role; children: React.ReactNode }) {
+// iMessage-style bubble: fully rounded, no border, a small round tail
+// tucked against the outer bottom corner of the last bubble in a run from
+// one sender — not on every bubble, the way Messages groups a back-and-forth.
+function Bubble({
+  role,
+  tail,
+  spacing,
+  children,
+}: {
+  role: Role;
+  tail: boolean;
+  spacing: "none" | "tight" | "loose";
+  children: React.ReactNode;
+}) {
   const isUser = role === "user";
+  const mt = spacing === "none" ? "mt-0" : spacing === "tight" ? "mt-1" : "mt-3";
   return (
     <div
-      className={`max-w-[80%] px-4 py-2.5 text-[15px] leading-relaxed ${
-        isUser
-          ? "ml-auto rounded-2xl rounded-br-md bg-accent text-surface"
-          : "rounded-2xl rounded-bl-md border border-line bg-bg text-ink"
+      className={`relative max-w-[75%] px-4 py-2 text-[15px] leading-snug ${mt} ${
+        isUser ? "ml-auto rounded-[18px] bg-accent text-surface" : "rounded-[18px] bg-bg text-ink"
       }`}
     >
       {children}
+      {tail && (
+        <span
+          aria-hidden="true"
+          className={`absolute -bottom-0.5 h-2.5 w-2.5 rounded-full ${
+            isUser ? "-right-1 bg-accent" : "-left-1 bg-bg"
+          }`}
+        />
+      )}
     </div>
   );
 }
@@ -148,7 +164,7 @@ function ChatBody({
 
       <div
         ref={listRef}
-        className="flex-1 space-y-2.5 overflow-y-auto px-4 py-4"
+        className="flex-1 overflow-y-auto px-4 py-4"
         aria-live="polite"
       >
         {messages.length === 0 && !limited && (
@@ -156,14 +172,20 @@ function ChatBody({
             Ask us anything about {businessName}.
           </p>
         )}
-        {messages.map((m, i) => (
-          <Bubble key={i} role={m.role}>
-            {m.content}
-          </Bubble>
-        ))}
+        {messages.map((m, i) => {
+          const grouped = i > 0 && messages[i - 1].role === m.role;
+          const tail = i === messages.length - 1 || messages[i + 1].role !== m.role;
+          const spacing = i === 0 ? "none" : grouped ? "tight" : "loose";
+          return (
+            <Bubble key={i} role={m.role} tail={tail} spacing={spacing}>
+              {m.content}
+            </Bubble>
+          );
+        })}
         {pending && (
-          <div className="max-w-[80%] rounded-2xl rounded-bl-md border border-line bg-bg px-4 py-2.5">
+          <div className="relative mt-3 max-w-[80%] rounded-[18px] bg-bg px-4 py-2">
             <TypingDots />
+            <span aria-hidden="true" className="absolute -bottom-0.5 -left-1 h-2.5 w-2.5 rounded-full bg-bg" />
           </div>
         )}
       </div>
