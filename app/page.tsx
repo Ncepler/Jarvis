@@ -4,6 +4,7 @@ import { PinnedLogo } from "@/components/PinnedLogo";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { StickyStartButton } from "@/components/StickyStartButton";
 import { About } from "@/components/sections/About";
+import { ChatSection } from "@/components/sections/ChatSection";
 import { ClientSites } from "@/components/sections/ClientSites";
 import { ClosingCta } from "@/components/sections/ClosingCta";
 import { DoTheMath } from "@/components/sections/DoTheMath";
@@ -41,6 +42,7 @@ export default async function Home() {
         <Seo />
         <About />
         <Faq />
+        <ChatSection />
         <ClosingCta />
       </main>
       <Footer />
