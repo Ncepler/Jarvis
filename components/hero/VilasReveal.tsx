@@ -8,6 +8,7 @@ import {
 } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
+import { NameDefinition } from "./NameDefinition";
 
 type Token = { id: string; char: string; core: boolean; bright?: boolean };
 type TourWord = { word: string; coreAt: number };
@@ -370,6 +371,9 @@ export function VilasReveal({
         <p className="mx-auto mt-10 max-w-sm text-balance text-base text-muted md:max-w-md md:text-lg">
           {tagline}
         </p>
+
+        <NameDefinition />
+
         <a
           href={ctaHref}
           className="press mt-8 inline-block text-sm text-accent underline decoration-accent/40 underline-offset-8 transition-colors hover:decoration-accent"
