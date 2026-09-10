@@ -44,13 +44,14 @@ export default async function Home() {
         <Seo />
         <About />
         <Faq />
-        <section className="px-6 pb-24 md:px-10 md:pb-40">
+        <section id="assistant" className="px-6 pb-24 md:px-10 md:pb-40">
           <div className="mx-auto max-w-3xl">
             <p className="mb-4 text-sm text-muted">Ask us anything.</p>
             <ChatAssistant
               mode="inline"
               siteSlug={vilasChatFacts.siteSlug}
               businessName={SITE.name}
+              title="Vilas assistant"
               phone={vilasChatFacts.phone}
             />
           </div>

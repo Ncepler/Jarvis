@@ -176,8 +176,16 @@ export function Gallery() {
   }, []);
 
   // keep the rail's active thumbnail in view when a chip picks a style
-  // that's scrolled off-screen in the rail
+  // that's scrolled off-screen in the rail. Skipped on first mount: the rail
+  // isn't its own vertical scroll container, so scrollIntoView's block axis
+  // was walking up to the page and yanking the whole site down to this
+  // section on every load — it should only react to an actual style change.
+  const mountedRef = useRef(false);
   useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
     const el = railRef.current?.querySelector<HTMLElement>(
       `[data-slug="${activeSlug}"]`,
     );

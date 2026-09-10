@@ -13,6 +13,8 @@ export type ChatAssistantProps = {
   mode: "inline" | "floating";
   siteSlug: string;
   businessName: string;
+  /** Header title. Defaults to "{businessName} assistant". */
+  title?: string;
   /** Optional — shown in the limit/error copy only when set. */
   phone?: string;
   /** Defaults to the same-origin route; demo sites pass the full vilas.studio URL. */
@@ -76,9 +78,38 @@ function useChat({ siteSlug, apiUrl = "/api/chat" }: { siteSlug: string; apiUrl?
   return { messages, pending, limited, remaining, send };
 }
 
+// Bubble shapes lean on a real texting app: rounded all around, with the
+// corner nearest the sender's own edge pulled in tight (the "tail" corner) —
+// user bubbles sit right with a tucked bottom-right, assistant bubbles sit
+// left with a tucked bottom-left.
+function Bubble({ role, children }: { role: Role; children: React.ReactNode }) {
+  const isUser = role === "user";
+  return (
+    <div
+      className={`max-w-[80%] px-4 py-2.5 text-[15px] leading-relaxed ${
+        isUser
+          ? "ml-auto rounded-2xl rounded-br-md bg-accent text-surface"
+          : "rounded-2xl rounded-bl-md border border-line bg-bg text-ink"
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function ChatHeader({ title }: { title: string }) {
+  return (
+    <div className="flex shrink-0 items-center gap-2.5 border-b border-line px-4 py-3.5">
+      <span className="h-2 w-2 shrink-0 rounded-full bg-accent-2" aria-hidden="true" />
+      <span className="text-sm font-semibold text-ink">{title}</span>
+    </div>
+  );
+}
+
 function ChatBody({
   siteSlug,
   businessName,
+  title,
   phone,
   apiUrl,
   panel,
@@ -112,12 +143,12 @@ function ChatBody({
     remaining !== null && remaining < 4 && remaining >= 0 && !limited;
 
   return (
-    <div
-      className={`flex flex-col ${panel ? "h-full" : "h-[420px]"} bg-surface`}
-    >
+    <div className={`flex flex-col ${panel ? "h-full" : "h-[460px]"} bg-surface`}>
+      <ChatHeader title={title ?? `${businessName} assistant`} />
+
       <div
         ref={listRef}
-        className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
+        className="flex-1 space-y-2.5 overflow-y-auto px-4 py-4"
         aria-live="polite"
       >
         {messages.length === 0 && !limited && (
@@ -126,33 +157,28 @@ function ChatBody({
           </p>
         )}
         {messages.map((m, i) => (
-          <div
-            key={i}
-            className={`max-w-[85%] rounded-sm border border-line px-3 py-2 text-sm leading-relaxed ${
-              m.role === "user" ? "ml-auto bg-bg text-ink" : "bg-surface text-ink"
-            }`}
-          >
+          <Bubble key={i} role={m.role}>
             {m.content}
-          </div>
+          </Bubble>
         ))}
         {pending && (
-          <div className="max-w-[85%] rounded-sm border border-line bg-surface px-3 py-2">
+          <div className="max-w-[80%] rounded-2xl rounded-bl-md border border-line bg-bg px-4 py-2.5">
             <TypingDots />
           </div>
         )}
       </div>
 
-      <div className="border-t border-line px-4 py-3">
+      <div className="border-t border-line px-3 py-3">
         {limited === "visitor" ? (
-          <p className="text-sm text-muted">
+          <p className="px-1 text-sm text-muted">
             You&rsquo;ve hit today&rsquo;s message limit. Try again tomorrow.{callLine(phone)}
           </p>
         ) : limited === "site" || limited === "error" ? (
-          <p className="text-sm text-muted">Chat is unavailable right now.{callLine(phone)}</p>
+          <p className="px-1 text-sm text-muted">Chat is unavailable right now.{callLine(phone)}</p>
         ) : (
           <>
             {lowOnMessages && (
-              <p className="mb-2 text-xs text-muted">
+              <p className="mb-2 px-1 text-xs text-muted">
                 {remaining} message{remaining === 1 ? "" : "s"} left today.
               </p>
             )}
@@ -165,14 +191,15 @@ function ChatBody({
                 rows={1}
                 placeholder="Type a message"
                 aria-label="Message"
-                className="max-h-24 flex-1 resize-none rounded-sm border border-line bg-bg px-3 py-2 text-sm text-ink outline-none focus-visible:border-ink"
+                className="max-h-24 flex-1 resize-none rounded-3xl border border-line bg-bg px-4 py-2.5 text-sm text-ink outline-none focus-visible:border-ink"
               />
               <button
                 type="submit"
                 disabled={pending || !draft.trim()}
-                className="press shrink-0 rounded-sm border border-line bg-ink px-3.5 py-2 text-sm text-bg disabled:opacity-40"
+                aria-label="Send"
+                className="press flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-bg disabled:opacity-40"
               >
-                Send
+                <span aria-hidden="true">↑</span>
               </button>
             </form>
           </>
@@ -185,7 +212,7 @@ function ChatBody({
 export function ChatAssistant(props: ChatAssistantProps) {
   if (props.mode === "inline") {
     return (
-      <div className="mx-auto max-w-3xl overflow-hidden rounded-sm border border-line">
+      <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-line shadow-sm">
         <ChatBody {...props} panel />
       </div>
     );
@@ -231,8 +258,8 @@ function FloatingChat(props: ChatAssistantProps) {
           <motion.div
             ref={dialogRef}
             role="dialog"
-            aria-label={`Chat with ${props.businessName}`}
-            className="fixed inset-x-0 bottom-0 z-50 h-[70vh] w-full overflow-hidden rounded-t-sm border border-line bg-surface shadow-xl sm:bottom-24 sm:right-8 sm:left-auto sm:h-[520px] sm:w-[380px] sm:rounded-sm"
+            aria-label={`Chat with ${props.title ?? props.businessName}`}
+            className="fixed inset-x-0 bottom-0 z-50 h-[70vh] w-full overflow-hidden rounded-t-2xl border border-line bg-surface shadow-xl sm:bottom-24 sm:right-8 sm:left-auto sm:h-[520px] sm:w-[380px] sm:rounded-2xl"
             initial={reduced ? { opacity: 0 } : { opacity: 0, y: 24 }}
             animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: 24 }}

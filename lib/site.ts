@@ -197,6 +197,14 @@ export const COPY = {
       custom:
         "Built from nothing, to spec, around how your business actually works.",
     },
+    // $30/month add-on, bought separately from any tier above — its own box
+    // so it never reads as bundled into a package.
+    chatAddon: {
+      eyebrow: "Add-on",
+      title: "AI chat assistant",
+      body: "Answers customer questions on your site around the clock. Optional, and separate from your monthly. $30/month.",
+      cta: "Try it out",
+    },
   },
   howItWorks: {
     title: "How it works",
