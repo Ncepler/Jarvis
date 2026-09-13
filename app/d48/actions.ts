@@ -13,7 +13,7 @@ import {
   updateStatus,
 } from "@/lib/d48";
 import { generatePrompt } from "@/lib/generatePrompt";
-import { templateByKey } from "@/lib/templates";
+import { depsFor, templateByKey } from "@/lib/templates";
 
 // Actions report failure as a value, never by throwing: Next redacts a thrown
 // server-action error in production, and "an error occurred" is exactly the
@@ -70,14 +70,25 @@ export async function destroy(id: string) {
 }
 
 // Reads the template's source off disk on every call, so what gets copied is
-// whatever is live in the repo right now.
+// whatever is live in the repo right now. Includes every shared file the demo
+// needs to compile/render on its own (nav, footer, the Vilas credit line,
+// premium hero media, hero-video concepts, and — for the magician — its
+// cursor effect), not just the one entry file, so nothing needs a second
+// copy. One clipboard-writeable string, each file marked off by a path
+// header, rather than restructuring the button into a multi-file export.
 export async function copyTemplateCode(templateKey: string) {
   return run(async () => {
     const tpl = templateByKey(templateKey);
     if (!tpl) throw new Error(`No template registered under "${templateKey}".`);
-    const src = await readFile(path.join(process.cwd(), tpl.file), "utf8");
+    const files = [tpl.file, ...depsFor(templateKey)];
+    const sections = await Promise.all(
+      files.map(async (file) => {
+        const src = await readFile(path.join(process.cwd(), file), "utf8");
+        return `// ---- FILE: ${file} ----\n\n${src}`;
+      }),
+    );
     const stamp = new Date().toISOString();
-    return `// Original template: ${tpl.name} (${tpl.file}) — copied from live repo at ${stamp}\n\n${src}`;
+    return `// Original template: ${tpl.name} (${tpl.file}) — copied from live repo at ${stamp}\n// Includes every shared file this style needs to render on its own.\n\n${sections.join("\n\n")}`;
   });
 }
 

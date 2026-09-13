@@ -42,7 +42,7 @@ export default function PrivacyPage() {
         <div className="mt-8">
           <h1 className="text-title font-display text-ink">Privacy Policy</h1>
           <p className="mt-3 font-mono text-sm text-muted">
-            Last updated: August 26, 2026
+            Last updated: August 27, 2026
           </p>
           <p className="mt-6 max-w-xl text-muted leading-relaxed">
             This is a plain explanation of what we collect, why, and what we
@@ -56,8 +56,8 @@ export default function PrivacyPage() {
                 When you fill out our intake form, we collect your business
                 name, your name, your business email, your phone number if
                 you give it, your business address or service area, the
-                domain you want, your current website if you have one, and
-                whatever else you tell us about your business. When you use
+                domain you want, and whatever else you tell us about your
+                business. When you use
                 our project lookup, we collect the reference code and email
                 you enter.
               </p>
@@ -74,6 +74,11 @@ export default function PrivacyPage() {
               </p>
             </Section>
 
+            <p className="max-w-xl text-muted leading-relaxed">
+              This policy covers vilas.studio only. Sites we build for
+              clients are run by those clients and have their own policies.
+            </p>
+
             <Section heading="Who else sees it">
               <p className="max-w-xl text-muted leading-relaxed">
                 We use a small number of service providers to run the
@@ -83,7 +88,12 @@ export default function PrivacyPage() {
                 <li>Vercel, which hosts this site and keeps standard server logs</li>
                 <li>Supabase, which stores intake submissions and project records</li>
                 <li>Resend, which sends the emails our forms generate</li>
+                <li>Stripe, which processes payments when you pay an invoice</li>
               </ul>
+              <p className="max-w-xl text-muted leading-relaxed">
+                We don&rsquo;t share personal information with anyone for
+                their own direct marketing.
+              </p>
             </Section>
 
             <Section heading="Cold outreach">
@@ -152,10 +162,10 @@ export default function PrivacyPage() {
 
             <Section heading="Contact">
               <a
-                href="mailto:hello@vilas.studio"
+                href="mailto:hello.vilasstudio@gmail.com"
                 className="text-ink/80 transition-colors duration-200 hover:text-accent"
               >
-                hello@vilas.studio
+                hello.vilasstudio@gmail.com
               </a>
             </Section>
           </div>

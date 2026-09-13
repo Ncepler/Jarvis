@@ -30,6 +30,16 @@ const PATHS = [
   },
 ] as const;
 
+// Plain scrollIntoView rather than a bare hash link — a hash href depends on
+// Lenis's own anchor handling picking up the click, and "Try it out" needs to
+// reliably land on the assistant every time regardless of that.
+function scrollToAssistant() {
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document
+    .getElementById("assistant")
+    ?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+}
+
 function PathCard({ path, n }: { path: (typeof PATHS)[number]; n: number }) {
   const reduced = useReducedMotion();
   const canHover = useCanHover();
@@ -127,6 +137,31 @@ export function Services() {
           <p className="mt-12 max-w-md text-lg">
             {COPY.services.riskReversal}
           </p>
+        </Reveal>
+
+        {/* $30/month chat add-on — its own box, never folded into a tier
+            above. "Try it out" jumps to the live assistant under the FAQ. */}
+        <Reveal delay={0.15}>
+          <div className="mt-10 flex flex-col items-start justify-between gap-6 border border-line bg-surface p-8 sm:flex-row sm:items-center">
+            <div>
+              <span className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
+                {COPY.services.chatAddon.eyebrow}
+              </span>
+              <p className="mt-2 text-lg text-ink">
+                {COPY.services.chatAddon.title}
+              </p>
+              <p className="mt-1 max-w-md text-sm text-muted">
+                {COPY.services.chatAddon.body}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={scrollToAssistant}
+              className="press shrink-0 border border-ink bg-ink px-5 py-2.5 text-sm font-semibold text-surface transition-opacity duration-200 hover:opacity-85"
+            >
+              {COPY.services.chatAddon.cta}
+            </button>
+          </div>
         </Reveal>
       </div>
     </section>

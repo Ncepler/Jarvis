@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import {
   Inter,
   Inter_Tight,
@@ -78,7 +79,19 @@ const spaceMono = Space_Mono({
 // reads like a plain, real business and links unfurl with title + description.
 // TODO(name): real OG image + favicon still pending (needs a designed asset, §12).
 const META_TITLE = `${SITE.name}: web design studio for small businesses`;
-const META_DESCRIPTION = `A small, fully remote web design studio. We build websites for local businesses that look like they cost as much as a villa.`;
+const META_DESCRIPTION = `A web design studio. We build websites for local businesses that look expensive — and aren't.`;
+
+// Organization, not LocalBusiness — Vilas has no physical location, so no
+// address/geo claims. Rendered as a plain <script> in the body; JSON-LD is
+// picked up by crawlers regardless of where in the document it sits.
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: SITE.name,
+  url: SITE_URL,
+  logo: `${SITE_URL}/vilas-mark.webp`,
+  areaServed: "United States",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -111,7 +124,14 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${interTight.variable} ${syne.variable} ${fraunces.variable} ${oswald.variable} ${playfair.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

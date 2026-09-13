@@ -6,6 +6,7 @@
 // Barber Co." is a sample brand for the demo, not a client.
 
 import {
+  ANCHOR_SCROLL_CLASS,
   Contact,
   CtaBand,
   DemoFooter,
@@ -24,7 +25,10 @@ import {
   TwoLine,
   WorkGrid,
 } from "./system";
+import { heroConceptFor } from "@/lib/heroConcepts";
+import type { Tier } from "./VilasDemoBar";
 
+const PREMIUM_HERO = heroConceptFor("demo-barber");
 const ACCENT = "#B0833F"; // brass / gold — warm lamplight (primary)
 const OXBLOOD = "#9A3B33"; // deep oxblood (secondary, used sparingly)
 
@@ -179,7 +183,7 @@ function TheChair() {
   );
 }
 
-export function BarberDemo() {
+export function BarberDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Book a chair" />
@@ -192,24 +196,29 @@ export function BarberDemo() {
         primaryCta="Book a chair"
         phone={PHONE}
         mediaLabel="HERO VIDEO: the shop floor (16:9)"
+        premium={tier === "premium" ? PREMIUM_HERO : undefined}
       />
       <DemoMarquee terms={["Cuts", "Fades", "Beards", "Shaves", "Kids"]} />
-      <Intro
-        eyebrow="Who we are"
-        line1="Old-school chair."
-        line2="No nonsense."
-        paragraphs={[
-          "No app trying to upsell you pomade, no rotating stranger who's never seen your hairline. Just a good cut from the same barbers.",
-          "Standard runs four chairs in Patchogue. Book online in a minute or walk in. If the pole's spinning, we're cutting.",
-        ]}
-        badges={[
-          ["Cuts to shaves", "Full menu"],
-          ["Walk-in or book", "Either works"],
-          ["Same barbers", "Consistent"],
-          ["Cash or card", "Easy"],
-        ]}
-      />
-      <PriceBoard />
+      <div id="about" className={ANCHOR_SCROLL_CLASS}>
+        <Intro
+          eyebrow="Who we are"
+          line1="Old-school chair."
+          line2="No nonsense."
+          paragraphs={[
+            "No app trying to upsell you pomade, no rotating stranger who's never seen your hairline. Just a good cut from the same barbers.",
+            "Standard runs four chairs in Patchogue. Book online in a minute or walk in. If the pole's spinning, we're cutting.",
+          ]}
+          badges={[
+            ["Cuts to shaves", "Full menu"],
+            ["Walk-in or book", "Either works"],
+            ["Same barbers", "Consistent"],
+            ["Cash or card", "Easy"],
+          ]}
+        />
+      </div>
+      <div id="services" className={ANCHOR_SCROLL_CLASS}>
+        <PriceBoard />
+      </div>
       <FullBleedBreak
         eyebrow="The shop"
         line1="Leather, brass,"
@@ -224,12 +233,14 @@ export function BarberDemo() {
         cta="Book a chair"
         mediaLabel="THE SHOP: chairs, brass, lamplight (16:9)"
       />
-      <WorkGrid
-        eyebrow="Recent work"
-        line1="The work,"
-        line2="on the wall."
-        items={WORK}
-      />
+      <div id="work" className={ANCHOR_SCROLL_CLASS}>
+        <WorkGrid
+          eyebrow="Recent work"
+          line1="The work,"
+          line2="on the wall."
+          items={WORK}
+        />
+      </div>
       <TheChair />
       <Faq
         eyebrow="Questions"
@@ -237,17 +248,19 @@ export function BarberDemo() {
         line2="people ask."
         items={FAQ}
       />
-      <Contact
-        eyebrow="Book or visit"
-        line1="Your chair's"
-        line2="waiting."
-        copy="Book online in under a minute, call, or just come by: 311 Main St, Patchogue. If the pole's spinning, we're cutting."
-        phone={PHONE}
-        email="hello@standardbarber.demo"
-        location="311 Main St, Patchogue, NY"
-        serviceLabel="What you're booking"
-        serviceOptions={["Haircut", "Skin fade", "Beard & line-up", "Hot-towel shave", "The works", "Kids"]}
-      />
+      <div id="contact" className={ANCHOR_SCROLL_CLASS}>
+        <Contact
+          eyebrow="Book or visit"
+          line1="Your chair's"
+          line2="waiting."
+          copy="Book online in under a minute, call, or just come by: 311 Main St, Patchogue. If the pole's spinning, we're cutting."
+          phone={PHONE}
+          email="hello@standardbarber.demo"
+          location="311 Main St, Patchogue, NY"
+          serviceLabel="What you're booking"
+          serviceOptions={["Haircut", "Skin fade", "Beard & line-up", "Hot-towel shave", "The works", "Kids"]}
+        />
+      </div>
       <CtaBand
         line1="Need a cut?"
         line2="Grab a chair."

@@ -61,6 +61,16 @@ body {
   transform: scale(0.98);
 }
 
+/* horizontal-scroll rows with no visible scrollbar (styles picker's chip row
+   and thumbnail rail) — the scroll affordance is the row itself, not a bar */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* custom bronze range slider for the "do the math" calculator — large 28px
    thumb (touch target), hairline track, accent fill. Cross-browser thumb. */
 .range {
@@ -157,5 +167,27 @@ body {
   .scroll-cue,
   .animate-fade-in {
     animation: none;
+  }
+}
+
+/* NameDefinition (components/hero/NameDefinition.tsx) — grid-rows expand is
+   CSS-only, so it's disarmed the same way: snap open/closed, no transition. */
+@media (prefers-reduced-motion: reduce) {
+  .name-definition-panel,
+  .name-definition-panel * {
+    transition: none !important;
+  }
+}
+
+/* Demo nav/footer anchor links (components/demos/system.tsx) — native CSS
+   smooth scroll, since demo pages don't run the main site's Lenis. Scoped via
+   :has() to pages that actually render a demo (the .demo-shell root DemoShell
+   sets), so it never touches the main site's own scrolling. */
+html:has(.demo-shell) {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:has(.demo-shell) {
+    scroll-behavior: auto;
   }
 }

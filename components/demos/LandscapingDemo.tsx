@@ -9,6 +9,7 @@
 import { useReducedMotion } from "motion/react";
 import { useState } from "react";
 import {
+  ANCHOR_SCROLL_CLASS,
   Contact,
   CtaBand,
   DemoFooter,
@@ -28,6 +29,10 @@ import {
   TwoLine,
   ValueProps,
 } from "./system";
+import { heroConceptFor } from "@/lib/heroConcepts";
+import type { Tier } from "./VilasDemoBar";
+
+const PREMIUM_HERO = heroConceptFor("demo-landscaping");
 
 const ACCENT = "#6E9A5C"; // moss / sage green, nudged brighter to pop on green-black
 
@@ -220,7 +225,7 @@ function LightingServices() {
   );
 }
 
-export function LandscapingDemo() {
+export function LandscapingDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free consult" />
@@ -233,24 +238,29 @@ export function LandscapingDemo() {
         primaryCta="Book a consultation"
         phone={PHONE}
         mediaLabel="HERO VIDEO: finished property b-roll (16:9)"
+        premium={tier === "premium" ? PREMIUM_HERO : undefined}
       />
       <DemoMarquee terms={["Patios", "Retaining Walls", "Gardens", "Lighting", "Fire Pits"]} />
-      <Intro
-        eyebrow="Who we are"
-        line1="One studio."
-        line2="One crew."
-        paragraphs={[
-          "Most yards get passed between a designer, a mason, and a landscaper who never talk. The seams show.",
-          "Stone & Sage draws it, builds it, and maintains it with our own people, so the property reads as one finished idea, not three.",
-        ]}
-        badges={[
-          ["Design through maintenance", "Full scope"],
-          ["Licensed & insured", "Fully covered"],
-          ["Our own crew, no subs", "Held to the drawing"],
-          ["Free consultations", "No pressure"],
-        ]}
-      />
-      <LightingServices />
+      <div id="about" className={ANCHOR_SCROLL_CLASS}>
+        <Intro
+          eyebrow="Who we are"
+          line1="One studio."
+          line2="One crew."
+          paragraphs={[
+            "Most yards get passed between a designer, a mason, and a landscaper who never talk. The seams show.",
+            "Stone & Sage draws it, builds it, and maintains it with our own people, so the property reads as one finished idea, not three.",
+          ]}
+          badges={[
+            ["Design through maintenance", "Full scope"],
+            ["Licensed & insured", "Fully covered"],
+            ["Our own crew, no subs", "Held to the drawing"],
+            ["Free consultations", "No pressure"],
+          ]}
+        />
+      </div>
+      <div id="services" className={ANCHOR_SCROLL_CLASS}>
+        <LightingServices />
+      </div>
       <ProcessStepper
         eyebrow="Our process"
         line1="Design."
@@ -272,13 +282,15 @@ export function LandscapingDemo() {
         cta="Walk the property with us"
         mediaLabel="TRANSFORMATION: before/after (16:9)"
       />
-      <FilterableWorkGrid
-        eyebrow="Recent work"
-        line1="Work you can"
-        line2="stand in."
-        chips={WORK_CHIPS}
-        items={WORK}
-      />
+      <div id="work" className={ANCHOR_SCROLL_CLASS}>
+        <FilterableWorkGrid
+          eyebrow="Recent work"
+          line1="Work you can"
+          line2="stand in."
+          chips={WORK_CHIPS}
+          items={WORK}
+        />
+      </div>
       <ValueProps
         eyebrow="Why hire us"
         line1="Reasons it"
@@ -291,18 +303,20 @@ export function LandscapingDemo() {
         line2="people ask."
         items={FAQ}
       />
-      <Contact
-        eyebrow="Free consult"
-        line1="Walk the property"
-        line2="with us."
-        copy="Consultations run about an hour. You'll leave with a clear sense of what the land wants to be, whether or not you build with us."
-        phone={PHONE}
-        email="hello@stoneandsage.demo"
-        location="North Shore, Long Island, NY"
-        serviceLabel="What you're planning"
-        serviceOptions={["Design", "Patio / walkway", "Retaining wall", "Garden & planting", "Lighting", "Maintenance", "Custom feature", "Not sure yet"]}
-        propertyTypes={["Residential", "Commercial"]}
-      />
+      <div id="contact" className={ANCHOR_SCROLL_CLASS}>
+        <Contact
+          eyebrow="Free consult"
+          line1="Walk the property"
+          line2="with us."
+          copy="Consultations run about an hour. You'll leave with a clear sense of what the land wants to be, whether or not you build with us."
+          phone={PHONE}
+          email="hello@stoneandsage.demo"
+          location="North Shore, Long Island, NY"
+          serviceLabel="What you're planning"
+          serviceOptions={["Design", "Patio / walkway", "Retaining wall", "Garden & planting", "Lighting", "Maintenance", "Custom feature", "Not sure yet"]}
+          propertyTypes={["Residential", "Commercial"]}
+        />
+      </div>
       <CtaBand
         line1="Ready to start?"
         line2="Let's walk the property."

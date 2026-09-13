@@ -1,0 +1,37 @@
+{
+  "siteSlug": "vilas",
+  "businessName": "Vilas Studio",
+  "whatTheyDo": "We're a web studio focused on local service businesses. Every site is fit by hand to the business it belongs to.",
+  "services": [
+    "Basic — $300 + $50/month: A still hero image, done well. Pick a style from the work below and we fit it to your business.",
+    "Premium — $500 + $80/month: A moving hero — video, or a scene that builds as people scroll. The one people remember.",
+    "Custom — let's talk: Built from nothing, to spec, around how your business actually works."
+  ],
+  "hours": "",
+  "areaServed": "United States",
+  "phone": "",
+  "contactUrl": "/start",
+  "isDemo": false,
+  "faqs": [
+    {
+      "q": "Is this legit?",
+      "a": "You probably got an email from a stranger, so: fair question. The work above is ours, click through all of it. And you don't pay the second half until you're happy, so the risk sits with us."
+    },
+    {
+      "q": "Do I own the site?",
+      "a": "Yes. The site and the domain are yours. We build it and keep it running, that's it."
+    },
+    {
+      "q": "What if I don't like it?",
+      "a": "We keep tweaking until you do. The second half of the payment waits until then."
+    },
+    {
+      "q": "How long does it take?",
+      "a": "Usually just days, not months. If you're picking one of our styles and you have your photos and hours ready, it's often faster. A custom build takes longer, and so does any round of changes you want after seeing the first version. Once we know what you're asking for we'll give you a real date instead of a range."
+    },
+    {
+      "q": "What do you need from me?",
+      "a": "Send your logo, photos, and hours. We write everything else."
+    }
+  ]
+}

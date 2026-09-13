@@ -3,7 +3,7 @@
 // can be edited here without touching the /d48 UI that calls it.
 
 import { templateByKey } from "./templates";
-import { droppedLabels, type SubmissionRow } from "./intake";
+import { droppedLabels, slugify, type SubmissionRow } from "./intake";
 
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 
@@ -175,6 +175,20 @@ export function generatePrompt(row: SubmissionRow): string {
           "The client noted these things should be changed from the template's default copy or content:",
           "",
           str(row.copy_changes),
+          "",
+        ]
+      : []),
+    ...(row.wants_chat_assistant
+      ? [
+          "## Chat assistant",
+          "This client bought the $30/month AI chat assistant add-on. Build it in:",
+          "",
+          join([
+            "- Mount `ChatAssistant` (ported from the Vilas repo's components/ChatAssistant.tsx, see session 3's instructions) in `floating` mode",
+            `- Create content/chat/${slugify(str(row.business_name)) || "SLUG"}.json, populated from the business info, content, and template answers above — leave a field empty rather than inventing an answer`,
+            "- Set `isDemo: false` in that file — this is a real, live client site",
+            "- It calls the shared chat API on vilas.studio. No OpenAI key goes in this repo, in any form",
+          ]),
           "",
         ]
       : []),

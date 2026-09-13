@@ -33,4 +33,4 @@ create policy "public read published sites"
 insert into public.client_sites (name, url, build_type, style_name, description, sort_order) values
   ('Jonah Shapiro Magic', 'https://jonahshapiromagic.vercel.app', 'style', 'Magician', 'A working magician''s site built from our Magician style: shows, reactions, and a booking form up front.', 10),
   ('PackPerfect', 'https://packperfectinc.com', 'custom', null, 'A custom build for a packing and shipping company, built from scratch around how they actually take orders.', 20),
-  ('Val''s Elegant Barbershop', 'https://val-s-barbershop.vercel.app', 'style', 'Barbershop', 'A barbershop site built from our Barbershop style, booking a chair front and center.', 30);
+  ('Val''s Elegant Barbershop', 'https://valsbarbershop.vercel.app', 'style', 'Barbershop', 'A barbershop site built from our Barbershop style, booking a chair front and center.', 30);

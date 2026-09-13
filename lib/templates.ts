@@ -540,6 +540,26 @@ export const TEMPLATES: Template[] = [
 export const templateByKey = (key: string) =>
   TEMPLATES.find((t) => t.key === key);
 
+// Every demo entry file imports these to compile/render on its own — the
+// shared design-system primitives (nav, footer, the Vilas credit line all
+// live in system.tsx), the premium-hero media component, the Tier type, and
+// the hero-video concept lookup. Read by copyTemplateCode (app/d48/actions.ts)
+// alongside `file` so "Copy template code" exports the whole demo, not just
+// its entry file.
+const SHARED_DEMO_FILES = [
+  "components/demos/system.tsx",
+  "components/demos/PremiumHeroMedia.tsx",
+  "components/demos/VilasDemoBar.tsx",
+  "lib/heroConcepts.ts",
+];
+
+// The magician demo alone pulls in its own cursor effect and a hover-capable
+// check the other styles don't use.
+const MAGICIAN_ONLY_FILES = ["components/demos/MagicianCursor.tsx", "lib/hooks.ts"];
+
+export const depsFor = (key: string): string[] =>
+  key === "demo-magician" ? [...SHARED_DEMO_FILES, ...MAGICIAN_ONLY_FILES] : SHARED_DEMO_FILES;
+
 // Questions the client actually sees for a template, catch-all last.
 export const questionsFor = (key: string) => {
   const t = templateByKey(key);

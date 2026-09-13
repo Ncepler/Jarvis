@@ -1,5 +1,6 @@
 "use client";
 
+import { useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { HeroConcept } from "@/lib/heroConcepts";
 
@@ -20,11 +21,33 @@ import type { HeroConcept } from "@/lib/heroConcepts";
 // still poster (or the text placeholder if there's no poster either):
 // scroll-scrubbed video on a phone is bad, and CLAUDE.md's whole premise is
 // that these visitors are mostly on phones.
-export function PremiumHeroMedia({ concept }: { concept: HeroConcept }) {
+//
+// `fallbackImage` (Demo bar ticket, job 6): the demo's own existing hero
+// photo, used as the still to animate when no `/premium/<slug>` poster has
+// been dropped in yet — every demo already has one of these, so the $500
+// state never falls all the way to the bare text placeholder while a real
+// photo exists. Three-tier still fallback is now poster → fallbackImage →
+// text placeholder, video always wins over any of them.
+//
+// The still (poster or fallbackImage) plays a one-time Ken Burns zoom — scale
+// 1 to ~1.06 over ~10s, ease-out, then hold at 1.06 (no loop, no snap back).
+// This IS "the $500 state" until a real video lands: the task's stand-in for
+// "no video exists yet" lives exactly here, in this fallback path, per Noah's
+// call — not as a parallel hero system. Reduced motion drops the zoom (still
+// renders, just static) but never drops the still itself.
+export function PremiumHeroMedia({
+  concept,
+  fallbackImage,
+}: {
+  concept: HeroConcept;
+  fallbackImage?: string;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const reducedMotion = useReducedMotion();
   const [videoBroken, setVideoBroken] = useState(false);
   const [posterBroken, setPosterBroken] = useState(false);
+  const [fallbackBroken, setFallbackBroken] = useState(false);
   const [skipVideo, setSkipVideo] = useState(true); // starts true: only enabled once checks pass, so SSR/first paint never ships a video tag it might have to tear down
 
   useEffect(() => {
@@ -97,10 +120,20 @@ export function PremiumHeroMedia({ concept }: { concept: HeroConcept }) {
   }, [concept.mode, skipVideo, videoBroken]);
 
   const showVideo = !skipVideo && !videoBroken && concept.videoSrc;
-  const showPoster = !showVideo && concept.poster && !posterBroken;
+  const posterOk = Boolean(concept.poster) && !posterBroken;
+  const fallbackOk = Boolean(fallbackImage) && !fallbackBroken;
+  // poster (the real /premium/<slug> asset) wins once it exists; until then
+  // the demo's own hero photo carries the zoom instead of a bare placeholder.
+  const stillSrc = posterOk ? concept.poster! : fallbackOk ? fallbackImage! : null;
+  const showStill = !showVideo && Boolean(stillSrc);
 
   return (
     <div ref={containerRef} className="absolute inset-0 overflow-hidden">
+      {showStill && !reducedMotion && (
+        <style>{`
+          @keyframes vilas-kenburns { from { transform: scale(1); } to { transform: scale(1.06); } }
+        `}</style>
+      )}
       {showVideo && (
         <video
           ref={videoRef}
@@ -117,16 +150,21 @@ export function PremiumHeroMedia({ concept }: { concept: HeroConcept }) {
           onError={() => setVideoBroken(true)}
         />
       )}
-      {showPoster && (
+      {showStill && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={concept.poster!}
+          src={stillSrc!}
           alt=""
           className="h-full w-full object-cover"
-          onError={() => setPosterBroken(true)}
+          style={
+            reducedMotion
+              ? undefined
+              : { animation: "vilas-kenburns 10s ease-out 1 forwards" }
+          }
+          onError={() => (posterOk ? setPosterBroken(true) : setFallbackBroken(true))}
         />
       )}
-      {!showVideo && !showPoster && (
+      {!showVideo && !showStill && (
         <div
           className="flex h-full w-full flex-col items-center justify-center gap-2 px-6 text-center"
           style={{ backgroundColor: "var(--d-surface)" }}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { demos } from "@/components/demos";
+import { DemoRoute } from "@/components/demos/DemoRoute";
 import { templateByKey } from "@/lib/templates";
 
 // A template on its own page, so a client filling in /start can keep the one
@@ -35,7 +36,6 @@ export default async function DemoPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const Demo = demos[slug];
-  if (!Demo) notFound();
-  return <Demo />;
+  if (!demos[slug]) notFound();
+  return <DemoRoute slug={slug} />;
 }

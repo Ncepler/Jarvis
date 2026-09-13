@@ -162,7 +162,10 @@ export async function POST(req: Request) {
       copy_changes: f("copyChanges", 5000) || null,
       dropped_sections: dropped.length ? dropped : null,
       brain_dump: f("brainDump", 5000) || null,
+      wants_chat_assistant: raw.wantsChatAssistant === true,
       status: "new",
+      terms_accepted_at: new Date().toISOString(),
+      terms_version: "2026-08-27",
     }),
   });
 
@@ -181,7 +184,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "hello@vilas.studio",
+        from: "hello.vilasstudio@gmail.com",
         to: personalEmail,
         subject: `Your reference code: ${row.ref_code}`,
         text: [

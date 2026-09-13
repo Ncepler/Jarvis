@@ -144,7 +144,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "intake@vilas.studio",
+        from: "hello.vilasstudio@gmail.com",
         to: NOTIFY_EMAIL,
         subject: `New Vilas intake: ${row.business_name}`,
         text,

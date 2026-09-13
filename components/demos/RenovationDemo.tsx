@@ -6,6 +6,7 @@
 // minimal and gallery-driven — the photography does the talking.
 
 import {
+  ANCHOR_SCROLL_CLASS,
   BeforeAfterSlider,
   Contact,
   CtaBand,
@@ -26,12 +27,14 @@ import {
   ValueProps,
 } from "./system";
 import { heroConceptFor } from "@/lib/heroConcepts";
+import type { Tier } from "./VilasDemoBar";
 
 const ACCENT = "#C8893F"; // warm finished-wood caramel
-// Reference wiring for the Premium hero mechanism (round 2, job 5) — proves
-// DemoHero's `premium` prop end to end. No video asset exists yet, so this
-// renders PremiumHeroMedia's labeled placeholder until one lands at
-// /public/premium/demo-renovation.mp4 (see lib/heroConcepts.ts).
+// Premium hero mechanism (round 2, job 5), now driven by the demo bar's tier
+// toggle (Demo bar ticket, job 5/6) instead of always-on. No video asset
+// exists yet, so the $500 state renders PremiumHeroMedia's zoom/stagger
+// fallback until one lands at /public/premium/demo-renovation.mp4 (see
+// lib/heroConcepts.ts).
 const PREMIUM_HERO = heroConceptFor("demo-renovation");
 const PHONE = "(516) 555-0000";
 const NAME = "Maple & Main Renovation Co.";
@@ -154,13 +157,13 @@ function RoomTransforms() {
   );
 }
 
-export function RenovationDemo() {
+export function RenovationDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT}>
       <DemoHeader name={NAME} phone={PHONE} />
       <DemoHero
         heroImage={firstRenovationImage}
-        premium={PREMIUM_HERO}
+        premium={tier === "premium" ? PREMIUM_HERO : undefined}
         eyebrow="Renovation & remodeling · North Shore"
         line1="Old house."
         line2="New everything."
@@ -170,22 +173,26 @@ export function RenovationDemo() {
         mediaLabel="HERO VIDEO: renovation b-roll (16:9)"
       />
       <DemoMarquee terms={["Kitchens", "Bathrooms", "Additions", "Basements", "Whole-Home", "Trim & Carpentry"]} />
-      <Intro
-        eyebrow="What we build"
-        line1="Every trade."
-        line2="One crew."
-        paragraphs={[
-          "Most renovation headaches come from juggling five contractors who each blame the other four. We don't work that way.",
-          "Maple & Main runs the whole job with our own crew, framing through finish carpentry, so there's one number, one schedule, and one person to call.",
-        ]}
-        badges={[
-          ["Small remodels to whole-home", "Full scope"],
-          ["Licensed & insured", "Fully covered"],
-          ["One crew, no subs", "Our people"],
-          ["Free estimates", "No pressure"],
-        ]}
-      />
-      <RoomTransforms />
+      <div id="about" className={ANCHOR_SCROLL_CLASS}>
+        <Intro
+          eyebrow="What we build"
+          line1="Every trade."
+          line2="One crew."
+          paragraphs={[
+            "Most renovation headaches come from juggling five contractors who each blame the other four. We don't work that way.",
+            "Maple & Main runs the whole job with our own crew, framing through finish carpentry, so there's one number, one schedule, and one person to call.",
+          ]}
+          badges={[
+            ["Small remodels to whole-home", "Full scope"],
+            ["Licensed & insured", "Fully covered"],
+            ["One crew, no subs", "Our people"],
+            ["Free estimates", "No pressure"],
+          ]}
+        />
+      </div>
+      <div id="services" className={ANCHOR_SCROLL_CLASS}>
+        <RoomTransforms />
+      </div>
       <ProcessStepper
         eyebrow="How it goes"
         line1="No mystery."
@@ -207,13 +214,15 @@ export function RenovationDemo() {
         cta="Meet the crew"
         mediaLabel="TRANSFORMATION: before/after (16:9)"
       />
-      <FilterableWorkGrid
-        eyebrow="Recent work"
-        line1="The work"
-        line2="speaks plainly."
-        chips={WORK_CHIPS}
-        items={WORK}
-      />
+      <div id="work" className={ANCHOR_SCROLL_CLASS}>
+        <FilterableWorkGrid
+          eyebrow="Recent work"
+          line1="The work"
+          line2="speaks plainly."
+          chips={WORK_CHIPS}
+          items={WORK}
+        />
+      </div>
       <ValueProps
         eyebrow="Why hire us"
         line1="Good reasons"
@@ -226,18 +235,20 @@ export function RenovationDemo() {
         line2="people ask."
         items={FAQ}
       />
-      <Contact
-        eyebrow="Free quote"
-        line1="Let's talk"
-        line2="about the house."
-        copy="Call, text, email, or fill out the form. We usually reply the same day. No pressure, no hard sell."
-        phone={PHONE}
-        email="hello@mapleandmain.demo"
-        location="North Shore, Long Island, NY"
-        serviceLabel="Project type"
-        serviceOptions={["Kitchen", "Bathroom", "Addition", "Basement", "Whole-home", "Multiple", "Not sure yet"]}
-        propertyTypes={["Residential", "Commercial"]}
-      />
+      <div id="contact" className={ANCHOR_SCROLL_CLASS}>
+        <Contact
+          eyebrow="Free quote"
+          line1="Let's talk"
+          line2="about the house."
+          copy="Call, text, email, or fill out the form. We usually reply the same day. No pressure, no hard sell."
+          phone={PHONE}
+          email="hello@mapleandmain.demo"
+          location="North Shore, Long Island, NY"
+          serviceLabel="Project type"
+          serviceOptions={["Kitchen", "Bathroom", "Addition", "Basement", "Whole-home", "Multiple", "Not sure yet"]}
+          propertyTypes={["Residential", "Commercial"]}
+        />
+      </div>
       <CtaBand
         line1="Ready to start?"
         line2="Let's walk the house."

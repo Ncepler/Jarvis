@@ -121,13 +121,21 @@ export function DemoShell({
     fontFamily: "var(--d-font)",
   } as CSSProperties;
   return (
-    <div className="antialiased" style={vars}>
+    // id="home" is the nav's "Home" anchor target — the top of every demo.
+    // "demo-shell" scopes the anchor-smooth-scroll rule in globals.css so it
+    // never touches the main site's own (Lenis-driven) scrolling.
+    <div id="home" className="antialiased demo-shell" style={vars}>
       {children}
     </div>
   );
 }
 
 const wrap = "mx-auto w-full max-w-[1200px] px-6 md:px-16";
+
+// Anchor targets need to clear the sticky Vilas demo bar (64px, VilasDemoBar's
+// h-16) plus this shared DemoHeader's own height (min 72px, taller once it
+// wraps) so a clicked nav item's heading never lands underneath either bar.
+export const ANCHOR_SCROLL_CLASS = "scroll-mt-[168px]";
 
 // ── Eyebrow: uppercase label with an accent tick. Sized and weighted to read
 // as an intentional section marker, not an afterthought (Noah's fix, §3 note)
@@ -244,12 +252,22 @@ export function DemoHeader({
   name,
   phone,
   quoteLabel = "Free estimate",
+  contactId = "contact",
 }: {
   name: string;
   phone: string;
   quoteLabel?: string;
+  // Two demos already had a pre-existing, differently-named contact anchor
+  // (their own CTA buttons scroll to it) — override rather than rename it.
+  contactId?: string;
 }) {
-  const nav = ["Home", "About", "Services", "Work", "Contact"];
+  const nav = [
+    { label: "Home", href: "#home" },
+    { label: "About", href: "#about" },
+    { label: "Services", href: "#services" },
+    { label: "Work", href: "#work" },
+    { label: "Contact", href: `#${contactId}` },
+  ];
   return (
     <header
       className="w-full"
@@ -274,15 +292,16 @@ export function DemoHeader({
             Demo build
           </span>
         </span>
-        <nav className="hidden items-center gap-7 lg:flex">
+        <nav className="hidden items-center gap-7 lg:flex" aria-label="Section">
           {nav.map((n) => (
-            <span
-              key={n}
-              className="text-[14px]"
-              style={{ color: "var(--d-body)" }}
+            <a
+              key={n.label}
+              href={n.href}
+              className="rounded-sm text-[14px] outline-none transition-opacity duration-150 hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
+              style={{ color: "var(--d-body)", outlineColor: "var(--d-accent)" }}
             >
-              {n}
-            </span>
+              {n.label}
+            </a>
           ))}
         </nav>
         <div className="flex items-center gap-5">
@@ -301,6 +320,31 @@ export function DemoHeader({
         </div>
       </div>
     </header>
+  );
+}
+
+// ── Premium-only staggered entrance (Demo bar ticket, job 6): the headline
+// group, then the CTA row, each fading/rising in with an increasing delay.
+// Callers `key` this by tier so React remounts it — and replays it — exactly
+// once per switch INTO premium, never on a loop. The $300 hero keeps the
+// plain single-fade <Rise> untouched below. Reduced motion drops the
+// animation (children render immediately) but never the content.
+export function HeroReveal({ children }: { children: ReactNode[] }) {
+  const reduced = useReducedMotion();
+  if (reduced) return <>{children}</>;
+  return (
+    <>
+      {children.map((child, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: EASE, delay: i * 0.15 }}
+        >
+          {child}
+        </motion.div>
+      ))}
+    </>
   );
 }
 
@@ -345,7 +389,7 @@ export function DemoHero({
       >
         <FileBadge file={premium ? undefined : "hero.jpg"} />
         {premium ? (
-          <PremiumHeroMedia concept={premium} />
+          <PremiumHeroMedia concept={premium} fallbackImage={heroImage} />
         ) : (
           !heroImage && (
             <div className="flex h-full w-full items-center justify-center">
@@ -366,43 +410,90 @@ export function DemoHero({
         className="absolute inset-0"
         style={{ background: "var(--d-hero-scrim)" }}
       />
-      <div className={`${wrap} relative flex min-h-[640px] flex-col justify-end pb-16 pt-28`}>
-        <Rise>
-          <div className="mb-6">
-            <Eyebrow>{eyebrow}</Eyebrow>
-          </div>
-          <h1
-            className="max-w-3xl text-[40px] font-bold leading-[1.04] tracking-[-0.02em] md:text-[72px]"
-            style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
-          >
-            {line1}
-            <br />
-            {line2}
-          </h1>
-          <p
-            className="mt-6 max-w-xl text-[17px] leading-[1.6]"
-            style={{ color: "var(--d-body)" }}
-          >
-            {sub}
-          </p>
-          <div className="mt-9 flex flex-wrap items-center gap-3">
-            <span
-              className="px-6 py-3.5 text-[14px] font-semibold"
-              style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
+      <div
+        className={`${wrap} relative flex min-h-[640px] flex-col justify-end ${
+          premium ? "pb-20 pt-32" : "pb-16 pt-28"
+        }`}
+      >
+        {premium ? (
+          <HeroReveal key="premium-hero">
+            {[
+              <div key="headline">
+                <div className="mb-6">
+                  <Eyebrow>{eyebrow}</Eyebrow>
+                </div>
+                <h1
+                  className="max-w-3xl text-[40px] font-bold leading-[1.04] tracking-[-0.02em] md:text-[72px]"
+                  style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
+                >
+                  {line1}
+                  <br />
+                  {line2}
+                </h1>
+                <p
+                  className="mt-6 max-w-xl text-[17px] leading-[1.6]"
+                  style={{ color: "var(--d-body)" }}
+                >
+                  {sub}
+                </p>
+              </div>,
+              <div key="cta" className="mt-9 flex flex-wrap items-center gap-3">
+                <span
+                  className="px-6 py-3.5 text-[14px] font-semibold"
+                  style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
+                >
+                  {primaryCta}
+                </span>
+                <span
+                  className="px-6 py-3.5 text-[14px] font-semibold"
+                  style={{
+                    border: "1px solid var(--d-line)",
+                    color: "var(--d-fg)",
+                  }}
+                >
+                  Call {phone}
+                </span>
+              </div>,
+            ]}
+          </HeroReveal>
+        ) : (
+          <Rise>
+            <div className="mb-6">
+              <Eyebrow>{eyebrow}</Eyebrow>
+            </div>
+            <h1
+              className="max-w-3xl text-[40px] font-bold leading-[1.04] tracking-[-0.02em] md:text-[72px]"
+              style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
             >
-              {primaryCta}
-            </span>
-            <span
-              className="px-6 py-3.5 text-[14px] font-semibold"
-              style={{
-                border: "1px solid var(--d-line)",
-                color: "var(--d-fg)",
-              }}
+              {line1}
+              <br />
+              {line2}
+            </h1>
+            <p
+              className="mt-6 max-w-xl text-[17px] leading-[1.6]"
+              style={{ color: "var(--d-body)" }}
             >
-              Call {phone}
-            </span>
-          </div>
-        </Rise>
+              {sub}
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <span
+                className="px-6 py-3.5 text-[14px] font-semibold"
+                style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
+              >
+                {primaryCta}
+              </span>
+              <span
+                className="px-6 py-3.5 text-[14px] font-semibold"
+                style={{
+                  border: "1px solid var(--d-line)",
+                  color: "var(--d-fg)",
+                }}
+              >
+                Call {phone}
+              </span>
+            </div>
+          </Rise>
+        )}
         <div
           className="mt-14 text-[12px] font-semibold uppercase tracking-[0.18em]"
           style={{ color: "var(--d-muted)" }}
@@ -1485,6 +1576,7 @@ export function DemoFooter({
   location,
   hours,
   strip,
+  contactId = "contact",
 }: {
   name: string;
   descriptor: string;
@@ -1495,6 +1587,9 @@ export function DemoFooter({
   location: string;
   hours: string;
   strip: string;
+  // Matches DemoHeader's contactId — the two demos with a pre-existing,
+  // differently-named contact anchor pass the same override here.
+  contactId?: string;
 }) {
   return (
     <footer className="w-full" style={{ background: "var(--d-surface)", borderTop: "1px solid var(--d-line)" }}>
@@ -1511,7 +1606,16 @@ export function DemoFooter({
               {area}
             </p>
           </div>
-          <FooterCol title="Navigate" items={["Home", "About", "Services", "Work", "Contact"]} />
+          <FooterCol
+            title="Navigate"
+            items={[
+              { label: "Home", href: "#home" },
+              { label: "About", href: "#about" },
+              { label: "Services", href: "#services" },
+              { label: "Work", href: "#work" },
+              { label: "Contact", href: `#${contactId}` },
+            ]}
+          />
           <FooterCol title="Services" items={services} />
           <div>
             <p className="text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
@@ -1533,21 +1637,63 @@ export function DemoFooter({
           <span>{strip}</span>
         </div>
       </div>
+      <VilasCredit />
     </footer>
   );
 }
 
-function FooterCol({ title, items }: { title: string; items: string[] }) {
+function FooterCol({
+  title,
+  items,
+}: {
+  title: string;
+  items: (string | { label: string; href: string })[];
+}) {
   return (
     <div>
       <p className="text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
         {title}
       </p>
       <ul className="mt-4 space-y-2 text-[14px]" style={{ color: "var(--d-body)" }}>
-        {items.map((i) => (
-          <li key={i}>{i}</li>
-        ))}
+        {items.map((i) => {
+          const label = typeof i === "string" ? i : i.label;
+          const href = typeof i === "string" ? undefined : i.href;
+          return (
+            <li key={label}>
+              {href ? (
+                <a
+                  href={href}
+                  className="rounded-sm outline-none transition-opacity duration-150 hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style={{ outlineColor: "var(--d-accent)" }}
+                >
+                  {label}
+                </a>
+              ) : (
+                label
+              )}
+            </li>
+          );
+        })}
       </ul>
+    </div>
+  );
+}
+
+// ── Vilas credit — belongs to Vilas, not the demo (Demo nav/credit task §2).
+// Fixed, theme-independent colors (deliberately NOT --d-* vars) so it reads
+// identically, quietly, on every demo regardless of that demo's own palette.
+// Never in the sticky Vilas bar, never affected by the $300/$500 toggle.
+export function VilasCredit() {
+  return (
+    <div className="w-full py-3 text-center text-[12px]" style={{ background: "#101012", color: "#8a8a8a" }}>
+      Site created by{" "}
+      <a
+        href="https://vilas.studio"
+        className="rounded-sm underline underline-offset-2 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a8a8a]"
+        style={{ color: "#b7b7b0" }}
+      >
+        vilas.studio
+      </a>
     </div>
   );
 }
