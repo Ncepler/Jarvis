@@ -1,42 +1,53 @@
-# HANDOFF — updated 2026-08-28
+# HANDOFF — updated 2026-09-13
 
 ## Current state
-- Builds clean locally this session: `npx tsc --noEmit`, `next lint`, `next build` all
-  pass with no errors. Committed and **pushed straight to `main`** (standing instruction
-  from Noah: push + sync to main whenever work is build-clean and ready, don't wait to be
-  asked). Not yet checked on the actual Vercel deploy this round.
-- This session ran four tickets back to back: a legal-patch + copy-fixes pass (19 tasks,
-  run twice), an SEO/UX checklist pass (9 tasks), a brand-copy scrub (removed a
-  name/villa FAQ pun, fixed a leftover tagline-prefix string a prior pass missed, cleaned
-  the meta description), and this round — **a placeholder cleanup pass**: a false
-  `/privacy` collection claim removed, the real tagline filled in, the Instagram
-  placeholder resolved to "no account yet" instead of a dead link, and a repo-wide
-  re-verify of the earlier tagline fix (which did land this time — confirmed by grep, not
-  just claimed). See git log for exact commits; this file only covers what's still
-  relevant to pick up work, not a full diary.
+- Builds clean this session: `npx tsc --noEmit`, `next lint`, `next build` all pass
+  with no errors. Not yet checked on the actual Vercel deploy — only verified
+  locally (`npm run dev` + a headless-Chromium harness), see below.
+- Done: the hero is now a fully scroll-scrubbed video-to-image piece
+  (`components/sections/Hero.tsx` + `HeroVideo.tsx`), replacing the old
+  VILAS→VAL text reveal entirely (`components/hero/VilasReveal.tsx` +
+  `NameDefinition.tsx` are deleted, along with their now-dead CSS in
+  `app/globals.css`). Mechanism: a 400vh pinned region maps scroll 0→1 to
+  5s of virtual video time via a lerped rAF loop (gated seeks on
+  `video.seeking`, blob-fetched source so Range-request quirks can't break
+  seeking in prod); video/image crossfade over virtual-time 1.75s–4.75s,
+  image opacity always `1 - video opacity` so they can't ever both show or
+  both hide. Verified by hand: the exact crossfade math (24 sample points,
+  zero error) via an isolated harness, plus real-browser checks that
+  reduced-motion fires zero video requests and the no-JS/broken-video path
+  shows the static image correctly. **Not yet verified: real video
+  playback** — see the blocker below.
 
-## This session's work — placeholder cleanup (most recent)
-1. `app/privacy/page.tsx` — dropped the "your current website" clause from "What we
-   collect": the intake form has no such field, so the policy shouldn't claim to collect
-   it. The field itself is still deferred, separate work (see Blocked on Noah).
-2. `lib/site.ts` `SITE.tagline` — real value now ("A website that looks expensive. It
-   wasn't."), replacing the placeholder. `app/opengraph-image.tsx` switched from its
-   `COPY.hero.positioning` stand-in to `SITE.tagline` directly now that it's real, and
-   its stale placeholder-referencing comment is gone.
-3. `lib/site.ts` `SITE.instagram` — set to `""` instead of a placeholder string, since
-   there's no real account to name a placeholder after. `isTBD()` now also treats `""`
-   as missing (one-line addition, not a rename) so the two existing gated renders
-   (`Footer.tsx`, `PinnedLogo.tsx`) keep hiding it exactly as before — no dead link was
-   ever actually shipping (both were already conditionally gated), but the literal
-   placeholder text is gone from the source now too.
-4. `CLAUDE.md` §2 — its `SITE` code sample and the surrounding paragraph updated to
-   match: tagline resolved, Instagram empty rather than a placeholder string. `email` and
-   `founder` still carry their own placeholder strings there, untouched — outside this
-   ticket's scope.
-5. Re-verified the earlier hero-tagline fix from two sessions ago actually holds
-   repo-wide this time (see Verify output below) — it does.
+## In progress
+- Nothing mid-flight. This session's hero work is code-complete and pushed.
+
+## Next up (ordered)
+1. **Fix the hero video asset (see Blocked on Noah below) — this is the only
+   thing standing between the new hero and actually working.**
+2. Deploy, confirm the hero on the actual Vercel URL, especially the blob-fetch
+   path against real production Range-request behavior (verified locally
+   only so far).
+3. Decide on the deferred "current website" intake field, or leave `/privacy`
+   as-is now that it no longer claims to collect it.
+4. Replace the placeholder OG image + upscaled 512 icon with real designed assets.
+5. Real Higgsfield hero clips for Premium, at `/public/premium/<slug>.mp4` +
+   `<slug>.jpg` per `lib/heroConcepts.ts` — start with `demo-renovation` since
+   it's already wired.
+6. `/api/check-domain` still hasn't been exercised against a real token on the deploy.
+7. Resend sending domain for `vilas.studio` is still unverified.
 
 ## Gotchas & decisions (standing, trimmed)
+- **`public/vilasherovideo.mp4` does not decode** — confirmed independently by
+  both Chromium (`DEMUXER_ERROR_NO_SUPPORTED_STREAMS`) and ffmpeg (`Invalid
+  data found when processing input`), despite a structurally intact outer MP4
+  box layout (ftyp/uuid/free/mdat/moov walk cleanly to exactly the file's
+  byte size — so it's not truncated, the encoded track data inside is just
+  bad). It was added in the "Add files via upload" commit. The hero's code
+  handles this exactly as designed — it falls back to the static
+  `vilasheroimage.png` — so the site isn't broken, it just can't show the
+  video until a valid file replaces it. No code change needed once that
+  happens.
 - **`outputFileTracingIncludes` in `next.config.ts`** covers `/start`, `/d48`, and
   `/api/capture-sites` (chromium binary) — don't delete these, routes break on Vercel
   while still working locally.
@@ -53,12 +64,17 @@
   reads `row.template`, a column dropped in migration 0007. Also `COPY.contact` in
   `lib/site.ts` (sub/reassurance/nearSubmit/step2Intro/success/errorSave) is dead —
   nothing imports it anymore now that `/start` is the only intake flow.
-- **`isTBD()` in `lib/site.ts`** now treats `""` as a placeholder too, not just a
+- **`isTBD()` in `lib/site.ts`** treats `""` as a placeholder too, not just a
   trailing `_TBD` suffix — keep that in mind before adding a new gated `SITE` field.
+- **Space Grotesk (`--font-wordmark` in `app/globals.css`, loaded in
+  `app/layout.tsx`) is now unused** — it existed only for the deleted
+  VilasReveal wordmark. Left in place since removing a font import touches
+  shared root layout, outside this session's scope — worth pruning in a
+  follow-up (real, measurable font-weight savings).
+- This devcontainer can run out of memory under concurrent sessions. If `next build`
+  gets `SIGTERM`'d with no other error, check `free -h` before assuming the code broke.
 - Honesty rules hold: no fake reviews or stats, labeled placeholders instead of stock or
   generated imagery.
-- **This devcontainer can run out of memory under concurrent sessions.** If `next build`
-  gets `SIGTERM`'d with no other error, check `free -h` before assuming the code broke.
 
 ## Supabase
 - Canonical project: **"Vilas"**, ref `epynfvskwaxejdibvgbr`, us-west-2.
@@ -70,22 +86,11 @@
   public.
 - Free tier pauses after ~1wk idle; a cold request just needs a retry.
 
-## Next up (ordered)
-1. Deploy, confirm `/robots.txt`, favicon, OG image, and the new tagline resolve on the
-   actual Vercel URL (verified locally only so far).
-2. Decide on the deferred "current website" intake field — build it as its own ticket,
-   or leave `/privacy` as-is now that it no longer claims to collect it.
-3. Replace the placeholder OG image + upscaled 512 icon with real designed assets.
-4. Real Higgsfield hero clips for Premium, at `/public/premium/<slug>.mp4` +
-   `<slug>.jpg` per `lib/heroConcepts.ts` — start with `demo-renovation` since it's
-   already wired.
-5. `/api/check-domain` still hasn't been exercised against a real token on the deploy.
-6. Resend sending domain for `vilas.studio` is still unverified.
-7. Contact address is now `hello.vilasstudio@gmail.com` (updated 2026-09-03,
-   including the Resend `from` fields in `/api/intake` and `/api/notify-intake`)
-   until a real `vilas.studio` mailbox + verified sending domain exist.
-
 ## Blocked on Noah
+- **The hero needs a working `public/vilasherovideo.mp4`.** The current file
+  is not a valid video (see Gotchas above) — please re-export/re-upload it.
+  Once a valid file lands at the same path, the scroll-scrub hero should
+  work with zero code changes (the math and pipeline are verified).
 - Confirm `hello.vilasstudio@gmail.com` stays the working inbox; `RESEND_API_KEY`/`NOTIFY_EMAIL` in Vercel.
 - A real Instagram account, when one exists — `SITE.instagram` is `""` until then.
 - Real photos/video across the demos, real Premium hero clips, a real high-res logo
