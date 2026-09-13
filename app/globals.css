@@ -151,31 +151,10 @@ body {
   animation: fade-in 220ms var(--ease-out-expo) both;
 }
 
-@keyframes cue-draw {
-  from {
-    transform: scaleY(0);
-  }
-}
-
-.scroll-cue {
-  transform-origin: top;
-  animation: cue-draw 1.2s var(--ease-out-expo) 1.1s both;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .rise-in,
-  .scroll-cue,
   .animate-fade-in {
     animation: none;
-  }
-}
-
-/* NameDefinition (components/hero/NameDefinition.tsx) — grid-rows expand is
-   CSS-only, so it's disarmed the same way: snap open/closed, no transition. */
-@media (prefers-reduced-motion: reduce) {
-  .name-definition-panel,
-  .name-definition-panel * {
-    transition: none !important;
   }
 }
 
