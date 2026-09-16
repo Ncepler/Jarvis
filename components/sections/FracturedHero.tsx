@@ -2,14 +2,20 @@
 
 // Fractured hero — a 12x7 grid of thin "slab" boxes showing one baked cream
 // wordmark texture, sliced per-tile via texture.offset/.repeat so together
-// they read as a single continuous hero image (see bakeTexture). On pointer
-// move — mouse or touch, same code path, since R3F's `state.pointer` tracks
-// both — tiles within a radius of the cursor push radially away, pop toward
-// the camera, and tilt slightly; they ease back to their grid position once
-// the cursor moves off (desktop) or lifts (touch). Camera stays fixed (no
-// OrbitControls); its distance is recomputed on resize from both a
-// width-fit and a height-fit formula, whichever needs more room, so the
-// full grid is always in frame.
+// they read as a single continuous hero image at rest (see paintCanvas /
+// bakeTexture). On pointer move — mouse or touch, same code path, since
+// R3F's `state.pointer` tracks both — tiles within a radius of the cursor
+// push radially away, pop toward the camera, and tilt slightly; they ease
+// back to their grid position once the cursor moves off (desktop) or lifts
+// (touch). Camera stays fixed (no OrbitControls); its distance is
+// recomputed on resize from both a width-fit and a height-fit formula,
+// whichever needs more room, so the full grid is always in frame.
+//
+// Reduced motion skips the Three.js grid entirely (no Canvas, no WebGL
+// context) and instead renders the SAME baked content as a plain static
+// <img> (via canvas.toDataURL) — same wordmark/tagline/fonts/colors as the
+// interactive version, just not the grid or the pointer effect, so a
+// reduced-motion visitor sees the same hero, not a different one.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
@@ -18,7 +24,13 @@ import { SITE } from "@/lib/site";
 const COLS = 12;
 const ROWS = 7;
 const CELL = 1; // world units per grid cell
-const GAP = 0.06; // visible gap between tiles
+// Near-zero rather than exactly zero: adjacent box edges are independently
+// triangulated meshes, and touching them at exactly the same coordinate can
+// leave a hairline rasterization crack/flicker on some GPUs. 0.004 world
+// units is sub-pixel at this grid's viewing distance (well under a screen
+// pixel) — visually seamless at rest, but never lets two edges coincide
+// exactly. Bump this (see task note) if a real GPU ever shows a seam.
+const GAP = 0.004;
 const BOX_W = CELL - GAP;
 const BOX_H = CELL - GAP;
 const BOX_D = 0.14; // thin slab depth
@@ -29,10 +41,10 @@ const INFLUENCE_RADIUS = 2.6; // world units — hover/touch push radius
 const PUSH_STRENGTH = 0.6;
 const MAX_TILT = 0.35; // radians
 
-// The site's actual tokens (app/globals.css --color-ink / --color-bg /
-// --color-muted), not invented values.
+// The site's actual tokens (app/globals.css --color-ink / --color-muted;
+// CREAM is the site's cream tone used elsewhere, e.g. app/opengraph-image.tsx).
 const INK = "#1f1a14";
-const CREAM = "#efe9dd";
+const CREAM = "#EDE7DA";
 const MUTED = "#4d4638";
 
 const TEX_CELL_PX = 128; // baked-texture resolution per grid cell
@@ -40,25 +52,10 @@ const TEX_CELL_PX = 128; // baked-texture resolution per grid cell
 type Home = { x: number; y: number; z: number };
 type TexOffset = { x: number; y: number };
 
-// three@0.186.0 ships no .d.ts / "types" export (see globals.d.ts) — these
-// are local aliases (all `any` underneath) so the rest of the file reads
-// with real names instead of bare `any` everywhere, and restoring real
-// types later (once @types/three exists) is a one-line swap per alias.
-/* eslint-disable @typescript-eslint/no-explicit-any -- forced by the
-   missing three types themselves, not a shortcut; see the comment above. */
-type Vec3 = any;
-type CanvasTex = any;
-type BoxGeom = any;
-type BasicMat = any;
-type MeshT = any;
-type PerspCam = any;
-/* eslint-enable @typescript-eslint/no-explicit-any */
-
-// Bakes the wordmark + tagline onto an offscreen 2D canvas once and wraps it
-// in a single CanvasTexture — every tile clones this ONE texture (modern
-// three shares the GPU upload across clones via a common Source) and only
-// changes .offset/.repeat, so it's one draw, not 84.
-function bakeTexture(wordmark: string, tagline: string) {
+// Paints the wordmark + tagline onto an offscreen 2D canvas — shared by both
+// the interactive texture bake and the reduced-motion static <img>, so both
+// paths render identical content.
+function paintCanvas(wordmark: string, tagline: string): HTMLCanvasElement | null {
   const width = COLS * TEX_CELL_PX;
   const height = ROWS * TEX_CELL_PX;
   const canvas = document.createElement("canvas");
@@ -85,6 +82,15 @@ function bakeTexture(wordmark: string, tagline: string) {
   ctx.font = `400 ${Math.round(height * 0.03)}px ${sansFont}`;
   ctx.fillText(tagline, width / 2, height / 2 + height * 0.08);
 
+  return canvas;
+}
+
+// Wraps paintCanvas's output in a single CanvasTexture — every tile clones
+// this ONE texture (modern three shares the GPU upload across clones via a
+// common Source) and only changes .offset/.repeat, so it's one draw, not 84.
+function bakeTexture(wordmark: string, tagline: string) {
+  const canvas = paintCanvas(wordmark, tagline);
+  if (!canvas) return null;
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
@@ -97,7 +103,7 @@ function bakeTexture(wordmark: string, tagline: string) {
 function CameraRig() {
   const { camera, size } = useThree();
   useEffect(() => {
-    const persp = camera as PerspCam;
+    const persp = camera as THREE.PerspectiveCamera;
     const aspect = size.width / size.height || 1;
     const vFov = (persp.fov * Math.PI) / 180;
     const distanceForHeight = GRID_H / 2 / Math.tan(vFov / 2);
@@ -121,13 +127,13 @@ function Tile({
 }: {
   home: Home;
   texOffset: TexOffset;
-  texture: CanvasTex;
-  geometry: BoxGeom;
-  sideMaterial: BasicMat;
-  mouseWorldRef: React.RefObject<Vec3>;
+  texture: THREE.CanvasTexture;
+  geometry: THREE.BoxGeometry;
+  sideMaterial: THREE.MeshBasicMaterial;
+  mouseWorldRef: React.RefObject<THREE.Vector3>;
   activeRef: React.RefObject<boolean>;
 }) {
-  const meshRef = useRef<MeshT>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
   const offset = useRef({ x: 0, y: 0, z: 0 });
   const rot = useRef({ x: 0, y: 0 });
 
@@ -214,7 +220,7 @@ function Scene({
   texture,
   activeRef,
 }: {
-  texture: CanvasTex;
+  texture: THREE.CanvasTexture;
   activeRef: React.RefObject<boolean>;
 }) {
   const mouseWorld = useRef(new THREE.Vector3());
@@ -286,21 +292,35 @@ function Scene({
 }
 
 export function FracturedHero() {
-  const [texture, setTexture] = useState<CanvasTex | null>(null);
-  const textureRef = useRef<CanvasTex | null>(null);
+  const [texture, setTexture] = useState<THREE.CanvasTexture | null>(null);
+  const [staticSrc, setStaticSrc] = useState<string | null>(null);
+  const textureRef = useRef<THREE.CanvasTexture | null>(null);
   const activeRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       try {
         await document.fonts?.ready; // bake against the real face, not a fallback
       } catch {
         /* Font Loading API unavailable — bake with whatever's loaded */
       }
       if (cancelled) return;
+
       const dotted = SITE.domain.slice(SITE.domain.indexOf("."));
       const wordmark = `${SITE.brand.toUpperCase()}${dotted}`;
+
+      // Reduced motion: paint the same content but never touch Three.js at
+      // all — no Canvas, no WebGL context, just a static <img>.
+      if (reduced) {
+        const canvas = paintCanvas(wordmark, SITE.tagline);
+        if (!cancelled && canvas) setStaticSrc(canvas.toDataURL());
+        return;
+      }
+
       const tex = bakeTexture(wordmark, SITE.tagline);
       if (cancelled) {
         tex?.dispose();
@@ -318,7 +338,7 @@ export function FracturedHero() {
 
   return (
     <div
-      className="relative h-svh w-full touch-none overflow-hidden"
+      className="relative h-svh w-full touch-pan-y overflow-hidden"
       style={{ backgroundColor: CREAM }}
       onPointerMove={() => {
         activeRef.current = true;
@@ -333,13 +353,22 @@ export function FracturedHero() {
         activeRef.current = false;
       }}
     >
-      {texture && (
-        <Canvas
-          dpr={[1, 2]}
-          camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0, 10] }}
-        >
-          <Scene texture={texture} activeRef={activeRef} />
-        </Canvas>
+      {staticSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={staticSrc}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        texture && (
+          <Canvas
+            dpr={[1, 2]}
+            camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0, 10] }}
+          >
+            <Scene texture={texture} activeRef={activeRef} />
+          </Canvas>
+        )
       )}
     </div>
   );
