@@ -15,7 +15,6 @@
 // real performer. Spec: .claude/skills/local-service-design-system/SKILL.md §16
 
 import {
-  AnimatePresence,
   motion,
   useMotionValue,
   useReducedMotion,
@@ -808,18 +807,8 @@ function WhereItWorks() {
   );
 }
 
-// ── Booking — the conversion point (§16e.8). Local demo state, gold button. ─
-const EVENT_TYPES = ["Corporate event", "Gala / fundraiser", "Private party", "Wedding", "Theater / live show", "Not sure yet"];
+// ── Booking — the conversion point (§16e.8). Plain reach-us block. ───────────
 function Booking() {
-  const [state, setState] = useState<"idle" | "ok" | "err">("idle");
-  const reduced = useReducedMotion();
-  const field: CSSProperties = {
-    background: BG,
-    border: `1px solid ${LINE}`,
-    color: FG,
-    borderRadius: 4,
-  };
-  const label = "mb-1.5 block text-[13px] font-semibold";
   return (
     <Section id="magician-book" className="" >
       <div className="grid gap-12 md:grid-cols-2 md:gap-16">
@@ -844,92 +833,28 @@ function Booking() {
           </div>
         </RiseFromDark>
         <RiseFromDark delay={0.1}>
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+          <div
+            className="p-8"
+            style={{ background: SURFACE, border: `1px solid ${LINE}`, borderRadius: 4 }}
+          >
+            <p className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: MUTED }}>
+              Reach out directly
+            </p>
+            <div className="mt-6 space-y-5">
               <div>
-                <span className={label} style={{ color: MUTED }}>Name *</span>
-                <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="Your name" />
+                <p className="text-[13px]" style={{ color: MUTED }}>Call or text</p>
+                <p className="mt-1 text-[22px]" style={{ color: FG, fontFamily: DISPLAY }}>{PHONE}</p>
               </div>
               <div>
-                <span className={label} style={{ color: MUTED }}>Email *</span>
-                <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="you@email.com" />
-              </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <span className={label} style={{ color: MUTED }}>Event type</span>
-                <select className="w-full px-3.5 py-3 text-[15px]" style={field} defaultValue="">
-                  <option value="" disabled>Select…</option>
-                  {EVENT_TYPES.map((o) => <option key={o}>{o}</option>)}
-                </select>
+                <p className="text-[13px]" style={{ color: MUTED }}>Email</p>
+                <p className="mt-1 text-[22px]" style={{ color: FG, fontFamily: DISPLAY }}>{EMAIL}</p>
               </div>
               <div>
-                <span className={label} style={{ color: MUTED }}>Date</span>
-                <input type="date" className="w-full px-3.5 py-3 text-[15px]" style={field} />
+                <p className="text-[13px]" style={{ color: MUTED }}>Instagram</p>
+                <p className="mt-1 text-[17px]" style={{ color: FG }}>Instagram</p>
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <span className={label} style={{ color: MUTED }}>Location / venue</span>
-                <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="Where's the show?" />
-              </div>
-              <div>
-                <span className={label} style={{ color: MUTED }}>Headcount</span>
-                <input type="number" min={1} className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="~60" />
-              </div>
-            </div>
-            <div>
-              <span className={label} style={{ color: MUTED }}>Anything else?</span>
-              <textarea rows={4} className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="Cocktail hour, sit-down dinner, stage available, whatever you've got." />
-            </div>
-            <div className="flex flex-wrap items-center gap-4">
-              <button
-                type="button"
-                onClick={() => setState("ok")}
-                className="px-6 py-3.5 text-[14px] font-semibold uppercase tracking-[0.08em]"
-                style={{ background: GOLD, color: "#0A0711" }}
-              >
-                Send it
-              </button>
-              {process.env.NODE_ENV !== "production" && (
-                <button
-                  type="button"
-                  onClick={() => setState("err")}
-                  className="text-[13px]"
-                  style={{ color: MUTED }}
-                >
-                  (demo: preview error state)
-                </button>
-              )}
-            </div>
-            <AnimatePresence mode="wait">
-              {state === "ok" && (
-                <motion.p
-                  initial={reduced ? false : { opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="text-[15px]"
-                  style={{ color: GOLD }}
-                >
-                  Got it. I&apos;ll get back to you within a day.
-                </motion.p>
-              )}
-              {state === "err" && (
-                <motion.p
-                  initial={reduced ? false : { opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="text-[15px]"
-                  style={{ color: FG }}
-                >
-                  That didn&apos;t send. Call or text {PHONE}, or{" "}
-                  <button type="button" onClick={() => setState("idle")} className="underline" style={{ color: GOLD }}>
-                    try again
-                  </button>.
-                </motion.p>
-              )}
-            </AnimatePresence>
-          </form>
+          </div>
         </RiseFromDark>
       </div>
     </Section>
