@@ -1,41 +1,21 @@
-# HANDOFF — updated 2026-09-13
+# HANDOFF — updated 2026-09-17
 
 ## Current state
-- Builds clean this session: `npx tsc --noEmit`, `next lint`, `next build` all pass
-  with no errors. Not yet checked on the actual Vercel deploy — only verified
-  locally (`npm run dev` + a headless-Chromium harness), see below.
-- Done: the hero is now a fully scroll-scrubbed video-to-image piece
-  (`components/sections/Hero.tsx` + `HeroVideo.tsx`), replacing the old
-  VILAS→VAL text reveal entirely (`components/hero/VilasReveal.tsx` +
-  `NameDefinition.tsx` are deleted, along with their now-dead CSS in
-  `app/globals.css`). Mechanism: a 400vh pinned region maps scroll 0→1 to
-  5s of virtual video time via a lerped rAF loop (gated seeks on
-  `video.seeking`, blob-fetched source so Range-request quirks can't break
-  seeking in prod); video/image crossfade over virtual-time 1.75s–4.75s,
-  image opacity always `1 - video opacity` so they can't ever both show or
-  both hide. Verified by hand: the exact crossfade math (24 sample points,
-  zero error) via an isolated harness, plus real-browser checks that
-  reduced-motion fires zero video requests and the no-JS/broken-video path
-  shows the static image correctly. **Not yet verified: real video
-  playback** — see the blocker below.
-
-## In progress
-- Nothing mid-flight. This session's hero work is code-complete and pushed.
+- Builds clean: `npx tsc --noEmit`, `next lint`, `next build` all pass.
+- **TRFox added to client_sites** (custom build, sort_order 40). Deployment verified on Vercel.
+  Entry exists in Supabase but screenshot not yet captured — the tile won't render until
+  it has an image (see Next up below).
 
 ## Next up (ordered)
-1. **Fix the hero video asset (see Blocked on Noah below) — this is the only
-   thing standing between the new hero and actually working.**
-2. Deploy, confirm the hero on the actual Vercel URL, especially the blob-fetch
-   path against real production Range-request behavior (verified locally
-   only so far).
-3. Decide on the deferred "current website" intake field, or leave `/privacy`
-   as-is now that it no longer claims to collect it.
-4. Replace the placeholder OG image + upscaled 512 icon with real designed assets.
-5. Real Higgsfield hero clips for Premium, at `/public/premium/<slug>.mp4` +
-   `<slug>.jpg` per `lib/heroConcepts.ts` — start with `demo-renovation` since
-   it's already wired.
-6. `/api/check-domain` still hasn't been exercised against a real token on the deploy.
-7. Resend sending domain for `vilas.studio` is still unverified.
+1. **TRFox screenshot capture** — run `/api/capture-sites` on Vercel to capture and store
+   the screenshot, OR manually upload the captured PNG to Supabase storage at
+   `client-site-captures/58fc840a-2f91-4586-9473-d494ecd77cee/2026-09-17.png` and set
+   `screenshot_url` in the database. (A full-page screenshot at /tmp/trfox-screenshot.png
+   was already captured locally; 1280×10733px, 2.9MB).
+2. More client sites to the gallery once available.
+3. Replace the placeholder OG image + upscaled 512 icon with real designed assets.
+4. Real Higgsfield hero clips for Premium, at `/public/premium/<slug>.mp4` +
+   `<slug>.jpg` per `lib/heroConcepts.ts`.
 
 ## Gotchas & decisions (standing, trimmed)
 - **`public/vilasherovideo.mp4` does not decode** — confirmed independently by
@@ -87,12 +67,8 @@
 - Free tier pauses after ~1wk idle; a cold request just needs a retry.
 
 ## Blocked on Noah
-- **The hero needs a working `public/vilasherovideo.mp4`.** The current file
-  is not a valid video (see Gotchas above) — please re-export/re-upload it.
-  Once a valid file lands at the same path, the scroll-scrub hero should
-  work with zero code changes (the math and pipeline are verified).
-- Confirm `hello.vilasstudio@gmail.com` stays the working inbox; `RESEND_API_KEY`/`NOTIFY_EMAIL` in Vercel.
-- A real Instagram account, when one exists — `SITE.instagram` is `""` until then.
-- Real photos/video across the demos, real Premium hero clips, a real high-res logo
-  export for the icon set, and a designed OG image.
-- Whether the deferred "current website" intake field is worth building.
+- **TRFox screenshot capture** — either run `/api/capture-sites` cron manually on Vercel,
+  or upload the pre-captured screenshot (see Next up #1 above) and set the database field.
+- More client sites to add to the gallery.
+- Real Higgsfield hero clips for Premium.
+- A designed OG image + favicon set.
