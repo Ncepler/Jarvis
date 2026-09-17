@@ -12,11 +12,13 @@
 // using whichever is SMALLER, so the grid covers the full frame on both
 // axes (cropping whichever axis has excess) rather than letterboxing.
 //
-// Reduced motion skips the Three.js grid entirely (no Canvas, no WebGL
-// context) and instead renders the SAME baked content as a plain static
-// <img> (via canvas.toDataURL) — same wordmark/tagline/fonts/colors as the
-// interactive version, just not the grid or the pointer effect, so a
-// reduced-motion visitor sees the same hero, not a different one.
+// Reduced motion AND mobile both skip the Three.js grid entirely (no
+// Canvas, no WebGL context, no mention of it in the DOM at all) and instead
+// render the SAME baked content as a plain static <img> (via
+// canvas.toDataURL) — same wordmark/tagline/fonts/colors as the interactive
+// version, just not the grid, the pointer effect, or (on mobile) the old
+// VILAS-reveal text animation this replaced — so those visitors see the
+// same hero, held still, not a different one.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
@@ -54,6 +56,9 @@ const MUTED = "#4d4638";
 const SCENE_BG = "#1a1a1a";
 
 const TEX_CELL_PX = 128; // baked-texture resolution per grid cell
+// Same breakpoint components/demos/PremiumHeroMedia.tsx uses for its own
+// "should we even attempt an interactive canvas" decision.
+const MOBILE_QUERY = "(max-width: 767px)";
 
 type Home = { x: number; y: number; z: number };
 type TexOffset = { x: number; y: number };
@@ -318,6 +323,7 @@ export function FracturedHero() {
       const reduced = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       ).matches;
+      const mobile = window.matchMedia(MOBILE_QUERY).matches;
       try {
         await document.fonts?.ready; // bake against the real face, not a fallback
       } catch {
@@ -328,9 +334,10 @@ export function FracturedHero() {
       const dotted = SITE.domain.slice(SITE.domain.indexOf("."));
       const wordmark = `${SITE.brand.toUpperCase()}${dotted}`;
 
-      // Reduced motion: paint the same content but never touch Three.js at
-      // all — no Canvas, no WebGL context, just a static <img>.
-      if (reduced) {
+      // Reduced motion or mobile: paint the same content but never touch
+      // Three.js at all — no Canvas, no WebGL context, just a static <img>.
+      // The interactive grid is desktop-only.
+      if (reduced || mobile) {
         const canvas = paintCanvas(wordmark, SITE.tagline);
         if (!cancelled && canvas) setStaticSrc(canvas.toDataURL());
         return;
