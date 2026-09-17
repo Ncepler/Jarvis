@@ -1301,7 +1301,7 @@ export function Faq({
   );
 }
 
-// ── Contact: copy + methods row + form with a service/project dropdown. ──────
+// ── Contact: copy + methods row + a plain reach-us block. ────────────────────
 export function Contact({
   eyebrow,
   line1,
@@ -1310,12 +1310,6 @@ export function Contact({
   phone,
   email,
   location,
-  serviceLabel,
-  serviceOptions,
-  propertyTypes,
-  vehicleFields,
-  claimToggle,
-  minimal,
 }: {
   eyebrow: string;
   line1: string;
@@ -1329,19 +1323,8 @@ export function Contact({
   propertyTypes?: string[];
   vehicleFields?: boolean; // Year / Make / Model row (auto body)
   claimToggle?: boolean; // "this is an insurance claim" toggle (auto body)
-  // 3 fields only — name, email, message. No phone, no service picker, no
-  // extras. For niches where the form itself should stay quick (florist).
   minimal?: boolean;
 }) {
-  const [state, setState] = useState<"idle" | "ok" | "err">("idle");
-  const reduced = useReducedMotion();
-  const field = {
-    background: "var(--d-bg)",
-    border: "1px solid var(--d-line)",
-    color: "var(--d-fg)",
-    borderRadius: "var(--d-radius)",
-  } as CSSProperties;
-  const label = "mb-1.5 block text-[13px] font-semibold";
   return (
     <Section dark>
       <div className="grid gap-12 md:grid-cols-2 md:gap-16">
@@ -1369,152 +1352,44 @@ export function Contact({
           </div>
         </Rise>
         <Rise delay={0.1}>
-          <form
-            onClick={(e) => e.preventDefault()}
-            className="space-y-4"
+          <div
+            className="p-8"
+            style={{
+              background: "var(--d-bg)",
+              border: "1px solid var(--d-line)",
+              borderRadius: "var(--d-radius)",
+            }}
           >
-            <div className="grid gap-4 sm:grid-cols-2">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
+              Reach us directly
+            </p>
+            <div className="mt-6 space-y-5">
               <div>
-                <span className={label} style={{ color: "var(--d-muted)" }}>
-                  Name *
-                </span>
-                <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="Your name" />
+                <p className="text-[13px]" style={{ color: "var(--d-muted)" }}>
+                  Call or text
+                </p>
+                <p className="mt-1 text-[22px] font-semibold" style={{ color: "var(--d-fg)" }}>
+                  {phone}
+                </p>
               </div>
               <div>
-                <span className={label} style={{ color: "var(--d-muted)" }}>
-                  Email *
-                </span>
-                <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="you@email.com" />
+                <p className="text-[13px]" style={{ color: "var(--d-muted)" }}>
+                  Email
+                </p>
+                <p className="mt-1 text-[22px] font-semibold" style={{ color: "var(--d-fg)" }}>
+                  {email}
+                </p>
+              </div>
+              <div>
+                <p className="text-[13px]" style={{ color: "var(--d-muted)" }}>
+                  Where
+                </p>
+                <p className="mt-1 text-[17px]" style={{ color: "var(--d-fg)" }}>
+                  {location}
+                </p>
               </div>
             </div>
-            {!minimal && (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <span className={label} style={{ color: "var(--d-muted)" }}>
-                    Phone
-                  </span>
-                  <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="(516) 555-0000" />
-                </div>
-                {serviceOptions && (
-                  <div>
-                    <span className={label} style={{ color: "var(--d-muted)" }}>
-                      {serviceLabel}
-                    </span>
-                    <select className="w-full px-3.5 py-3 text-[15px]" style={field} defaultValue="">
-                      <option value="" disabled>
-                        Select…
-                      </option>
-                      {serviceOptions.map((o) => (
-                        <option key={o}>{o}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-            )}
-            {!minimal && propertyTypes && (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <span className={label} style={{ color: "var(--d-muted)" }}>
-                    Property type
-                  </span>
-                  <select className="w-full px-3.5 py-3 text-[15px]" style={field} defaultValue="">
-                    <option value="" disabled>
-                      Select…
-                    </option>
-                    {propertyTypes.map((o) => (
-                      <option key={o}>{o}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <span className={label} style={{ color: "var(--d-muted)" }}>
-                    City
-                  </span>
-                  <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="Your town" />
-                </div>
-              </div>
-            )}
-            {!minimal && vehicleFields && (
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <span className={label} style={{ color: "var(--d-muted)" }}>
-                    Year
-                  </span>
-                  <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="2019" />
-                </div>
-                <div>
-                  <span className={label} style={{ color: "var(--d-muted)" }}>
-                    Make
-                  </span>
-                  <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="Honda" />
-                </div>
-                <div>
-                  <span className={label} style={{ color: "var(--d-muted)" }}>
-                    Model
-                  </span>
-                  <input className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="Accord" />
-                </div>
-              </div>
-            )}
-            {!minimal && claimToggle && (
-              <label className="flex cursor-pointer items-center gap-3 text-[15px]" style={{ color: "var(--d-body)" }}>
-                <input
-                  type="checkbox"
-                  className="h-4 w-4"
-                  style={{ accentColor: "var(--d-accent)" }}
-                />
-                This is an insurance claim
-              </label>
-            )}
-            <div>
-              <span className={label} style={{ color: "var(--d-muted)" }}>
-                Tell us about your project
-              </span>
-              <textarea rows={4} className="w-full px-3.5 py-3 text-[15px]" style={field} placeholder="A few sentences is plenty." />
-            </div>
-            <div className="flex flex-wrap items-center gap-4">
-              <button
-                type="button"
-                onClick={() => setState("ok")}
-                className="px-6 py-3.5 text-[14px] font-semibold"
-                style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
-              >
-                Send
-              </button>
-              {/* dev-only affordance to preview the error state — never ships
-                  to the live opened demo a prospect actually sees (§12) */}
-              {process.env.NODE_ENV !== "production" && (
-                <button
-                  type="button"
-                  onClick={() => setState("err")}
-                  className="text-[13px]"
-                  style={{ color: "var(--d-muted)" }}
-                >
-                  (demo: preview error state)
-                </button>
-              )}
-            </div>
-            {state === "ok" && (
-              <motion.p
-                initial={reduced ? false : { opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-[15px]"
-                style={{ color: "var(--d-accent)" }}
-              >
-                Got it. We&apos;ll get back to you the same day.
-              </motion.p>
-            )}
-            {state === "err" && (
-              <p className="text-[15px]" style={{ color: "var(--d-fg)" }}>
-                That didn&apos;t send. Give us a call at {phone} or{" "}
-                <button type="button" onClick={() => setState("idle")} className="underline" style={{ color: "var(--d-accent)" }}>
-                  try again
-                </button>
-                .
-              </p>
-            )}
-          </form>
+          </div>
         </Rise>
       </div>
     </Section>
