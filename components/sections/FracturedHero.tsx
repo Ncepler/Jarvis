@@ -24,16 +24,20 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { SITE } from "@/lib/site";
 
-const COLS = 12;
-const ROWS = 7;
+// 16 rows, columns scaled to hold the original 12:7 ratio (round(16*12/7) =
+// 27) — desktop only; mobile/reduced-motion never mount this grid at all.
+const ROWS = 16;
+const COLS = 27;
 const CELL = 1; // world units per grid cell
 // A tiny OVERLAP, not a gap: sizing each box slightly larger than its grid
 // pitch means adjacent boxes physically overlap by a hair, which guarantees
 // no sub-pixel gap can ever appear regardless of GPU/antialiasing rounding
-// (a zero-or-near-zero butt-join is fragile to exactly that). 1.01 (1%
-// larger than the cell pitch) is the conservative end of the 1.01-1.02
-// range — drop toward 1 if this ever shows visible z-fighting on a real GPU.
-const OVERLAP = 1.01;
+// (a zero-or-near-zero butt-join is fragile to exactly that). 1.02 (2%
+// larger than the cell pitch) — the top of the previously-approved
+// 1.01-1.02 range, bumped up from 1.01 now that there are 5x as many,
+// proportionally smaller boxes, so the same 1% margin covers fewer actual
+// screen pixels. Drop toward 1.01 if this ever shows visible z-fighting.
+const OVERLAP = 1.02;
 const BOX_W = CELL * OVERLAP;
 const BOX_H = CELL * OVERLAP;
 const BOX_D = 0.14; // thin slab depth
@@ -387,6 +391,13 @@ export function FracturedHero() {
           <Canvas
             dpr={[1, 2]}
             camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0, 10] }}
+            // R3F's default renderer runs ACESFilmicToneMapping, which
+            // compresses/desaturates bright, low-contrast colors like this
+            // cream non-uniformly per channel — confirmed live (gl.toneMapping
+            // read back as 4 = ACESFilmicToneMapping) as the actual cause of
+            // the boxes rendering visibly grayer than the true #EDE7DA.
+            // NoToneMapping renders flat material colors exactly as authored.
+            gl={{ toneMapping: THREE.NoToneMapping }}
           >
             <Scene texture={texture} activeRef={activeRef} />
           </Canvas>
