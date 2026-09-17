@@ -45,8 +45,13 @@ const MAX_TILT = 0.35; // radians
 // The site's actual tokens (app/globals.css --color-ink / --color-muted;
 // CREAM is the site's cream tone used elsewhere, e.g. app/opengraph-image.tsx).
 const INK = "#1f1a14";
-const CREAM = "#EDE7DA";
+const CREAM = "#EDE7DA"; // the boxes themselves — front face + sides
 const MUTED = "#4d4638";
+// What shows behind/between the boxes (scene background + the wrapper div's
+// own CSS background, so both agree before the Canvas even mounts) — a
+// really dark neutral gray, deliberately not pure black and not cream, so
+// gaps between separated tiles read as depth, not a void.
+const SCENE_BG = "#1a1a1a";
 
 const TEX_CELL_PX = 128; // baked-texture resolution per grid cell
 
@@ -281,9 +286,9 @@ function Scene({
 
   return (
     <>
-      {/* Cream, not the WebGL default black — shows through on any margin
-          (e.g. a resize frame) instead of ever reading as a black flash. */}
-      <color attach="background" args={[CREAM]} />
+      {/* Dark gray, not the WebGL default black — shows through on any
+          margin (e.g. a resize frame) or in the gaps once tiles separate. */}
+      <color attach="background" args={[SCENE_BG]} />
       <CameraRig />
       {tiles.map((t) => (
         <Tile
@@ -349,7 +354,7 @@ export function FracturedHero() {
   return (
     <div
       className="relative h-svh w-full touch-pan-y overflow-hidden"
-      style={{ backgroundColor: CREAM }}
+      style={{ backgroundColor: SCENE_BG }}
       onPointerMove={() => {
         activeRef.current = true;
       }}
