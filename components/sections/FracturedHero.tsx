@@ -9,7 +9,8 @@
 // back to their grid position once the cursor moves off (desktop) or lifts
 // (touch). Camera stays fixed (no OrbitControls); its distance is
 // recomputed on resize from both a width-fit and a height-fit formula,
-// whichever needs more room, so the full grid is always in frame.
+// using whichever is SMALLER, so the grid covers the full frame on both
+// axes (cropping whichever axis has excess) rather than letterboxing.
 //
 // Reduced motion skips the Three.js grid entirely (no Canvas, no WebGL
 // context) and instead renders the SAME baked content as a plain static
@@ -24,15 +25,15 @@ import { SITE } from "@/lib/site";
 const COLS = 12;
 const ROWS = 7;
 const CELL = 1; // world units per grid cell
-// Near-zero rather than exactly zero: adjacent box edges are independently
-// triangulated meshes, and touching them at exactly the same coordinate can
-// leave a hairline rasterization crack/flicker on some GPUs. 0.004 world
-// units is sub-pixel at this grid's viewing distance (well under a screen
-// pixel) — visually seamless at rest, but never lets two edges coincide
-// exactly. Bump this (see task note) if a real GPU ever shows a seam.
-const GAP = 0.004;
-const BOX_W = CELL - GAP;
-const BOX_H = CELL - GAP;
+// A tiny OVERLAP, not a gap: sizing each box slightly larger than its grid
+// pitch means adjacent boxes physically overlap by a hair, which guarantees
+// no sub-pixel gap can ever appear regardless of GPU/antialiasing rounding
+// (a zero-or-near-zero butt-join is fragile to exactly that). 1.01 (1%
+// larger than the cell pitch) is the conservative end of the 1.01-1.02
+// range — drop toward 1 if this ever shows visible z-fighting on a real GPU.
+const OVERLAP = 1.01;
+const BOX_W = CELL * OVERLAP;
+const BOX_H = CELL * OVERLAP;
 const BOX_D = 0.14; // thin slab depth
 const GRID_W = COLS * CELL;
 const GRID_H = ROWS * CELL;
@@ -98,8 +99,11 @@ function bakeTexture(wordmark: string, tagline: string) {
 
 // Recomputes camera distance on mount and on every resize: a width-fit
 // distance (so the grid's full width is in frame) and a height-fit distance
-// (same for height), and uses whichever is larger so neither axis ever
-// clips.
+// (same for height). Takes whichever is SMALLER — cover, not contain — so
+// the grid fills the whole frame on both axes, cropping whichever axis has
+// excess, like CSS `background-size: cover`. The 0.97 multiplier zooms in
+// slightly further (below 1, not above) to guarantee no hairline gap at the
+// very edge from rounding, since covering means slight overscan is correct.
 function CameraRig() {
   const { camera, size } = useThree();
   useEffect(() => {
@@ -108,7 +112,7 @@ function CameraRig() {
     const vFov = (persp.fov * Math.PI) / 180;
     const distanceForHeight = GRID_H / 2 / Math.tan(vFov / 2);
     const distanceForWidth = GRID_W / 2 / (aspect * Math.tan(vFov / 2));
-    const distance = Math.max(distanceForHeight, distanceForWidth) * 1.08;
+    const distance = Math.min(distanceForHeight, distanceForWidth) * 0.97;
     persp.position.set(0, 0, distance);
     persp.aspect = aspect;
     persp.updateProjectionMatrix();
@@ -232,8 +236,11 @@ function Scene({
     () => new THREE.BoxGeometry(BOX_W, BOX_H, BOX_D),
     [],
   );
+  // Cream, not dark: if a sliver of side face is ever visible at a seam
+  // (the OVERLAP above should already prevent that), it reads as more cream,
+  // not a black line.
   const sideMaterial = useMemo(
-    () => new THREE.MeshBasicMaterial({ color: INK }),
+    () => new THREE.MeshBasicMaterial({ color: CREAM }),
     [],
   );
 
@@ -274,6 +281,9 @@ function Scene({
 
   return (
     <>
+      {/* Cream, not the WebGL default black — shows through on any margin
+          (e.g. a resize frame) instead of ever reading as a black flash. */}
+      <color attach="background" args={[CREAM]} />
       <CameraRig />
       {tiles.map((t) => (
         <Tile
