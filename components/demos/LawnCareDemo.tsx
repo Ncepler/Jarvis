@@ -25,6 +25,9 @@ import {
   ProofStrip,
   Rise,
   Section,
+  SceneBlock,
+  StickyReveal,
+  StickyScene,
   TwoLine,
   WorkGrid,
 } from "./system";
@@ -290,35 +293,42 @@ export function LawnCareDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" contactId="freshcut-contact" />
-      <DemoHero
-        heroImage={firstLawnCareImage}
-        eyebrow="Lawn care · Nassau County"
-        line1="Your lawn,"
-        line2="handled."
-        sub="Weekly mowing, cleanups, and edging for homes on the South Shore. No contracts, no voicemail tag. Text a photo, get a price."
-        primaryCta="Get a free quote"
-        phone={PHONE}
-        mediaLabel="HERO VIDEO: fresh-cut lawn (16:9)"
-        premium={tier === "premium" ? PREMIUM_HERO : undefined}
-      />
-      <DemoMarquee terms={["Mowing", "Cleanups", "Edging", "Mulch", "Fertilizing"]} />
-      <div id="about" className={ANCHOR_SCROLL_CLASS}>
-        <Intro
-          eyebrow="Who we are"
-          line1="Show up."
-          line2="Cut it right."
-          paragraphs={[
-            "Lawn care isn't complicated. It's whether the crew shows up, does it right, and you never have to chase them. That's the whole job.",
-            "Fresh Cut runs a tight weekly route with the same crew, a firm price up front, and no contract to trap you if we don't earn it.",
-          ]}
-          badges={[
-            ["Mowing to fertilizing", "Full season"],
-            ["Same crew every week", "Consistent"],
-            ["No contracts", "Skip anytime"],
-            ["Fully insured", "Quotes same day"],
-          ]}
+      <StickyScene image={firstLawnCareImage} priority>
+        <DemoHero
+          pinned
+          heroImage={firstLawnCareImage}
+          eyebrow="Lawn care · Nassau County"
+          line1="Your lawn,"
+          line2="handled."
+          sub="Weekly mowing, cleanups, and edging for homes on the South Shore. No contracts, no voicemail tag. Text a photo, get a price."
+          primaryCta="Get a free quote"
+          phone={PHONE}
+          mediaLabel="HERO VIDEO: fresh-cut lawn (16:9)"
+          premium={tier === "premium" ? PREMIUM_HERO : undefined}
         />
-      </div>
+        <SceneBlock>
+          <StickyReveal>
+            <DemoMarquee terms={["Mowing", "Cleanups", "Edging", "Mulch", "Fertilizing"]} />
+            <div id="about" className={ANCHOR_SCROLL_CLASS}>
+              <Intro
+                eyebrow="Who we are"
+                line1="Show up."
+                line2="Cut it right."
+                paragraphs={[
+                  "Lawn care isn't complicated. It's whether the crew shows up, does it right, and you never have to chase them. That's the whole job.",
+                  "Fresh Cut runs a tight weekly route with the same crew, a firm price up front, and no contract to trap you if we don't earn it.",
+                ]}
+                badges={[
+                  ["Mowing to fertilizing", "Full season"],
+                  ["Same crew every week", "Consistent"],
+                  ["No contracts", "Skip anytime"],
+                  ["Fully insured", "Quotes same day"],
+                ]}
+              />
+            </div>
+          </StickyReveal>
+        </SceneBlock>
+      </StickyScene>
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
         <PlanCards />
       </div>
