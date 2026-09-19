@@ -40,13 +40,26 @@ const CELL = 1; // world units per grid cell
 const OVERLAP = 1.02;
 const BOX_W = CELL * OVERLAP;
 const BOX_H = CELL * OVERLAP;
-const BOX_D = 0.14; // thin slab depth
+const BOX_D = 0.36; // slab depth — thick enough that a ~35° tilt reads as a real edge, not a sliver
 const GRID_W = COLS * CELL;
 const GRID_H = ROWS * CELL;
 
-const INFLUENCE_RADIUS = 2.6; // world units — hover/touch push radius
+const INFLUENCE_RADIUS = 4.16; // world units — hover/touch push radius (1.6x the original 2.6)
 const PUSH_STRENGTH = 0.6;
-const MAX_TILT = 0.35; // radians
+const MAX_TILT = (35 * Math.PI) / 180; // ~35°, up from ~20°, so side faces actually show
+
+// Spring constants for the push/tilt response (position, rotation both use
+// these). Deliberately underdamped — critical damping at this stiffness is
+// 2*sqrt(SPRING_K) ≈ 19, and SPRING_DAMPING sits well under that, so a tile
+// overshoots its target slightly before settling, both on push-out and on
+// return. `responsiveness` (computed per-tile below, from distance to the
+// pointer) scales this stiffness down for tiles farther from the cursor, so
+// the reaction visibly ripples outward instead of every tile snapping at
+// once.
+const SPRING_K = 90;
+const SPRING_DAMPING = 12;
+// How dark the front face gets at full tilt (1 = unlit/original color).
+const MIN_SHADE = 0.82;
 
 // The site's actual tokens (app/globals.css --color-ink / --color-muted;
 // CREAM is the site's cream tone used elsewhere, e.g. app/opengraph-image.tsx).
@@ -153,13 +166,18 @@ function Tile({
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const offset = useRef({ x: 0, y: 0, z: 0 });
+  const vel = useRef({ x: 0, y: 0, z: 0 });
   const rot = useRef({ x: 0, y: 0 });
+  const rotVel = useRef({ x: 0, y: 0 });
 
   const frontMaterial = useMemo(() => {
     const tex = texture.clone();
     tex.needsUpdate = true;
     tex.repeat.set(1 / COLS, 1 / ROWS);
     tex.offset.set(texOffset.x, texOffset.y);
+    // color starts white (full brightness); useFrame below multiplies it
+    // down toward MIN_SHADE as the tile tilts — fake shading without adding
+    // scene lights, which would shift the rest-state color (see BOX_D note).
     return new THREE.MeshBasicMaterial({ map: tex });
   }, [texture, texOffset]);
 
@@ -185,12 +203,16 @@ function Tile({
   useFrame((_, dt) => {
     const mesh = meshRef.current;
     if (!mesh) return;
+    // Clamp dt so a stalled/backgrounded frame can't feed the spring a huge
+    // step and fling a tile off; 1/30s is already a slow frame.
+    const clampedDt = Math.min(dt, 1 / 30);
 
     let targetX = 0,
       targetY = 0,
       targetZ = 0,
       targetRotX = 0,
       targetRotY = 0;
+    let k = SPRING_K;
 
     if (activeRef.current) {
       const mw = mouseWorldRef.current;
@@ -198,7 +220,8 @@ function Tile({
       const dy = home.y - mw.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       if (dist < INFLUENCE_RADIUS) {
-        const falloff = Math.pow(1 - dist / INFLUENCE_RADIUS, 2);
+        const proximity = 1 - dist / INFLUENCE_RADIUS; // 1 at the cursor, 0 at the ring's edge
+        const falloff = proximity * proximity;
         const dirX = dist > 0.0001 ? dx / dist : 0;
         const dirY = dist > 0.0001 ? dy / dist : 0;
         targetX = dirX * falloff * PUSH_STRENGTH;
@@ -206,15 +229,37 @@ function Tile({
         targetZ = falloff * PUSH_STRENGTH * 0.9;
         targetRotX = dirY * falloff * MAX_TILT;
         targetRotY = -dirX * falloff * MAX_TILT;
+        // ripple: a tile right under the cursor reacts at full stiffness; one
+        // near the edge of the influence ring reacts more softly (lower k),
+        // so it visibly lags a beat behind — the wave travels outward rather
+        // than every tile in range snapping in unison.
+        k = SPRING_K * (0.55 + 0.45 * proximity);
       }
     }
 
-    const ease = 1 - Math.pow(0.001, dt); // frame-rate independent
-    offset.current.x += (targetX - offset.current.x) * ease;
-    offset.current.y += (targetY - offset.current.y) * ease;
-    offset.current.z += (targetZ - offset.current.z) * ease;
-    rot.current.x += (targetRotX - rot.current.x) * ease;
-    rot.current.y += (targetRotY - rot.current.y) * ease;
+    // Semi-implicit Euler spring per axis, all scalar math on refs already
+    // allocated outside this loop — no per-frame allocations. Underdamped on
+    // purpose (see SPRING_DAMPING) so each axis overshoots slightly before
+    // settling, on both the push-out and the return to rest.
+    const accX = (targetX - offset.current.x) * k - vel.current.x * SPRING_DAMPING;
+    vel.current.x += accX * clampedDt;
+    offset.current.x += vel.current.x * clampedDt;
+
+    const accY = (targetY - offset.current.y) * k - vel.current.y * SPRING_DAMPING;
+    vel.current.y += accY * clampedDt;
+    offset.current.y += vel.current.y * clampedDt;
+
+    const accZ = (targetZ - offset.current.z) * k - vel.current.z * SPRING_DAMPING;
+    vel.current.z += accZ * clampedDt;
+    offset.current.z += vel.current.z * clampedDt;
+
+    const accRX = (targetRotX - rot.current.x) * k - rotVel.current.x * SPRING_DAMPING;
+    rotVel.current.x += accRX * clampedDt;
+    rot.current.x += rotVel.current.x * clampedDt;
+
+    const accRY = (targetRotY - rot.current.y) * k - rotVel.current.y * SPRING_DAMPING;
+    rotVel.current.y += accRY * clampedDt;
+    rot.current.y += rotVel.current.y * clampedDt;
 
     mesh.position.set(
       home.x + offset.current.x,
@@ -222,6 +267,17 @@ function Tile({
       home.z + offset.current.z,
     );
     mesh.rotation.set(rot.current.x, rot.current.y, 0);
+
+    // Fake shading: darken the front face toward MIN_SHADE as tilt grows,
+    // multiplying the baked cream color down rather than adding a light
+    // (a real light would shift the rest-state color off the true #EDE7DA —
+    // see the gl.toneMapping note above). Side faces are untouched, so they
+    // stay cream at any angle, never reading as a dark seam.
+    const tilt = Math.min(
+      Math.sqrt(rot.current.x * rot.current.x + rot.current.y * rot.current.y) / MAX_TILT,
+      1,
+    );
+    frontMaterial.color.setScalar(1 - (1 - MIN_SHADE) * tilt);
   });
 
   return (
