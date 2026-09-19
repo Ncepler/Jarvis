@@ -27,6 +27,9 @@ import {
   Intro,
   Rise,
   Section,
+  SceneBlock,
+  StickyReveal,
+  StickyScene,
   TwoLine,
   WorkGrid,
 } from "./system";
@@ -105,37 +108,51 @@ function CarOutline({
 // tier (Demo bar ticket, job 5/6): $500 swaps the still photo for the shared
 // PremiumHeroMedia mechanism (zoom/stagger fallback until a real video lands
 // at lib/heroConcepts.ts's demo-autobody path) — everything else is unchanged.
-function HeroCarReveal({ tier = "basic" }: { tier?: Tier }) {
+function HeroCarReveal({
+  tier = "basic",
+  pinned,
+}: {
+  tier?: Tier;
+  // Set when the caller wraps this hero in <StickyScene image={firstAutoBodyImage}>
+  // — the pinned sticky layer already paints the image behind this section, so
+  // the basic-tier still-photo div is skipped (avoids double-painting it). The
+  // premium tier keeps its own non-pinned PremiumHeroMedia background.
+  pinned?: boolean;
+}) {
   const reduced = useReducedMotion();
+  const skipOwnBg = pinned && tier !== "premium";
   return (
     <section className="relative w-full overflow-hidden" style={{ minHeight: "640px" }}>
-      {/* full-bleed media slot — premium mechanism, else real photo, else placeholder */}
-      <div className="absolute inset-0">
-        {tier === "premium" && AUTO_BODY_HERO ? (
-          <PremiumHeroMedia concept={AUTO_BODY_HERO} fallbackImage={firstAutoBodyImage} />
-        ) : (
-          <div
-            className="h-full w-full"
-            style={{
-              backgroundColor: firstAutoBodyImage ? undefined : "var(--d-surface)",
-              backgroundImage: firstAutoBodyImage ? `url("${firstAutoBodyImage}")` : undefined,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          >
-            {!firstAutoBodyImage && (
-              <div className="flex h-full w-full items-center justify-center">
-                <span
-                  className="text-[11px] font-semibold uppercase tracking-[0.18em]"
-                  style={{ color: "var(--d-muted)" }}
-                >
-                  HERO: car reveal sequence (16:9)
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      {/* full-bleed media slot — premium mechanism, else real photo, else
+          placeholder. Skipped when `pinned`: StickyScene already paints it. */}
+      {!skipOwnBg && (
+        <div className="absolute inset-0">
+          {tier === "premium" && AUTO_BODY_HERO ? (
+            <PremiumHeroMedia concept={AUTO_BODY_HERO} fallbackImage={firstAutoBodyImage} />
+          ) : (
+            <div
+              className="h-full w-full"
+              style={{
+                backgroundColor: firstAutoBodyImage ? undefined : "var(--d-surface)",
+                backgroundImage: firstAutoBodyImage ? `url("${firstAutoBodyImage}")` : undefined,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              {!firstAutoBodyImage && (
+                <div className="flex h-full w-full items-center justify-center">
+                  <span
+                    className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+                    style={{ color: "var(--d-muted)" }}
+                  >
+                    HERO: car reveal sequence (16:9)
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       {/* clear-coat shine sweep — a glossy highlight travels across on enter */}
       {!reduced && (
         <motion.div
@@ -711,25 +728,31 @@ export function AutoBodyDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free estimate" contactId="apex-contact" />
-      <HeroCarReveal tier={tier} />
-      <DemoMarquee terms={["Collision", "Paint", "Dents", "Frame", "Glass", "Detailing"]} />
-      <div id="about" className={ANCHOR_SCROLL_CLASS}>
-        <Intro
-          eyebrow="Who we are"
-          line1="Back to factory."
-          line2="Claim and all."
-          paragraphs={[
-            "A collision shop is mostly about two things: getting the car right, and not making the claim your problem. We do both.",
-            "Apex repairs, refinishes, and reglasses every make in Hicksville: laser-measured frames, booth-baked paint, and an estimate you can read.",
-          ]}
-          badges={[
-            ["Collision to refinishing", "Full service"],
-            ["We handle the claim", "Insurance"],
-            ["Lifetime paint warranty", "Guaranteed"],
-            ["Free written estimates", "No pressure"],
-          ]}
-        />
-      </div>
+      <StickyScene image={firstAutoBodyImage} priority>
+        <HeroCarReveal tier={tier} pinned />
+        <SceneBlock>
+          <StickyReveal>
+            <DemoMarquee terms={["Collision", "Paint", "Dents", "Frame", "Glass", "Detailing"]} />
+            <div id="about" className={ANCHOR_SCROLL_CLASS}>
+              <Intro
+                eyebrow="Who we are"
+                line1="Back to factory."
+                line2="Claim and all."
+                paragraphs={[
+                  "A collision shop is mostly about two things: getting the car right, and not making the claim your problem. We do both.",
+                  "Apex repairs, refinishes, and reglasses every make in Hicksville: laser-measured frames, booth-baked paint, and an estimate you can read.",
+                ]}
+                badges={[
+                  ["Collision to refinishing", "Full service"],
+                  ["We handle the claim", "Insurance"],
+                  ["Lifetime paint warranty", "Guaranteed"],
+                  ["Free written estimates", "No pressure"],
+                ]}
+              />
+            </div>
+          </StickyReveal>
+        </SceneBlock>
+      </StickyScene>
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
         <DamageMap />
       </div>
