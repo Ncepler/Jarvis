@@ -22,6 +22,9 @@ import {
   Media,
   Rise,
   Section,
+  SceneBlock,
+  StickyReveal,
+  StickyScene,
   TwoLine,
   WorkGrid,
 } from "./system";
@@ -187,35 +190,42 @@ export function BarberDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Book a chair" />
-      <DemoHero
-        heroImage={firstBarberImage}
-        eyebrow="Barbershop · Patchogue"
-        line1="A good cut."
-        line2="Every time."
-        sub="Four chairs, no rush, no upsell. Book online or walk in; either way you leave sharp."
-        primaryCta="Book a chair"
-        phone={PHONE}
-        mediaLabel="HERO VIDEO: the shop floor (16:9)"
-        premium={tier === "premium" ? PREMIUM_HERO : undefined}
-      />
-      <DemoMarquee terms={["Cuts", "Fades", "Beards", "Shaves", "Kids"]} />
-      <div id="about" className={ANCHOR_SCROLL_CLASS}>
-        <Intro
-          eyebrow="Who we are"
-          line1="Old-school chair."
-          line2="No nonsense."
-          paragraphs={[
-            "No app trying to upsell you pomade, no rotating stranger who's never seen your hairline. Just a good cut from the same barbers.",
-            "Standard runs four chairs in Patchogue. Book online in a minute or walk in. If the pole's spinning, we're cutting.",
-          ]}
-          badges={[
-            ["Cuts to shaves", "Full menu"],
-            ["Walk-in or book", "Either works"],
-            ["Same barbers", "Consistent"],
-            ["Cash or card", "Easy"],
-          ]}
+      <StickyScene image={firstBarberImage} priority>
+        <DemoHero
+          pinned
+          heroImage={firstBarberImage}
+          eyebrow="Barbershop · Patchogue"
+          line1="A good cut."
+          line2="Every time."
+          sub="Four chairs, no rush, no upsell. Book online or walk in; either way you leave sharp."
+          primaryCta="Book a chair"
+          phone={PHONE}
+          mediaLabel="HERO VIDEO: the shop floor (16:9)"
+          premium={tier === "premium" ? PREMIUM_HERO : undefined}
         />
-      </div>
+        <SceneBlock>
+          <StickyReveal>
+            <DemoMarquee terms={["Cuts", "Fades", "Beards", "Shaves", "Kids"]} />
+            <div id="about" className={ANCHOR_SCROLL_CLASS}>
+              <Intro
+                eyebrow="Who we are"
+                line1="Old-school chair."
+                line2="No nonsense."
+                paragraphs={[
+                  "No app trying to upsell you pomade, no rotating stranger who's never seen your hairline. Just a good cut from the same barbers.",
+                  "Standard runs four chairs in Patchogue. Book online in a minute or walk in. If the pole's spinning, we're cutting.",
+                ]}
+                badges={[
+                  ["Cuts to shaves", "Full menu"],
+                  ["Walk-in or book", "Either works"],
+                  ["Same barbers", "Consistent"],
+                  ["Cash or card", "Easy"],
+                ]}
+              />
+            </div>
+          </StickyReveal>
+        </SceneBlock>
+      </StickyScene>
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
         <PriceBoard />
       </div>
