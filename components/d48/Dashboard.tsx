@@ -4,6 +4,10 @@ import { Fragment, useEffect, useMemo, useState, useTransition } from "react";
 import {
   archive,
   copyBuildPrompt,
+  copyChangesReceivedEmail,
+  copyFinalPaymentEmail,
+  copyFirstDraftEmail,
+  copyFirstPaymentEmail,
   copyTemplateCode,
   destroy,
   logout,
@@ -180,9 +184,11 @@ function ConfirmDialog({
 function CopyButton({
   label,
   get,
+  copiedNote = "Copied to clipboard",
 }: {
   label: string;
   get: () => Promise<Result<string>>;
+  copiedNote?: string;
 }) {
   const [note, setNote] = useState("");
   const [failed, setFailed] = useState("");
@@ -195,7 +201,7 @@ function CopyButton({
       if (!result.ok) return setFailed(result.error);
       try {
         await navigator.clipboard.writeText(result.value);
-        setNote("Copied to clipboard");
+        setNote(copiedNote);
         setTimeout(() => setNote(""), 2400);
       } catch {
         setFailed("The browser wouldn't let us reach the clipboard.");
@@ -316,6 +322,30 @@ function Detail({ row }: { row: SubmissionRow }) {
         </label>
         <CopyButton label="Copy build prompt" get={() => copyBuildPrompt(row.id)} />
         {tpl && <CopyButton label="Copy template code" get={() => copyTemplateCode(tpl.key)} />}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <span className={meta}>Client emails</span>
+        <CopyButton
+          label="First payment received"
+          get={() => copyFirstPaymentEmail(row.id)}
+          copiedNote="Copied. Fill in anything still in {curly braces}."
+        />
+        <CopyButton
+          label="First draft ready"
+          get={() => copyFirstDraftEmail(row.id)}
+          copiedNote="Copied. Fill in anything still in {curly braces}."
+        />
+        <CopyButton
+          label="Changes received"
+          get={() => copyChangesReceivedEmail(row.id)}
+          copiedNote="Copied. Fill in anything still in {curly braces}."
+        />
+        <CopyButton
+          label="Final payment"
+          get={() => copyFinalPaymentEmail(row.id)}
+          copiedNote="Copied. Fill in anything still in {curly braces}."
+        />
       </div>
 
       <div className="grid gap-8 md:grid-cols-2">

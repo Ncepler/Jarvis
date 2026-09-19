@@ -109,3 +109,55 @@ export async function copyBuildPrompt(id: string) {
     return generatePrompt(row);
   });
 }
+
+// Client email copy buttons (Detail's "Copy build prompt" row). Every
+// template below is verbatim except {{firstName}}/{{businessName}}, which
+// get filled from the submission — first word of the contact name, and the
+// business name as given. {{previewLink}}/{{amount}}/{{paymentLink}}/{{domain}}
+// stay as curly-brace placeholders for Noah to fill by hand.
+const EMAIL_TEMPLATES = {
+  firstPayment: {
+    subject: "Got your first payment",
+    body: (first: string, business: string) =>
+      `Hi ${first},\n\nThank you for the first half. We're starting on ${business} now.\n\nWe'll email you when the first draft is ready. Then you can tell us what you'd change.\n\nVilas Studio`,
+  },
+  firstDraft: {
+    subject: "Your first draft is ready",
+    body: (first: string, business: string) =>
+      `Hi ${first},\n\nThe first draft of ${business} is ready: {{previewLink}}\n\nLook through it on your phone and on a computer. Then send us everything you'd change in one reply, and we'll take care of it.\n\nVilas Studio`,
+  },
+  changesReceived: {
+    subject: "Got your changes",
+    body: (first: string) =>
+      `Hi ${first},\n\nGot it. We're working through your changes and we'll send the updated version when it's ready.\n\nIf you think of anything else, send it before then so it goes in the same round.\n\nVilas Studio`,
+  },
+  finalPayment: {
+    subject: "Ready to go live",
+    body: (first: string) =>
+      `Hi ${first},\n\nGlad you're happy with it. The second half is {{amount}}: {{paymentLink}}\n\nOnce that's in, we'll set up {{domain}} and take the site live. Your monthly plan starts once it's live.\n\nVilas Studio`,
+  },
+} as const;
+
+async function clientEmail(id: string, key: keyof typeof EMAIL_TEMPLATES) {
+  return run(async () => {
+    const row = await getSubmission(id);
+    if (!row) throw new Error("That submission isn't there any more.");
+    const first = (row.your_name ?? "").trim().split(/\s+/)[0] || "{{firstName}}";
+    const business = (row.business_name ?? "").trim() || "{{businessName}}";
+    const tpl = EMAIL_TEMPLATES[key];
+    return `Subject: ${tpl.subject}\n\n${tpl.body(first, business)}`;
+  });
+}
+
+export async function copyFirstPaymentEmail(id: string) {
+  return clientEmail(id, "firstPayment");
+}
+export async function copyFirstDraftEmail(id: string) {
+  return clientEmail(id, "firstDraft");
+}
+export async function copyChangesReceivedEmail(id: string) {
+  return clientEmail(id, "changesReceived");
+}
+export async function copyFinalPaymentEmail(id: string) {
+  return clientEmail(id, "finalPayment");
+}
