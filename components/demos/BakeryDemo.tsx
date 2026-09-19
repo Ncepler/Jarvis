@@ -21,7 +21,10 @@ import {
   Intro,
   Media,
   Rise,
+  SceneBlock,
   Section,
+  StickyReveal,
+  StickyScene,
   TwoLine,
   WorkGrid,
 } from "./system";
@@ -171,35 +174,42 @@ export function BakeryDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Order ahead" />
-      <DemoHero
-        heroImage={firstBakeryImage}
-        eyebrow="Bakery · Sayville"
-        line1="Baked at 4am."
-        line2="Gone by noon."
-        sub="Sourdough, morning buns, and one very good cookie, baked in small batches every morning. When the case is empty, that's the day."
-        primaryCta="Order ahead"
-        phone={PHONE}
-        mediaLabel="HERO VIDEO: the case at 7am (16:9)"
-        premium={tier === "premium" ? PREMIUM_HERO : undefined}
-      />
-      <DemoMarquee terms={["Sourdough", "Pastry", "Cakes", "Focaccia", "Cookies"]} />
-      <div id="about" className={ANCHOR_SCROLL_CLASS}>
-        <Intro
-          eyebrow="Who we are"
-          line1="Small batches."
-          line2="Every morning."
-          paragraphs={[
-            "We're a small bakehouse that does a few things and does them every day, instead of a long menu we phone in.",
-            "Sourdough on a long ferment, pastry out before the morning rush, and cakes to order. When the case is empty, we're proud of it.",
-          ]}
-          badges={[
-            ["Bread, pastry & cakes", "Daily"],
-            ["36-hour ferment", "No shortcuts"],
-            ["Order ahead", "Reserved by name"],
-            ["Open from 7am", "Until sold out"],
-          ]}
+      <StickyScene image={firstBakeryImage} priority>
+        <DemoHero
+          pinned
+          heroImage={firstBakeryImage}
+          eyebrow="Bakery · Sayville"
+          line1="Baked at 4am."
+          line2="Gone by noon."
+          sub="Sourdough, morning buns, and one very good cookie, baked in small batches every morning. When the case is empty, that's the day."
+          primaryCta="Order ahead"
+          phone={PHONE}
+          mediaLabel="HERO VIDEO: the case at 7am (16:9)"
+          premium={tier === "premium" ? PREMIUM_HERO : undefined}
         />
-      </div>
+        <SceneBlock>
+          <StickyReveal>
+            <DemoMarquee terms={["Sourdough", "Pastry", "Cakes", "Focaccia", "Cookies"]} />
+            <div id="about" className={ANCHOR_SCROLL_CLASS}>
+              <Intro
+                eyebrow="Who we are"
+                line1="Small batches."
+                line2="Every morning."
+                paragraphs={[
+                  "We're a small bakehouse that does a few things and does them every day, instead of a long menu we phone in.",
+                  "Sourdough on a long ferment, pastry out before the morning rush, and cakes to order. When the case is empty, we're proud of it.",
+                ]}
+                badges={[
+                  ["Bread, pastry & cakes", "Daily"],
+                  ["36-hour ferment", "No shortcuts"],
+                  ["Order ahead", "Reserved by name"],
+                  ["Open from 7am", "Until sold out"],
+                ]}
+              />
+            </div>
+          </StickyReveal>
+        </SceneBlock>
+      </StickyScene>
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
         <BakeryMenu />
       </div>
