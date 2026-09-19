@@ -21,7 +21,10 @@ import {
   Intro,
   Media,
   Rise,
+  SceneBlock,
   Section,
+  StickyReveal,
+  StickyScene,
   TwoLine,
 } from "./system";
 import { heroConceptFor } from "@/lib/heroConcepts";
@@ -227,35 +230,42 @@ export function FloristDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Order flowers" />
-      <DemoHero
-        heroImage={firstFloristImage}
-        eyebrow="Flower shop · Rockville Centre"
-        line1="Picked,"
-        line2="not produced."
-        sub="Seasonal stems, arranged the morning you order them. Walk in, call ahead, or set up weekly flowers for the house."
-        primaryCta="Order for pickup"
-        phone={PHONE}
-        mediaLabel="HERO VIDEO: shop & blooms (16:9)"
-        premium={tier === "premium" ? PREMIUM_HERO : undefined}
-      />
-      <DemoMarquee terms={["Weddings", "Events", "Daily", "Weekly", "Sympathy"]} />
-      <div id="about" className={ANCHOR_SCROLL_CLASS}>
-        <Intro
-          eyebrow="Who we are"
-          line1="A small shop."
-          line2="Real flowers."
-          paragraphs={[
-            "We're a working flower shop, not a website that ships boxes. What's in the cooler is what came in good that week.",
-            "Tell us the person and the occasion and we'll design around it: loose, seasonal, and arranged the day it goes out.",
-          ]}
-          badges={[
-            ["Daily to weddings", "Full range"],
-            ["Arranged same morning", "Never pre-made"],
-            ["Same-day until 2pm", "Local delivery"],
-            ["Family-run", "Talk to the maker"],
-          ]}
+      <StickyScene image={firstFloristImage} priority>
+        <DemoHero
+          pinned
+          heroImage={firstFloristImage}
+          eyebrow="Flower shop · Rockville Centre"
+          line1="Picked,"
+          line2="not produced."
+          sub="Seasonal stems, arranged the morning you order them. Walk in, call ahead, or set up weekly flowers for the house."
+          primaryCta="Order for pickup"
+          phone={PHONE}
+          mediaLabel="HERO VIDEO: shop & blooms (16:9)"
+          premium={tier === "premium" ? PREMIUM_HERO : undefined}
         />
-      </div>
+        <SceneBlock>
+          <StickyReveal>
+            <DemoMarquee terms={["Weddings", "Events", "Daily", "Weekly", "Sympathy"]} />
+            <div id="about" className={ANCHOR_SCROLL_CLASS}>
+              <Intro
+                eyebrow="Who we are"
+                line1="A small shop."
+                line2="Real flowers."
+                paragraphs={[
+                  "We're a working flower shop, not a website that ships boxes. What's in the cooler is what came in good that week.",
+                  "Tell us the person and the occasion and we'll design around it: loose, seasonal, and arranged the day it goes out.",
+                ]}
+                badges={[
+                  ["Daily to weddings", "Full range"],
+                  ["Arranged same morning", "Never pre-made"],
+                  ["Same-day until 2pm", "Local delivery"],
+                  ["Family-run", "Talk to the maker"],
+                ]}
+              />
+            </div>
+          </StickyReveal>
+        </SceneBlock>
+      </StickyScene>
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
         <OccasionTiles />
       </div>
