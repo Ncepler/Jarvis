@@ -170,3 +170,16 @@ html:has(.demo-shell) {
     scroll-behavior: auto;
   }
 }
+
+/* StickyScene's pinned image (components/demos/system.tsx) — scales
+   1.00 -> 1.06 across the pin, driven by the --scene-p custom property a
+   rAF-throttled scroll listener writes. Off under reduced motion. */
+.scene-scale {
+  transform: scale(calc(1 + (0.06 * var(--scene-p, 0))));
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-scale {
+    transform: none;
+  }
+}

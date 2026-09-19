@@ -23,6 +23,9 @@ import {
   ProcessStepper,
   Rise,
   Section,
+  SceneBlock,
+  StickyReveal,
+  StickyScene,
   TwoLine,
   ValueProps,
 } from "./system";
@@ -161,35 +164,42 @@ export function RenovationDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT}>
       <DemoHeader name={NAME} phone={PHONE} />
-      <DemoHero
-        heroImage={firstRenovationImage}
-        premium={tier === "premium" ? PREMIUM_HERO : undefined}
-        eyebrow="Renovation & remodeling · North Shore"
-        line1="Old house."
-        line2="New everything."
-        sub="Kitchens, baths, additions, and whole-home renovations across the North Shore. One crew, start to finish."
-        primaryCta="Get a free estimate"
-        phone={PHONE}
-        mediaLabel="HERO VIDEO: renovation b-roll (16:9)"
-      />
-      <DemoMarquee terms={["Kitchens", "Bathrooms", "Additions", "Basements", "Whole-Home", "Trim & Carpentry"]} />
-      <div id="about" className={ANCHOR_SCROLL_CLASS}>
-        <Intro
-          eyebrow="What we build"
-          line1="Every trade."
-          line2="One crew."
-          paragraphs={[
-            "Most renovation headaches come from juggling five contractors who each blame the other four. We don't work that way.",
-            "Maple & Main runs the whole job with our own crew, framing through finish carpentry, so there's one number, one schedule, and one person to call.",
-          ]}
-          badges={[
-            ["Small remodels to whole-home", "Full scope"],
-            ["Licensed & insured", "Fully covered"],
-            ["One crew, no subs", "Our people"],
-            ["Free estimates", "No pressure"],
-          ]}
+      <StickyScene image={firstRenovationImage} priority>
+        <DemoHero
+          pinned
+          heroImage={firstRenovationImage}
+          premium={tier === "premium" ? PREMIUM_HERO : undefined}
+          eyebrow="Renovation & remodeling · North Shore"
+          line1="Old house."
+          line2="New everything."
+          sub="Kitchens, baths, additions, and whole-home renovations across the North Shore. One crew, start to finish."
+          primaryCta="Get a free estimate"
+          phone={PHONE}
+          mediaLabel="HERO VIDEO: renovation b-roll (16:9)"
         />
-      </div>
+        <SceneBlock>
+          <StickyReveal>
+            <DemoMarquee terms={["Kitchens", "Bathrooms", "Additions", "Basements", "Whole-Home", "Trim & Carpentry"]} />
+            <div id="about" className={ANCHOR_SCROLL_CLASS}>
+              <Intro
+                eyebrow="What we build"
+                line1="Every trade."
+                line2="One crew."
+                paragraphs={[
+                  "Most renovation headaches come from juggling five contractors who each blame the other four. We don't work that way.",
+                  "Maple & Main runs the whole job with our own crew, framing through finish carpentry, so there's one number, one schedule, and one person to call.",
+                ]}
+                badges={[
+                  ["Small remodels to whole-home", "Full scope"],
+                  ["Licensed & insured", "Fully covered"],
+                  ["One crew, no subs", "Our people"],
+                  ["Free estimates", "No pressure"],
+                ]}
+              />
+            </div>
+          </StickyReveal>
+        </SceneBlock>
+      </StickyScene>
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
         <RoomTransforms />
       </div>
@@ -213,6 +223,7 @@ export function RenovationDemo({ tier = "basic" }: { tier?: Tier }) {
         ]}
         cta="Meet the crew"
         mediaLabel="TRANSFORMATION: before/after (16:9)"
+        img="/previews/renovation1.after.webp"
       />
       <div id="work" className={ANCHOR_SCROLL_CLASS}>
         <FilterableWorkGrid

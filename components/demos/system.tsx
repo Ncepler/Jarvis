@@ -15,6 +15,7 @@
 // Spec: .claude/skills/local-service-design-system/SKILL.md
 
 import { motion, useReducedMotion } from "motion/react";
+import Image from "next/image";
 import {
   useCallback,
   useEffect,
@@ -87,6 +88,161 @@ export function Rise({
     >
       {children}
     </motion.div>
+  );
+}
+
+// ── StickyScene: a full-bleed image pinned via `position: sticky` while the
+// foreground stack (its children, in normal flow) scrolls over it, then
+// releases once the stack runs out. Native scroll only — no scroll-jacking,
+// no wheel/touch listeners, no GSAP/Lenis. `svh` (not `vh`) so a mobile
+// browser's toolbar collapsing/expanding never shifts the pinned height.
+// One shared passive scroll listener, rAF-throttled, writes a single CSS
+// custom property (`--scene-p`, 0→1 across the pin) that a CSS-only rule
+// reads to scale the image 1.00→1.06 — no per-frame React state, no layout
+// thrash. `prefers-reduced-motion` drops the scale (see .scene-scale in
+// globals.css) but the pin itself is layout, not "motion", so it stays.
+export function StickyScene({
+  image,
+  imageAlt = "",
+  priority,
+  children,
+}: {
+  image: string;
+  imageAlt?: string;
+  priority?: boolean;
+  children: ReactNode;
+}) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const scaleRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const root = rootRef.current;
+    const scale = scaleRef.current;
+    if (!root || !scale) return;
+    let raf = 0;
+    const tick = () => {
+      raf = 0;
+      const rect = root.getBoundingClientRect();
+      const span = Math.max(root.offsetHeight - window.innerHeight, 1);
+      const progress = Math.min(Math.max(-rect.top / span, 0), 1);
+      scale.style.setProperty("--scene-p", progress.toFixed(4));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    tick();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return (
+    <div ref={rootRef} className="relative">
+      <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
+        <div ref={scaleRef} className="scene-scale h-full w-full">
+          <Image
+            src={image}
+            alt={imageAlt}
+            fill
+            priority={priority}
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
+      </div>
+      {/* pulled up over the pinned layer so children paint on top of it in
+          normal document flow — no z-index needed, just paint order */}
+      <div className="relative" style={{ marginTop: "-100svh" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ── SceneBlock: wraps one StickyScene foreground block that needs to stay
+// legible while it rides over the pinned image. The first ~22% (top) fades
+// from transparent so a sliver of image shows through as the block arrives;
+// past that the block is fully opaque `--d-bg`, so any text — which always
+// sits well below a Section's own top padding — reads at the same contrast
+// the rest of the site already guarantees for body text on `--d-bg` (every
+// theme is built to clear 4.5:1 there), regardless of what's in the photo
+// behind it. Reused for both Scene A's Intro block and Scene B sections.
+export function SceneBlock({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`relative ${className}`}
+      style={{
+        background:
+          "linear-gradient(180deg, transparent 0%, var(--d-bg) 22%, var(--d-bg) 100%)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ── StickyReveal: fade + rise-24px, once, on IntersectionObserver entry —
+// the "each foreground block fades in and rises once it enters" motion
+// StickyScene callers wrap their blocks in. Reduced motion shows the final
+// state immediately, no observer attached.
+export function StickyReveal({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(false);
+  const reduced = useReducedMotion();
+
+  useEffect(() => {
+    if (reduced) {
+      setShown(true);
+      return;
+    }
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setShown(true);
+            io.disconnect();
+          }
+        }
+      },
+      { threshold: 0.2 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [reduced]);
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: shown ? 1 : 0,
+        transform: shown ? "translateY(0)" : "translateY(24px)",
+        transition: reduced
+          ? undefined
+          : "opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1)",
+      }}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -359,6 +515,7 @@ export function DemoHero({
   mediaLabel,
   heroImage,
   premium,
+  pinned,
 }: {
   eyebrow: string;
   line1: string;
@@ -373,36 +530,47 @@ export function DemoHero({
   // background for PremiumHeroMedia's video (looping or scroll-driven,
   // per the concept's `mode`) — everything else about the hero is unchanged.
   premium?: HeroConcept;
+  // Set when a caller wraps this hero in <StickyScene image={heroImage}> —
+  // the pinned sticky layer already paints `heroImage` behind this section,
+  // so the hero skips rendering its own background media (avoids painting
+  // the same image twice). The scrim still renders: it's what keeps the
+  // headline legible against whatever's now behind it. Never true together
+  // with `premium` — the video tier keeps its own non-pinned background.
+  pinned?: boolean;
 }) {
+  const skipOwnBg = pinned && !premium;
   return (
     <section className="relative w-full" style={{ minHeight: "640px" }}>
       {/* full-bleed background media slot — Premium's moving hero if given,
-          else a real image, else the placeholder label */}
-      <div
-        className="group/media absolute inset-0"
-        style={{
-          backgroundColor: heroImage || premium ? undefined : "var(--d-surface)",
-          backgroundImage: !premium && heroImage ? `url("${heroImage}")` : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <FileBadge file={premium ? undefined : "hero.jpg"} />
-        {premium ? (
-          <PremiumHeroMedia concept={premium} fallbackImage={heroImage} />
-        ) : (
-          !heroImage && (
-            <div className="flex h-full w-full items-center justify-center">
-              <span
-                className="text-[11px] font-semibold uppercase tracking-[0.18em]"
-                style={{ color: "var(--d-muted)" }}
-              >
-                {mediaLabel}
-              </span>
-            </div>
-          )
-        )}
-      </div>
+          else a real image, else the placeholder label. Skipped entirely
+          when `pinned`: the StickyScene wrapper already paints this. */}
+      {!skipOwnBg && (
+        <div
+          className="group/media absolute inset-0"
+          style={{
+            backgroundColor: heroImage || premium ? undefined : "var(--d-surface)",
+            backgroundImage: !premium && heroImage ? `url("${heroImage}")` : undefined,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <FileBadge file={premium ? undefined : "hero.jpg"} />
+          {premium ? (
+            <PremiumHeroMedia concept={premium} fallbackImage={heroImage} />
+          ) : (
+            !heroImage && (
+              <div className="flex h-full w-full items-center justify-center">
+                <span
+                  className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+                  style={{ color: "var(--d-muted)" }}
+                >
+                  {mediaLabel}
+                </span>
+              </div>
+            )
+          )}
+        </div>
+      )}
       {/* scrim so headlines stay readable on real footage — light demos pass a
           light scrim so the bright hero stays bright (SKILL §13f) */}
       <div
@@ -740,6 +908,7 @@ export function FullBleedBreak({
   checklist,
   cta,
   mediaLabel,
+  img,
 }: {
   eyebrow: string;
   line1: string;
@@ -748,7 +917,49 @@ export function FullBleedBreak({
   checklist: string[];
   cta: string;
   mediaLabel: string;
+  // An existing image already used elsewhere in this style (reused, never a
+  // new asset). When given, this becomes StickyScene's Scene B: the image
+  // pins while this block's own copy scrolls over it, per style.
+  img?: string;
 }) {
+  const copy = (
+    <div className={`${wrap} relative py-[96px] md:py-[160px]`}>
+      <Rise>
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <div className="mt-5">
+          <TwoLine a={line1} b={line2} />
+        </div>
+        <p className="mt-6 max-w-xl text-[17px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+          {paragraph}
+        </p>
+        <ul className="mt-8 grid max-w-xl gap-3 sm:grid-cols-2">
+          {checklist.map((c) => (
+            <li key={c} className="flex items-start gap-2.5 text-[15px]" style={{ color: "var(--d-body)" }}>
+              <span style={{ color: "var(--d-accent)" }}>✓</span>
+              {c}
+            </li>
+          ))}
+        </ul>
+        <span
+          className="mt-9 inline-block px-6 py-3.5 text-[14px] font-semibold"
+          style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
+        >
+          {cta}
+        </span>
+      </Rise>
+    </div>
+  );
+
+  if (img) {
+    return (
+      <StickyScene image={img}>
+        <SceneBlock>
+          <StickyReveal>{copy}</StickyReveal>
+        </SceneBlock>
+      </StickyScene>
+    );
+  }
+
   return (
     <section className="relative w-full">
       <div className="absolute inset-0" style={{ background: "var(--d-surface)" }}>
@@ -766,31 +977,7 @@ export function FullBleedBreak({
         className="absolute inset-0"
         style={{ background: "var(--d-break-scrim)" }}
       />
-      <div className={`${wrap} relative py-[96px] md:py-[160px]`}>
-        <Rise>
-          <Eyebrow>{eyebrow}</Eyebrow>
-          <div className="mt-5">
-            <TwoLine a={line1} b={line2} />
-          </div>
-          <p className="mt-6 max-w-xl text-[17px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-            {paragraph}
-          </p>
-          <ul className="mt-8 grid max-w-xl gap-3 sm:grid-cols-2">
-            {checklist.map((c) => (
-              <li key={c} className="flex items-start gap-2.5 text-[15px]" style={{ color: "var(--d-body)" }}>
-                <span style={{ color: "var(--d-accent)" }}>✓</span>
-                {c}
-              </li>
-            ))}
-          </ul>
-          <span
-            className="mt-9 inline-block px-6 py-3.5 text-[14px] font-semibold"
-            style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
-          >
-            {cta}
-          </span>
-        </Rise>
-      </div>
+      {copy}
     </section>
   );
 }
