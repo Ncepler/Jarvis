@@ -25,7 +25,10 @@ import {
   Intro,
   ProcessStepper,
   Rise,
+  SceneBlock,
   Section,
+  StickyReveal,
+  StickyScene,
   TwoLine,
   ValueProps,
 } from "./system";
@@ -229,35 +232,42 @@ export function LandscapingDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free consult" />
-      <DemoHero
-        heroImage={firstLandscapingImage}
-        eyebrow="Landscape design & build · North Shore"
-        line1="Built to be lived in."
-        line2="Built to stay."
-        sub="We design and build the whole property (stone, plantings, lighting, water), then we keep it. One studio, one crew, one standard."
-        primaryCta="Book a consultation"
-        phone={PHONE}
-        mediaLabel="HERO VIDEO: finished property b-roll (16:9)"
-        premium={tier === "premium" ? PREMIUM_HERO : undefined}
-      />
-      <DemoMarquee terms={["Patios", "Retaining Walls", "Gardens", "Lighting", "Fire Pits"]} />
-      <div id="about" className={ANCHOR_SCROLL_CLASS}>
-        <Intro
-          eyebrow="Who we are"
-          line1="One studio."
-          line2="One crew."
-          paragraphs={[
-            "Most yards get passed between a designer, a mason, and a landscaper who never talk. The seams show.",
-            "Stone & Sage draws it, builds it, and maintains it with our own people, so the property reads as one finished idea, not three.",
-          ]}
-          badges={[
-            ["Design through maintenance", "Full scope"],
-            ["Licensed & insured", "Fully covered"],
-            ["Our own crew, no subs", "Held to the drawing"],
-            ["Free consultations", "No pressure"],
-          ]}
+      <StickyScene image={firstLandscapingImage} priority>
+        <DemoHero
+          pinned
+          heroImage={firstLandscapingImage}
+          eyebrow="Landscape design & build · North Shore"
+          line1="Built to be lived in."
+          line2="Built to stay."
+          sub="We design and build the whole property (stone, plantings, lighting, water), then we keep it. One studio, one crew, one standard."
+          primaryCta="Book a consultation"
+          phone={PHONE}
+          mediaLabel="HERO VIDEO: finished property b-roll (16:9)"
+          premium={tier === "premium" ? PREMIUM_HERO : undefined}
         />
-      </div>
+        <SceneBlock>
+          <StickyReveal>
+            <DemoMarquee terms={["Patios", "Retaining Walls", "Gardens", "Lighting", "Fire Pits"]} />
+            <div id="about" className={ANCHOR_SCROLL_CLASS}>
+              <Intro
+                eyebrow="Who we are"
+                line1="One studio."
+                line2="One crew."
+                paragraphs={[
+                  "Most yards get passed between a designer, a mason, and a landscaper who never talk. The seams show.",
+                  "Stone & Sage draws it, builds it, and maintains it with our own people, so the property reads as one finished idea, not three.",
+                ]}
+                badges={[
+                  ["Design through maintenance", "Full scope"],
+                  ["Licensed & insured", "Fully covered"],
+                  ["Our own crew, no subs", "Held to the drawing"],
+                  ["Free consultations", "No pressure"],
+                ]}
+              />
+            </div>
+          </StickyReveal>
+        </SceneBlock>
+      </StickyScene>
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
         <LightingServices />
       </div>
