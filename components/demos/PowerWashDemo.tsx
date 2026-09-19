@@ -22,7 +22,10 @@ import {
   Media,
   ProofStrip,
   Rise,
+  SceneBlock,
   Section,
+  StickyReveal,
+  StickyScene,
   TwoLine,
   WorkGrid,
 } from "./system";
@@ -185,35 +188,42 @@ export function PowerWashDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" />
-      <DemoHero
-        heroImage={firstPowerWashImage}
-        eyebrow="Power washing · Suffolk County"
-        line1="Like the day"
-        line2="it was built."
-        sub="Houses, driveways, decks, and fences washed back to new in one visit. Flat quotes, no surprises."
-        primaryCta="Get a free quote"
-        phone={PHONE}
-        mediaLabel="HERO VIDEO: wash footage (16:9)"
-        premium={tier === "premium" ? PREMIUM_HERO : undefined}
-      />
-      <DemoMarquee terms={["Houses", "Driveways", "Decks", "Patios", "Fences"]} />
-      <div id="about" className={ANCHOR_SCROLL_CLASS}>
-        <Intro
-          eyebrow="Who we are"
-          line1="One visit."
-          line2="Back to new."
-          paragraphs={[
-            "Most of what looks worn out is just dirty. Siding, concrete, decks: a proper wash buys you years before you ever think about replacing anything.",
-            "Tide Line does it in one visit, with the right pressure for each surface, and a flat number you agree to before we start.",
-          ]}
-          badges={[
-            ["Soft wash to high pressure", "Right for each surface"],
-            ["Flat written quotes", "No surprises"],
-            ["Licensed & insured", "Fully covered"],
-            ["Same-day quotes", "Text a photo"],
-          ]}
+      <StickyScene image={firstPowerWashImage} priority>
+        <DemoHero
+          pinned
+          heroImage={firstPowerWashImage}
+          eyebrow="Power washing · Suffolk County"
+          line1="Like the day"
+          line2="it was built."
+          sub="Houses, driveways, decks, and fences washed back to new in one visit. Flat quotes, no surprises."
+          primaryCta="Get a free quote"
+          phone={PHONE}
+          mediaLabel="HERO VIDEO: wash footage (16:9)"
+          premium={tier === "premium" ? PREMIUM_HERO : undefined}
         />
-      </div>
+        <SceneBlock>
+          <StickyReveal>
+            <DemoMarquee terms={["Houses", "Driveways", "Decks", "Patios", "Fences"]} />
+            <div id="about" className={ANCHOR_SCROLL_CLASS}>
+              <Intro
+                eyebrow="Who we are"
+                line1="One visit."
+                line2="Back to new."
+                paragraphs={[
+                  "Most of what looks worn out is just dirty. Siding, concrete, decks: a proper wash buys you years before you ever think about replacing anything.",
+                  "Tide Line does it in one visit, with the right pressure for each surface, and a flat number you agree to before we start.",
+                ]}
+                badges={[
+                  ["Soft wash to high pressure", "Right for each surface"],
+                  ["Flat written quotes", "No surprises"],
+                  ["Licensed & insured", "Fully covered"],
+                  ["Same-day quotes", "Text a photo"],
+                ]}
+              />
+            </div>
+          </StickyReveal>
+        </SceneBlock>
+      </StickyScene>
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
         <WashProofRows />
       </div>
