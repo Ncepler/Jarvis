@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Fragment, useEffect, useMemo, useState, useTransition } from "react";
 import {
   archive,
@@ -518,11 +519,16 @@ export function Dashboard({
         <h1 className="font-display text-title text-ink">
           {view === "submissions" ? "Intake submissions" : "Update requests"}
         </h1>
-        <form action={logout}>
-          <button type="submit" className="cursor-pointer text-sm text-muted hover:text-ink">
-            Sign out
-          </button>
-        </form>
+        <div className="flex items-center gap-5">
+          <Link href="/d48/revenue" className="text-sm text-muted hover:text-ink">
+            Revenue
+          </Link>
+          <form action={logout}>
+            <button type="submit" className="cursor-pointer text-sm text-muted hover:text-ink">
+              Sign out
+            </button>
+          </form>
+        </div>
       </div>
 
       {/* Following the existing dashboard's own pattern of a filter control

@@ -181,3 +181,80 @@ export async function deleteSubmission(id: string) {
   });
   if (!res.ok) throw new Error(`The files are gone but the row wouldn't delete (${res.status}).`);
 }
+
+// ── Revenue ledger (/d48/revenue) ───────────────────────────────────────
+export type RevenueEntry = {
+  id: string;
+  received_on: string; // date
+  client_name: string;
+  kind: "build" | "monthly" | "other";
+  amount_cents: number;
+  note: string | null;
+  created_at: string;
+};
+
+export type RevenuePlan = {
+  id: string;
+  client_name: string;
+  monthly_cents: number;
+  starts_on: string; // date
+  ends_on: string | null; // date
+  note: string | null;
+  created_at: string;
+};
+
+export async function listRevenueEntries(): Promise<RevenueEntry[]> {
+  if (!hasBackend()) return [];
+  const res = await sb("revenue_entries?select=*&order=received_on.desc");
+  if (!res.ok) throw new Error(`Supabase read failed (${res.status})`);
+  return res.json();
+}
+
+export async function listRevenuePlans(): Promise<RevenuePlan[]> {
+  if (!hasBackend()) return [];
+  const res = await sb("revenue_plans?select=*&order=starts_on.desc");
+  if (!res.ok) throw new Error(`Supabase read failed (${res.status})`);
+  return res.json();
+}
+
+export async function addRevenueEntry(entry: {
+  received_on: string;
+  client_name: string;
+  kind: "build" | "monthly" | "other";
+  amount_cents: number;
+  note?: string;
+}) {
+  if (!hasBackend()) throw new Error("Supabase isn't configured on this deploy.");
+  const res = await sb("revenue_entries", {
+    method: "POST",
+    body: JSON.stringify({ ...entry, note: entry.note || null }),
+  });
+  if (!res.ok) throw new Error(`Couldn't save that payment (${res.status}).`);
+}
+
+export async function addRevenuePlan(plan: {
+  client_name: string;
+  monthly_cents: number;
+  starts_on: string;
+  ends_on?: string;
+  note?: string;
+}) {
+  if (!hasBackend()) throw new Error("Supabase isn't configured on this deploy.");
+  const res = await sb("revenue_plans", {
+    method: "POST",
+    body: JSON.stringify({ ...plan, ends_on: plan.ends_on || null, note: plan.note || null }),
+  });
+  if (!res.ok) throw new Error(`Couldn't save that plan (${res.status}).`);
+}
+
+export async function deleteRevenueEntry(id: string) {
+  if (!hasBackend()) throw new Error("Supabase isn't configured on this deploy.");
+  const res = await sb(`revenue_entries?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(`Couldn't delete that (${res.status}).`);
+}
+
+export async function deleteRevenuePlan(id: string) {
+  if (!hasBackend()) throw new Error("Supabase isn't configured on this deploy.");
+  const res = await sb(`revenue_plans?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(`Couldn't delete that (${res.status}).`);
+}
