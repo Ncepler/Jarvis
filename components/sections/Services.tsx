@@ -2,9 +2,12 @@
 
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { useRef, useState } from "react";
+import { AdminDemo } from "@/components/addons/AdminDemo";
+import { GiftBoxDemo } from "@/components/addons/GiftBoxDemo";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/SectionHeading";
 import { useCanHover } from "@/lib/hooks";
+import { ADDONS, priceLabel, WAIVER_NAMES, type Addon } from "@/lib/pricing";
 import { COPY } from "@/lib/site";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -110,6 +113,108 @@ function PathCard({ path, n }: { path: (typeof PATHS)[number]; n: number }) {
   );
 }
 
+function AddOnDemo({ addon }: { addon: Addon }) {
+  if (addon.demo === "chat") {
+    return (
+      <button
+        type="button"
+        onClick={scrollToAssistant}
+        className="press shrink-0 border border-ink bg-ink px-5 py-2.5 text-sm font-semibold text-surface transition-opacity duration-200 hover:opacity-85"
+      >
+        {COPY.services.premiumAddons.chatCta}
+      </button>
+    );
+  }
+  if (addon.demo === "model") return <GiftBoxDemo />;
+  if (addon.demo === "admin") return <AdminDemo />;
+  return null;
+}
+
+function AddOnCard({ addon }: { addon: Addon }) {
+  const reduced = useReducedMotion();
+  const canHover = useCanHover();
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { amount: 0.7 });
+  const [hovered, setHovered] = useState(false);
+  // mobile has no hover: cards open as they scroll into view, tap overrides
+  const [tapped, setTapped] = useState<boolean | null>(null);
+
+  const expanded = canHover ? hovered : (tapped ?? inView);
+
+  return (
+    <motion.div
+      ref={ref}
+      className="relative border border-line p-8"
+      onHoverStart={() => canHover && setHovered(true)}
+      onHoverEnd={() => canHover && setHovered(false)}
+    >
+      <button
+        type="button"
+        aria-expanded={expanded}
+        className="flex w-full items-baseline justify-between gap-4 text-left"
+        onClick={() => !canHover && setTapped((t) => !(t ?? inView))}
+        onFocus={() => canHover && setHovered(true)}
+        onBlur={() => canHover && setHovered(false)}
+      >
+        <span>
+          <span className="block font-mono text-xs uppercase tracking-[0.14em] text-accent">
+            {COPY.services.premiumAddons.cardLabel}
+          </span>
+          <span className="mt-1 block text-lg">{addon.name}</span>
+        </span>
+        <span className="shrink-0 text-sm text-accent">
+          {priceLabel(addon)}
+        </span>
+      </button>
+
+      <motion.div
+        className="overflow-hidden"
+        initial={false}
+        animate={{ height: expanded ? "auto" : 0 }}
+        transition={reduced ? { duration: 0 } : { duration: 0.5, ease: EASE }}
+      >
+        {/* content fades in well after the card opens — the delay is the trick */}
+        <motion.div
+          className="pt-6"
+          initial={false}
+          animate={{ opacity: expanded ? 1 : 0 }}
+          transition={{
+            duration: reduced ? 0.15 : 0.4,
+            delay: expanded && !reduced ? 0.75 : 0,
+            ease: EASE,
+          }}
+        >
+          <p className="max-w-md text-sm leading-relaxed text-muted">
+            {addon.blurb}
+          </p>
+
+          {/* demos mount only while the card is open */}
+          {expanded && <div className="mt-6">{<AddOnDemo addon={addon} />}</div>}
+
+          {addon.live && (
+            <a
+              href={addon.live.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 inline-block text-sm text-accent transition-opacity duration-200 hover:opacity-80"
+            >
+              {addon.live.label}
+            </a>
+          )}
+
+          <a
+            href="/start"
+            tabIndex={expanded ? 0 : -1}
+            className="mt-8 block text-sm transition-colors duration-200 hover:text-accent"
+          >
+            Start a project →
+          </a>
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export function Services() {
   return (
     <section
@@ -139,28 +244,22 @@ export function Services() {
           </p>
         </Reveal>
 
-        {/* $30/month chat add-on — its own box, never folded into a tier
-            above. "Try it out" jumps to the live assistant under the FAQ. */}
+        {/* Add-ons bought separately from either tier — their own grid so
+            none of them reads as bundled into a package. */}
         <Reveal delay={0.15}>
-          <div className="mt-10 flex flex-col items-start justify-between gap-6 border border-line bg-surface p-8 sm:flex-row sm:items-center">
-            <div>
-              <span className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
-                {COPY.services.chatAddon.eyebrow}
-              </span>
-              <p className="mt-2 text-lg text-ink">
-                {COPY.services.chatAddon.title}
-              </p>
-              <p className="mt-1 max-w-md text-sm text-muted">
-                {COPY.services.chatAddon.body}
-              </p>
+          <div className="mt-16">
+            <span className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
+              {COPY.services.premiumAddons.label}
+            </span>
+            <p className="mt-2 max-w-xl text-sm text-muted">
+              Add any of these to Basic or Premium. Premium waives the build
+              fee on one: {WAIVER_NAMES}.
+            </p>
+            <div className="mt-8 grid items-start gap-6 md:grid-cols-2">
+              {ADDONS.map((addon) => (
+                <AddOnCard key={addon.id} addon={addon} />
+              ))}
             </div>
-            <button
-              type="button"
-              onClick={scrollToAssistant}
-              className="press shrink-0 border border-ink bg-ink px-5 py-2.5 text-sm font-semibold text-surface transition-opacity duration-200 hover:opacity-85"
-            >
-              {COPY.services.chatAddon.cta}
-            </button>
           </div>
         </Reveal>
       </div>

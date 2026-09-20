@@ -117,6 +117,8 @@ export const COPY = {
   pricing: {
     recap:
       "Basic — $300 + $50/month · Premium — $500 + $80/month · Custom — let's talk.",
+    addons:
+      "Add-ons are priced on top of either tier. Each one is labeled one-time, monthly, or both. Premium waives one add-on's build fee. Any monthly still applies.",
     body: [
       "Half up front, half when you approve the site. We send invoices through Stripe — you pay by card. The monthly starts the day your site goes live.",
       "The build fee is the site itself — design, build, copy, photos, launch. One time, done.",
@@ -193,17 +195,17 @@ export const COPY = {
       basic:
         "A still hero image, done well. Pick a style from the work below and we fit it to your business.",
       premium:
-        "A moving hero — video, or a scene that builds as people scroll. The one people remember.",
+        "A moving hero — video, or a scene that builds as people scroll. The one people remember. Includes the build fee on one add-on.",
       custom:
         "Built from nothing, to spec, around how your business actually works.",
     },
-    // $30/month add-on, bought separately from any tier above — its own box
-    // so it never reads as bundled into a package.
-    chatAddon: {
-      eyebrow: "Add-on",
-      title: "AI chat assistant",
-      body: "Answers customer questions on your site around the clock. Optional, and separate from your monthly. $30/month.",
-      cta: "Try it out",
+    // Add-ons bought separately from any tier above — their own grid so
+    // none of them reads as bundled into a package. Prices/blurbs live in
+    // lib/pricing.ts so the cards and the /start estimate never disagree.
+    premiumAddons: {
+      label: "Premium add-ons",
+      cardLabel: "Add-on",
+      chatCta: "Try it out",
     },
   },
   howItWorks: {

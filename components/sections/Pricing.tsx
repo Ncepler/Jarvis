@@ -24,6 +24,12 @@ export function Pricing() {
           </p>
         </Reveal>
 
+        <Reveal delay={0.1}>
+          <p className="mt-16 max-w-2xl text-lg leading-relaxed text-ink">
+            {COPY.pricing.addons}
+          </p>
+        </Reveal>
+
         <div className="mt-8 max-w-2xl">
           {COPY.pricing.body.map((p, i) => (
             <Reveal key={p} delay={0.12 + i * 0.06}>
