@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ADDONS } from "@/lib/pricing";
 
 export const runtime = "edge";
 
@@ -33,6 +34,26 @@ function formatHours(hours: unknown) {
     })
     .filter(Boolean)
     .join("\n");
+}
+
+function formatAddons(addons: unknown) {
+  if (!addons || typeof addons !== "object") return null;
+  const selected = (addons as Row).selected;
+  if (!Array.isArray(selected) || selected.length === 0) return null;
+  const names = selected
+    .filter((id): id is string => typeof id === "string")
+    .map((id) => ADDONS.find((a) => a.id === id)?.name ?? id);
+  return names.length ? names.join(", ") : null;
+}
+
+function formatEstimate(addons: unknown) {
+  if (!addons || typeof addons !== "object") return null;
+  const est = (addons as Row).estimate;
+  if (!est || typeof est !== "object") return null;
+  const build = (est as Row).build;
+  const monthly = (est as Row).monthly;
+  if (typeof build !== "number" || typeof monthly !== "number") return null;
+  return `build $${build}, monthly $${monthly}`;
 }
 
 function formatPhotos(photos: unknown) {
@@ -105,6 +126,8 @@ export async function POST(req: Request) {
       line("Address", row.address),
       line("Domain they want", row.desired_domain),
       line("Build", row.is_custom_build ? "custom build" : row.template_choice),
+      line("Add-ons", formatAddons(row.addons)),
+      line("Estimate", formatEstimate(row.addons)),
       "",
       "— Brand —",
       line("Palette", row.palette_choice),

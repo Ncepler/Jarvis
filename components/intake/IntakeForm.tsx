@@ -16,6 +16,7 @@ import { questionsFor, templateByKey } from "@/lib/templates";
 import { SITE } from "@/lib/site";
 import { getTemplateContent } from "@/app/start/actions";
 import { ProgressSteps } from "./ProgressSteps";
+import { EstimateBar } from "./EstimateBar";
 import { PageContact } from "./PageContact";
 import { PageBrand } from "./PageBrand";
 import { PageContent } from "./PageContent";
@@ -50,6 +51,8 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
   const [loadingContent, setLoadingContent] = useState(false);
   const honeypotRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+  const [barHeight, setBarHeight] = useState(0);
   // A second click event can land before React's re-render disables the
   // button — this ref blocks it synchronously, the instant the handler
   // runs, rather than waiting on state. Two real rows landed 0.4s apart
@@ -89,6 +92,20 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
     }
     setHydrated(true);
   }, []);
+
+  // Keeps the form's bottom padding in step with the sticky estimate bar's
+  // real height, so its content (which grows a line once Premium waives an
+  // add-on) never ends up hiding the Next/Back buttons on mobile.
+  useEffect(() => {
+    const el = barRef.current;
+    if (!el) {
+      setBarHeight(0);
+      return;
+    }
+    const observer = new ResizeObserver(([entry]) => setBarHeight(entry.contentRect.height));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [draft.tier, draft.addonIds]);
 
   const steps = useMemo(() => stepsFor(draft), [draft]);
   // A draft loaded from storage can point past the end when someone switches
@@ -322,7 +339,7 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
         </p>
       )}
 
-      <div className="mt-16 grid gap-10">
+      <div className="mt-16 grid gap-10" style={{ paddingBottom: barHeight || undefined }}>
         <ProgressSteps steps={steps} step={step} />
 
         <form ref={formRef} onSubmit={onSubmit} noValidate className="grid gap-10">
@@ -453,6 +470,8 @@ export function IntakeForm({ hasBackend }: { hasBackend: boolean }) {
           </div>
         </form>
       </div>
+
+      <EstimateBar ref={barRef} draft={draft} />
     </>
   );
 }
