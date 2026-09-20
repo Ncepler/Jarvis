@@ -7,6 +7,7 @@ import {
   type Upload,
 } from "@/lib/intake";
 import { questionsFor, templateByKey } from "@/lib/templates";
+import { ADDONS, estimate, type TierKey } from "@/lib/pricing";
 
 // Talks to Supabase's REST API directly with fetch — no client lib, and the
 // service role key never leaves the server (CLAUDE.md §14). Files are
@@ -123,6 +124,29 @@ export async function POST(req: Request) {
   const uploads = (raw.uploads ?? {}) as Record<string, unknown>;
   const photoUrls = asPhotos(uploads.photos);
 
+  // Recomputed here, never trusted from the client: anything the browser
+  // sends can be edited, so the dollar amounts that end up on the row are
+  // always ones this handler derived itself from a validated id list.
+  const knownAddonIds = new Set(ADDONS.map((a) => a.id));
+  const addonIds = (Array.isArray(raw.addonIds) ? raw.addonIds : [])
+    .filter((id): id is string => typeof id === "string" && knownAddonIds.has(id));
+  const addons =
+    tier === "custom"
+      ? null
+      : (() => {
+          const est = estimate(tier as TierKey, addonIds);
+          return {
+            selected: addonIds,
+            waived: est.waivedId,
+            estimate: {
+              build: est.build,
+              monthly: est.monthly,
+              dueToStart: est.dueToStart,
+              hasFrom: est.hasFrom,
+            },
+          };
+        })();
+
   const res = await fetch(`${SUPABASE_URL}/rest/v1/intake_submissions?select=id,ref_code`, {
     method: "POST",
     headers: {
@@ -159,6 +183,7 @@ export async function POST(req: Request) {
       google_business: f("googleBusiness", 300) || null,
       photo_urls: photoUrls.length ? photoUrls : null,
       template_customizations: custom,
+      addons,
       copy_changes: f("copyChanges", 5000) || null,
       dropped_sections: dropped.length ? dropped : null,
       brain_dump: f("brainDump", 5000) || null,

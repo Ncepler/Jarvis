@@ -11,6 +11,7 @@ import {
 } from "@/lib/intake";
 import { TEMPLATES } from "@/lib/templates";
 import { COPY } from "@/lib/site";
+import { ADDONS, WAIVER_NAMES, priceLabel } from "@/lib/pricing";
 import { FieldError, FieldSet, SelectField, TextField, Wrap, inputClass } from "./fields";
 
 const YOUR_EMAIL_HINT =
@@ -71,6 +72,53 @@ function TierChoice({
         {c.customPrompt} {c.customLink}
       </button>
       <FieldError error={error} />
+    </FieldSet>
+  );
+}
+
+// Sits directly under the tier choice (job 2): the price a client sees on
+// /start already reflects what they'll actually be billed. Premium waives
+// the build fee on whichever eligible add-on is picked (lib/pricing.ts
+// `estimate` does the actual waiving) — this just tells them that's coming.
+function AddonsPicker({
+  tier,
+  selected,
+  onChange,
+}: {
+  tier: TierChoice;
+  selected: string[];
+  onChange: (ids: string[]) => void;
+}) {
+  const toggle = (id: string) =>
+    onChange(
+      selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id],
+    );
+
+  return (
+    <FieldSet legend="Add-ons (optional)">
+      <div data-field="addonIds" className="grid gap-3">
+        {ADDONS.map((addon) => (
+          <label
+            key={addon.id}
+            className="flex cursor-pointer items-start gap-2 text-sm text-ink"
+          >
+            <input
+              type="checkbox"
+              checked={selected.includes(addon.id)}
+              onChange={() => toggle(addon.id)}
+              className="mt-0.5 size-4 shrink-0 cursor-pointer accent-accent"
+            />
+            <span>
+              {addon.name} — {priceLabel(addon)}
+            </span>
+          </label>
+        ))}
+      </div>
+      {tier === "premium" && (
+        <p className="mt-3 text-xs text-muted">
+          Premium waives the build fee on one: {WAIVER_NAMES}.
+        </p>
+      )}
     </FieldSet>
   );
 }
@@ -197,6 +245,14 @@ export function PageContact({
           onBlur("tier");
         }}
       />
+
+      {(draft.tier === "basic" || draft.tier === "premium") && (
+        <AddonsPicker
+          tier={draft.tier}
+          selected={draft.addonIds}
+          onChange={(addonIds) => onChange({ addonIds })}
+        />
+      )}
 
       {usingTemplate && (
         <SelectField

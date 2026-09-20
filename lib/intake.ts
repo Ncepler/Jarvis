@@ -60,6 +60,7 @@ export type IntakeDraft = {
   businessEmail: string;
   phone: string;
   address: string;
+  addonIds: string[];
 
   // page 2, brand
   paletteChoice: PaletteChoice;
@@ -120,6 +121,7 @@ export const emptyDraft = (): IntakeDraft => ({
   businessEmail: "",
   phone: "",
   address: "",
+  addonIds: [],
   paletteChoice: "",
   mainColor: "#1a1612",
   accentColor: "#8a5a2b",
@@ -354,6 +356,11 @@ export type SubmissionRow = {
   google_business: string | null;
   photo_urls: PhotoRef[] | null;
   template_customizations: Record<string, string> | null;
+  addons: {
+    selected: string[];
+    waived: string | null;
+    estimate: { build: number; monthly: number; dueToStart: number; hasFrom: boolean };
+  } | null;
   copy_changes: string | null;
   dropped_sections: string[] | null;
   brain_dump: string | null;
