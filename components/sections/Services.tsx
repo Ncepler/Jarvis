@@ -163,7 +163,9 @@ function AddOnCard({ addon }: { addon: Addon }) {
           <span className="mt-1 block text-lg">{addon.name}</span>
         </span>
         <span className="shrink-0 text-sm text-accent">
-          {priceLabel(addon)}
+          {addon.bundledWith
+            ? "Comes standard with Premium — not sold as a separate add-on."
+            : priceLabel(addon)}
         </span>
       </button>
 

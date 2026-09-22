@@ -97,7 +97,7 @@ function AddonsPicker({
   return (
     <FieldSet legend="Add-ons (optional)">
       <div data-field="addonIds" className="grid gap-3">
-        {ADDONS.map((addon) => (
+        {ADDONS.filter((addon) => !addon.bundledWith).map((addon) => (
           <label
             key={addon.id}
             className="flex cursor-pointer items-start gap-2 text-sm text-ink"

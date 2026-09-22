@@ -20,6 +20,7 @@ export type Addon = {
   freePickEligible: boolean;
   demo: AddonDemo;
   live?: { label: string; href: string };
+  bundledWith?: TierKey;
 };
 
 export const ADDONS: Addon[] = [
@@ -50,11 +51,12 @@ export const ADDONS: Addon[] = [
     name: "Scroll video",
     blurb:
       "A video that plays as visitors scroll down the page, as its own section.",
-    build: 150,
+    build: 0,
     monthly: 0,
     buildIsFrom: false,
-    freePickEligible: true,
+    freePickEligible: false,
     demo: "scroll",
+    bundledWith: "premium",
   },
   {
     id: "admin",
@@ -87,7 +89,7 @@ export const WAIVER_NAMES = ADDONS.filter(
   .join(" or ");
 
 export function estimate(tier: TierKey, ids: string[]) {
-  const picks = ADDONS.filter((a) => ids.includes(a.id));
+  const picks = ADDONS.filter((a) => ids.includes(a.id) && !a.bundledWith);
 
   const waived =
     tier === "premium"
