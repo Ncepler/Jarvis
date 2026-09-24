@@ -36,6 +36,7 @@
   box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.8);
   will-change: flex-grow, transform;
   -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
 }
 
 .ag-panel:focus-visible {

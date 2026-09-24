@@ -95,6 +95,22 @@ const AccordionGallery = ({
       ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
       : false;
 
+  // Touch browsers synthesize `mouseenter` at touch-down, before the browser
+  // knows whether the gesture is a tap or the start of a scroll — expanding
+  // the panel then (mid-scroll) is what was blocking vertical swipes. Only
+  // let real hover (mouse/trackpad) drive `handleEnter`; touch taps still
+  // expand via the native `onClick`, which browsers already suppress when
+  // the touch moved (i.e. was a scroll, not a tap).
+  const [canHover, setCanHover] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+    setCanHover(mq.matches);
+    const listener = (e: MediaQueryListEvent) => setCanHover(e.matches);
+    mq.addEventListener("change", listener);
+    return () => mq.removeEventListener("change", listener);
+  }, []);
+
   useEffect(() => {
     onActiveIndexChange?.(active);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -192,7 +208,7 @@ const AccordionGallery = ({
   );
 
   const handleEnter = (i: number) => {
-    if (trigger === "hover") setActive(i);
+    if (trigger === "hover" && canHover) setActive(i);
   };
 
   const handleClick = (i: number, e: React.MouseEvent) => {
