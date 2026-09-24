@@ -151,18 +151,18 @@ function AddOnCard({ addon }: { addon: Addon }) {
       <button
         type="button"
         aria-expanded={expanded}
-        className="flex w-full items-baseline justify-between gap-4 text-left"
+        className="flex w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-2 text-left"
         onClick={() => !canHover && setTapped((t) => !(t ?? inView))}
         onFocus={() => canHover && setHovered(true)}
         onBlur={() => canHover && setHovered(false)}
       >
-        <span>
+        <span className="min-w-0">
           <span className="block font-mono text-xs uppercase tracking-[0.14em] text-accent">
             {COPY.services.premiumAddons.cardLabel}
           </span>
           <span className="mt-1 block text-lg">{addon.name}</span>
         </span>
-        <span className="shrink-0 text-sm text-accent">
+        <span className="max-w-full text-sm text-accent">
           {addon.bundledWith
             ? "Comes standard with Premium — not sold as a separate add-on."
             : priceLabel(addon)}

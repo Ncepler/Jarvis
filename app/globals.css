@@ -37,6 +37,14 @@
   --font-mono: var(--font-space-mono);
 }
 
+/* Backstop only, not the fix — a layout bug that pushes content past the
+   viewport should still be fixed at its source; this just keeps a future
+   regression of that kind from drifting the whole page horizontally. */
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-ink);
