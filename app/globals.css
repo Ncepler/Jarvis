@@ -183,3 +183,11 @@ html:has(.demo-shell) {
     transform: none;
   }
 }
+
+/* InfiniteMenu's action-button (components/InfiniteMenu.tsx, ClientSites
+   section) ships hardcoded violet in its own CSS — overridden here to the
+   site's actual accent rather than editing brand color into the vendored
+   component file. */
+.client-sites-menu .action-button {
+  background: var(--color-accent);
+}
