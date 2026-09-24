@@ -1,7 +1,23 @@
-# HANDOFF — updated 2026-09-17
+# HANDOFF — updated 2026-09-24
 
 ## Current state
 - Builds clean: `npx tsc --noEmit`, `next lint`, `next build` all pass.
+- **Two mobile bugs fixed** (verified with Playwright/Chromium at 375px & 390px):
+  1. Styles gallery (`components/AccordionGallery.tsx`) was expanding a panel on
+     touch's synthesized `mouseenter`, before the browser knew a swipe was a scroll —
+     blocking vertical scroll over a card. Fixed by gating the hover trigger behind
+     `matchMedia("(hover: hover) and (pointer: fine)")`; touch still expands via the
+     existing `onClick` (browsers already suppress click on a moved touch). Added
+     `touch-action: pan-y` on `.ag-panel` as a CSS backstop.
+  2. Horizontal page drift on scroll — root cause was NOT the marquee (it's already
+     `overflow-hidden` and was a red herring in initial DOM inspection) and NOT a demo
+     page hero — it was the "Scroll video" add-on card's bundled-note span
+     (`components/sections/Services.tsx`, `AddOnCard`) with `shrink-0` inside a
+     non-wrapping flex row: its long text ("Comes standard with Premium — not sold as
+     a separate add-on.") pushed the row past the viewport at narrow widths. Fixed by
+     letting the row wrap (`flex-wrap`) and the text shrink. Also added
+     `overflow-x: hidden` on `html, body` in `app/globals.css` as a backstop, not the
+     fix.
 - **TRFox added to client_sites** (custom build, sort_order 40). Deployment verified on Vercel.
   Entry exists in Supabase but screenshot not yet captured — the tile won't render until
   it has an image (see Next up below).
