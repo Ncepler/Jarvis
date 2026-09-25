@@ -145,17 +145,15 @@ export const COPY = {
       ],
     },
     ongoing: {
-      heading: "What we keep doing every month",
+      heading: "As your business grows",
       items: [
-        "Google Business Profile — posts, photos, review replies, hours kept current. For local search this moves more than the website does.",
-        "Keeping your name, address and phone identical everywhere online",
         "New pages when you add a service or want to show up in a neighboring town",
-        "Watching what's ranking and adjusting",
       ],
     },
     closing:
       "Local SEO isn't instant. Most of this takes three to six months to show up in rankings. Anyone promising you page one next week is lying.",
     cta: "Get started",
+    contactCta: "Have any questions? Email us",
   },
   // The attribute-first choice on /start (before any price is shown). The
   // visitor picks based on what they want, not what it costs — price follows

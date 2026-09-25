@@ -54,12 +54,20 @@ export function Seo() {
         </Reveal>
 
         <Reveal delay={0.3}>
-          <a
-            href="/start"
-            className="mt-12 inline-block border border-accent bg-accent px-6 py-3 text-sm text-white transition-colors duration-200 hover:bg-accent/90"
-          >
-            {COPY.seo.cta} →
-          </a>
+          <div className="mt-12 flex flex-wrap items-center gap-4">
+            <a
+              href="/start"
+              className="inline-block border border-accent bg-accent px-6 py-3 text-sm text-white transition-colors duration-200 hover:bg-accent/90"
+            >
+              {COPY.seo.cta} →
+            </a>
+            <a
+              href="mailto:hello.vilasstudio@gmail.com"
+              className="inline-block border border-accent bg-accent px-6 py-3 text-sm text-white transition-colors duration-200 hover:bg-accent/90"
+            >
+              {COPY.seo.contactCta}
+            </a>
+          </div>
         </Reveal>
       </div>
     </section>
