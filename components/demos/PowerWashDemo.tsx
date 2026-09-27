@@ -1,10 +1,13 @@
 // Style demo — a power-washing homepage in the clean & crisp "Tide Line" mood
 // (SKILL §13d + §14a): cool off-white, water-blue accent, a clean grotesque,
-// high-key before/after photography. The whole pitch is the transformation, so
-// the services section is alternating before/after PROOF ROWS, the full-bleed
-// break is a big interactive before/after slider, and "why us" is a proof strip
-// — not the numbered grid. "Tide Line Power Washing" is a sample brand, not a client.
+// high-key before/after photography. The whole pitch is the transformation,
+// so the interactive before/after slider is the first thing after the hero —
+// not a service description, not a "why us" list, the actual proof — and the
+// four services and six recent jobs run as plain ruled lists instead of
+// image-card grids so the page doesn't lean on placeholder photography it
+// doesn't have yet. "Tide Line Power Washing" is a sample brand, not a client.
 
+import type { ReactNode } from "react";
 import {
   ANCHOR_SCROLL_CLASS,
   BeforeAfterSlider,
@@ -19,15 +22,12 @@ import {
   Eyebrow,
   Faq,
   Intro,
-  Media,
-  ProofStrip,
+  ProcessStepper,
   Rise,
   SceneBlock,
-  Section,
   StickyReveal,
   StickyScene,
   TwoLine,
-  WorkGrid,
 } from "./system";
 import { heroConceptFor } from "@/lib/heroConcepts";
 import type { Tier } from "./VilasDemoBar";
@@ -35,7 +35,8 @@ import type { Tier } from "./VilasDemoBar";
 const PREMIUM_HERO = heroConceptFor("demo-powerwash");
 const ACCENT = "#1E86C4"; // clean water blue (deeper for contrast on white)
 
-// Clean & crisp power-washing mood (SKILL §13d).
+// Clean & crisp power-washing mood (SKILL §13d) — matches the spec exactly,
+// left unchanged.
 const THEME: DemoTheme = {
   bg: "#F4F7F9", // clean cool off-white (water-white)
   surface: "#FFFFFF",
@@ -50,14 +51,12 @@ const THEME: DemoTheme = {
   breakScrim: "linear-gradient(180deg, rgba(244,247,249,.38), rgba(244,247,249,.85))",
 };
 const PHONE = "(631) 555-0192";
+const TEL_HREF = `tel:+1${PHONE.replace(/\D/g, "")}`;
 const NAME = "Tide Line Power Washing";
 
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
-// Put your hero photo in /public (e.g. /public/demos/powerwash-hero.jpg), then
-// set the path below. Leave "" to show the labeled placeholder instead.
 const firstPowerWashImage = "/previews/firstPowerWashImage.webp";
 
-// Each service is a before/after proof row, not a text card (§14a).
 const WASH = [
   {
     title: "House soft wash",
@@ -102,56 +101,12 @@ const FAQ = [
   { q: "How long does a wash take?", a: "Most homes and driveways are a single morning. We'll give you a real time window when we quote it." },
 ];
 
-// ── Services — alternating before/after proof rows (§14a). The result, not an
-// icon, is the visual for every service. ─────────────────────────────────────
-// One before/after slider is plenty on a single page (WashTransformation,
-// right after this) — this row now shows one representative "after" shot
-// per service instead of a second, redundant before/after pairing (Noah's
-// demo audit: the two sections were doing the same job back to back).
-function WashProofRows() {
-  return (
-    <Section>
-      <Rise>
-        <Eyebrow>What we wash</Eyebrow>
-        <div className="mt-5">
-          <TwoLine a="Four services." b="One flat quote." />
-        </div>
-      </Rise>
-      <div className="mt-14 space-y-16 md:space-y-20">
-        {WASH.map((s, i) => {
-          const flip = i % 2 === 1;
-          return (
-            <Rise key={s.slug}>
-              <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
-                {/* one representative shot */}
-                <div className={flip ? "md:order-2" : ""}>
-                  <Media label={`RESULT: ${s.title} (4:3)`} file={`result-${i + 1}.jpg`} ratio="4/3" />
-                </div>
-                {/* text */}
-                <div className={flip ? "md:order-1" : ""}>
-                  <span className="text-[13px] font-semibold tracking-[0.1em]" style={{ color: "var(--d-accent)" }}>
-                    0{i + 1}
-                  </span>
-                  <h3 className="mt-2 text-[26px] font-semibold leading-[1.15]" style={{ color: "var(--d-fg)" }}>
-                    {s.title}
-                  </h3>
-                  <p className="mt-3 text-[16px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-                    {s.copy}
-                  </p>
-                  <p className="mt-4 text-[13px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--d-muted)" }}>
-                    {s.includes}
-                  </p>
-                </div>
-              </div>
-            </Rise>
-          );
-        })}
-      </div>
-    </Section>
-  );
-}
-
-// ── The transformation — the prominent interactive before/after slider (§14a).
+// ── The transformation — the section's centerpiece (§14a), moved to run
+// directly after the hero/marquee/intro block, before the service list.
+// The real before/after driveway photo pair couldn't be sourced for this
+// pass (network policy blocked the host), so the slider runs on its built-in
+// labeled-placeholder fallback — fully functional and correctly shaped,
+// ready to take real images later.
 function WashTransformation() {
   return (
     <section className="w-full" style={{ borderTop: "1px solid var(--d-line)", borderBottom: "1px solid var(--d-line)" }}>
@@ -168,16 +123,150 @@ function WashTransformation() {
         </Rise>
         <Rise delay={0.1}>
           <div className="mt-10">
-            <BeforeAfterSlider beforeLabel="BEFORE: driveway (16:9)" afterLabel="AFTER: driveway (16:9)" beforeFile="before-1.jpg" afterFile="after-1.jpg" />
+            <BeforeAfterSlider beforeLabel="BEFORE: driveway" afterLabel="AFTER: driveway" beforeFile="before-1.jpg" afterFile="after-1.jpg" />
           </div>
         </Rise>
         <Rise delay={0.15}>
-          <span
-            className="mt-9 inline-block px-6 py-3.5 text-[14px] font-semibold"
+          <a
+            href="#contact"
+            className="press mt-9 inline-block px-6 py-3.5 text-[14px] font-semibold"
             style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
           >
             Text us a photo
-          </span>
+          </a>
+        </Rise>
+      </div>
+    </section>
+  );
+}
+
+// ── A single hairline row: number, title, one-line copy, right-hand meta.
+// This is the "RuledList" pattern (§build note): map over items, each row
+// sitting on `borderTop: 1px solid var(--d-line)`. Shared by the services
+// list below and the recent-work list, at two different densities.
+function RuledRow({
+  index,
+  title,
+  meta,
+  children,
+  dense,
+}: {
+  index: number;
+  title: ReactNode;
+  meta?: ReactNode;
+  children?: ReactNode;
+  dense?: boolean;
+}) {
+  return (
+    <div
+      className={`flex flex-col gap-2 sm:flex-row sm:items-baseline sm:gap-8 ${dense ? "py-5" : "py-7"}`}
+      style={{ borderTop: "1px solid var(--d-line)" }}
+    >
+      <div className={`flex items-baseline gap-4 sm:shrink-0 ${dense ? "sm:w-[200px]" : "sm:w-[260px]"}`}>
+        <span
+          className="text-[12px] font-semibold tracking-[0.1em]"
+          style={{ color: dense ? "var(--d-muted)" : "var(--d-accent)" }}
+        >
+          0{index}
+        </span>
+        <span
+          className={dense ? "text-[15px] font-semibold uppercase tracking-[0.06em]" : "text-[20px] font-semibold leading-[1.2]"}
+          style={{ color: "var(--d-fg)" }}
+        >
+          {title}
+        </span>
+      </div>
+      {children && (
+        <p className="flex-1 text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+          {children}
+        </p>
+      )}
+      {meta && (
+        <span
+          className="text-[12px] font-semibold uppercase tracking-[0.1em] sm:shrink-0 sm:text-right"
+          style={{ color: "var(--d-muted)" }}
+        >
+          {meta}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// ── Services — a plain ruled list, one flat quote per job (§14a "simpler
+// fallback"). No RESULT thumbnails: the slider above already carries the
+// proof, so this stays fast, text-led, and honest about having no photos yet.
+function WashServices() {
+  return (
+    <section className="w-full" style={{ borderBottom: "1px solid var(--d-line)" }}>
+      <div className="mx-auto w-full max-w-[1200px] px-6 py-[96px] md:px-16 md:py-[150px]">
+        <Rise>
+          <Eyebrow>What we wash</Eyebrow>
+          <div className="mt-5">
+            <TwoLine a="Four services." b="One flat quote." />
+          </div>
+        </Rise>
+        <div className="mt-14">
+          {WASH.map((s, i) => (
+            <Rise key={s.slug} delay={Math.min(i * 0.06, 0.24)}>
+              <RuledRow index={i + 1} title={s.title} meta={s.includes}>
+                {s.copy}
+              </RuledRow>
+            </Rise>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Recent work — six real-shaped jobs as a dense ruled list rather than a
+// thumbnail grid (§build note: keep it simple, no photos to show yet).
+function RecentWork() {
+  return (
+    <section className="w-full" style={{ borderBottom: "1px solid var(--d-line)" }}>
+      <div className="mx-auto w-full max-w-[1200px] px-6 py-[64px] md:px-16 md:py-[112px]">
+        <Rise>
+          <Eyebrow>Recent work</Eyebrow>
+          <div className="mt-5">
+            <TwoLine a="Recent jobs," b="close to home." />
+          </div>
+        </Rise>
+        <div className="mt-10">
+          {WORK.map((w, i) => (
+            <Rise key={w.caption} delay={Math.min(i * 0.05, 0.25)}>
+              <RuledRow index={i + 1} title={w.tag} dense>
+                {w.caption}
+              </RuledRow>
+            </Rise>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Text a photo — the phone number in large display type, leading into the
+// full contact form (§7: Contact/ContactBlock led by "Text a photo").
+function TextUsBand() {
+  return (
+    <section className="w-full" style={{ borderTop: "1px solid var(--d-line)" }}>
+      <div className="mx-auto w-full max-w-[1200px] px-6 py-[56px] md:px-16 md:py-[88px]">
+        <Rise>
+          <Eyebrow>Fastest way to reach us</Eyebrow>
+          <p className="mt-5 max-w-xl text-[17px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+            Text a photo of the job and we&apos;ll text back a flat price. No walkthrough, no waiting on hold.
+          </p>
+          <a
+            href={TEL_HREF}
+            className="press mt-6 inline-block text-[48px] font-bold leading-[1.02] tracking-[-0.02em] md:text-[84px]"
+            style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
+          >
+            {PHONE}
+          </a>
+          <p className="mt-3 text-[13px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--d-muted)" }}>
+            Call or text, 8am–6pm
+          </p>
         </Rise>
       </div>
     </section>
@@ -198,12 +287,11 @@ export function PowerWashDemo({ tier = "basic" }: { tier?: Tier }) {
           sub="Houses, driveways, decks, and fences washed back to new in one visit. Flat quotes, no surprises."
           primaryCta="Get a free quote"
           phone={PHONE}
-          mediaLabel="HERO VIDEO: wash footage (16:9)"
+          mediaLabel="HERO VIDEO: wash footage"
           premium={tier === "premium" ? PREMIUM_HERO : undefined}
         />
         <SceneBlock>
           <StickyReveal>
-            <DemoMarquee terms={["Houses", "Driveways", "Decks", "Patios", "Fences"]} />
             <div id="about" className={ANCHOR_SCROLL_CLASS}>
               <Intro
                 eyebrow="Who we are"
@@ -224,36 +312,51 @@ export function PowerWashDemo({ tier = "basic" }: { tier?: Tier }) {
           </StickyReveal>
         </SceneBlock>
       </StickyScene>
-      <div id="services" className={ANCHOR_SCROLL_CLASS}>
-        <WashProofRows />
+      {/* Marquee lives as its own band, outside the pinned hero image, so it
+          never rides over the photo (was nested in the StickyScene stack). */}
+      <div
+        style={{ background: "var(--d-bg)", borderTop: "1px solid var(--d-line)", borderBottom: "1px solid var(--d-line)" }}
+        className="py-6"
+      >
+        <DemoMarquee terms={["Houses", "Driveways", "Decks", "Patios", "Fences"]} />
       </div>
       <WashTransformation />
-      <div id="work" className={ANCHOR_SCROLL_CLASS}>
-        <WorkGrid
-          eyebrow="Recent work"
-          line1="Before, after,"
-          line2="and done."
-          items={WORK}
-        />
+      <div id="services" className={ANCHOR_SCROLL_CLASS}>
+        <WashServices />
       </div>
-      <ProofStrip
-        eyebrow="Why hire us"
-        line1="Clean, without"
-        line2="the headache."
-        claims={[
-          { label: "Flat written quote", sub: "One number for the whole job. No hourly meter." },
-          { label: "Soft wash that won't strip paint", sub: "The right pressure for each surface." },
-          { label: "Same crew, one visit", sub: "We show up when we say, and finish in a day." },
-          { label: "Licensed & insured", sub: "Fully covered, proof on request." },
+      <ProcessStepper
+        eyebrow="How it works"
+        line1="Before, after,"
+        line2="and done."
+        steps={[
+          {
+            title: "Send a photo",
+            what: "Text a picture of the house, driveway, or deck. We measure off it and text back a flat price.",
+            duration: "Same-day quote",
+          },
+          {
+            title: "We wash",
+            what: "One crew, one visit. Soft wash on siding and roofs, full pressure on concrete and pavers.",
+            duration: "Usually one morning",
+          },
+          {
+            title: "Walk it together",
+            what: "We check every surface with you before we pack up. Anything missed gets fixed on the spot.",
+            duration: "Before we go",
+          },
         ]}
       />
+      <div id="work" className={ANCHOR_SCROLL_CLASS}>
+        <RecentWork />
+      </div>
       <Faq
         eyebrow="Questions"
-        line1="The stuff"
-        line2="people ask."
+        line1="Before you book,"
+        line2="what to expect."
         items={FAQ}
       />
       <div id="contact" className={ANCHOR_SCROLL_CLASS}>
+        <TextUsBand />
         <Contact
           eyebrow="Free quote"
           line1="Text a photo."
