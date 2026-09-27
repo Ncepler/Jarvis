@@ -1,12 +1,13 @@
 # HANDOFF — updated 2026-09-27 (all 11 real photos landed)
 
 ## Current state
-- Deployed: last confirmed production deploy (`vilas.studio`) was built from
-  commit `7918f63` and is `READY` — that was BEFORE this session's craft
-  pass and all three real-photo batches below, all pushed to
-  `claude/sleepy-newton-uaamxu` but not yet merged to `main`/redeployed.
-  Builds clean locally: `npx tsc --noEmit`, `next lint`, `next build` all
-  pass; all 9 `/demos/demo-*` routes prerender.
+- Deployed: `main` fast-forwarded to `45216ce` and confirmed `READY` on
+  production (`vilas.studio` / `www.vilas.studio`), deployment
+  `dpl_EoSHVmLyQaYxj1MQyvFpFZWg3nyx`, verified via the Vercel MCP tools.
+  This carries the full Emil Kowalski/Apple craft pass AND all three
+  real-photo batches below — `main` and `claude/sleepy-newton-uaamxu` are
+  now identical. Builds clean locally: `npx tsc --noEmit`, `next lint`,
+  `next build` all pass; all 9 `/demos/demo-*` routes prerender.
 - **All 11 of the original Higgsfield photos are in and wired** — the
   network block on this sandbox never got resolved directly; Noah worked
   around it himself by downloading each batch and re-uploading as chat
@@ -104,17 +105,13 @@
 - Nothing photo-related — the full 11-image Higgsfield batch is in and
   wired. Only remaining asset gaps are the ones already listed under Next
   up (TRFox screenshots, Premium-tier hero clips), unrelated to this batch.
-- No pull request opened. Everything is on `claude/sleepy-newton-uaamxu`;
-  `main` has been fast-forwarded to match it before (once, on explicit
-  request) but is currently one round behind — see git log before assuming
-  main is current.
+- No pull request opened; none needed — `main` was fast-forwarded directly
+  (on explicit request) and is now current, identical to
+  `claude/sleepy-newton-uaamxu` at `45216ce`, and live in production.
 
 ## Next up (ordered)
-1. Merge/deploy the craft pass + all 3 photo batches (fast-forward `main`,
-   confirm Vercel green) — all of it is on `claude/sleepy-newton-uaamxu`
-   only, `main` has not moved since `7918f63`.
-2. TRFox screenshot capture (pending from before this session).
-3. Real Higgsfield hero clips for Premium tier.
+1. TRFox screenshot capture (pending from before this session).
+2. Real Higgsfield hero clips for Premium tier.
 
 ## Gotchas & decisions (standing, trimmed)
 - **Concurrent subagents sharing one working tree is genuinely risky**:
