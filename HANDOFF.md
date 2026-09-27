@@ -1,16 +1,18 @@
-# HANDOFF — updated 2026-09-27 (real photos, second batch)
+# HANDOFF — updated 2026-09-27 (all 11 real photos landed)
 
 ## Current state
 - Deployed: last confirmed production deploy (`vilas.studio`) was built from
   commit `7918f63` and is `READY` — that was BEFORE this session's craft
-  pass and both real-photo batches below, all pushed to
+  pass and all three real-photo batches below, all pushed to
   `claude/sleepy-newton-uaamxu` but not yet merged to `main`/redeployed.
   Builds clean locally: `npx tsc --noEmit`, `next lint`, `next build` all
   pass; all 9 `/demos/demo-*` routes prerender.
-- **10 of the 11 Higgsfield photos are in and wired** (Noah works around the
-  sandbox's network block by downloading them himself and uploading them as
-  chat attachments 5-at-a-time — that's the actual resolution path now, not
-  widening network access). Landed in `public/demos/<slug>/*.webp`:
+- **All 11 of the original Higgsfield photos are in and wired** — the
+  network block on this sandbox never got resolved directly; Noah worked
+  around it himself by downloading each batch and re-uploading as chat
+  attachments (5-at-a-time upload limit is why it happened in 3 rounds).
+  That's the resolution path now, not widening network access. Landed in
+  `public/demos/<slug>/*.webp`:
   - `florist/cooler.webp` — walk-in cooler still life, covers
     Sympathy/Everyday/Events. `florist/wedding-table.webp` — long-table
     wedding setting, covers the Weddings occasion specifically. Both wired
@@ -32,7 +34,9 @@
     `Media`'s existing `img` prop.
   - `bakery/the-case.webp` — the pastry case (croissants, cookies,
     focaccia). Fills `BakeryDemo.tsx`'s scroll-scaled case photo via
-    `Media`'s `img` prop. The bakehouse-bench photo is still outstanding.
+    `Media`'s `img` prop. `bakery/bakehouse-bench.webp` — proofing baskets,
+    flour, the wood-fired oven — fills the `CakeOrders` section's bench shot
+    the same way.
   - `barber/shop.webp` — the shop floor, red leather chairs, brass, warm
     light. Fills `BarberDemo.tsx`'s `FullBleedBreak` "The shop" scene via
     its existing `img` prop.
@@ -97,29 +101,20 @@
   already pushed; purely cosmetic.
 
 ## Blocked on Noah
-- **1 of the 11 Higgsfield photos still outstanding: bakery's
-  "bakehouse-bench" shot** (`BakeryDemo.tsx`'s `CakeOrders` section, `<Media
-  label="The bakehouse bench" file="bakehouse-bench.jpg" ...>`, still a bare
-  placeholder with no `img`). This sandbox's network policy still can't
-  reach the Higgsfield CDN directly, so Noah downloads it himself and
-  uploads it as a chat attachment same as the rest. Once it lands: `sharp`
-  q82 → `public/demos/bakery/bakehouse-bench.webp`, add `img=` to that
-  `<Media>` call, verify, commit, push.
-- Every other image-dependent mechanism across all 9 demos is now backed by
-  a real photo. This was the last one.
+- Nothing photo-related — the full 11-image Higgsfield batch is in and
+  wired. Only remaining asset gaps are the ones already listed under Next
+  up (TRFox screenshots, Premium-tier hero clips), unrelated to this batch.
 - No pull request opened. Everything is on `claude/sleepy-newton-uaamxu`;
   `main` has been fast-forwarded to match it before (once, on explicit
   request) but is currently one round behind — see git log before assuming
   main is current.
 
 ## Next up (ordered)
-1. Receive and wire the last Higgsfield photo, bakehouse-bench (see Blocked
-   on Noah).
-2. Merge/deploy the craft pass + both photo batches (fast-forward `main`,
+1. Merge/deploy the craft pass + all 3 photo batches (fast-forward `main`,
    confirm Vercel green) — all of it is on `claude/sleepy-newton-uaamxu`
-   only.
-3. TRFox screenshot capture (pending from before this session).
-4. Real Higgsfield hero clips for Premium tier.
+   only, `main` has not moved since `7918f63`.
+2. TRFox screenshot capture (pending from before this session).
+3. Real Higgsfield hero clips for Premium tier.
 
 ## Gotchas & decisions (standing, trimmed)
 - **Concurrent subagents sharing one working tree is genuinely risky**:
