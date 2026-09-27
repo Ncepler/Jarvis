@@ -71,7 +71,15 @@ export type DemoTheme = {
   breakScrim?: string; // full-bleed break gradient (default: darker)
   font?: string; // base font-family value (default: --font-tight)
   display?: string; // display/header font-family (default: same as font)
-  radius?: string; // card/button radius (default: 5px)
+  radius?: string; // card/button radius (default: 5px) — the "medium" tier
+  // Optional finer-grained tiers (craft pass 2026-09-27, personality-per-
+  // style radius scale) for a large panel or a small chip that should read
+  // rounder/sharper than the medium default — e.g. florist/bakery 14/8/4,
+  // lawncare/powerwash 12/6/3, the sharp-edged niches 4/2/0. Purely additive:
+  // every existing var(--d-radius) usage is untouched, and both fall back to
+  // the base `radius` if a theme doesn't set them.
+  radiusLg?: string;
+  radiusSm?: string;
 };
 
 // ── Motion: fade + small rise, once on enter. Reduced-motion → final state. ──
@@ -307,6 +315,8 @@ export function DemoShell({
     "--d-font": t.font ?? DARK_THEME.font,
     "--d-display": t.display ?? t.font ?? DARK_THEME.font,
     "--d-radius": t.radius ?? DARK_THEME.radius,
+    "--d-radius-lg": t.radiusLg ?? t.radius ?? DARK_THEME.radius,
+    "--d-radius-sm": t.radiusSm ?? t.radius ?? DARK_THEME.radius,
     // Motion tokens — one scale, used by every primitive below and by the
     // per-style files (animate/GUIDE.md canonical curves + a duration scale
     // sized to what each moment actually is, not one number everywhere).
