@@ -25,13 +25,14 @@ import {
   Faq,
   HeroReveal,
   Intro,
+  Media,
+  MobileStickyCta,
   Rise,
   Section,
   SceneBlock,
   StickyReveal,
   StickyScene,
   TwoLine,
-  WorkGrid,
 } from "./system";
 import { heroConceptFor } from "@/lib/heroConcepts";
 import { PremiumHeroMedia } from "./PremiumHeroMedia";
@@ -39,7 +40,11 @@ import type { Tier } from "./VilasDemoBar";
 
 const AUTO_BODY_HERO = heroConceptFor("demo-autobody");
 
-const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]; // entering/exiting
+// Movement (a highlight that travels, a ring that pulses) reads better on the
+// in-out curve — matches --d-ease-in-out exactly so JS- and CSS-driven motion
+// in this file share one feel.
+const EASE_IN_OUT: [number, number, number, number] = [0.77, 0, 0.175, 1];
 
 const ACCENT = "#2FA8FF"; // electric blue — precision / automotive (primary)
 const ACCENT2 = "#FF5A2C"; // hot orange — urgent CTAs only, used sparingly
@@ -58,6 +63,11 @@ const THEME: DemoTheme = {
   font: "var(--font-tight)", // tight technical grotesque
   heroScrim: "linear-gradient(180deg, rgba(10,12,15,.35), rgba(10,12,15,.9))",
   breakScrim: "linear-gradient(180deg, rgba(10,12,15,.5), rgba(10,12,15,.92))",
+  // Sharp-edged niche (SKILL §7 personality scale, tier 4/2/0) — precision
+  // instrument, not a soft consumer product.
+  radius: "2px",
+  radiusLg: "4px",
+  radiusSm: "0px",
 };
 
 const PHONE = "(516) 555-0143";
@@ -158,9 +168,9 @@ function HeroCarReveal({
         <motion.div
           aria-hidden
           className="absolute inset-0"
-          initial={{ x: "-120%" }}
-          animate={{ x: "120%" }}
-          transition={{ duration: 1.8, ease: EASE, delay: 0.35 }}
+          initial={{ transform: "translateX(-120%)" }}
+          animate={{ transform: "translateX(120%)" }}
+          transition={{ duration: 1.8, ease: EASE_IN_OUT, delay: 0.35 }}
           style={{
             background:
               "linear-gradient(105deg, transparent 42%, rgba(244,246,248,.16) 50%, rgba(47,168,255,.12) 53%, transparent 62%)",
@@ -322,7 +332,7 @@ function DamageMap() {
   const [active, setActive] = useState(0);
   const a = HOTSPOTS[active];
   return (
-    <section className="w-full py-[64px] md:py-[128px]">
+    <section className="d-grain w-full py-[64px] md:py-[128px]">
       <div className="mx-auto w-full max-w-[1200px] px-6 md:px-16">
         <Rise>
           <Eyebrow>What we fix</Eyebrow>
@@ -346,18 +356,33 @@ function DamageMap() {
                     onClick={() => setActive(i)}
                     aria-label={`${h.panel}: ${h.service}`}
                     aria-pressed={on}
-                    className="absolute -translate-x-1/2 -translate-y-1/2"
-                    style={{ left: `${h.x}%`, top: `${h.y}%` }}
+                    className="absolute"
+                    style={{ left: `${h.x}%`, top: `${h.y}%`, transform: "translate(-50%, -50%)" }}
                   >
-                    {/* pulse ring (static on reduced motion) */}
+                    {/* panel highlight — opacity-only overlay, the "which
+                        panel is selected" signal on the body itself, not just
+                        the dot. Plain CSS transition so it still runs (no
+                        looping motion) under reduced-motion. */}
+                    <span
+                      aria-hidden
+                      className="absolute left-1/2 top-1/2 h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                      style={{
+                        background: ACCENT,
+                        filter: "blur(10px)",
+                        opacity: on ? 0.32 : 0,
+                        transition: "opacity var(--d-dur-hover, 200ms) var(--d-ease-out, cubic-bezier(0.23,1,0.32,1))",
+                      }}
+                    />
+                    {/* pulse ring (static on reduced motion) — continuous
+                        movement, so the in-out curve, not an entering ease */}
                     {on && !reduced && (
                       <motion.span
                         aria-hidden
-                        className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                        className="absolute left-1/2 top-1/2 h-4 w-4 rounded-full"
                         style={{ border: `1px solid ${ACCENT}` }}
-                        initial={{ scale: 1, opacity: 0.8 }}
-                        animate={{ scale: 3, opacity: 0 }}
-                        transition={{ duration: 1.4, ease: "easeOut", repeat: Infinity }}
+                        initial={{ transform: "translate(-50%, -50%) scale(1)", opacity: 0.8 }}
+                        animate={{ transform: "translate(-50%, -50%) scale(3)", opacity: 0 }}
+                        transition={{ duration: 1.4, ease: EASE_IN_OUT, repeat: Infinity }}
                       />
                     )}
                     <span
@@ -372,6 +397,38 @@ function DamageMap() {
                   </button>
                 );
               })}
+              {/* anchored label pill — enters from the panel's own point:
+                  transform-origin sits at its bottom edge, right where the
+                  hotspot is, so it reads as growing out of the panel rather
+                  than floating in from nowhere. Remounts (key={a.key}) to
+                  replay on every selection change; the keyframe itself is
+                  neutralized under reduced-motion (see <style> below). */}
+              <div
+                key={a.key}
+                aria-hidden
+                className="damage-pill-in pointer-events-none absolute z-10 whitespace-nowrap px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
+                style={{
+                  left: `${a.x}%`,
+                  top: `${a.y}%`,
+                  background: "var(--d-surface)",
+                  color: "var(--d-fg)",
+                  border: "1px solid var(--d-accent)",
+                  borderRadius: "var(--d-radius-sm, var(--d-radius))",
+                  transformOrigin: "50% 100%",
+                }}
+              >
+                {a.panel}
+              </div>
+              <style>{`
+                @keyframes damage-pill-in {
+                  from { opacity: 0; transform: translate(-50%, calc(-100% - 14px)) scale(0.96); }
+                  to { opacity: 1; transform: translate(-50%, calc(-100% - 14px)) scale(1); }
+                }
+                .damage-pill-in { animation: damage-pill-in 200ms var(--d-ease-out, cubic-bezier(0.23,1,0.32,1)) both; }
+                @media (prefers-reduced-motion: reduce) {
+                  .damage-pill-in { animation: none !important; transform: translate(-50%, calc(-100% - 14px)) scale(1) !important; }
+                }
+              `}</style>
             </div>
             {/* tap-list — mobile + reduced-motion path; also the labeled list */}
             <div className="mt-6 flex flex-wrap gap-2">
@@ -385,7 +442,7 @@ function DamageMap() {
                   style={{
                     border: `1px solid ${i === active ? ACCENT : "var(--d-line)"}`,
                     color: i === active ? ACCENT : "var(--d-muted)",
-                    borderRadius: "var(--d-radius)",
+                    borderRadius: "var(--d-radius-sm, var(--d-radius))",
                   }}
                 >
                   {h.panel}
@@ -400,11 +457,11 @@ function DamageMap() {
               style={{
                 background: "var(--d-surface)",
                 border: "1px solid var(--d-line)",
-                borderRadius: "var(--d-radius)",
+                borderRadius: "var(--d-radius-lg, var(--d-radius))",
               }}
             >
               <span
-                className="text-[13px] font-semibold tracking-[0.1em]"
+                className="tabular-nums text-[13px] font-semibold tracking-[0.08em]"
                 style={{ color: "var(--d-accent)", fontFamily: MONO }}
               >
                 0{active + 1} / 0{HOTSPOTS.length}
@@ -415,7 +472,12 @@ function DamageMap() {
               >
                 {a.panel}
               </p>
-              <motion.div key={a.key} initial={reduced ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: EASE }}>
+              <motion.div
+                key={a.key}
+                initial={reduced ? false : { opacity: 0, transform: "translateY(8px)" }}
+                animate={{ opacity: 1, transform: "translateY(0px)" }}
+                transition={{ duration: 0.3, ease: EASE }}
+              >
                 <h3 className="mt-2 text-[26px] font-semibold leading-[1.15]" style={{ color: "var(--d-fg)" }}>
                   {a.service}
                 </h3>
@@ -489,7 +551,7 @@ function PaintMatch() {
   const [paint, setPaint] = useState(3); // Apex Blue
   const p = PAINTS[paint];
   return (
-    <Section dark>
+    <Section dark className="d-grain">
       <div className="grid items-center gap-10 md:grid-cols-[1fr_1fr] md:gap-14">
         <Rise>
           <Eyebrow>Paint & color match</Eyebrow>
@@ -500,6 +562,9 @@ function PaintMatch() {
             We scan the existing paint and mix to it, then blend into the
             surrounding panels so the repair vanishes. Tap a swatch to preview.
           </p>
+          {/* the ring is one shared element (layoutId) that travels between
+              swatches — the right tool for "a selection marker moves between
+              fixed positions" (vs. re-animating size/position by hand). */}
           <div className="mt-7 flex flex-wrap gap-3">
             {PAINTS.map((sw, i) => (
               <button
@@ -508,31 +573,54 @@ function PaintMatch() {
                 onClick={() => setPaint(i)}
                 aria-label={sw.name}
                 aria-pressed={i === paint}
-                className="h-9 w-9 rounded-full transition-transform duration-200"
-                style={{
-                  background: sw.hex,
-                  outline: i === paint ? `2px solid ${ACCENT}` : "1px solid var(--d-line)",
-                  outlineOffset: 2,
-                  transform: i === paint ? "scale(1.1)" : "scale(1)",
-                }}
-              />
+                className="press paint-swatch relative h-9 w-9 rounded-full"
+                style={{ background: sw.hex, border: "1px solid var(--d-line)" }}
+              >
+                {i === paint && (
+                  <motion.span
+                    layoutId="paint-ring"
+                    aria-hidden
+                    className="absolute -inset-1 rounded-full"
+                    style={{ boxShadow: `0 0 0 2px ${ACCENT}, 0 0 0 6px rgba(47,168,255,.18)` }}
+                    transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 32, mass: 0.6 }}
+                  />
+                )}
+              </button>
             ))}
           </div>
           <p className="mt-5 text-[13px]" style={{ color: "var(--d-muted)" }}>
             <span style={{ color: "var(--d-fg)" }}>{p.name}</span>{" "}
-            <span style={{ fontFamily: MONO }}>{p.hex.toUpperCase()}</span>
+            <span className="tabular-nums" style={{ fontFamily: MONO }}>{p.hex.toUpperCase()}</span>
           </p>
+          <style>{`
+            @media (hover: hover) and (pointer: fine) {
+              .paint-swatch { transition: transform var(--d-dur-hover, 200ms) var(--d-ease-out, cubic-bezier(0.23,1,0.32,1)); }
+              .paint-swatch:hover { transform: scale(1.08); }
+            }
+          `}</style>
         </Rise>
         <Rise delay={0.1}>
           <div
             className="flex items-center justify-center p-6"
-            style={{ background: "var(--d-bg)", border: "1px solid var(--d-line)", borderRadius: "var(--d-radius)", aspectRatio: "360/200" }}
+            style={{ background: "var(--d-bg)", border: "1px solid var(--d-line)", borderRadius: "var(--d-radius-lg, var(--d-radius))", aspectRatio: "360/200" }}
           >
-            <CarOutline
-              fill={p.hex}
-              stroke="rgba(244,246,248,.35)"
-              transition={reduced ? undefined : "fill .4s ease"}
-            />
+            {/* masking-a-crossfade: the fill swap itself is instant, but a
+                brief blur+dim over the swap hides the "two states swapping"
+                seam a plain crossfade would show (remounts on `paint` so the
+                keyframe always replays from its start). */}
+            <div
+              key={paint}
+              className="h-full w-full paint-swap-in"
+              style={{ animation: reduced ? undefined : "paint-swap-in var(--d-dur-ui, 240ms) var(--d-ease-out, cubic-bezier(0.23,1,0.32,1)) both" }}
+            >
+              <CarOutline fill={p.hex} stroke="rgba(244,246,248,.35)" />
+            </div>
+            <style>{`
+              @keyframes paint-swap-in { from { filter: blur(2px); opacity: 0.7; } to { filter: blur(0); opacity: 1; } }
+              @media (prefers-reduced-motion: reduce) {
+                .paint-swap-in { animation: none !important; filter: none !important; opacity: 1 !important; }
+              }
+            `}</style>
           </div>
         </Rise>
       </div>
@@ -579,7 +667,7 @@ function EstimateWidget() {
     onPick: (i: number) => void;
   }) => (
     <div>
-      <p className="text-[12px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
+      <p className="text-[12px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--d-muted)" }}>
         {title}
       </p>
       <div className="mt-2.5 flex flex-wrap gap-2">
@@ -594,7 +682,7 @@ function EstimateWidget() {
               background: i === value ? "var(--d-accent)" : "transparent",
               color: i === value ? "var(--d-onaccent)" : "var(--d-body)",
               border: `1px solid ${i === value ? "var(--d-accent)" : "var(--d-line)"}`,
-              borderRadius: "var(--d-radius)",
+              borderRadius: "var(--d-radius-sm, var(--d-radius))",
             }}
           >
             {o.label}
@@ -623,13 +711,13 @@ function EstimateWidget() {
         <Rise delay={0.1}>
           <div
             className="flex h-full flex-col justify-between p-7"
-            style={{ background: "var(--d-surface)", border: "1px solid var(--d-line)", borderRadius: "var(--d-radius)" }}
+            style={{ background: "var(--d-surface)", border: "1px solid var(--d-line)", borderRadius: "var(--d-radius-lg, var(--d-radius))" }}
           >
             <div>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
+              <p className="text-[12px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--d-muted)" }}>
                 Estimated range
               </p>
-              <p className="mt-3 text-[36px] font-bold leading-none md:text-[44px]" style={{ color: "var(--d-fg)", fontFamily: MONO }}>
+              <p className="tabular-nums mt-3 text-[36px] font-bold leading-none md:text-[44px]" style={{ color: "var(--d-fg)", fontFamily: MONO }}>
                 {low}
                 <span style={{ color: "var(--d-muted)" }}> – </span>
                 {high}
@@ -662,7 +750,7 @@ const SPECS = [
 
 function SpecStrip() {
   return (
-    <section className="w-full py-[96px] md:py-[160px]" style={{ background: "var(--d-surface)" }}>
+    <section className="d-grain w-full py-[96px] md:py-[160px]" style={{ background: "var(--d-surface)" }}>
       <div className="mx-auto w-full max-w-[1200px] px-6 md:px-16">
         <Rise>
           <Eyebrow>Why bring it here</Eyebrow>
@@ -677,7 +765,7 @@ function SpecStrip() {
           {SPECS.map((s, i) => (
             <Rise key={s.label} delay={Math.min(i * 0.06, 0.24)}>
               <div className="h-full p-7" style={{ background: "var(--d-bg)" }}>
-                <p className="text-[34px] font-bold leading-none" style={{ color: "var(--d-accent)", fontFamily: MONO }}>
+                <p className="tabular-nums text-[34px] font-bold leading-none" style={{ color: "var(--d-accent)", fontFamily: MONO }}>
                   {s.fig}
                 </p>
                 <h3 className="mt-4 text-[18px] font-semibold" style={{ color: "var(--d-fg)" }}>
@@ -720,6 +808,77 @@ const WORK = [
   { tag: "Glass", caption: "Windshield swap & ADAS recalibration", img: "/previews/car1.5.webp" },
   { tag: "Detail", caption: "Paint correction & ceramic finish", img: "/previews/car1.6.webp" },
 ];
+
+// ── RECENT WORK — asymmetric editorial grid (one large frame + two stacked,
+// then three across), not the shared symmetric WorkGrid: this niche earns a
+// bigger, less uniform mosaic. Every tile shares one aspect ratio, which is
+// what keeps the tall block's height matching the stacked pair's combined
+// height with zero JS measurement — a box at 2x the width of another box, at
+// the same ratio, is exactly 2x its height, so two stacked 1x tiles land
+// within a gap's width of the 2x tile beside them. The frame never moves;
+// only the photo inside it scales, via the shared `d-img-hover` (real
+// pointers only — there's nothing to lose on touch, it's a photo, not a
+// control that needs a tap fallback).
+function WorkTile({ w, i }: { w: (typeof WORK)[number]; i: number }) {
+  return (
+    <Rise delay={Math.min(i * 0.05, 0.3)}>
+      <figure>
+        <div className="d-img-hover overflow-hidden" style={{ borderRadius: "var(--d-radius)" }}>
+          <Media label={`WORK: ${w.caption} (4:3)`} img={w.img} file={`work-${i + 1}.jpg`} rounded={false} />
+        </div>
+        <figcaption className="mt-3">
+          <span
+            className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+            style={{ color: "var(--d-muted)" }}
+          >
+            {w.tag}
+          </span>
+          <p className="mt-1 text-[15px]" style={{ color: "var(--d-body)" }}>
+            {w.caption}
+          </p>
+        </figcaption>
+      </figure>
+    </Rise>
+  );
+}
+
+function RecentWork() {
+  const [hero, ...rest] = WORK;
+  const stacked = rest.slice(0, 2);
+  const row = rest.slice(2, 5);
+  return (
+    <Section className="d-grain">
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <Rise>
+          <Eyebrow>Recent work</Eyebrow>
+          <div className="mt-5">
+            <TwoLine a="In the booth," b="and back out." />
+          </div>
+        </Rise>
+        <Rise delay={0.1}>
+          <span className="inline-flex items-center gap-1.5 text-[14px] font-semibold" style={{ color: "var(--d-accent)" }}>
+            See all work →
+          </span>
+        </Rise>
+      </div>
+      <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div className="md:col-span-2">
+          <WorkTile w={hero} i={0} />
+        </div>
+        <div className="flex flex-col gap-5">
+          {stacked.map((w, idx) => (
+            <WorkTile key={w.caption} w={w} i={idx + 1} />
+          ))}
+        </div>
+      </div>
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+        {row.map((w, idx) => (
+          <WorkTile key={w.caption} w={w} i={idx + 3} />
+        ))}
+      </div>
+    </Section>
+  );
+}
 
 const FAQ = [
   { q: "What areas do you serve?", a: "All of Nassau County: Hicksville, Levittown, Bethpage, Plainview, Westbury, Syosset, and nearby towns." },
@@ -773,7 +932,7 @@ export function AutoBodyDemo({ tier = "basic" }: { tier?: Tier }) {
       <BeforeAfter />
       <PaintMatch />
       <div id="work" className={ANCHOR_SCROLL_CLASS}>
-        <WorkGrid eyebrow="Recent work" line1="In the booth," line2="and back out." items={WORK} />
+        <RecentWork />
       </div>
       <EstimateWidget />
       <SpecStrip />
@@ -802,6 +961,7 @@ export function AutoBodyDemo({ tier = "basic" }: { tier?: Tier }) {
         />
       </div>
       <CtaBand line1="Wrecked?" line2="Let's make it disappear." cta="Get a free estimate" phone={PHONE} />
+      <MobileStickyCta phone={PHONE} bookLabel="Get an estimate" contactId="apex-contact" />
       <DemoFooter
         name={NAME}
         descriptor="Collision repair, refinishing, and glass: insurance claims handled."

@@ -5,6 +5,9 @@
 // page follows the case, the ovens, and a cake order — not a numbered grid.
 // "Golden Hour Bakehouse" is a sample brand for the demo, not a client.
 
+"use client";
+
+import { useEffect, useState } from "react";
 import {
   ANCHOR_SCROLL_CLASS,
   Contact,
@@ -20,6 +23,7 @@ import {
   FullBleedBreak,
   Intro,
   Media,
+  MobileStickyCta,
   Rise,
   SceneBlock,
   StickyReveal,
@@ -52,6 +56,8 @@ const THEME: DemoTheme = {
   font: "var(--font-tight)",
   display: "var(--font-fraunces)", // warm characterful display
   radius: "8px", // a touch softer — handmade, not bubbly
+  radiusLg: "14px",
+  radiusSm: "4px",
   heroScrim: "linear-gradient(180deg, rgba(246,239,226,.12), rgba(246,239,226,.8))",
   breakScrim: "linear-gradient(180deg, rgba(246,239,226,.42), rgba(246,239,226,.88))",
 };
@@ -78,7 +84,121 @@ const FAQ = [
   { q: "Do you do gluten-free?", a: "Not yet. We're a small flour-and-water shop and can't promise a clean kitchen for it. We'd rather be honest than careless." },
 ];
 
+// ── Open/closed status — computed from facts already stated elsewhere on this
+// page: "Wed–Sun, 7am" (footer/FAQ) and "gone by noon" (hero). No hours are
+// invented here, just structured so the chip and the hours list can read off
+// one place. Sun=0 … Sat=6, matching Date#getDay().
+const OPEN_DAYS = new Set([0, 3, 4, 5, 6]); // Wed, Thu, Fri, Sat, Sun
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const HOURS_ROWS: { day: number; label: string; hours: string }[] = [
+  { day: 1, label: "Monday", hours: "Closed" },
+  { day: 2, label: "Tuesday", hours: "Closed" },
+  { day: 3, label: "Wednesday", hours: "7am – sold out" },
+  { day: 4, label: "Thursday", hours: "7am – sold out" },
+  { day: 5, label: "Friday", hours: "7am – sold out" },
+  { day: 6, label: "Saturday", hours: "7am – sold out" },
+  { day: 0, label: "Sunday", hours: "7am – sold out" },
+];
+
+type BakeryStatus = { open: boolean; text: string };
+
+function computeBakeryStatus(now: Date): BakeryStatus {
+  const day = now.getDay();
+  const hour = now.getHours() + now.getMinutes() / 60;
+  const isOpenDay = OPEN_DAYS.has(day);
+  // The case is realistically done by noon (the hero's own "gone by noon"),
+  // even though the shop's line to customers is "until sold out".
+  if (isOpenDay && hour >= 7 && hour < 12) {
+    return { open: true, text: "Open now — until noon" };
+  }
+  if (isOpenDay && hour < 7) {
+    return { open: false, text: "Opens today at 7am" };
+  }
+  for (let i = 1; i <= 7; i++) {
+    const nextDay = (day + i) % 7;
+    if (OPEN_DAYS.has(nextDay)) {
+      return { open: false, text: `Opens 7am ${i === 1 ? "tomorrow" : DAY_NAMES[nextDay]}` };
+    }
+  }
+  return { open: false, text: "Closed" };
+}
+
+// Recomputed once on mount (avoids an SSR/client clock mismatch) and every
+// minute after — a live status reads stale fast otherwise on a long visit.
+function useBakeryStatus(): BakeryStatus | null {
+  const [status, setStatus] = useState<BakeryStatus | null>(null);
+  useEffect(() => {
+    const tick = () => setStatus(computeBakeryStatus(new Date()));
+    tick();
+    const id = window.setInterval(tick, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+  return status;
+}
+
+// A soft pulsing dot + label. The pulse is one of the few constant-motion
+// cases this system allows (animate/GUIDE.md): it's a live-status indicator,
+// not decoration, and it goes fully static (solid dot) under reduced motion
+// via the stylesheet below. Renders nothing until the client clock resolves,
+// so it never flashes a wrong state.
+function StatusChip({ status, className = "" }: { status: BakeryStatus | null; className?: string }) {
+  if (!status) return null;
+  return (
+    <span
+      className={`d-material inline-flex items-center gap-2 rounded-full px-3.5 py-[7px] text-[12px] font-semibold uppercase tracking-[0.06em] ${className}`}
+      style={{ color: "var(--d-fg)", border: "1px solid var(--d-line)" }}
+    >
+      <span
+        aria-hidden
+        className="bakery-status-dot"
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: "50%",
+          background: status.open ? "var(--d-accent)" : "var(--d-muted)",
+        }}
+      />
+      {status.text}
+    </span>
+  );
+}
+
+// Today's row gets a static tint + accent rule — no animation, just a state
+// that's true or false the instant the clock is read (per spec §3).
+function HoursTable({ today }: { today: number | null }) {
+  return (
+    <div style={{ borderTop: "1px solid var(--d-line)" }}>
+      {HOURS_ROWS.map((r) => {
+        const isToday = r.day === today;
+        return (
+          <div
+            key={r.day}
+            className="flex items-baseline justify-between gap-6 py-2.5 pr-3 text-[14px]"
+            style={{
+              borderBottom: "1px solid var(--d-line)",
+              borderLeft: `2px solid ${isToday ? "var(--d-accent)" : "transparent"}`,
+              paddingLeft: "12px",
+              background: isToday ? "color-mix(in srgb, var(--d-accent) 7%, transparent)" : "transparent",
+            }}
+          >
+            <span style={{ color: isToday ? "var(--d-fg)" : "var(--d-body)", fontWeight: isToday ? 600 : 400 }}>
+              {r.label}
+            </span>
+            <span className="tabular-nums" style={{ color: isToday ? "var(--d-fg)" : "var(--d-muted)" }}>
+              {r.hours}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── What we bake — the menu beside the case, like stepping to the counter (§14b).
+// Menu rows read like a printed menu: an uppercase+tracked category head (a
+// deterministic cross-browser stand-in for small-caps — real font small-caps
+// support is inconsistent, this always reads right), a dotted leader to the
+// price, and tabular figures so the prices line up down the column.
 function BakeryMenu() {
   return (
     <section className="w-full py-24 md:py-32">
@@ -94,33 +214,36 @@ function BakeryMenu() {
         <Rise>
           <div style={{ borderTop: "1px solid var(--d-line)" }}>
             {MENU.map((m) => (
-              <div
-                key={m.name}
-                className="flex items-baseline justify-between gap-6 py-6"
-                style={{ borderBottom: "1px solid var(--d-line)" }}
-              >
-                <div>
+              <div key={m.name} className="py-6" style={{ borderBottom: "1px solid var(--d-line)" }}>
+                <div className="flex items-baseline gap-3">
                   <h3
-                    className="text-[26px] font-semibold leading-[1.1]"
-                    style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
+                    className="shrink-0 text-[16px] font-semibold uppercase leading-none"
+                    style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)", letterSpacing: "0.09em" }}
                   >
                     {m.name}
                   </h3>
-                  <p className="mt-2 max-w-sm text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-                    {m.desc}
-                  </p>
+                  <span aria-hidden className="mb-[3px] flex-1" style={{ borderBottom: "1px dotted var(--d-line)" }} />
+                  <span
+                    className="shrink-0 text-[14px] font-semibold uppercase tabular-nums tracking-[0.04em]"
+                    style={{ color: "var(--d-accent)" }}
+                  >
+                    {m.price}
+                  </span>
                 </div>
-                <span className="shrink-0 text-[14px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--d-accent)" }}>
-                  {m.price}
-                </span>
+                <p className="mt-2 max-w-sm text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+                  {m.desc}
+                </p>
               </div>
             ))}
           </div>
         </Rise>
-        {/* the case */}
-        <Rise delay={0.1}>
+        {/* the case — scales gently in as you scroll past it (view-timeline
+            CSS below); the sticky wrapper is a full grid-row-height box, so
+            it has a real scroll range to drive from. Static everywhere the
+            technique isn't supported and under reduced motion. */}
+        <Rise delay={0.1} className="bakery-case-scene">
           <div className="md:sticky md:top-10">
-            <Media label="The case" file="the-case.jpg" ratio="4/3" />
+            <Media label="The case" file="the-case.jpg" ratio="4/3" className="bakery-case-media" />
             <p className="mt-3 text-[13px]" style={{ color: "var(--d-muted)" }}>
               The case at 7am. When it&apos;s empty, that&apos;s the day.
             </p>
@@ -169,22 +292,57 @@ function CakeOrders() {
 }
 
 export function BakeryDemo({ tier = "basic" }: { tier?: Tier }) {
+  const status = useBakeryStatus();
+  const [today, setToday] = useState<number | null>(null);
+  useEffect(() => setToday(new Date().getDay()), []);
+
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
+      {/* Scoped to this file only. The view-timeline block mirrors
+          StickyScene's own native scroll-driven technique (system.tsx +
+          globals.css .d-scene-scale-native) but targets just the case photo;
+          unsupported browsers and reduced motion get a static image, no JS
+          scroll listener either way. The status-dot pulse is opacity-only. */}
+      <style>{`
+        @supports (view-timeline-name: --x) {
+          .bakery-case-scene { view-timeline-name: --bakery-case; view-timeline-axis: block; }
+          @keyframes bakery-case-scale { from { transform: scale(1.04); } to { transform: scale(1); } }
+          .bakery-case-media {
+            animation: bakery-case-scale linear both;
+            animation-timeline: --bakery-case;
+            animation-range: cover 0% cover 100%;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .bakery-case-media { animation: none; transform: none; }
+        }
+        .bakery-status-dot { animation: bakery-status-pulse 2s ease-in-out infinite; }
+        @keyframes bakery-status-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @media (prefers-reduced-motion: reduce) {
+          .bakery-status-dot { animation: none; opacity: 1; }
+        }
+      `}</style>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Order ahead" />
       <StickyScene image={firstBakeryImage} priority>
-        <DemoHero
-          pinned
-          heroImage={firstBakeryImage}
-          eyebrow="Bakery · Sayville"
-          line1="Baked at 4am."
-          line2="Gone by noon."
-          sub="Sourdough, morning buns, and one very good cookie, baked in small batches every morning. When the case is empty, that's the day."
-          primaryCta="Order ahead"
-          phone={PHONE}
-          mediaLabel="The bakery, from the sidewalk"
-          premium={tier === "premium" ? PREMIUM_HERO : undefined}
-        />
+        <div className="relative">
+          <DemoHero
+            pinned
+            heroImage={firstBakeryImage}
+            eyebrow="Bakery · Sayville"
+            line1="Baked at 4am."
+            line2="Gone by noon."
+            sub="Sourdough, morning buns, and one very good cookie, baked in small batches every morning. When the case is empty, that's the day."
+            primaryCta="Order ahead"
+            phone={PHONE}
+            mediaLabel="The bakery, from the sidewalk"
+            premium={tier === "premium" ? PREMIUM_HERO : undefined}
+          />
+          {/* overlaid on the hero's own empty top corner (content sits bottom-
+              aligned) — a live open/closed read the instant the page loads. */}
+          <div className="absolute right-6 top-8 z-10 md:right-16 md:top-10">
+            <StatusChip status={status} />
+          </div>
+        </div>
         <SceneBlock>
           <StickyReveal>
             <div id="about" className={ANCHOR_SCROLL_CLASS}>
@@ -253,6 +411,19 @@ export function BakeryDemo({ tier = "basic" }: { tier?: Tier }) {
           serviceLabel="What you're after"
           serviceOptions={["Daily bread", "Morning pastry", "Cake to order", "Wholesale", "Not sure yet"]}
         />
+        <div className={wrap}>
+          <Rise>
+            <div className="mx-auto max-w-md py-12 md:py-16" style={{ borderTop: "1px solid var(--d-line)" }}>
+              <div className="flex items-center justify-between gap-4">
+                <Eyebrow>Hours</Eyebrow>
+                <StatusChip status={status} />
+              </div>
+              <div className="mt-6">
+                <HoursTable today={today} />
+              </div>
+            </div>
+          </Rise>
+        </div>
       </div>
       <CtaBand
         line1="Hungry yet?"
@@ -271,6 +442,7 @@ export function BakeryDemo({ tier = "basic" }: { tier?: Tier }) {
         hours="Wed–Sun, 7am until sold out"
         strip="Baked Fresh Daily · Order Ahead · Small Batches"
       />
+      <MobileStickyCta phone={PHONE} bookLabel="Order ahead" contactId="contact" />
     </DemoShell>
   );
 }
