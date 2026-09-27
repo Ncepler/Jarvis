@@ -207,9 +207,14 @@ function DayNightSignature() {
                 : "Showing the day view. Switch to after dark."
             }
             onClick={toggle}
-            className="d-press relative mt-9 inline-flex overflow-hidden outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="d-press relative mt-9 flex w-full max-w-[280px] overflow-hidden outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             style={{ border: "1px solid var(--d-line)", borderRadius: "var(--d-radius)", outlineColor: "var(--d-accent)" }}
           >
+            {/* Highlight is `w-1/2`, so both labels must actually occupy an
+                equal half each (flex-1 + text-center) — "Day" is far shorter
+                than "After dark", and without matched widths the highlight's
+                assumed 50% boundary lands mid-word instead of between them,
+                covering the first letter of whichever label follows. */}
             <span
               aria-hidden
               className="absolute inset-y-0 left-0 w-1/2"
@@ -221,14 +226,14 @@ function DayNightSignature() {
             />
             <span
               aria-hidden
-              className="relative px-6 py-3.5 text-[13px] font-semibold uppercase tracking-[0.08em]"
+              className="relative flex-1 px-4 py-3.5 text-center text-[13px] font-semibold uppercase tracking-[0.08em]"
               style={{ color: night ? "var(--d-fg)" : "var(--d-onaccent)", transition: "color var(--d-dur-hover) ease" }}
             >
               Day
             </span>
             <span
               aria-hidden
-              className="relative px-6 py-3.5 text-[13px] font-semibold uppercase tracking-[0.08em]"
+              className="relative flex-1 px-4 py-3.5 text-center text-[13px] font-semibold uppercase tracking-[0.08em]"
               style={{ color: night ? "var(--d-onaccent)" : "var(--d-fg)", transition: "color var(--d-dur-hover) ease" }}
             >
               After dark

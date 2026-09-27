@@ -133,11 +133,17 @@ export function StickyScene({
   image,
   imageAlt = "",
   priority,
+  imagePosition,
   children,
 }: {
   image: string;
   imageAlt?: string;
   priority?: boolean;
+  // Object-position override for this pinned image's center-crop (default:
+  // browser center). Needed when the frame's interesting detail sits off-
+  // center — e.g. barber's shop.webp has an out-of-focus lamp filling its
+  // left third, so the crop needs to favor the chairs/mirrors on the right.
+  imagePosition?: string;
   children: ReactNode;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -184,6 +190,7 @@ export function StickyScene({
             priority={priority}
             sizes="100vw"
             className="object-cover"
+            style={imagePosition ? { objectPosition: imagePosition } : undefined}
           />
         </div>
       </div>
@@ -344,9 +351,10 @@ export function DemoShell({
 
 const wrap = "mx-auto w-full max-w-[1200px] px-6 md:px-16";
 
-// Anchor targets need to clear the sticky Vilas demo bar (64px, VilasDemoBar's
-// h-16) plus this shared DemoHeader's own height (min 72px, taller once it
-// wraps) so a clicked nav item's heading never lands underneath either bar.
+// Anchor targets need to clear the sticky Vilas demo bar (56px — VilasDemoBar
+// is `sticky top-3` + h-11) plus this shared DemoHeader, now also sticky
+// (top-14, min-h-72px, taller once it wraps) so a clicked nav item's heading
+// never lands underneath either bar.
 export const ANCHOR_SCROLL_CLASS = "scroll-mt-[168px]";
 
 // ── Eyebrow: uppercase label with an accent tick. Sized and weighted to read
@@ -462,8 +470,14 @@ export function Media({
 }
 
 // ── Header: name left, nav + phone + accent quote button right. ──────────────
-// Not position:fixed — the demo is rendered inside a scaled gallery container,
-// so a fixed bar would escape it. A plain top band on a hairline reads right.
+// Sticky (not fixed) so it never escapes a transform-scaled gallery-card
+// preview of this same demo — sticky respects the nearest scrolling ancestor
+// instead of the viewport, so it degrades to "just scrolls" there and pins
+// properly on the full standalone /demos/<slug> route. Stacks directly below
+// VilasDemoBar's floating pill (sticky top-3, h-11 → bottom edge at 56px), so
+// this header picks up at top-14 (56px) with a lower z-index. Background uses
+// --d-bg (themed per demo) through color-mix + blur, so it reads correctly
+// over both light and dark demo moods without a per-style override.
 export function DemoHeader({
   name,
   phone,
@@ -486,8 +500,13 @@ export function DemoHeader({
   ];
   return (
     <header
-      className="w-full"
-      style={{ borderBottom: "1px solid var(--d-line)" }}
+      className="sticky top-14 z-40 w-full"
+      style={{
+        borderBottom: "1px solid var(--d-line)",
+        background: "color-mix(in srgb, var(--d-bg) 86%, transparent)",
+        backdropFilter: "blur(16px) saturate(160%)",
+        WebkitBackdropFilter: "blur(16px) saturate(160%)",
+      }}
     >
       <div
         className={`${wrap} flex min-h-[72px] flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3`}
@@ -1021,6 +1040,7 @@ export function FullBleedBreak({
   cta,
   mediaLabel,
   img,
+  imgPosition,
 }: {
   eyebrow: string;
   line1: string;
@@ -1033,6 +1053,9 @@ export function FullBleedBreak({
   // new asset). When given, this becomes StickyScene's Scene B: the image
   // pins while this block's own copy scrolls over it, per style.
   img?: string;
+  // Object-position override, forwarded to StickyScene — see its own doc
+  // comment. Only needed when the image's focal point isn't centered.
+  imgPosition?: string;
 }) {
   const copy = (
     <div className={`${wrap} relative py-[96px] md:py-[160px]`}>
@@ -1069,7 +1092,7 @@ export function FullBleedBreak({
 
   if (img) {
     return (
-      <StickyScene image={img}>
+      <StickyScene image={img} imagePosition={imgPosition}>
         <SceneBlock>
           <StickyReveal>{copy}</StickyReveal>
         </SceneBlock>
