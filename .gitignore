@@ -24,6 +24,10 @@ npm-debug.log*
 # vercel
 .vercel
 
+# animation/craft review scratch (screenshots, plans, gate results) — local
+# working notes for a rebuild pass, not build output
+/.review/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
