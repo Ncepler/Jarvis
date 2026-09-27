@@ -196,6 +196,17 @@ export function SceneBlock({
 // the "each foreground block fades in and rises once it enters" motion
 // StickyScene callers wrap their blocks in. Reduced motion shows the final
 // state immediately, no observer attached.
+//
+// threshold must stay near 0, not a fraction like 0.2: several callers wrap
+// a single tall block (marquee + full Intro copy, ~900px) in one
+// StickyReveal, and a 20%-of-area threshold on something that tall doesn't
+// fire until a large fraction of it has already scrolled past — the gap
+// reads as a dead, fully-transparent stretch riding over the pinned image
+// (confirmed empirically on the auto-body demo: ~180-200px of scroll sitting
+// at opacity:0, coinciding with SceneBlock's own fade-to-solid, so it reads
+// as a solid blank rectangle). Firing on first intersection, biased 8% off
+// the bottom edge (matching every other reveal in this system), makes the
+// trigger independent of the wrapped block's height.
 export function StickyReveal({
   children,
   className = "",
@@ -223,7 +234,7 @@ export function StickyReveal({
           }
         }
       },
-      { threshold: 0.2 },
+      { threshold: 0, rootMargin: "0px 0px -8% 0px" },
     );
     io.observe(el);
     return () => io.disconnect();
