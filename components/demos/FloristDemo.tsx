@@ -28,8 +28,8 @@ import {
   type DemoTheme,
   Eyebrow,
   Faq,
+  FileBadge,
   FullBleedBreak,
-  Media,
   MobileStickyCta,
   Rise,
   SceneBlock,
@@ -71,11 +71,15 @@ const NAME = "Wildstem Florals";
 // the shared primitives around them).
 const wrap = "mx-auto w-full max-w-[1200px] px-6 md:px-16";
 
-// ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
-// The only real photo on this demo — everything else below is a labeled
-// placeholder (SKILL §10). New cooler/wedding-table photography was planned
-// for this rebuild but couldn't be fetched, so this stays the sole image.
+// ── REAL PHOTOGRAPHY ─────────────────────────────────────────────────────
+// Two real photos now back this demo (SKILL §10): the original hero/weekly-
+// flowers shot, and a walk-in cooler still life (galvanized buckets, roses,
+// ranunculus) added in the 2026-09-27 photo pass, used for the occasion
+// cursor preview, the bouquet-row thumbnails, and the occasion tiles below.
+// A wedding-table photo was also planned but hasn't landed yet — anything
+// still waiting on it stays a labeled placeholder.
 const firstFloristImage = "/previews/firstFloristImage.webp";
+const coolerImage = "/demos/florist/cooler.webp";
 
 // Same curve system.tsx sets as var(--d-ease-out) (not exported, so mirrored
 // here as the numeric tuple Motion's `ease` needs); entering/exiting content
@@ -98,10 +102,9 @@ function useHoverCapablePointer() {
   return capable;
 }
 
-// One real photo, four different slices of it (§ signature detail 2 — no
-// second photo exists yet, see the HERO BACKGROUND IMAGE note above, so each
-// occasion gets a distinct object-position crop of the same shop image
-// rather than a fabricated second asset).
+// The cooler photo, four different slices of it (§ signature detail 2) — each
+// occasion gets a distinct object-position crop of the same real cooler image
+// rather than four separate photo shoots.
 const OCCASION_CROPS = ["18% 25%", "75% 20%", "35% 75%", "88% 65%"];
 const PREVIEW_W = 240;
 const PREVIEW_H = 300;
@@ -190,7 +193,7 @@ function OccasionCursorPreview({
             transition={{ duration: 0.2, ease: EASE_OUT }}
           >
             <Image
-              src={firstFloristImage}
+              src={coolerImage}
               alt=""
               fill
               sizes={`${PREVIEW_W}px`}
@@ -324,8 +327,8 @@ function AboutSection() {
   );
 }
 
-// ── The shop — a plain ruled price list, no photos (IMAGE CONSTRAINT). ───────
-// One real photo, sliced differently per row (same IMAGE CONSTRAINT as the
+// ── The shop — a plain ruled price list, thumbnails only on hover. ──────────
+// The cooler photo again, sliced differently per row (same real image as the
 // occasion crops above — no distinct bouquet photography exists yet).
 const BOUQUET_CROPS = ["30% 20%", "70% 30%", "20% 60%", "80% 70%", "50% 15%", "45% 85%"];
 
@@ -381,7 +384,7 @@ function BouquetList() {
                   }}
                 >
                   <Image
-                    src={firstFloristImage}
+                    src={coolerImage}
                     alt=""
                     fill
                     sizes="48px"
@@ -446,10 +449,23 @@ function OccasionTiles() {
                 onMouseEnter={showCursorPreview ? () => setActiveIndex(i) : undefined}
               >
                 <div
-                  className="overflow-hidden transition-transform duration-500 group-hover:-translate-y-1"
-                  style={{ borderRadius: "var(--d-radius)", boxShadow: "0 8px 24px rgba(42,38,34,.06)" }}
+                  className="group/media relative overflow-hidden transition-transform duration-500 group-hover:-translate-y-1"
+                  style={{
+                    aspectRatio: "3/4",
+                    borderRadius: "var(--d-radius)",
+                    boxShadow: "0 8px 24px rgba(42,38,34,.06)",
+                    border: "1px solid var(--d-line)",
+                  }}
                 >
-                  <Media label={`Occasion — ${o.name}`} file={`occasion-${i + 1}.jpg`} ratio="3/4" rounded={false} />
+                  <FileBadge file={`occasion-${i + 1}.jpg`} />
+                  <Image
+                    src={coolerImage}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 25vw, 50vw"
+                    className="object-cover"
+                    style={{ objectPosition: OCCASION_CROPS[i] }}
+                  />
                 </div>
                 <figcaption className="mt-3">
                   <h3

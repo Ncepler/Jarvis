@@ -124,10 +124,8 @@ const FAQ = [
 // wrapping `<div style={{height}}>` would not, since aspect-ratio would still
 // drive the slider's auto height from its full-bleed width. Clamped so it
 // never gets absurd on very short or very tall viewports.
-// The real before/after driveway photo pair couldn't be sourced for this
-// pass (network policy blocked the host), so the slider runs on its built-in
-// labeled-placeholder fallback — fully functional and correctly shaped,
-// ready to take real images later.
+// Real before/after driveway photos (2026-09-27 photo pass) — same framing,
+// stained/mossy concrete vs. clean.
 function WashTransformation() {
   return (
     <section className="w-full" style={{ borderTop: "1px solid var(--d-line)", borderBottom: "1px solid var(--d-line)" }}>
@@ -148,7 +146,14 @@ function WashTransformation() {
           className="mt-10 grid w-full"
           style={{ height: "clamp(460px, 88svh, 880px)", gridTemplateRows: "1fr", gridTemplateColumns: "1fr" }}
         >
-          <BeforeAfterSlider beforeLabel="BEFORE: driveway" afterLabel="AFTER: driveway" beforeFile="before-1.jpg" afterFile="after-1.jpg" />
+          <BeforeAfterSlider
+            beforeImg="/demos/powerwash/driveway-before.webp"
+            afterImg="/demos/powerwash/driveway-after.webp"
+            beforeLabel="BEFORE: driveway"
+            afterLabel="AFTER: driveway"
+            beforeFile="before-1.jpg"
+            afterFile="after-1.jpg"
+          />
         </div>
       </Rise>
       <div className="mx-auto w-full max-w-[1200px] px-6 pb-[80px] md:px-16 md:pb-[120px]">
