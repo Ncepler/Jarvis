@@ -1,117 +1,118 @@
-# HANDOFF — updated 2026-09-27
+# HANDOFF — updated 2026-09-27 (craft/motion pass)
 
 ## Current state
-- Builds clean: `npx tsc --noEmit`, `next lint`, `next build` all pass (all 9
-  `/demos/demo-*` routes prerender as static pages).
-- **All 9 demo styles rebuilt this session** (renovation, landscaping,
-  powerwash, florist, lawncare, bakery, barber, autobody, magician) per
-  `.claude/skills/local-service-design-system/SKILL.md`. Per style: unique
-  FAQ heading (retired the shared "The stuff people ask." across all 9),
-  no leftover `(w:h)` ratio-suffix text in any placeholder label, varied
-  section padding, no two adjacent sections sharing a layout, no "template"
-  wording anywhere (grepped, 0 hits).
-- **Two real, verified bugs fixed system-wide** (in `components/demos/system.tsx`):
-  1. `VilasDemoBar` was `sticky` (already in normal flow, 64px) but
-     `DemoRoute` also added a redundant `pt-16` on top of it — a doubled,
-     wrongly-colored (cream, from the main site's body bg) dead strip
-     between the bar and every demo's own header. Bar is now a 44px
-     floating translucent pill; the redundant offset is gone.
-  2. `DemoHero` was a fixed 640px and painted `heroImage` as an
-     unprioritized CSS background (no `next/image`, no priority hint) —
-     late LCP paint on real photos. Now `100svh` min-height with a real
-     `next/image priority fetchPriority="high"`.
-  3. `StickyReveal`'s IntersectionObserver used `threshold: 0.2` with no
-     `rootMargin` — on the ~900px marquee+intro block several demos wrap in
-     it, that doesn't fire until a large fraction has scrolled past, reading
-     as a dead blank stretch riding over the pinned hero (this was the
-     "~780px pure-black screen" and "headings at ~30% opacity" bugs
-     reported against autobody/florist). Fixed to `threshold: 0,
-     rootMargin: "0px 0px -8% 0px"` — fires on first intersection,
-     independent of the wrapped block's height.
-  4. Magician's premium-tier hero was **100% invisible** — its velvet
-     overlay used opaque hex gradient stops instead of rgba, fully
-     painting over `PremiumHeroMedia` underneath. Fixed.
-- Every demo file still exports the same `{tier?: "basic"|"premium"}`
-  shape `components/demos/index.ts` expects — none of that wiring changed.
+- Deployed: last confirmed production deploy (`vilas.studio`) was built from
+  commit `7918f63` and is `READY` — that was BEFORE this session's craft
+  pass below, which is pushed to `claude/sleepy-newton-uaamxu` but not yet
+  merged to `main`/redeployed. Builds clean locally: `npx tsc --noEmit`,
+  `next lint`, `next build` all pass; all 9 `/demos/demo-*` routes prerender.
+- **A full Emil Kowalski / Apple-interface craft pass landed on top of last
+  session's rebuild**, across shared system + all 9 styles. Shared
+  (`components/demos/system.tsx` + `app/globals.css`, all `.demo-shell`
+  scoped, main site untouched):
+  - New motion tokens (`--d-ease-out/-in-out/-drawer`, `--d-dur-press/hover/
+    ui/reveal/media`) extending the existing `--ease-out-expo` pattern.
+  - Reveal (`Rise`/`StickyReveal`) retuned to 8px/420ms/-4% margin.
+  - Hero entrance choreography is now pure CSS keyframes (image settles
+    1.06→1 over 1400ms, headline lines mask in, then kicker/paragraph/
+    buttons rise staggered) — runs off the main thread, both hero tiers
+    share one timing.
+  - `StickyScene`'s scroll-linked image scale now prefers a
+    `view-timeline-name` CSS path (no JS scroll listener) where supported,
+    falling back to the existing rAF mechanism.
+  - `Faq` rebuilt on `grid-template-rows` (was a Motion height animation);
+    `BeforeAfterSlider` got a spring-scaled handle, a first-reveal hint,
+    shift+arrow keyboard step, position-based label fade; `DemoMarquee` gets
+    an edge-fade mask and pauses on hover/offscreen at ~40px/s.
+  - New `MobileStickyCta` component (each style wires one in); `DemoFooter`
+    got the oversized cropped-wordmark treatment; `TwoLine`/`CtaBand`
+    headlines are now full-contrast on both lines (no more greyed second
+    line — that was never an actual design-spec requirement, just an
+    earlier implementation choice).
+  - New CSS utilities, all `.demo-shell`-scoped: `.d-press`, `.d-link`,
+    `.d-img-hover`, `.d-crisp-edge`, `.d-float`, `.d-grain`,
+    `.d-feature-reveal`, `.d-material` (w/ reduced-transparency/contrast
+    fallbacks), `.d-sticky-cta`, plus a mobile-native baseline.
+  - `DemoHero.line1`/`.line2` widened from `string` to `ReactNode` (safe
+    superset) so a caller can style part of a headline without a cast.
+  - `DemoTheme` gained optional `radiusLg`/`radiusSm` tiers.
+- **Per-style signature details**, one subagent per file — see each style's
+  `.review/<slug>/motion.md` (gitignored, local only) for the itemized gate
+  report. Highlights: florist (cursor-follow occasion preview, italic hero
+  word), bakery (open/closed status chip, scroll-scaled case photo),
+  landscaping (day/night now auto-plays once), power wash (full-bleed 88svh
+  slider + text-a-photo thread), lawn care (custom estimate slider, no
+  counting animation), barber (walk-ins status chip, brass price-board
+  frame), magician (interruptible card flip, canvas pause on
+  offscreen/hidden-tab), autobody (layoutId color-ring, found & fixed a
+  real dead-zone bug last session), renovation (scroll-driven progress
+  line).
+- Two review-animations violations found and fixed repo-wide: `HeroReveal`
+  (system.tsx) and `RiseFromDark` (MagicianDemo.tsx) were animating Motion's
+  `y` shorthand (not hardware-accelerated) — both now animate a full
+  `transform` string.
+- **One commit-history wrinkle** (functionally harmless): the AutoBodyDemo
+  and BakeryDemo craft-pass commits collided during a batch commit (a `git
+  add` with an already-gitignored `.review/` path silently failed the whole
+  `&&` chain, but had already staged both files from two separate earlier
+  attempts) — both files' changes are correctly committed and pushed, just
+  both landed under the "Autobody craft pass" commit message instead of two
+  separate ones. Not rewritten/force-pushed to fix since the branch was
+  already pushed; purely cosmetic.
 
-## Blocked on Noah — read this before the next demo-image session
-- **11 real photos were generated on Higgsfield for this rebuild but could
-  NOT be downloaded/committed** — this sandbox's network egress policy
-  denies Higgsfield's CDN host (`d8j0ntlcm91z4.cloudfront.net`) as an
-  org-policy decision (403 on CONNECT), not a bug. **Fix: widen this
-  environment's Network access setting (or allow that host) before the next
-  session touches demo images**, then re-fetch by job id below (Higgsfield
-  `show_generation_by_ids`/history) and drop each into
-  `public/demos/<slug>/<file>.webp` (sharp, q82, keep full 4K — several
-  layouts crop one file several ways):
-
-  | Slot | File | Job ID | Used by |
-  |---|---|---|---|
-  | F1 cooler | `florist/cooler.webp` | `301bd173-8cfb-4b2c-96e9-a984cd8dcb4a` | Florist bouquet/collage section |
-  | F2 wedding table | `florist/wedding-table.webp` | `295be81c-4809-47bb-9fe6-698b417c0d07` | Florist FullBleedBreak |
-  | B1 the case | `bakery/the-case.webp` | `7b48b33e-0cce-4bdb-a1cb-a6c88bb75ef1` | Bakery menu section |
-  | B2 bakehouse | `bakery/bakehouse.webp` | `4ba8e4cd-0ea4-4512-9596-9f8fbeb3f6bf` | Bakery FullBleedBreak |
-  | L1 patio day | `landscaping/patio-day.webp` | `5b26530f-a978-4c38-affe-9fc9345da20a` | Landscaping day/night toggle |
-  | L2 patio night | `landscaping/patio-night.webp` | `074f9b61-f212-4bf4-b973-28518928a401` | Landscaping day/night toggle |
-  | P1 driveway before | `powerwash/driveway-before.webp` | `732daa80-35f6-4c96-a788-bc852a8eee22` | PowerWash compare slider |
-  | P2 driveway after | `powerwash/driveway-after.webp` | `83626692-bbda-4ab0-a819-f603c8abb393` | PowerWash compare slider |
-  | LC1 hero lawn | `lawncare/hero-lawn.webp` | `57d42bf8-732b-4be6-a04a-18c47d4b34b0` | Replaces `/previews/firstLawnCareImage.webp` |
-  | BR1 shop | `barber/shop.webp` | `b48c34bc-fa9c-4efd-9091-62446d0e0bf5` | Barber FullBleedBreak "the shop" |
-  | MG1 portrait | `magician/portrait.webp` | `3ba3e958-c87c-4ebf-831e-95b3231f49f0` | Magician About section |
-
-  1 of the 12-credit budget is unspent (reserve reroll, never used). Every
-  demo's interactive mechanism that needs one of these (day/night toggle,
-  compare slider, collage) is already fully built and wired to a labeled
-  placeholder — dropping the real file in is a one-line `img`/`beforeImg`/
-  `afterImg` prop change per site, not a rebuild.
-- The demo skill's old "no AI images" rule (§1.2/§10/§11/§13f/§14a/§16f) has
-  a dated addendum at the top of the file superseding it for this one
-  curated batch — read that note before adding any *more* AI imagery there.
-- Real photography still missing (no Higgsfield job, no existing asset):
-  florist's 6 bouquet items, bakery's whole-cake section, barber's cut
-  captions, magician's REEL video (no performance/shuffle clip exists in
-  `public/` at all — checked). These stayed on the pre-existing
-  labeled-placeholder convention.
-- No pull request opened this session — everything is pushed to
-  `claude/sleepy-newton-uaamxu` only, per this session's branch assignment.
+## Blocked on Noah — unchanged from last session, still true
+- **11 real photos generated on Higgsfield still can't be downloaded** —
+  this sandbox's network policy still denies the CDN host
+  (`d8j0ntlcm91z4.cloudfront.net`), confirmed again this session (retested,
+  still 403). Job IDs, destination paths and what each feeds are unchanged
+  from before — see git history on this file (or ask, they're still valid)
+  rather than duplicating the table here again. **Widen this environment's
+  Network access setting before the next image-focused session.**
+- Every mechanism that needs one of those images (day/night toggle, compare
+  slider, cursor-follow crop, collage) is fully built and interactive on a
+  placeholder — dropping the real file in is a one-line prop change per site.
+- No pull request opened. Everything is on `claude/sleepy-newton-uaamxu`;
+  `main` has been fast-forwarded to match it before (once, on explicit
+  request) but is currently one round behind — see git log before assuming
+  main is current.
 
 ## Next up (ordered)
-1. Widen network access, pull the 11 images above into `public/demos/`.
-2. TRFox screenshot capture (still pending from before this session — see
-   git history for `/api/capture-sites` details).
-3. Real Higgsfield hero clips for Premium tier, `/public/premium/<slug>.mp4`.
-4. Replace the placeholder OG image + upscaled 512 icon with real assets.
+1. Merge/deploy this craft pass (fast-forward `main`, confirm Vercel green).
+2. Widen network access, pull the 11 images into `public/demos/`.
+3. TRFox screenshot capture (pending from before this session).
+4. Real Higgsfield hero clips for Premium tier.
 
 ## Gotchas & decisions (standing, trimmed)
-- **This devcontainer runs out of memory / flakes on `next build` under
-  concurrent sessions** — confirmed again this session (9 parallel
-  subagents each editing a different demo file hit SIGKILL/stale-cache
-  JSON errors on `npm run build`; `tsc`/`eslint` stayed reliable
-  throughout). Re-run build once contention clears before trusting a
-  build failure.
-- **Working in the same checkout from multiple concurrent agents is risky**:
-  one subagent ran `git stash` mid-session to test something and swept up
-  every other agent's uncommitted files. Everyone recovered via
-  `git show stash@{0}:<path>` / `git checkout stash@{0} -- <path>` without
-  data loss, but avoid running `git stash` in a shared working tree with
-  other sessions active — use `git diff`/targeted `git add` instead.
+- **Concurrent subagents sharing one working tree is genuinely risky**:
+  this session hit a `git stash` collision (again) mid-Phase-3, and two
+  subagents were cut off mid-task by a session-wide API rate limit. Every
+  case was recoverable (`git checkout stash@{0} -- <path>`, or just
+  verifying the interrupted agent's last edit was actually already
+  complete before treating it as done) — but budget time for this kind of
+  recovery when running 9 parallel file-editing agents in one checkout.
+- **This devcontainer flakes on `next build` under concurrent sessions**
+  (SIGKILL/stale-cache errors) — `tsc`/`eslint` stay reliable throughout;
+  re-run build once contention clears.
+- `.review/` (gitignored) holds per-style gate reports and screenshots —
+  **`git add` on an explicitly-named gitignored path exits non-zero and
+  silently kills the rest of an `&&` chain**, including a `git commit` after
+  it. Add real files and ignored files in separate commands, not one `git
+  add realfile ignoredfile && git commit`.
 - `public/vilasherovideo.mp4` still does not decode (falls back to the
-  static poster image as designed) — unrelated to this session.
+  static poster) — unrelated to demos.
 - **Demos live in `components/demos/`, not `app/demos/`.**
-- **Demos vary by mood (SKILL §13).** DARK = renovation + landscaping. LIGHT
-  = florist/bakery/powerwash/lawncare. WARM-DARK = barber. GRAPHITE-DARK =
-  auto body. THEATRICAL = the Magician (§16).
-- Renovation and florist's *existing* hero photos (`firstRenovationImage.webp`,
-  `firstFloristImage.webp`, both pre-dating this session) read a bit hazy/
-  soft compared to barber's crisp one — asset quality, not a scrim/code bug
-  (the scrim mechanism is unchanged and correct); worth a reshoot, not a fix.
+- **Demos vary by mood (SKILL §13).** DARK = renovation + landscaping.
+  FOREST-DARK = landscaping specifically. LIGHT = florist/bakery/powerwash/
+  lawncare. WARM-DARK = barber. GRAPHITE-DARK = auto body. THEATRICAL = the
+  Magician (§16).
+- Renovation and florist's *existing* hero photos read a bit hazy/soft
+  compared to barber's crisp one — asset quality, not a code/scrim bug.
 - `Faq`/`Contact` in `system.tsx` both render a fixed two-column layout and
-  sit adjacent in every demo's section plan — several subagents flagged this
-  as the one unavoidable back-to-back layout repeat; would need a
-  `system.tsx` change to fully resolve.
-- **Known pre-existing bug, still not fixed:** `Marquee.tsx` hydration
-  mismatch under `prefers-reduced-motion: reduce` at first paint (React
-  self-heals, nothing visibly breaks).
+  sit adjacent in every demo — the one unavoidable back-to-back layout
+  repeat without a `system.tsx` structural change.
+- **Known pre-existing bug, still not fixed:** `Marquee.tsx` (main site, not
+  the demo one) hydration mismatch under `prefers-reduced-motion: reduce`
+  at first paint (React self-heals, nothing visibly breaks).
 
 ## Supabase
 - Canonical project: **"Vilas"**, ref `epynfvskwaxejdibvgbr`, us-west-2.
