@@ -112,11 +112,9 @@ const FAQ = [
 // (~900ms, eased) — the same pitch real landscape lighting sites make with a
 // day rendering and a night one. This is the page's one named exception to
 // the 300ms UI ceiling: it's a rare, marketing-grade moment, not a control
-// used dozens of times a visit. The night shot is a real photo (2026-09-27
-// photo pass, blue-hour patio with the fire pit and path lights on); the day
-// shot is still a labeled Media placeholder until its photo arrives — the
-// mechanism itself is fully working either way, so dropping the day photo in
-// later is a one-line swap.
+// used dozens of times a visit. Both shots are now real photos (2026-09-27
+// photo pass) of the same stone patio/fire-pit seating wall: golden-hour day,
+// then blue-hour with the fire pit and path lights on.
 //
 // It plays itself once — the section auto-wipes day→night the first time
 // it's 60% in view (named purpose: show the feature without asking anyone to
@@ -160,7 +158,12 @@ function DayNightSignature() {
       style={{ minHeight: "100svh" }}
     >
       <div className="absolute inset-0">
-        <Media label="Patio — day" className="h-full w-full" rounded={false} />
+        <Media
+          label="Patio — day"
+          img="/demos/landscaping/patio-day.webp"
+          className="h-full w-full"
+          rounded={false}
+        />
       </div>
       <div
         className="absolute inset-0"

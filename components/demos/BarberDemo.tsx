@@ -430,6 +430,7 @@ export function BarberDemo({ tier = "basic" }: { tier?: Tier }) {
         ]}
         cta="Book a chair"
         mediaLabel="The shop: chairs, brass, lamplight"
+        img="/demos/barber/shop.webp"
       />
       <div id="work" className={ANCHOR_SCROLL_CLASS}>
         <CutMenu />

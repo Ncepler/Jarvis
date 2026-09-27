@@ -58,9 +58,11 @@ const PHONE = "(516) 555-0148";
 const NAME = "Fresh Cut Lawn Co.";
 
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
-// Put your hero photo in /public (e.g. /public/demos/lawncare-hero.jpg), then
-// set the path below. Leave "" to show the labeled placeholder instead.
-const firstLawnCareImage = "/previews/firstLawnCareImage.webp";
+// Real photo (2026-09-27 photo pass): a striped, dew-lit front lawn at a
+// white Colonial, the actual look this niche sells. Replaces an earlier
+// placeholder shot that was a generic close-up of grass with apartment
+// buildings in the background — the wrong setting entirely for this niche.
+const firstLawnCareImage = "/demos/lawncare/hero-lawn.webp";
 
 // Recurring plans, laid out like pricing tiers (§14g). Starting prices, clear.
 const PLANS = [

@@ -72,14 +72,15 @@ const NAME = "Wildstem Florals";
 const wrap = "mx-auto w-full max-w-[1200px] px-6 md:px-16";
 
 // ── REAL PHOTOGRAPHY ─────────────────────────────────────────────────────
-// Two real photos now back this demo (SKILL §10): the original hero/weekly-
-// flowers shot, and a walk-in cooler still life (galvanized buckets, roses,
-// ranunculus) added in the 2026-09-27 photo pass, used for the occasion
-// cursor preview, the bouquet-row thumbnails, and the occasion tiles below.
-// A wedding-table photo was also planned but hasn't landed yet — anything
-// still waiting on it stays a labeled placeholder.
+// Three real photos now back this demo (SKILL §10): the original hero/
+// weekly-flowers shot, a walk-in cooler still life (galvanized buckets,
+// roses, ranunculus), and a long-table wedding setting — both added in the
+// 2026-09-27 photo pass. The cooler photo covers Sympathy/Everyday/Events;
+// the wedding photo covers the Weddings occasion specifically, wherever a
+// per-occasion image is needed below.
 const firstFloristImage = "/previews/firstFloristImage.webp";
 const coolerImage = "/demos/florist/cooler.webp";
+const weddingImage = "/demos/florist/wedding-table.webp";
 
 // Same curve system.tsx sets as var(--d-ease-out) (not exported, so mirrored
 // here as the numeric tuple Motion's `ease` needs); entering/exiting content
@@ -102,10 +103,12 @@ function useHoverCapablePointer() {
   return capable;
 }
 
-// The cooler photo, four different slices of it (§ signature detail 2) — each
-// occasion gets a distinct object-position crop of the same real cooler image
-// rather than four separate photo shoots.
-const OCCASION_CROPS = ["18% 25%", "75% 20%", "35% 75%", "88% 65%"];
+// One real photo per occasion tile where we have one, otherwise a distinct
+// slice of the cooler photo (§ signature detail 2) — order matches OCCASIONS
+// below (Weddings, Sympathy, Everyday, Events). Weddings gets its own real
+// wedding-table photo; the rest share the cooler image, cropped differently.
+const OCCASION_IMAGES = [weddingImage, coolerImage, coolerImage, coolerImage];
+const OCCASION_CROPS = ["50% 38%", "75% 20%", "35% 75%", "88% 65%"];
 const PREVIEW_W = 240;
 const PREVIEW_H = 300;
 
@@ -193,7 +196,7 @@ function OccasionCursorPreview({
             transition={{ duration: 0.2, ease: EASE_OUT }}
           >
             <Image
-              src={coolerImage}
+              src={OCCASION_IMAGES[activeIndex]}
               alt=""
               fill
               sizes={`${PREVIEW_W}px`}
@@ -215,11 +218,11 @@ const OCCASIONS = [
   { name: "Events", note: "Dinners, openings, the long table." },
 ];
 
-// The shop, as a plain price list — no photo-collage (see IMAGE CONSTRAINT in
-// the rebuild brief: the cooler still life couldn't be sourced). Every $
-// figure below is unchanged from the original demo; items that only ever
-// carried an occasion label (not a price) now say so plainly instead of
-// guessing a number.
+// The shop, as a plain ruled price list rather than a photo grid — the real
+// photos live in the hover thumbnails (see BouquetList below), not as a
+// collage here. Every $ figure below is unchanged from the original demo;
+// items that only ever carried an occasion label (not a price) now say so
+// plainly instead of guessing a number.
 const BOUQUETS = [
   { name: "Seasonal hand-tie", occasion: "Everyday", price: "from $55" },
   { name: "Garden-style ceremony arch", occasion: "Weddings", price: "let's talk" },
@@ -384,12 +387,15 @@ function BouquetList() {
                   }}
                 >
                   <Image
-                    src={coolerImage}
+                    src={b.occasion === "Weddings" ? weddingImage : coolerImage}
                     alt=""
                     fill
                     sizes="48px"
                     className="object-cover"
-                    style={{ objectPosition: BOUQUET_CROPS[i % BOUQUET_CROPS.length] }}
+                    style={{
+                      objectPosition:
+                        b.occasion === "Weddings" ? "50% 40%" : BOUQUET_CROPS[i % BOUQUET_CROPS.length],
+                    }}
                   />
                 </div>
                 <p
@@ -459,7 +465,7 @@ function OccasionTiles() {
                 >
                   <FileBadge file={`occasion-${i + 1}.jpg`} />
                   <Image
-                    src={coolerImage}
+                    src={OCCASION_IMAGES[i]}
                     alt=""
                     fill
                     sizes="(min-width: 768px) 25vw, 50vw"

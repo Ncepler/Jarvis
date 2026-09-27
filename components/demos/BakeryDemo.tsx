@@ -243,7 +243,13 @@ function BakeryMenu() {
             technique isn't supported and under reduced motion. */}
         <Rise delay={0.1} className="bakery-case-scene">
           <div className="md:sticky md:top-10">
-            <Media label="The case" file="the-case.jpg" ratio="4/3" className="bakery-case-media" />
+            <Media
+              label="The case"
+              img="/demos/bakery/the-case.webp"
+              file="the-case.jpg"
+              ratio="4/3"
+              className="bakery-case-media"
+            />
             <p className="mt-3 text-[13px]" style={{ color: "var(--d-muted)" }}>
               The case at 7am. When it&apos;s empty, that&apos;s the day.
             </p>
