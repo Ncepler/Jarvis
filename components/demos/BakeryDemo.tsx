@@ -289,7 +289,12 @@ function CakeOrders() {
       </div>
       <Rise delay={0.12}>
         <div className="mx-auto mt-14 max-w-sm">
-          <Media label="The bakehouse bench" file="bakehouse-bench.jpg" ratio="4/5" />
+          <Media
+            label="The bakehouse bench"
+            img="/demos/bakery/bakehouse-bench.webp"
+            file="bakehouse-bench.jpg"
+            ratio="4/5"
+          />
         </div>
       </Rise>
       </div>
