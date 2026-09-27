@@ -61,6 +61,31 @@ const AREA = "Based on Long Island, NY, available across the tri-state area";
 
 const wrap = "mx-auto w-full max-w-[1160px] px-6 md:px-16";
 
+// ── Fires once when an element first enters the viewport, then disconnects.
+// Used to trigger one-shot reveal effects (e.g. the portrait rim-light) that
+// should never replay. ────────────────────────────────────────────────────
+function useInViewOnce<T extends HTMLElement>(threshold = 0.3) {
+  const ref = useRef<T | null>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || inView) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { threshold },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [threshold]);
+  return [ref, inView] as const;
+}
+
 // ── Section shell: consistent vertical rhythm on the velvet field. ───────────
 function Section({
   children,
@@ -113,13 +138,21 @@ function Placeholder({
   ratio = "16/9",
   className = "",
   glow = false,
+  shimmer = false,
 }: {
   label: string;
   file?: string; // filename a client should give their own media
   ratio?: string;
   className?: string;
   glow?: boolean;
+  // one-time gold rim-light sweep on first reveal — reserved for the
+  // portrait slot (§ signature detail 3); no real photo exists yet, so it
+  // plays over the placeholder box itself and will read the same way once
+  // Noah drops a real image in.
+  shimmer?: boolean;
 }) {
+  const reduced = useReducedMotion();
+  const [shimmerRef, shimmerVisible] = useInViewOnce<HTMLDivElement>(0.35);
   return (
     <div
       className={`group/media relative w-full overflow-hidden rounded-[6px] ${className}`}
@@ -143,6 +176,33 @@ function Placeholder({
               "radial-gradient(60% 60% at 50% 35%, rgba(212,165,60,.14), transparent 70%)",
           }}
         />
+      )}
+      {shimmer && !reduced && (
+        <div ref={shimmerRef} aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <style>{`
+            .ev-shimmer-sweep { transform: translateX(-150%); opacity: 0; }
+            .ev-shimmer-sweep[data-visible] {
+              animation: ev-shimmer-sweep 6s cubic-bezier(0.16,1,0.3,1) forwards;
+            }
+            @keyframes ev-shimmer-sweep {
+              0% { transform: translateX(-150%); opacity: 0; }
+              15% { opacity: 1; }
+              85% { opacity: 1; }
+              100% { transform: translateX(350%); opacity: 0; }
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .ev-shimmer-sweep { display: none; }
+            }
+          `}</style>
+          <div
+            data-visible={shimmerVisible || undefined}
+            className="ev-shimmer-sweep absolute inset-y-0 left-0 w-2/5"
+            style={{
+              background:
+                "linear-gradient(115deg, transparent 0%, rgba(212,165,60,.12) 50%, transparent 100%)",
+            }}
+          />
+        </div>
       )}
       <div className="absolute inset-3 flex items-end justify-start">
         <span
@@ -234,10 +294,41 @@ function Embers({ density = 26 }: { density?: number }) {
       }
       raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
-    return () => {
+
+    // Cheap correctness fixes: the loop only actually runs while the canvas
+    // is on screen AND the tab is visible. Combines cleanly since either
+    // condition alone should stop it.
+    let intersecting = false;
+    const start = () => {
+      if (raf) return;
+      last = performance.now();
+      raf = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      if (!raf) return;
       cancelAnimationFrame(raf);
+      raf = 0;
+    };
+    const sync = () => {
+      if (intersecting && !document.hidden) start();
+      else stop();
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        intersecting = entry.isIntersecting;
+        sync();
+      },
+      { threshold: 0 },
+    );
+    io.observe(canvas);
+    document.addEventListener("visibilitychange", sync);
+
+    return () => {
+      stop();
+      io.disconnect();
       ro.disconnect();
+      document.removeEventListener("visibilitychange", sync);
     };
   }, [reduced, density]);
 
@@ -539,22 +630,29 @@ const SHOWS = [
 
 function ShowCard({ show, index }: { show: (typeof SHOWS)[number]; index: number }) {
   const [flipped, setFlipped] = useState(false);
+  const canHover = useCanHover();
   const tilt = [-9, -4, 0, 4, 9][index % 5];
+  // Full transform strings (never the x/y/rotateY shorthand) so the spring
+  // below is interruptible mid-flip and hover composes on top of whichever
+  // face is currently showing.
+  const base = flipped ? "rotateY(180deg)" : "rotateY(0deg)";
+  const rest = `${base} translateY(0px)`;
+  const lifted = `${base} translateY(-10px)`;
   return (
     <button
       type="button"
       onClick={() => setFlipped((f) => !f)}
       aria-pressed={flipped}
       aria-label={flipped ? show.label : `Reveal show type ${index + 1}`}
-      className="group relative h-[230px] w-[152px] shrink-0 cursor-pointer md:h-[250px] md:w-[168px]"
+      className="ev-flip-card group relative h-[230px] w-[152px] shrink-0 cursor-pointer rounded-[8px] md:h-[250px] md:w-[168px]"
       style={{ perspective: 1200, transform: `rotate(${tilt}deg)` }}
     >
       <motion.div
         className="relative h-full w-full"
         style={{ transformStyle: "preserve-3d" }}
-        animate={{ rotateY: flipped ? 180 : 0, y: flipped ? -10 : 0 }}
-        whileHover={{ y: -10 }}
-        transition={{ duration: 0.55, ease: EASE }}
+        animate={{ transform: rest }}
+        whileHover={canHover ? { transform: lifted } : undefined}
+        transition={{ type: "spring", duration: 0.6, bounce: 0.2 }}
       >
         {/* back of card — face down, gold diamond lattice */}
         <div
@@ -623,6 +721,15 @@ function TheExperience() {
   const reduced = useReducedMotion();
   return (
     <Section id="magician-experience">
+      {/* visible keyboard focus ring for the flip-card buttons — a gold
+          double ring instead of the browser default blue, scoped to this
+          section only. */}
+      <style>{`
+        .ev-flip-card:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 2px ${BG}, 0 0 0 4px ${GOLD};
+        }
+      `}</style>
       <Embers density={16} />
       <RiseFromDark className="relative">
         <span className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: GOLD }}>
@@ -756,7 +863,7 @@ function About() {
     <Section className="" id="magician-about">
       <div className="grid items-center gap-12 md:grid-cols-[0.85fr_1fr] md:gap-16">
         <RiseFromDark>
-          <Placeholder label="PORTRAIT: the magician, low key" file="portrait.jpg" ratio="4/5" glow />
+          <Placeholder label="PORTRAIT: the magician, low key" file="portrait.jpg" ratio="4/5" glow shimmer />
         </RiseFromDark>
         <RiseFromDark delay={0.1}>
           <span className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: GOLD }}>
