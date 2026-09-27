@@ -91,6 +91,11 @@
   the demos at 360×640 @3x, then render the composition page frame by frame.
   Headless Chromium doesn't trust the sandbox proxy CA, so self-host any web
   fonts instead of loading Google Fonts.
+- **Supabase `instagram_posts` = the log of every IG post** (migration 0017).
+  Before making a new `/brag` reel, `select title, angle, hook, techniques,
+  notes from instagram_posts` and pick a different angle/hook/techniques;
+  after rendering, insert a row. The `notes` column on the first row lists
+  untried angles.
 - **Concurrent subagents sharing one working tree is genuinely risky**:
   this session hit a `git stash` collision (again) mid-Phase-3, and two
   subagents were cut off mid-task by a session-wide API rate limit. Every
