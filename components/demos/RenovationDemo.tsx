@@ -4,7 +4,10 @@
 // Renovation Co." is a sample brand for the demo, not a client. This is the
 // REFERENCE build the other demos match for quality. Mood stays near-black §2,
 // minimal and gallery-driven — the photography does the talking.
+"use client";
 
+import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "motion/react";
 import {
   ANCHOR_SCROLL_CLASS,
   BeforeAfterSlider,
@@ -20,7 +23,7 @@ import {
   FilterableWorkGrid,
   FullBleedBreak,
   Intro,
-  ProcessStepper,
+  MobileStickyCta,
   Rise,
   Section,
   SceneBlock,
@@ -28,6 +31,7 @@ import {
   StickyScene,
   TwoLine,
   ValueProps,
+  type Step,
 } from "./system";
 import { heroConceptFor } from "@/lib/heroConcepts";
 import type { Tier } from "./VilasDemoBar";
@@ -99,7 +103,7 @@ const FAQ = [
 // numbered 01–06 list as a compact strip beneath (§14e). ──────────────────────
 function RoomTransforms() {
   return (
-    <Section className="pt-14 pb-24 md:pt-24 md:pb-40">
+    <Section className="d-grain pt-14 pb-24 md:pt-24 md:pb-40">
       <Rise>
         <Eyebrow>What we do</Eyebrow>
         <div className="mt-5">
@@ -110,7 +114,10 @@ function RoomTransforms() {
           took down to the studs and brought back better than new.
         </p>
       </Rise>
-      <div className="mt-12 grid gap-10 lg:grid-cols-2">
+      {/* Full-width, stacked — the same one-slider-at-a-time prominence
+          power-washing's transformation section gets, rather than splitting
+          the two rooms into half-width columns (craft pass 2026-09-27). */}
+      <div className="mt-12 flex flex-col gap-14">
         <Rise>
           <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
             Kitchen: full gut
@@ -157,6 +164,176 @@ function RoomTransforms() {
         ))}
       </div>
     </Section>
+  );
+}
+
+// ── "Here's the order" — a vertical process timeline (craft pass 2026-09-27,
+// replacing the shared ProcessStepper's horizontal grid here only). Purpose:
+// make the four-step sequence read as one continuous line the visitor moves
+// down, not four disconnected cards — the accent fill is a progress cue for
+// "how far through the job you are," and each number lighting up says "you
+// are here" as that step nears the middle of the screen.
+//
+// The fill is transform:scaleY (transform-origin: top) only, driven natively
+// by a named view-timeline where supported — same technique as StickyScene's
+// `d-scene-scale-native` (system.tsx) — with the identical rAF+CSS-var
+// fallback where it isn't. Both paths write the same
+// `transform: scaleY(var(--reno-progress-p))`, so only one is ever actually
+// in control. `prefers-reduced-motion` drops the scroll-driven fill entirely
+// and shows the line already complete — a progress bar frozen at empty would
+// read as broken, not restrained.
+//
+// Per-step highlighting is a discrete IntersectionObserver toggle (not a
+// continuous scroll computation): rootMargin pulls the trigger band into the
+// vertical center of the viewport, so a step's number turns accent right as
+// it crosses the middle, and only one step is usually "active" at a time.
+function ProcessTimeline({
+  eyebrow,
+  line1,
+  line2,
+  steps,
+  note,
+}: {
+  eyebrow: string;
+  line1: string;
+  line2: string;
+  steps: Step[];
+  note?: string;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const fillRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+
+  useEffect(() => {
+    if (reduced) return;
+    // The CSS path below (view-timeline-name) already handles this natively —
+    // skip the JS fallback entirely when the browser can do it off-thread.
+    if (typeof CSS !== "undefined" && CSS.supports?.("view-timeline-name: --x")) return;
+    const track = trackRef.current;
+    const fill = fillRef.current;
+    if (!track || !fill) return;
+    let raf = 0;
+    const tick = () => {
+      raf = 0;
+      const rect = track.getBoundingClientRect();
+      // Fills across the track crossing the viewport's middle 70% — starts
+      // near-empty as the top of the list arrives, reads full once its last
+      // step has passed center.
+      const span = Math.max(rect.height, 1);
+      const progress = (window.innerHeight * 0.75 - rect.top) / span;
+      fill.style.setProperty("--reno-progress-p", Math.min(Math.max(progress, 0), 1).toFixed(4));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    tick();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [reduced]);
+
+  return (
+    <Section className="d-grain">
+      <Rise>
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <div className="mt-5">
+          <TwoLine a={line1} b={line2} />
+        </div>
+      </Rise>
+      <style>{`
+        @supports (view-timeline-name: --x) {
+          .reno-process-track { view-timeline-name: --reno-process; view-timeline-axis: block; }
+          @keyframes reno-process-fill { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+          .reno-process-fill-native {
+            animation: reno-process-fill linear both;
+            animation-timeline: --reno-process;
+            animation-range: cover 10% cover 85%;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .reno-process-fill-native { animation: none !important; transform: scaleY(1) !important; }
+        }
+        .reno-step-num { transition: color var(--d-dur-hover, 200ms) var(--d-ease-out, ease); }
+      `}</style>
+      <Rise delay={0.1}>
+        <div ref={trackRef} className="reno-process-track relative mt-14">
+          {/* base line */}
+          <div
+            aria-hidden
+            className="absolute left-[15px] top-1 bottom-1 w-px md:left-[19px]"
+            style={{ background: "var(--d-line)" }}
+          />
+          {/* accent fill — transform-only, transform-origin: top */}
+          <div
+            aria-hidden
+            ref={fillRef}
+            className="reno-process-fill-native absolute left-[15px] top-1 bottom-1 w-px md:left-[19px]"
+            style={{
+              background: "var(--d-accent)",
+              transformOrigin: "top",
+              transform: "scaleY(var(--reno-progress-p, 0))",
+            }}
+          />
+          <ol className="relative flex flex-col gap-10 md:gap-12">
+            {steps.map((s, i) => (
+              <ProcessTimelineStep key={s.title} index={i} step={s} />
+            ))}
+          </ol>
+        </div>
+      </Rise>
+      {note && (
+        <Rise delay={0.16}>
+          <p className="mt-8 max-w-xl text-[14px] leading-[1.6]" style={{ color: "var(--d-muted)" }}>
+            {note}
+          </p>
+        </Rise>
+      )}
+    </Section>
+  );
+}
+
+// One step: number badge + copy. The number's color is the only thing an
+// IntersectionObserver ever touches — a discrete state flip on crossing the
+// viewport's middle band, not a per-frame scroll value.
+function ProcessTimelineStep({ index, step }: { index: number; step: Step }) {
+  const ref = useRef<HTMLLIElement>(null);
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([entry]) => setActive(entry.isIntersecting), {
+      rootMargin: "-45% 0px -45% 0px",
+      threshold: 0,
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <li ref={ref} className="relative pl-12 md:pl-16">
+      <span
+        className="reno-step-num absolute left-0 top-0 flex h-8 w-8 items-center justify-center text-[13px] font-semibold tracking-[0.05em] md:h-10 md:w-10"
+        style={{ color: active ? "var(--d-accent)" : "var(--d-muted)" }}
+      >
+        0{index + 1}
+      </span>
+      <h3 className="text-[20px] font-semibold" style={{ color: "var(--d-fg)" }}>
+        {step.title}
+      </h3>
+      <p className="mt-2 max-w-md text-[14px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+        {step.what}
+      </p>
+      {step.duration && (
+        <p className="mt-3 text-[12px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--d-muted)" }}>
+          {step.duration}
+        </p>
+      )}
+    </li>
   );
 }
 
@@ -217,7 +394,7 @@ export function RenovationDemo({ tier = "basic" }: { tier?: Tier }) {
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
         <RoomTransforms />
       </div>
-      <ProcessStepper
+      <ProcessTimeline
         eyebrow="How it goes"
         line1="No mystery."
         line2="Here's the order."
@@ -280,6 +457,7 @@ export function RenovationDemo({ tier = "basic" }: { tier?: Tier }) {
         cta="Get a free estimate"
         phone={PHONE}
       />
+      <MobileStickyCta phone={PHONE} bookLabel="Get a quote" contactId="contact" />
       <DemoFooter
         name={NAME}
         descriptor="Full-service renovation and remodeling, one crew from framing to finish."
