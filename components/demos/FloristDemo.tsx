@@ -72,18 +72,20 @@ const NAME = "Wildstem Florals";
 const wrap = "mx-auto w-full max-w-[1200px] px-6 md:px-16";
 
 // ── REAL PHOTOGRAPHY ─────────────────────────────────────────────────────
-// Four real photos now back this demo (SKILL §10): the original hero/
-// weekly-flowers shot, a walk-in cooler still life (galvanized buckets,
-// roses, ranunculus), a rustic barn wedding-table setting, and a formal
-// candlelit long table — the last three all added in the 2026-09-27 photo
-// pass. The cooler photo covers Sympathy/Everyday; the wedding photo covers
-// Weddings; the candlelit long table covers Events specifically ("Dinners,
-// openings, the long table" — a literal match), wherever a per-occasion
-// image is needed below.
+// Seven real photos now back this demo (SKILL §10), all but the original
+// hero/weekly-flowers shot and the cooler still life added in the
+// 2026-09-27 photo pass. Every occasion tile and almost every bouquet row
+// now has its own dedicated photo instead of a reused cooler-photo crop —
+// see OCCASION_IMAGES and BOUQUET_IMAGE_OVERRIDE below. The cooler photo is
+// kept only as the fallback for the one bouquet row ("Weekly café
+// arrangement") that still doesn't have one.
 const firstFloristImage = "/previews/firstFloristImage.webp";
 const coolerImage = "/demos/florist/cooler.webp";
 const weddingImage = "/demos/florist/wedding-table.webp";
 const longTableImage = "/demos/florist/long-table.webp";
+const sympathySprayImage = "/demos/florist/sympathy-spray.webp";
+const marketBunchImage = "/demos/florist/market-bunch.webp";
+const handTieImage = "/demos/florist/hand-tie.webp";
 
 // Same curve system.tsx sets as var(--d-ease-out) (not exported, so mirrored
 // here as the numeric tuple Motion's `ease` needs); entering/exiting content
@@ -108,11 +110,10 @@ function useHoverCapablePointer() {
 
 // One real photo per occasion tile where we have one, otherwise a distinct
 // slice of the cooler photo (§ signature detail 2) — order matches OCCASIONS
-// below (Weddings, Sympathy, Everyday, Events). Weddings and Events each get
-// their own real photo; Sympathy/Everyday share the cooler image, cropped
-// differently.
-const OCCASION_IMAGES = [weddingImage, coolerImage, coolerImage, longTableImage];
-const OCCASION_CROPS = ["50% 38%", "75% 20%", "35% 75%", "50% 55%"];
+// below (Weddings, Sympathy, Everyday, Events). All four now have their own
+// dedicated real photo (2026-09-27 photo pass, round 2).
+const OCCASION_IMAGES = [weddingImage, sympathySprayImage, marketBunchImage, longTableImage];
+const OCCASION_CROPS = ["50% 38%", "50% 32%", "50% 42%", "50% 55%"];
 const PREVIEW_W = 240;
 const PREVIEW_H = 300;
 
@@ -338,15 +339,20 @@ function AboutSection() {
 }
 
 // ── The shop — a plain ruled price list, thumbnails only on hover. ──────────
-// The cooler photo again, sliced differently per row (same real image as the
-// occasion crops above — no distinct bouquet photography exists yet).
+// The cooler photo, sliced differently per row — now only the fallback for
+// whichever row has no dedicated photo of its own (see the override below).
 const BOUQUET_CROPS = ["30% 20%", "70% 30%", "20% 60%", "80% 70%", "50% 15%", "45% 85%"];
 
-// Rows whose occasion has its own dedicated real photo (mirrors
-// OCCASION_IMAGES above) skip the cooler-photo crop entirely.
+// Rows with their own dedicated real photo, keyed by bouquet name rather
+// than occasion — "Everyday" alone covers two rows (hand-tie, market
+// bunch) that each need a different photo. Only "Weekly café arrangement"
+// still falls back to a cooler-photo crop.
 const BOUQUET_IMAGE_OVERRIDE: Record<string, { src: string; crop: string }> = {
-  Weddings: { src: weddingImage, crop: "50% 40%" },
-  Events: { src: longTableImage, crop: "50% 55%" },
+  "Seasonal hand-tie": { src: handTieImage, crop: "50% 35%" },
+  "Garden-style ceremony arch": { src: weddingImage, crop: "50% 40%" },
+  "Long-table dinner runner": { src: longTableImage, crop: "50% 55%" },
+  "Soft white standing spray": { src: sympathySprayImage, crop: "50% 30%" },
+  "Market bunch, wrapped": { src: marketBunchImage, crop: "50% 42%" },
 };
 
 function BouquetList() {
@@ -401,14 +407,14 @@ function BouquetList() {
                   }}
                 >
                   <Image
-                    src={BOUQUET_IMAGE_OVERRIDE[b.occasion]?.src ?? coolerImage}
+                    src={BOUQUET_IMAGE_OVERRIDE[b.name]?.src ?? coolerImage}
                     alt=""
                     fill
                     sizes="48px"
                     className="object-cover"
                     style={{
                       objectPosition:
-                        BOUQUET_IMAGE_OVERRIDE[b.occasion]?.crop ?? BOUQUET_CROPS[i % BOUQUET_CROPS.length],
+                        BOUQUET_IMAGE_OVERRIDE[b.name]?.crop ?? BOUQUET_CROPS[i % BOUQUET_CROPS.length],
                     }}
                   />
                 </div>

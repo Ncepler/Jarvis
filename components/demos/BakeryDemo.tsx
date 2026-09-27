@@ -290,9 +290,9 @@ function CakeOrders() {
       <Rise delay={0.12}>
         <div className="mx-auto mt-14 max-w-sm">
           <Media
-            label="The bakehouse bench"
-            img="/demos/bakery/bakehouse-bench.webp"
-            file="bakehouse-bench.jpg"
+            label="A finished cake"
+            img="/demos/bakery/cake.webp"
+            file="cake-1.jpg"
             ratio="4/5"
           />
         </div>
@@ -401,6 +401,7 @@ export function BakeryDemo({ tier = "basic" }: { tier?: Tier }) {
           ]}
           cta="See today's menu"
           mediaLabel="The bakehouse, early morning"
+          img="/demos/bakery/bakehouse-bench.webp"
         />
       </div>
       <CakeOrders />
