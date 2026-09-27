@@ -796,7 +796,12 @@ function Reel() {
           </h2>
         </RiseFromDark>
         <RiseFromDark delay={0.12} className="relative mx-auto mt-12 max-w-3xl">
-          <Placeholder label="REEL: live performance" file="reel.mp4" glow />
+          <Placeholder
+            label="REEL: live performance"
+            img="/demos/magician/cards.webp"
+            file="reel.mp4"
+            glow
+          />
           <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-0 flex items-center justify-center"
