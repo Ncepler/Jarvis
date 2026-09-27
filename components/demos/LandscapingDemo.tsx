@@ -8,7 +8,7 @@
 // "Stone & Sage Landscapes" is a sample brand for the demo, not a client.
 
 import { useReducedMotion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
   ANCHOR_SCROLL_CLASS,
   Contact,
@@ -23,6 +23,7 @@ import {
   Faq,
   Intro,
   Media,
+  MobileStickyCta,
   ProcessStepper,
   Rise,
   SceneBlock,
@@ -51,6 +52,10 @@ const THEME: DemoTheme = {
   font: "var(--font-tight)",
   heroScrim: "linear-gradient(180deg, rgba(12,17,11,.35), rgba(12,17,11,.85))",
   breakScrim: "linear-gradient(180deg, rgba(12,17,11,.55), rgba(12,17,11,.9))",
+  // Sharp-edged niche (SKILL §7 personality scale) — 4/2/0 radius tier.
+  radius: "2px",
+  radiusLg: "4px",
+  radiusSm: "0px",
 };
 
 const PHONE = "(516) 555-0123";
@@ -104,17 +109,55 @@ const FAQ = [
 
 // ── Day ↔ night lighting toggle — landscaping's signature interactive (§14f).
 // A full-bleed featured space that WIPES from day to night via clip-path
-// (~900ms, eased) when toggled — the same pitch real landscape lighting sites
-// make with a day rendering and a night one. Real day/night photography isn't
-// in the build yet, so both slots are labeled Media placeholders; the toggle
-// mechanism itself is fully working and keyboard-accessible (plain <button>s
-// with aria-pressed), so dropping real photos in later is a one-line swap.
-// Reduced motion: the wipe becomes an instant swap, no animated transition.
+// (~900ms, eased) — the same pitch real landscape lighting sites make with a
+// day rendering and a night one. This is the page's one named exception to
+// the 300ms UI ceiling: it's a rare, marketing-grade moment, not a control
+// used dozens of times a visit. Real day/night photography isn't in the
+// build yet, so both slots are labeled Media placeholders; the mechanism
+// itself is fully working, so dropping real photos in later is a one-line
+// swap.
+//
+// It plays itself once — the section auto-wipes day→night the first time
+// it's 60% in view (named purpose: show the feature without asking anyone to
+// find it), then hands control to a single real switch. Reduced motion skips
+// the auto-play trigger entirely (there is no wipe to demonstrate once the
+// transition itself is instant) and the switch always renders as a proper
+// `role="switch"`, so Space/Enter toggles it like any native control.
 function DayNightSignature() {
   const reduced = useReducedMotion();
   const [night, setNight] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const autoPlayed = useRef(false);
+
+  useEffect(() => {
+    if (reduced) return; // gentler, not zero: skip the self-playing demo, keep manual control
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !autoPlayed.current) {
+          autoPlayed.current = true;
+          setNight(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [reduced]);
+
+  const toggle = () => {
+    autoPlayed.current = true; // a manual toggle counts as "shown" — never auto-play over it
+    setNight((v) => !v);
+  };
+
   return (
-    <section className="relative w-full overflow-hidden" style={{ minHeight: "100svh" }}>
+    <section
+      ref={sectionRef}
+      className="relative w-full overflow-hidden d-grain"
+      style={{ minHeight: "100svh" }}
+    >
       <div className="absolute inset-0">
         <Media label="Patio — day" className="h-full w-full" rounded={false} />
       </div>
@@ -122,7 +165,7 @@ function DayNightSignature() {
         className="absolute inset-0"
         style={{
           clipPath: night ? "inset(0 0 0 0)" : "inset(0 0 0 100%)",
-          transition: reduced ? undefined : "clip-path 900ms cubic-bezier(0.16, 1, 0.3, 1)",
+          transition: reduced ? undefined : "clip-path 900ms var(--d-ease-out)",
         }}
       >
         <Media label="Patio — night, lights on" className="h-full w-full" rounded={false} />
@@ -142,48 +185,66 @@ function DayNightSignature() {
             come on. We design the after-dark view right alongside the daytime
             one, since that&apos;s usually the view that sells it.
           </p>
-          <div
-            className="mt-9 inline-flex overflow-hidden"
-            style={{ border: "1px solid var(--d-line)", borderRadius: "var(--d-radius)" }}
-            role="group"
-            aria-label="Day or night view"
+          {/* A single real switch, not two selectable buttons — Space/Enter
+              toggles it like any native control, and the sliding highlight is
+              transform-only (never width) so it stays on the compositor. */}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={night}
+            aria-label={
+              night
+                ? "Showing the after-dark view. Switch to day."
+                : "Showing the day view. Switch to after dark."
+            }
+            onClick={toggle}
+            className="d-press relative mt-9 inline-flex overflow-hidden outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{ border: "1px solid var(--d-line)", borderRadius: "var(--d-radius)", outlineColor: "var(--d-accent)" }}
           >
-            {(
-              [
-                ["Day", false],
-                ["After dark", true],
-              ] as const
-            ).map(([label, isNight]) => {
-              const on = night === isNight;
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  className="press px-6 py-3.5 text-[13px] font-semibold uppercase tracking-[0.08em] transition-colors"
-                  onClick={() => setNight(isNight)}
-                  aria-pressed={on}
-                  style={{
-                    background: on ? "var(--d-accent)" : "transparent",
-                    color: on ? "var(--d-onaccent)" : "var(--d-fg)",
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
+            <span
+              aria-hidden
+              className="absolute inset-y-0 left-0 w-1/2"
+              style={{
+                background: "var(--d-accent)",
+                transform: night ? "translateX(100%)" : "translateX(0%)",
+                transition: reduced ? undefined : "transform var(--d-dur-ui) var(--d-ease-in-out)",
+              }}
+            />
+            <span
+              aria-hidden
+              className="relative px-6 py-3.5 text-[13px] font-semibold uppercase tracking-[0.08em]"
+              style={{ color: night ? "var(--d-fg)" : "var(--d-onaccent)", transition: "color var(--d-dur-hover) ease" }}
+            >
+              Day
+            </span>
+            <span
+              aria-hidden
+              className="relative px-6 py-3.5 text-[13px] font-semibold uppercase tracking-[0.08em]"
+              style={{ color: night ? "var(--d-onaccent)" : "var(--d-fg)", transition: "color var(--d-dur-hover) ease" }}
+            >
+              After dark
+            </span>
+          </button>
         </Rise>
       </div>
     </section>
   );
 }
 
-// ── Specialties — a numbered ruled list, text only. The day↔night feature
-// that used to live above this list is now its own full-bleed section, so
-// this reads as a clean, confident list rather than a crowded combo block. ──
+// ── Specialties — a numbered accordion, text only. Each row expands on click
+// to reveal its detail (grid-template-rows 0fr→1fr, the same technique as the
+// shared Faq accordion in system.tsx, rebuilt locally since this row's shape
+// — numeral / title / chevron header, detail below — differs from Faq's
+// question/answer one). The day↔night feature that used to live above this
+// list is now its own full-bleed section, so this reads as a clean, confident
+// list rather than a crowded combo block. ──────────────────────────────────
 function Specialties() {
+  const [open, setOpen] = useState<Record<number, boolean>>({});
+  const uid = useId();
+  const toggle = (i: number) => setOpen((prev) => ({ ...prev, [i]: !prev[i] }));
+
   return (
-    <section className="w-full py-20 md:py-32">
+    <section className="w-full py-20 md:py-32 d-grain">
       <div className="mx-auto w-full max-w-[1200px] px-6 md:px-16">
         <Rise>
           <Eyebrow>What we do</Eyebrow>
@@ -191,25 +252,68 @@ function Specialties() {
             <TwoLine a="Six specialties." b="One property." />
           </div>
         </Rise>
+        <style>{`
+          .ls-specialty-panel {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows var(--d-dur-ui) var(--d-ease-out);
+          }
+          .ls-specialty-panel[data-open="true"] { grid-template-rows: 1fr; }
+          .ls-specialty-panel > div { overflow: hidden; min-height: 0; }
+          .ls-specialty-num { transition: color 200ms ease; }
+          .ls-specialty-chevron { transition: transform var(--d-dur-ui) var(--d-ease-out); }
+          .ls-specialty-chevron[data-open="true"] { transform: rotate(45deg); }
+          @media (prefers-reduced-motion: reduce) {
+            .ls-specialty-panel { transition: none; }
+            .ls-specialty-chevron { transition: none; }
+          }
+        `}</style>
         <div className="mt-14" style={{ borderTop: "1px solid var(--d-line)" }}>
-          {SERVICES.map((s, i) => (
-            <Rise key={s.title} delay={Math.min(i * 0.05, 0.25)}>
-              <div
-                className="grid grid-cols-1 gap-2 py-7 sm:grid-cols-[64px_220px_1fr] sm:items-baseline sm:gap-8"
-                style={{ borderBottom: "1px solid var(--d-line)" }}
-              >
-                <span className="text-[13px] font-semibold tracking-[0.1em]" style={{ color: "var(--d-accent)" }}>
-                  0{i + 1}
-                </span>
-                <h3 className="text-[19px] font-semibold" style={{ color: "var(--d-fg)" }}>
-                  {s.title}
-                </h3>
-                <p className="text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-                  {s.copy}
-                </p>
-              </div>
-            </Rise>
-          ))}
+          {SERVICES.map((s, i) => {
+            const isOpen = !!open[i];
+            const panelId = `${uid}-specialty-${i}`;
+            return (
+              <Rise key={s.title} delay={Math.min(i * 0.05, 0.25)}>
+                <div style={{ borderBottom: "1px solid var(--d-line)" }}>
+                  <button
+                    type="button"
+                    onClick={() => toggle(i)}
+                    aria-expanded={isOpen}
+                    aria-controls={panelId}
+                    className="d-press flex w-full items-center gap-6 py-7 text-left"
+                  >
+                    <span
+                      className="ls-specialty-num text-[13px] font-semibold tracking-[0.1em]"
+                      style={{ color: isOpen ? "var(--d-accent)" : "var(--d-muted)" }}
+                    >
+                      0{i + 1}
+                    </span>
+                    <span className="flex-1 text-[19px] font-semibold" style={{ color: "var(--d-fg)" }}>
+                      {s.title}
+                    </span>
+                    <span
+                      aria-hidden
+                      data-open={isOpen}
+                      className="ls-specialty-chevron shrink-0 text-[20px] leading-none"
+                      style={{ color: "var(--d-muted)" }}
+                    >
+                      +
+                    </span>
+                  </button>
+                  <div id={panelId} className="ls-specialty-panel" data-open={isOpen} role="region">
+                    <div>
+                      <p
+                        className="pb-7 pl-[52px] pr-6 text-[15px] leading-[1.6] sm:pl-[64px]"
+                        style={{ color: "var(--d-body)" }}
+                      >
+                        {s.copy}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Rise>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -217,10 +321,35 @@ function Specialties() {
 }
 
 // ── Projects — a text-only ruled list (project / town / scope), no photos.
-// The existing "WORK:" captions become the three columns directly. ──────────
+// The existing "WORK:" captions become the three columns directly, aligned to
+// the same fixed-width grid as the header row. Each row draws in a full-width
+// hairline under itself on hover — background-size 0%→100% on a 1px gradient,
+// the same technique as the shared .d-link underline (system.tsx/globals.css)
+// but horizontal and under the whole row instead of under text — so hovering
+// a row down the list reads as a confirm, not decoration. Hover-only, gated
+// to real pointers; a fine-pointer visitor is the only one who'd ever rest a
+// cursor on a row long enough to notice it. ─────────────────────────────────
 function ProjectsList() {
   return (
-    <section className="w-full py-24 md:py-36">
+    <section className="w-full py-24 md:py-36 d-grain">
+      <style>{`
+        .ls-row-hairline {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: 1px;
+          background-image: linear-gradient(90deg, var(--d-accent), var(--d-accent));
+          background-repeat: no-repeat;
+          background-position: left center;
+          background-size: 0% 100%;
+          transition: background-size 300ms var(--d-ease-out);
+          pointer-events: none;
+        }
+        @media (hover: hover) and (pointer: fine) {
+          .ls-row:hover .ls-row-hairline { background-size: 100% 100%; }
+        }
+      `}</style>
       <div className="mx-auto w-full max-w-[1200px] px-6 md:px-16">
         <Rise>
           <Eyebrow>Recent work</Eyebrow>
@@ -240,7 +369,7 @@ function ProjectsList() {
           {PROJECTS.map((p, i) => (
             <Rise key={p.name} delay={Math.min(i * 0.03, 0.2)}>
               <div
-                className="grid grid-cols-1 gap-1.5 py-5 sm:grid-cols-[1fr_200px_140px] sm:items-center sm:gap-6"
+                className="ls-row relative grid grid-cols-1 gap-1.5 py-5 sm:grid-cols-[1fr_200px_140px] sm:items-center sm:gap-6"
                 style={{ borderTop: "1px solid var(--d-line)" }}
               >
                 <span className="text-[16px] font-semibold" style={{ color: "var(--d-fg)" }}>
@@ -252,6 +381,7 @@ function ProjectsList() {
                 <span className="text-[13px] font-semibold uppercase tracking-[0.1em]" style={{ color: "var(--d-accent)" }}>
                   {p.scope}
                 </span>
+                <span aria-hidden className="ls-row-hairline" />
               </div>
             </Rise>
           ))}
@@ -305,7 +435,7 @@ export function LandscapingDemo({ tier = "basic" }: { tier?: Tier }) {
           it) — it now sits on solid --d-bg as its own quiet divider band. */}
       <div
         style={{ background: "var(--d-bg)", borderTop: "1px solid var(--d-line)", borderBottom: "1px solid var(--d-line)" }}
-        className="py-6"
+        className="py-6 d-grain"
       >
         <DemoMarquee terms={["Patios", "Retaining Walls", "Gardens", "Lighting", "Fire Pits"]} />
       </div>
@@ -360,6 +490,7 @@ export function LandscapingDemo({ tier = "basic" }: { tier?: Tier }) {
         hours="Mon–Sat, 7am–6pm"
         strip="Licensed & Insured · Free Consultations · Design-Build"
       />
+      <MobileStickyCta phone={PHONE} bookLabel="Book a consult" contactId="contact" />
     </DemoShell>
   );
 }
