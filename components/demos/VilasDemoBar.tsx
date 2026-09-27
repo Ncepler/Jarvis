@@ -17,9 +17,11 @@ import { SITE } from "@/lib/site";
 
 export type Tier = "basic" | "premium";
 
-// Single source for the bar's height, so DemoRoute's top-offset padding can
-// never drift out of sync with the bar itself.
-export const DEMO_BAR_OFFSET_CLASS = "pt-16";
+// The bar is `sticky` (in normal document flow), so it already reserves its
+// own height — DemoRoute must NOT add extra top padding on top of it (that
+// used to double up into a dead, wrongly-colored strip between this bar and
+// each demo's own header; see git history). Nothing to offset by anymore.
+export const DEMO_BAR_OFFSET_CLASS = "";
 
 export function VilasDemoBar({
   slug,
@@ -53,14 +55,21 @@ export function VilasDemoBar({
   const isPremium = tier === "premium";
 
   return (
-    <div className="sticky top-0 z-50 w-full border-b border-line bg-surface">
+    <div className="sticky top-3 z-50 w-full px-3">
       {nudge && (
         <style>{`
           @keyframes vilas-bar-nudge { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
           .vilas-bar-nudge { animation: vilas-bar-nudge 0.7s ease-in-out 1; }
         `}</style>
       )}
-      <div className="mx-auto grid h-16 max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 md:px-6">
+      <div
+        className="mx-auto grid h-11 max-w-[900px] grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-full border border-line/70 px-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-8px_rgba(0,0,0,0.12)] md:px-6"
+        style={{
+          background: "color-mix(in srgb, var(--color-surface) 72%, transparent)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        }}
+      >
         {/* wordmark — drops on mobile, per spec; toggle + CTA never do */}
         <div className="hidden items-center sm:flex">
           <Link href="/" className="flex items-center gap-2" aria-label={SITE.name}>
@@ -86,7 +95,7 @@ export function VilasDemoBar({
             aria-checked={isPremium}
             aria-label="Style price: $300 or $500"
             onClick={() => handleChange(isPremium ? "basic" : "premium")}
-            className="relative h-6 w-11 shrink-0 rounded-full border border-line bg-bg outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            className="press relative h-6 w-11 shrink-0 rounded-full border border-line bg-bg outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             <span
               aria-hidden
@@ -107,7 +116,7 @@ export function VilasDemoBar({
         <div className="flex items-center justify-end">
           <Link
             href={`/start?style=${slug}&tier=${tier}`}
-            className="whitespace-nowrap rounded-full bg-accent px-3.5 py-2 text-[12px] font-semibold text-surface transition-opacity duration-200 hover:opacity-90 sm:px-4 sm:text-[13px]"
+            className="press whitespace-nowrap rounded-full bg-accent px-3.5 py-2 text-[12px] font-semibold text-surface transition-opacity duration-200 hover:opacity-90 sm:px-4 sm:text-[13px]"
           >
             Start with this style
           </Link>

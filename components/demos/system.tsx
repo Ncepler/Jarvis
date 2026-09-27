@@ -540,34 +540,35 @@ export function DemoHero({
 }) {
   const skipOwnBg = pinned && !premium;
   return (
-    <section className="relative w-full" style={{ minHeight: "640px" }}>
+    <section className="relative w-full" style={{ minHeight: "max(640px, 100svh)" }}>
       {/* full-bleed background media slot — Premium's moving hero if given,
           else a real image, else the placeholder label. Skipped entirely
-          when `pinned`: the StickyScene wrapper already paints this. */}
+          when `pinned`: the StickyScene wrapper already paints this (and
+          StickyScene's own <Image priority> gets the LCP fast-path there). */}
       {!skipOwnBg && (
-        <div
-          className="group/media absolute inset-0"
-          style={{
-            backgroundColor: heroImage || premium ? undefined : "var(--d-surface)",
-            backgroundImage: !premium && heroImage ? `url("${heroImage}")` : undefined,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
+        <div className="group/media absolute inset-0" style={{ backgroundColor: "var(--d-surface)" }}>
           <FileBadge file={premium ? undefined : "hero.jpg"} />
           {premium ? (
             <PremiumHeroMedia concept={premium} fallbackImage={heroImage} />
+          ) : heroImage ? (
+            <Image
+              src={heroImage}
+              alt=""
+              fill
+              priority
+              fetchPriority="high"
+              sizes="100vw"
+              className="object-cover"
+            />
           ) : (
-            !heroImage && (
-              <div className="flex h-full w-full items-center justify-center">
-                <span
-                  className="text-[11px] font-semibold uppercase tracking-[0.18em]"
-                  style={{ color: "var(--d-muted)" }}
-                >
-                  {mediaLabel}
-                </span>
-              </div>
-            )
+            <div className="flex h-full w-full items-center justify-center">
+              <span
+                className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+                style={{ color: "var(--d-muted)" }}
+              >
+                {mediaLabel}
+              </span>
+            </div>
           )}
         </div>
       )}
@@ -579,9 +580,8 @@ export function DemoHero({
         style={{ background: "var(--d-hero-scrim)" }}
       />
       <div
-        className={`${wrap} relative flex min-h-[640px] flex-col justify-end ${
-          premium ? "pb-20 pt-32" : "pb-16 pt-28"
-        }`}
+        className={`${wrap} relative flex flex-col justify-end pt-28`}
+        style={{ minHeight: "max(640px, 100svh)", paddingBottom: "8vh" }}
       >
         {premium ? (
           <HeroReveal key="premium-hero">
@@ -662,12 +662,6 @@ export function DemoHero({
             </div>
           </Rise>
         )}
-        <div
-          className="mt-14 text-[12px] font-semibold uppercase tracking-[0.18em]"
-          style={{ color: "var(--d-muted)" }}
-        >
-          Scroll
-        </div>
       </div>
     </section>
   );

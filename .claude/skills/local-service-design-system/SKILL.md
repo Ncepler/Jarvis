@@ -21,6 +21,9 @@ description: >
 
 # Local-Service Demo Design System ("the Axel's / Sallem look")
 
+> **Update 2026-09-27 (overnight demo rebuild — supersedes the "no AI images" rule below for this pass).**
+> §1.2, §10, §11, §13f, §14a and §16f say demo placeholders never become AI-generated images. That rule is superseded for this rebuild: a small, hand-curated set of Higgsfield-generated photographs (12-credit budget, `seedream_v4_5`, rejected on any artifact, full 4K kept) now fills the highest-value hero/feature slots across florist, bakery, landscaping, power washing, lawn care and barber — exactly the direction §14a already flagged ("the planned Higgsfield power-wash hero"). This is a one-time, deliberate investment to kill the 62-empty-placeholder problem (the #1 measured defect), not a general license for stock/AI filler going forward: keep committing only curated, individually-reviewed images, never raw batch output, and the §12 honesty rules (no fabricated proof) still bind. Autobody, renovation and the magician already run on real/placeholder assets and this note doesn't touch them. Remaining empty slots on any style still use the §10 labeled-placeholder convention.
+
 ## 0. Read this first
 
 **What it is.** Axel's and Sallem are the *same underlying template*, re-skinned for two trades (same Cloudflare Stream video host, identical section skeleton, identical near-black theme color `#0b0b0c`). That is exactly Vilas's model — one strong system, re-flavored per niche. So this isn't loose inspiration; it's a working blueprint.
