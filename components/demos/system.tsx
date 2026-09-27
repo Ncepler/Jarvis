@@ -645,8 +645,11 @@ export function DemoHero({
   pinned,
 }: {
   eyebrow: string;
-  line1: string;
-  line2: string;
+  // ReactNode (not just string) so a caller can style part of the headline —
+  // e.g. italicizing one word — without an unsafe cast; HeroLine's own
+  // children type was already ReactNode, this just matches it up top.
+  line1: ReactNode;
+  line2: ReactNode;
   sub: string;
   primaryCta: string;
   phone: string;

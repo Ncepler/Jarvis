@@ -4,8 +4,18 @@
 // arrangements are the show, so "what we do" is occasion tiles, the work grid is
 // a bouquet gallery, and "why us" is a soft warm set — not the numbered grid.
 // "Wildstem Florals" is a sample brand for the demo, not a client.
+//
+// Craft pass (2026-09-27) — florist-specific motion/typography signature:
+// italic last word on the hero headline, a cursor-follow photo crop over the
+// occasion tiles, a clip-path reveal on the bouquet rows, and a ~2% paper
+// grain. Uses hooks (useState/useEffect/Motion values) directly, hence
+// "use client" below.
 
+"use client";
+
+import { AnimatePresence, motion, useMotionTemplate, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import Image from "next/image";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import {
   ANCHOR_SCROLL_CLASS,
   Contact,
@@ -20,6 +30,7 @@ import {
   Faq,
   FullBleedBreak,
   Media,
+  MobileStickyCta,
   Rise,
   SceneBlock,
   StickyReveal,
@@ -47,6 +58,10 @@ const THEME: DemoTheme = {
   display: "var(--font-fraunces)", // elegant serif headers
   heroScrim: "linear-gradient(180deg, rgba(251,248,243,.12), rgba(251,248,243,.78))",
   breakScrim: "linear-gradient(180deg, rgba(251,248,243,.4), rgba(251,248,243,.86))",
+  // Florist personality-scale radius tier (SKILL §7): 14/8/4.
+  radius: "8px",
+  radiusLg: "14px",
+  radiusSm: "4px",
 };
 const PHONE = "(516) 555-0167";
 const NAME = "Wildstem Florals";
@@ -61,6 +76,133 @@ const wrap = "mx-auto w-full max-w-[1200px] px-6 md:px-16";
 // placeholder (SKILL §10). New cooler/wedding-table photography was planned
 // for this rebuild but couldn't be fetched, so this stays the sole image.
 const firstFloristImage = "/previews/firstFloristImage.webp";
+
+// Same curve system.tsx sets as var(--d-ease-out) (not exported, so mirrored
+// here as the numeric tuple Motion's `ease` needs); entering/exiting content
+// uses ease-out per the demo motion rules.
+const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1];
+
+// ── Hover-capability gate ────────────────────────────────────────────────
+// Mirrors MagicianCursor.tsx's pointer probes: default to "no" so SSR and a
+// touch/coarse-pointer visitor never mount the cursor-follow listener below,
+// then flip on only once a real hover-capable, fine pointer is confirmed.
+function useHoverCapablePointer() {
+  const [capable, setCapable] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+    setCapable(mq.matches);
+    const onChange = () => setCapable(mq.matches);
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, []);
+  return capable;
+}
+
+// One real photo, four different slices of it (§ signature detail 2 — no
+// second photo exists yet, see the HERO BACKGROUND IMAGE note above, so each
+// occasion gets a distinct object-position crop of the same shop image
+// rather than a fabricated second asset).
+const OCCASION_CROPS = ["18% 25%", "75% 20%", "35% 75%", "88% 65%"];
+const PREVIEW_W = 240;
+const PREVIEW_H = 300;
+
+// ── Paper grain (§ signature detail 5) ───────────────────────────────────
+// A ~2% static noise texture for the cream background — lighter than the
+// shared `d-grain` utility (globals.css, tuned for dark styles at 3.5% and
+// explicitly not for florist), so it's a local one-off here rather than an
+// override of that shared class. Same fractal-noise data URI, just a gentler
+// opacity. Purely decorative and static — never animated, so it needs no
+// reduced-motion handling. Render once as the first child of any `relative`
+// section that should carry it.
+function PaperGrain() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0"
+      style={{
+        opacity: 0.02,
+        mixBlendMode: "overlay",
+        backgroundImage:
+          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+      }}
+    />
+  );
+}
+
+// Rare-delight hover detail, desktop-only: a small crop of the shop photo
+// trails the cursor over the occasion grid, previewing "real flowers" against
+// the intentionally-placeholder tiles beneath it. Purpose: delight + a taste
+// of the real photography, not feedback for an action — so it's gated hard
+// behind hover-capability and reduced motion (only mounted by the parent when
+// both checks pass) and never appears on a touch device or 100+/day control.
+function OccasionCursorPreview({
+  containerRef,
+  activeIndex,
+}: {
+  containerRef: RefObject<HTMLDivElement | null>;
+  activeIndex: number | null;
+}) {
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  // Spring, not a raw follow — a touch of inertia reads as considered motion
+  // rather than a snap-to-cursor glitch (feedback / rare delight).
+  const sx = useSpring(mx, { stiffness: 150, damping: 20 });
+  const sy = useSpring(my, { stiffness: 150, damping: 20 });
+  const tx = useTransform(sx, (v) => v - PREVIEW_W / 2);
+  const ty = useTransform(sy, (v) => v - PREVIEW_H / 2);
+  // Full transform string (never the x/y shorthand) so the browser only ever
+  // sees one compositor-friendly transform property.
+  const transform = useMotionTemplate`translate(${tx}px, ${ty}px)`;
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect();
+      mx.set(e.clientX - rect.left);
+      my.set(e.clientY - rect.top);
+    };
+    el.addEventListener("mousemove", onMove);
+    return () => el.removeEventListener("mousemove", onMove);
+  }, [containerRef, mx, my]);
+
+  return (
+    <motion.div
+      aria-hidden
+      className="pointer-events-none absolute left-0 top-0 z-10 hidden overflow-hidden md:block"
+      style={{
+        width: PREVIEW_W,
+        height: PREVIEW_H,
+        transform,
+        borderRadius: "var(--d-radius-sm)",
+        boxShadow: "0 20px 48px -16px rgba(42,38,34,.28)",
+      }}
+    >
+      <AnimatePresence>
+        {activeIndex !== null && (
+          <motion.div
+            key={activeIndex}
+            className="absolute inset-0"
+            style={{ transformOrigin: "center center" }}
+            initial={{ opacity: 0, transform: "scale(0.96)" }}
+            animate={{ opacity: 1, transform: "scale(1)" }}
+            exit={{ opacity: 0, transform: "scale(0.96)" }}
+            transition={{ duration: 0.2, ease: EASE_OUT }}
+          >
+            <Image
+              src={firstFloristImage}
+              alt=""
+              fill
+              sizes={`${PREVIEW_W}px`}
+              className="object-cover"
+              style={{ objectPosition: OCCASION_CROPS[activeIndex] }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
 
 // People self-select by why they're buying (§14h).
 const OCCASIONS = [
@@ -110,7 +252,8 @@ const FACTS: [string, string][] = [
 // value reasons folded in underneath. One section, not two. ─────────────────
 function AboutSection() {
   return (
-    <section className="w-full py-20 md:py-36">
+    <section className="relative w-full py-20 md:py-36">
+      <PaperGrain />
       <div className={wrap}>
         <div className="grid gap-12 md:grid-cols-[0.85fr_1fr] md:gap-16">
           <Rise>
@@ -182,10 +325,31 @@ function AboutSection() {
 }
 
 // ── The shop — a plain ruled price list, no photos (IMAGE CONSTRAINT). ───────
+// One real photo, sliced differently per row (same IMAGE CONSTRAINT as the
+// occasion crops above — no distinct bouquet photography exists yet).
+const BOUQUET_CROPS = ["30% 20%", "70% 30%", "20% 60%", "80% 70%", "50% 15%", "45% 85%"];
+
 function BouquetList() {
   return (
-    <section className="w-full py-16 md:py-28" style={{ background: "var(--d-surface)" }}>
+    <section className="relative w-full py-16 md:py-28" style={{ background: "var(--d-surface)" }}>
+      <PaperGrain />
       <div className={wrap}>
+        {/* Left-edge reveal on row hover (§ signature detail 3) — clip-path
+            only, gated to real hover pointers, gentler (opacity, no wipe)
+            under reduced motion. Scoped locally; doesn't touch globals.css. */}
+        <style>{`
+          .wf-thumb {
+            clip-path: inset(0 100% 0 0);
+            transition: clip-path var(--d-dur-ui, 240ms) var(--d-ease-out, cubic-bezier(0.23,1,0.32,1));
+          }
+          @media (hover: hover) and (pointer: fine) {
+            .wf-row:hover .wf-thumb { clip-path: inset(0); }
+          }
+          @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+            .wf-thumb { clip-path: inset(0); opacity: 0; transition: opacity 200ms ease; }
+            .wf-row:hover .wf-thumb { opacity: 1; }
+          }
+        `}</style>
         <Rise>
           <Eyebrow>The shop</Eyebrow>
           <div className="mt-5">
@@ -196,9 +360,35 @@ function BouquetList() {
           {BOUQUETS.map((b, i) => (
             <Rise key={b.name} delay={Math.min(i * 0.05, 0.25)}>
               <div
-                className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5"
+                className="wf-row relative flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5"
                 style={{ borderBottom: "1px solid var(--d-line)" }}
               >
+                {/* thumbnail crop, revealed from the row's left edge on hover
+                    — desktop only, sits in the section's own gutter so it
+                    never shifts the row's text (no width/left/padding
+                    animation, only clip-path). */}
+                <div
+                  aria-hidden
+                  className="wf-thumb pointer-events-none absolute hidden overflow-hidden md:block"
+                  style={{
+                    left: "-64px",
+                    top: "50%",
+                    width: 48,
+                    height: 48,
+                    transform: "translateY(-50%)",
+                    borderRadius: "var(--d-radius-sm)",
+                    border: "1px solid var(--d-line)",
+                  }}
+                >
+                  <Image
+                    src={firstFloristImage}
+                    alt=""
+                    fill
+                    sizes="48px"
+                    className="object-cover"
+                    style={{ objectPosition: BOUQUET_CROPS[i % BOUQUET_CROPS.length] }}
+                  />
+                </div>
                 <p
                   className="text-[20px] md:text-[24px]"
                   style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
@@ -211,7 +401,7 @@ function BouquetList() {
                 >
                   {b.occasion}
                 </span>
-                <span className="text-[15px] font-semibold" style={{ color: "var(--d-accent)" }}>
+                <span className="text-[15px] font-semibold tabular-nums" style={{ color: "var(--d-accent)" }}>
                   {b.price}
                 </span>
               </div>
@@ -225,8 +415,18 @@ function BouquetList() {
 
 // ── What we do — occasion tiles, the occasion name in the serif (§14h). ──────
 function OccasionTiles() {
+  const hoverCapable = useHoverCapablePointer();
+  const reducedMotion = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  // Only mount the cursor-follow preview (and its listener) for a confirmed
+  // hover-capable, fine pointer with motion allowed — never on touch, never
+  // under reduced motion.
+  const showCursorPreview = hoverCapable && !reducedMotion;
+
   return (
-    <section className="w-full py-24 md:py-40">
+    <section className="relative w-full py-24 md:py-40">
+      <PaperGrain />
       <div className={wrap}>
         <Rise>
           <Eyebrow>What we do</Eyebrow>
@@ -234,10 +434,17 @@ function OccasionTiles() {
             <TwoLine a="Tell us the moment." b="We'll make it." />
           </div>
         </Rise>
-        <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-5">
+        <div
+          ref={containerRef}
+          className="relative mt-12 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-5"
+          onMouseLeave={showCursorPreview ? () => setActiveIndex(null) : undefined}
+        >
           {OCCASIONS.map((o, i) => (
             <Rise key={o.name} delay={Math.min(i * 0.06, 0.18)}>
-              <figure className="group">
+              <figure
+                className="group"
+                onMouseEnter={showCursorPreview ? () => setActiveIndex(i) : undefined}
+              >
                 <div
                   className="overflow-hidden transition-transform duration-500 group-hover:-translate-y-1"
                   style={{ borderRadius: "var(--d-radius)", boxShadow: "0 8px 24px rgba(42,38,34,.06)" }}
@@ -258,6 +465,9 @@ function OccasionTiles() {
               </figure>
             </Rise>
           ))}
+          {showCursorPreview && (
+            <OccasionCursorPreview containerRef={containerRef} activeIndex={activeIndex} />
+          )}
         </div>
       </div>
     </section>
@@ -270,7 +480,8 @@ function OccasionTiles() {
 // it; degrades to a normal stacked column on mobile / short viewports). ─────
 function WeeklyFlowers() {
   return (
-    <section className="w-full py-20 md:py-32">
+    <section className="relative w-full py-20 md:py-32">
+      <PaperGrain />
       <div className={wrap}>
         <div className="grid items-start gap-10 md:grid-cols-[1fr_0.9fr] md:gap-16">
           <Rise>
@@ -321,7 +532,9 @@ export function FloristDemo({ tier = "basic" }: { tier?: Tier }) {
           heroImage={firstFloristImage}
           eyebrow="Flower shop · Rockville Centre"
           line1="Picked,"
-          line2="not produced."
+          // Pure typography, no motion (§ signature detail 1): last word set
+          // in italic Fraunces at the same size as the rest of the line.
+          line2={<>not <em style={{ fontStyle: "italic" }}>produced.</em></>}
           sub="Seasonal stems, arranged the morning you order them. Walk in, call ahead, or set up weekly flowers for the house."
           primaryCta="Order for pickup"
           phone={PHONE}
@@ -402,6 +615,7 @@ export function FloristDemo({ tier = "basic" }: { tier?: Tier }) {
         hours="Tue–Sat 9–6 · Sun 10–2"
         strip="Same-day until 2pm · Local delivery · Family-run"
       />
+      <MobileStickyCta phone={PHONE} bookLabel="Order" contactId="contact" />
     </DemoShell>
   );
 }
