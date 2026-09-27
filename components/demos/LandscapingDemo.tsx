@@ -3,7 +3,8 @@
 // Style demo — a landscape design/build homepage in the FOREST-DARK "Stone &
 // Sage" mood (SKILL §13g + §14f): a near-black warmed toward dark forest green,
 // sage accent, green-tinted scrims. The signature move is a day↔night lighting
-// toggle on a featured outdoor space. Same editorial spine as the other demos.
+// toggle on a featured outdoor space, built as a real clip-path wipe (not a
+// plain cross-fade) so it reads as the site's one showpiece interaction.
 // "Stone & Sage Landscapes" is a sample brand for the demo, not a client.
 
 import { useReducedMotion } from "motion/react";
@@ -20,17 +21,14 @@ import {
   type DemoTheme,
   Eyebrow,
   Faq,
-  FilterableWorkGrid,
-  FullBleedBreak,
   Intro,
+  Media,
   ProcessStepper,
   Rise,
   SceneBlock,
-  Section,
   StickyReveal,
   StickyScene,
   TwoLine,
-  ValueProps,
 } from "./system";
 import { heroConceptFor } from "@/lib/heroConcepts";
 import type { Tier } from "./VilasDemoBar";
@@ -64,10 +62,10 @@ const NAME = "Stone & Sage Landscapes";
 const firstLandscapingImage = "/previews/firstLandscapingImage.webp";
 
 const SERVICES = [
-  { title: "Design", copy: "A measured plan for the whole property (plantings, stone, lighting, grading) before anything is dug." },
-  { title: "Patios & walkways", copy: "Bluestone, pavers, and gravel laid on a base built to outlast the freeze-thaw, not just look good in spring." },
+  { title: "Design", copy: "A measured plan for the whole property — plantings, stone, lighting, grading — worked out before anything gets dug." },
+  { title: "Patios & walkways", copy: "Bluestone, pavers, and gravel laid on a base built to outlast freeze-thaw seasons, so it still looks right ten years in." },
   { title: "Retaining walls", copy: "Engineered to hold the grade and drain right, so the wall is still plumb a decade out." },
-  { title: "Garden & planting", copy: "Native and seasonal plantings chosen for your light and soil, set to fill in instead of fight the site." },
+  { title: "Garden & planting", copy: "Native and seasonal plantings picked for your light and soil, set to fill in fast and hold up through a real Long Island winter." },
   { title: "Maintenance", copy: "Seasonal care by the people who built it, so year five looks better than year one." },
   { title: "Custom features", copy: "Fire pits, pergolas, outdoor kitchens, water. The pieces that turn a yard into a place you sit." },
 ];
@@ -79,26 +77,20 @@ const PROCESS = [
   { title: "Grow", what: "Planting, then seasonal care by the same crew, so it fills in and keeps looking right.", duration: "Ongoing" },
 ];
 
-// Work grid is filterable by type (§14f). Tags match the chip set below.
-const WORK_CHIPS = ["Patios", "Walls", "Gardens", "Lighting", "Fire pits"];
-const WORK = [
-  { tag: "Patios", caption: "Bayside bluestone terrace: Port Washington" },
-  { tag: "Walls", caption: "Tiered retaining wall & steps: Huntington" },
-  { tag: "Gardens", caption: "Native meadow front yard: Northport" },
-  { tag: "Lighting", caption: "Low-voltage path & garden lighting" },
-  { tag: "Fire pits", caption: "Sunken fire pit & seating wall: Cold Spring Harbor" },
-  { tag: "Patios", caption: "Pool surround in bluestone: Huntington" },
-  { tag: "Gardens", caption: "Pollinator border & gravel garden" },
-  { tag: "Lighting", caption: "Uplit specimen trees & façade wash" },
-  { tag: "Walls", caption: "Dry-stack stone wall & planted terrace" },
-];
-
-const PROPS = [
-  { title: "Designed in-house", copy: "The crew that builds it drew it, so far less gets lost between the plan and the ground." },
-  { title: "Built to last", copy: "We build the base you can't see right, so the surface you can see stays put." },
-  { title: "Straight, written pricing", copy: "A real number on paper before we break ground. No surprises mid-project." },
-  { title: "Local & responsive", copy: "We're on the North Shore and we answer our phone. You deal with the people doing the work." },
-  { title: "We maintain what we plant", copy: "Seasonal care by the people who built it keeps the whole property reading right for years." },
+// Recent projects — text-only ruled list (name / town / scope), no photos
+// (this section skips imagery entirely). Every project name is the same
+// descriptor the gallery has always used; entries that didn't already name a
+// town use "North Shore," the same regional line used throughout this page.
+const PROJECTS = [
+  { name: "Bayside bluestone terrace", town: "Port Washington", scope: "Patios" },
+  { name: "Tiered retaining wall & steps", town: "Huntington", scope: "Walls" },
+  { name: "Native meadow front yard", town: "Northport", scope: "Gardens" },
+  { name: "Low-voltage path & garden lighting", town: "North Shore", scope: "Lighting" },
+  { name: "Sunken fire pit & seating wall", town: "Cold Spring Harbor", scope: "Fire pits" },
+  { name: "Pool surround in bluestone", town: "Huntington", scope: "Patios" },
+  { name: "Pollinator border & gravel garden", town: "North Shore", scope: "Gardens" },
+  { name: "Uplit specimen trees & façade wash", town: "North Shore", scope: "Lighting" },
+  { name: "Dry-stack stone wall & planted terrace", town: "North Shore", scope: "Walls" },
 ];
 
 const FAQ = [
@@ -111,120 +103,161 @@ const FAQ = [
 ];
 
 // ── Day ↔ night lighting toggle — landscaping's signature interactive (§14f).
-// Two-button cross-fade between a daylight still and a dusk-with-lights-on
-// still. The cross-fade is the whole pitch for the lighting service; reduced
-// motion drops the transition but keeps the tap toggle (the mobile path too).
-function DayNight() {
+// A full-bleed featured space that WIPES from day to night via clip-path
+// (~900ms, eased) when toggled — the same pitch real landscape lighting sites
+// make with a day rendering and a night one. Real day/night photography isn't
+// in the build yet, so both slots are labeled Media placeholders; the toggle
+// mechanism itself is fully working and keyboard-accessible (plain <button>s
+// with aria-pressed), so dropping real photos in later is a one-line swap.
+// Reduced motion: the wipe becomes an instant swap, no animated transition.
+function DayNightSignature() {
   const reduced = useReducedMotion();
   const [night, setNight] = useState(false);
-  const fade = reduced ? undefined : "opacity .6s ease";
   return (
-    <div>
-      <div
-        className="relative w-full overflow-hidden"
-        style={{ aspectRatio: "16/9", border: "1px solid var(--d-line)", borderRadius: "var(--d-radius)" }}
-      >
-        {/* DAY */}
-        <div
-          className="absolute inset-0 flex items-center justify-center p-4 text-center"
-          style={{ background: "var(--d-surface)", opacity: night ? 0 : 1, transition: fade }}
-        >
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--d-muted)" }}>
-            FEATURED: patio, DAY (16:9)
-          </span>
-        </div>
-        {/* NIGHT — landscape lighting on */}
-        <div
-          className="absolute inset-0 flex items-center justify-center p-4 text-center"
-          style={{ background: "var(--d-bg)", opacity: night ? 1 : 0, transition: fade }}
-        >
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--d-accent)" }}>
-            FEATURED: patio, NIGHT, lights on (16:9)
-          </span>
-        </div>
+    <section className="relative w-full overflow-hidden" style={{ minHeight: "100svh" }}>
+      <div className="absolute inset-0">
+        <Media label="Patio — day" className="h-full w-full" rounded={false} />
       </div>
-      {/* the toggle */}
       <div
-        className="mt-4 inline-flex overflow-hidden"
-        style={{ border: "1px solid var(--d-line)", borderRadius: "var(--d-radius)" }}
-        role="group"
-        aria-label="Day or night view"
+        className="absolute inset-0"
+        style={{
+          clipPath: night ? "inset(0 0 0 0)" : "inset(0 0 0 100%)",
+          transition: reduced ? undefined : "clip-path 900ms cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
       >
-        {[
-          ["Day", false],
-          ["After dark", true],
-        ].map(([label, isNight]) => {
-          const on = night === isNight;
-          return (
-            <button
-              key={String(label)}
-              type="button"
-              onClick={() => setNight(isNight as boolean)}
-              aria-pressed={on}
-              className="px-5 py-2.5 text-[13px] font-semibold uppercase tracking-[0.08em] transition-colors"
-              style={{
-                background: on ? "var(--d-accent)" : "transparent",
-                color: on ? "var(--d-onaccent)" : "var(--d-muted)",
-              }}
-            >
-              {label}
-            </button>
-          );
-        })}
+        <Media label="Patio — night, lights on" className="h-full w-full" rounded={false} />
       </div>
-    </div>
+      <div aria-hidden className="absolute inset-0" style={{ background: "var(--d-break-scrim)" }} />
+      <div
+        className="relative mx-auto flex w-full max-w-[1200px] flex-col justify-end px-6 pb-16 pt-28 md:px-16 md:pb-24"
+        style={{ minHeight: "100svh" }}
+      >
+        <Rise>
+          <Eyebrow>After dark</Eyebrow>
+          <div className="mt-5">
+            <TwoLine a="Same patio." b="After the sun goes down." />
+          </div>
+          <p className="mt-6 max-w-xl text-[17px] leading-[1.6]" style={{ color: "var(--d-fg)" }}>
+            Flip it to night and the uplighting, path lights, and fire feature
+            come on. We design the after-dark view right alongside the daytime
+            one, since that&apos;s usually the view that sells it.
+          </p>
+          <div
+            className="mt-9 inline-flex overflow-hidden"
+            style={{ border: "1px solid var(--d-line)", borderRadius: "var(--d-radius)" }}
+            role="group"
+            aria-label="Day or night view"
+          >
+            {(
+              [
+                ["Day", false],
+                ["After dark", true],
+              ] as const
+            ).map(([label, isNight]) => {
+              const on = night === isNight;
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  className="press px-6 py-3.5 text-[13px] font-semibold uppercase tracking-[0.08em] transition-colors"
+                  onClick={() => setNight(isNight)}
+                  aria-pressed={on}
+                  style={{
+                    background: on ? "var(--d-accent)" : "transparent",
+                    color: on ? "var(--d-onaccent)" : "var(--d-fg)",
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </Rise>
+      </div>
+    </section>
   );
 }
 
-// ── Services — the day↔night feature is the section hero, with the numbered
-// 01–06 list beneath it (§14f). ──────────────────────────────────────────────
-function LightingServices() {
+// ── Specialties — a numbered ruled list, text only. The day↔night feature
+// that used to live above this list is now its own full-bleed section, so
+// this reads as a clean, confident list rather than a crowded combo block. ──
+function Specialties() {
   return (
-    <Section>
-      <Rise>
-        <Eyebrow>What we do</Eyebrow>
-        <div className="mt-5">
-          <TwoLine a="Six specialties." b="One property." />
-        </div>
-      </Rise>
-      <div className="mt-12 grid items-center gap-10 md:grid-cols-[1.3fr_1fr] md:gap-14">
+    <section className="w-full py-20 md:py-32">
+      <div className="mx-auto w-full max-w-[1200px] px-6 md:px-16">
         <Rise>
-          <DayNight />
+          <Eyebrow>What we do</Eyebrow>
+          <div className="mt-5">
+            <TwoLine a="Six specialties." b="One property." />
+          </div>
         </Rise>
-        <Rise delay={0.1}>
-          <p className="text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
-            See it after dark
-          </p>
-          <h3 className="mt-3 text-[26px] font-semibold leading-[1.15]" style={{ color: "var(--d-fg)" }}>
-            Lighting is where a yard earns its keep.
-          </h3>
-          <p className="mt-4 text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-            Flip it to dusk and the same patio turns into a place you actually
-            use at night: warm uplighting in the trees, low path lights, and the
-            fire feature glowing. We design the night view alongside the day one,
-            because that&apos;s when most people fall for it.
-          </p>
+        <div className="mt-14" style={{ borderTop: "1px solid var(--d-line)" }}>
+          {SERVICES.map((s, i) => (
+            <Rise key={s.title} delay={Math.min(i * 0.05, 0.25)}>
+              <div
+                className="grid grid-cols-1 gap-2 py-7 sm:grid-cols-[64px_220px_1fr] sm:items-baseline sm:gap-8"
+                style={{ borderBottom: "1px solid var(--d-line)" }}
+              >
+                <span className="text-[13px] font-semibold tracking-[0.1em]" style={{ color: "var(--d-accent)" }}>
+                  0{i + 1}
+                </span>
+                <h3 className="text-[19px] font-semibold" style={{ color: "var(--d-fg)" }}>
+                  {s.title}
+                </h3>
+                <p className="text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+                  {s.copy}
+                </p>
+              </div>
+            </Rise>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Projects — a text-only ruled list (project / town / scope), no photos.
+// The existing "WORK:" captions become the three columns directly. ──────────
+function ProjectsList() {
+  return (
+    <section className="w-full py-24 md:py-36">
+      <div className="mx-auto w-full max-w-[1200px] px-6 md:px-16">
+        <Rise>
+          <Eyebrow>Recent work</Eyebrow>
+          <div className="mt-5">
+            <TwoLine a="Nine projects," b="around the North Shore." />
+          </div>
         </Rise>
+        <div className="mt-12" style={{ borderTop: "1px solid var(--d-line)" }}>
+          <div
+            className="hidden gap-6 pb-3 pt-5 text-[12px] font-semibold uppercase tracking-[0.12em] sm:grid sm:grid-cols-[1fr_200px_140px]"
+            style={{ color: "var(--d-muted)" }}
+          >
+            <span>Project</span>
+            <span>Town</span>
+            <span>Scope</span>
+          </div>
+          {PROJECTS.map((p, i) => (
+            <Rise key={p.name} delay={Math.min(i * 0.03, 0.2)}>
+              <div
+                className="grid grid-cols-1 gap-1.5 py-5 sm:grid-cols-[1fr_200px_140px] sm:items-center sm:gap-6"
+                style={{ borderTop: "1px solid var(--d-line)" }}
+              >
+                <span className="text-[16px] font-semibold" style={{ color: "var(--d-fg)" }}>
+                  {p.name}
+                </span>
+                <span className="text-[14px]" style={{ color: "var(--d-body)" }}>
+                  {p.town}
+                </span>
+                <span className="text-[13px] font-semibold uppercase tracking-[0.1em]" style={{ color: "var(--d-accent)" }}>
+                  {p.scope}
+                </span>
+              </div>
+            </Rise>
+          ))}
+        </div>
       </div>
-      {/* numbered service list */}
-      <div className="mt-16 grid gap-x-10 gap-y-9 md:grid-cols-2 lg:grid-cols-3">
-        {SERVICES.map((s, i) => (
-          <Rise key={s.title} delay={Math.min(i * 0.05, 0.25)}>
-            <div className="pt-5" style={{ borderTop: "1px solid var(--d-line)" }}>
-              <span className="text-[13px] font-semibold tracking-[0.1em]" style={{ color: "var(--d-accent)" }}>
-                0{i + 1}
-              </span>
-              <h3 className="mt-2 text-[19px] font-semibold" style={{ color: "var(--d-fg)" }}>
-                {s.title}
-              </h3>
-              <p className="mt-2 text-[14px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-                {s.copy}
-              </p>
-            </div>
-          </Rise>
-        ))}
-      </div>
-    </Section>
+    </section>
   );
 }
 
@@ -242,12 +275,11 @@ export function LandscapingDemo({ tier = "basic" }: { tier?: Tier }) {
           sub="We design and build the whole property (stone, plantings, lighting, water), then we keep it. One studio, one crew, one standard."
           primaryCta="Book a consultation"
           phone={PHONE}
-          mediaLabel="HERO VIDEO: finished property b-roll (16:9)"
+          mediaLabel="Hero — finished property"
           premium={tier === "premium" ? PREMIUM_HERO : undefined}
         />
         <SceneBlock>
           <StickyReveal>
-            <DemoMarquee terms={["Patios", "Retaining Walls", "Gardens", "Lighting", "Fire Pits"]} />
             <div id="about" className={ANCHOR_SCROLL_CLASS}>
               <Intro
                 eyebrow="Who we are"
@@ -255,7 +287,7 @@ export function LandscapingDemo({ tier = "basic" }: { tier?: Tier }) {
                 line2="One crew."
                 paragraphs={[
                   "Most yards get passed between a designer, a mason, and a landscaper who never talk. The seams show.",
-                  "Stone & Sage draws it, builds it, and maintains it with our own people, so the property reads as one finished idea, not three.",
+                  "Stone & Sage draws it, builds it, and maintains it with our own people, so the property reads like it was planned by one hand.",
                 ]}
                 badges={[
                   ["Design through maintenance", "Full scope"],
@@ -268,9 +300,19 @@ export function LandscapingDemo({ tier = "basic" }: { tier?: Tier }) {
           </StickyReveal>
         </SceneBlock>
       </StickyScene>
-      <div id="services" className={ANCHOR_SCROLL_CLASS}>
-        <LightingServices />
+      {/* Marquee moved out from over the pinned hero image (it used to ride
+          the StickyScene as a SceneBlock child, fighting the photo underneath
+          it) — it now sits on solid --d-bg as its own quiet divider band. */}
+      <div
+        style={{ background: "var(--d-bg)", borderTop: "1px solid var(--d-line)", borderBottom: "1px solid var(--d-line)" }}
+        className="py-6"
+      >
+        <DemoMarquee terms={["Patios", "Retaining Walls", "Gardens", "Lighting", "Fire Pits"]} />
       </div>
+      <div id="services" className={ANCHOR_SCROLL_CLASS}>
+        <Specialties />
+      </div>
+      <DayNightSignature />
       <ProcessStepper
         eyebrow="Our process"
         line1="Design."
@@ -278,39 +320,13 @@ export function LandscapingDemo({ tier = "basic" }: { tier?: Tier }) {
         steps={PROCESS}
         note="Most projects run a few weeks to a full season, depending on scope. We give you a real schedule before we break ground."
       />
-      <FullBleedBreak
-        eyebrow="See the transformation"
-        line1="We read the land first."
-        line2="Then we build for it."
-        paragraph="Grading, drainage, and light decide what a yard can be long before the stone goes down. We plan for the property you have, not a photo of someone else's."
-        checklist={[
-          "Free on-site consultation",
-          "Our own crew, no subs",
-          "Plan before we break ground",
-          "Licensed & insured",
-        ]}
-        cta="Walk the property with us"
-        mediaLabel="TRANSFORMATION: before/after (16:9)"
-      />
       <div id="work" className={ANCHOR_SCROLL_CLASS}>
-        <FilterableWorkGrid
-          eyebrow="Recent work"
-          line1="Work you can"
-          line2="stand in."
-          chips={WORK_CHIPS}
-          items={WORK}
-        />
+        <ProjectsList />
       </div>
-      <ValueProps
-        eyebrow="Why hire us"
-        line1="Reasons it"
-        line2="stays put."
-        props={PROPS}
-      />
       <Faq
         eyebrow="Questions"
-        line1="The stuff"
-        line2="people ask."
+        line1="What neighbors"
+        line2="usually ask us."
         items={FAQ}
       />
       <div id="contact" className={ANCHOR_SCROLL_CLASS}>
