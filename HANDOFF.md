@@ -1,99 +1,86 @@
-# HANDOFF — updated 2026-09-27 (second photo folder, round 1 of 3)
+# HANDOFF — updated 2026-09-27 (second photo folder, round 2 of 3)
 
 ## Current state
 - Deployed: production (`vilas.studio`) is `READY` as of commit `556f023`
-  (verified via Vercel MCP). The round below (commits `82372cc`/`34b9740`)
-  is pushed to `claude/sleepy-newton-uaamxu` but **not yet merged to
-  `main`** — Noah said he has 2 more upload rounds coming from this same
-  "higgsfield-9-27" folder, so main is being held until all 3 land rather
-  than fast-forwarding after each one. Builds clean locally: `npx tsc
-  --noEmit`, `next lint`, `next build` all pass; all 9 `/demos/demo-*`
-  routes prerender.
-- **Second photo folder, round 1 of 3** — a fresh, separate batch from
-  Noah's own computer (`~/Downloads/higgsfield-9-27`), delivered the same
-  way as before (chat attachments, 5 at a time — this session cannot reach
-  a local folder path directly, only chat uploads; see Gotchas). Verified
-  by eye plus a Playwright pass against a local `next start` build (no
-  direct network to `vilas.studio` or Higgsfield's CDN from this sandbox,
-  so verification runs locally, not against the live URL). Landed and wired:
-  - `autobody/hero.webp` — low-angle front-end shot, dark teal-lit garage.
-    **Replaced** `AutoBodyDemo.tsx`'s hero outright — the old photo (a
-    mechanic pouring oil) visibly showed real **Mercedes-Benz** branding
-    (tristar on the jacket AND the oil bottle), a real-brand exposure this
-    demo shouldn't carry, on top of being a bright mood mismatch for
-    GRAPHITE-DARK. One photo fixed both problems.
-  - `landscaping/hero-patio.webp` — golden-hour patio/seat-wall framed
-    through two porch columns. **Replaced** `LandscapingDemo.tsx`'s hero
-    outright — the old photo was a worker pushing a wheelbarrow through
-    autumn leaf litter, an unrelated fall-cleanup labor shot, not the
-    finished-hardscape aspirational image this niche's hero needs.
-  - `renovation/kitchen-traditional.webp` — traditional wood-tone kitchen
-    island. Added as a 10th `WORK` item in `RenovationDemo.tsx` (tag
-    "Kitchen"). **Had to be sepia/warm-toned with `sharp` (`modulate`
-    saturation .35 + `tint` 214/196/168)** before use — the source was full
-    color and clashed hard against the existing `renovation3.*` set, which
-    all share a warm-sepia grade. Caught by eye during the Playwright pass,
-    not obvious from the source photo alone.
-  - `florist/long-table.webp` — a formal candlelit long table. Given its
-    own dedicated slot on the **Events** occasion specifically (tile,
-    cursor-preview crop, and the "Long-table dinner runner" bouquet row) —
-    Events' own copy says "the long table," a literal match. `FloristDemo`
-    now has `OCCASION_IMAGES`/`BOUQUET_IMAGE_OVERRIDE` picking per-occasion
-    instead of only Weddings having a dedicated photo.
-  - **Bonus fix, found during Playwright verification, unrelated to any new
-    photo**: `FloristDemo.tsx`'s `OccasionCursorPreview` box always cast its
-    drop-shadow, even before the first hover (when nothing is showing) —
-    visible as an empty shadowed square sitting near the section heading on
-    page load. Fixed by gating `boxShadow` on `activeIndex !== null`.
-  - **One image from this round was NOT used as-is**: a magician "cards
-    flying in the dark" photo had a subtle hand-anatomy flaw on close
-    inspection (crop saved for reference: ask Claude or check the session
-    transcript). Generated 2 replacement candidates via
-    `mcp__Higgsfield__generate_image` (`gpt_image_2_5`, job ids
-    `3f981fd4-dba8-48fa-885a-e6d3107905dd` and
-    `4f2e6b03-7725-45b7-8e28-7021b0102b39`, ~2.75 credits each) but **could
-    not download either** — same CDN network block as always. Sitting
-    unused in Higgsfield history until Noah pulls one down and uploads it;
-    `MagicianDemo.tsx`'s "REEL: live performance" `Placeholder` is the
-    intended slot (already has an `img` prop, just needs the path). 4 of
-    the 5 remake credits Noah offered are still unspent.
-- **First photo folder (the original 11-image Higgsfield batch) is fully in
-  and wired**, shipped to `main`/production earlier — see git log around
-  commit `45216ce` for the itemized breakdown (florist cooler + wedding
-  table, magician portrait, powerwash before/after, landscaping day/night,
-  bakery case + bakehouse bench, barber shop, lawncare hero replacement).
-  Not repeated here to keep this file short; nothing from that batch needs
-  further action.
-- **The Emil Kowalski/Apple-interface craft pass** (shared motion tokens in
-  `system.tsx`/`globals.css`, per-style signature details, 2 review-animation
-  fixes) shipped to production earlier this session too — see git log around
-  commit `141f22c` for the full breakdown. Nothing outstanding from it.
+  (verified via Vercel MCP). Everything below is pushed to
+  `claude/sleepy-newton-uaamxu` but **not yet merged to `main`** — Noah
+  said he has 3 upload rounds total from this "higgsfield-9-27" folder;
+  main is held until all 3 land rather than fast-forwarding after each one.
+  Builds clean locally: `npx tsc --noEmit`, `next lint`, `next build` all
+  pass; all 9 `/demos/demo-*` routes prerender.
+- **Second photo folder, round 1 of 3** (commits `82372cc`/`34b9740`) —
+  `autobody/hero.webp` replaced a hero that visibly showed real
+  **Mercedes-Benz** branding; `landscaping/hero-patio.webp` replaced a
+  mismatched fall-cleanup labor photo; `renovation/kitchen-traditional.webp`
+  added as a 10th `WORK` item (had to be sepia-toned with `sharp` to match
+  the existing sepia set); `florist/long-table.webp` gave the Events
+  occasion its own photo. Also fixed a pre-existing bug: `FloristDemo`'s
+  cursor-preview box cast a shadow at rest before any hover. Full detail in
+  that commit range if needed — not repeated here.
+- **Second photo folder, round 2 of 3** (commits `91c34e4`/`7cbe0ff`) —
+  landed and wired:
+  - `florist/hand-tie.webp` (mixed roses) → "Seasonal hand-tie" bouquet row.
+  - `florist/market-bunch.webp` (kraft-wrapped wildflowers) → "Market
+    bunch, wrapped" bouquet row AND the Everyday occasion tile.
+  - `florist/sympathy-spray.webp` (white lily standing spray on an easel)
+    → "Soft white standing spray" bouquet row AND the Sympathy occasion
+    tile. **All 4 florist occasion tiles now have their own dedicated real
+    photo** (previously Sympathy/Everyday shared cooler-photo crops).
+    `BOUQUET_IMAGE_OVERRIDE` re-keyed from occasion to bouquet `name`,
+    since "Everyday" alone covers 2 rows needing different photos — 5 of 6
+    bouquet rows are real now, only "Weekly café arrangement" still falls
+    back to the cooler photo.
+  - `bakery/cake.webp` (finished piped-buttercream cake) → `CakeOrders`'s
+    "Need a cake?" section. **Swapped places** with `bakehouse-bench.webp`
+    (proofing baskets/oven), which moved to the "Behind the counter — In by
+    4am" `FullBleedBreak` instead — a much better match for both slots than
+    round 1's original placement (a bench photo under "need a cake?" never
+    quite fit).
+  - **One image from this round was unusable**: a "power-washed white
+    garage door" photo came back almost entirely blown-out/overexposed —
+    confirmed by boosting contrast in `sharp`, which recovered almost no
+    detail. Regenerated 2 replacement candidates via `generate_image`
+    (`gpt_image_2_5`, job ids `1d67034b-bab1-4410-b545-bd6965908c8b` and
+    `4a5508a3-4d2a-4e58-8c35-d0e94ec72243`) but hit the same download block
+    as the magician remakes below — unclaimed in Higgsfield history. No
+    confirmed destination for this one yet either (`PowerWashDemo`'s
+    before/after slider already has real photos from round 1; this would
+    need a "before" companion to pair with, which didn't come in this
+    batch) — ask Noah what it was meant to show before wiring it anywhere.
+  - **Round 1's magician "cards flying" replacement is still unclaimed
+    too** (job ids `3f981fd4-dba8-48fa-885a-e6d3107905dd` and
+    `4f2e6b03-7725-45b7-8e28-7021b0102b39`). **4 of the 5 remake credits
+    are now spent** (magician + powerwash); 1 remains.
+- **First photo folder (the original 11-image batch) and the Emil
+  Kowalski/Apple craft pass** are both fully shipped to production already
+  — see git log around `45216ce` and `141f22c`. Nothing outstanding from
+  either; not repeated here to keep this file short.
 
 ## Blocked on Noah
-- **2 more upload rounds still coming** from the same `~/Downloads/
-  higgsfield-9-27` folder — Noah said "I'll do 3 rounds" and this HANDOFF
-  covers round 1 of 3. Keep using the same flow: he attaches ~5 images in
-  chat (can't hand over a local folder path directly, see Gotchas), Claude
-  identifies each by content, `sharp`-converts to webp q82, finds the best
-  real destination in the relevant demo file (don't assume a manifest
-  exists for this folder the way the original 11-image batch had one —
-  read the target component to find the actual empty/weak slot), wires it,
+- **1 more upload round still coming** from the same `~/Downloads/
+  higgsfield-9-27` folder (this HANDOFF covers round 2 of 3). Same flow:
+  he attaches ~5 images in chat (can't hand over a local folder path
+  directly, see Gotchas), Claude identifies each by content, `sharp`-
+  converts to webp q82, finds the best real destination by reading the
+  target component fresh (no manifest exists for this folder), wires it,
   verifies with `tsc`/lint/build + a local Playwright pass, commits images
   and code separately.
-- **The magician "cards flying" replacement is stuck on the same download
-  block** — see the bullet above for the 2 unclaimed job IDs. Noah needs to
-  pull one of those 2 candidates from his Higgsfield history and upload it
-  like any other image; only then can `MagicianDemo.tsx`'s REEL placeholder
-  get its `img`.
+- **4 generated replacement candidates are stuck unclaimed** in Higgsfield
+  history, same CDN download block as always — 2 for the magician "cards
+  flying" photo (round 1), 2 for a blown-out power-wash photo (round 2, and
+  this one still needs a decision on where it'd even go — see round 2
+  notes above). Noah needs to pull one of each pair down and upload it like
+  any other image. Only 1 of the 5 offered remake credits is left.
 - No pull request opened. `main` is intentionally NOT fast-forwarded yet —
-  wait for all 3 upload rounds, then fast-forward and confirm the Vercel
-  deploy like the last few rounds.
+  wait for round 3, then fast-forward and confirm the Vercel deploy like
+  the last few rounds.
 
 ## Next up (ordered)
-1. Receive and wire upload rounds 2 and 3 from the higgsfield-9-27 folder.
-2. Get a clean magician "cards" replacement in (2 candidates already
-   generated, just need downloading — see Blocked on Noah).
-3. Fast-forward `main`, confirm Vercel green, once all 3 rounds are in.
+1. Receive and wire upload round 3 from the higgsfield-9-27 folder.
+2. Get clean replacements in for the magician "cards" photo and (if it gets
+   a real destination) the power-wash photo — 4 candidates already
+   generated, just need downloading — see Blocked on Noah.
+3. Fast-forward `main`, confirm Vercel green, once round 3 is in.
 4. TRFox screenshot capture (pending from before this session).
 5. Real Higgsfield hero clips for Premium tier.
 
