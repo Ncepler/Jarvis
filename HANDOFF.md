@@ -1,119 +1,122 @@
-# HANDOFF — updated 2026-09-27 (all 11 real photos landed)
+# HANDOFF — updated 2026-09-27 (second photo folder, round 1 of 3)
 
 ## Current state
-- Deployed: `main` fast-forwarded to `45216ce` and confirmed `READY` on
-  production (`vilas.studio` / `www.vilas.studio`), deployment
-  `dpl_EoSHVmLyQaYxj1MQyvFpFZWg3nyx`, verified via the Vercel MCP tools.
-  This carries the full Emil Kowalski/Apple craft pass AND all three
-  real-photo batches below — `main` and `claude/sleepy-newton-uaamxu` are
-  now identical. Builds clean locally: `npx tsc --noEmit`, `next lint`,
-  `next build` all pass; all 9 `/demos/demo-*` routes prerender.
-- **All 11 of the original Higgsfield photos are in and wired** — the
-  network block on this sandbox never got resolved directly; Noah worked
-  around it himself by downloading each batch and re-uploading as chat
-  attachments (5-at-a-time upload limit is why it happened in 3 rounds).
-  That's the resolution path now, not widening network access. Landed in
-  `public/demos/<slug>/*.webp`:
-  - `florist/cooler.webp` — walk-in cooler still life, covers
-    Sympathy/Everyday/Events. `florist/wedding-table.webp` — long-table
-    wedding setting, covers the Weddings occasion specifically. Both wired
-    into `FloristDemo.tsx`'s occasion cursor-preview, bouquet row
-    thumbnails, and occasion tiles grid (an `OCCASION_IMAGES` array now
-    picks per-occasion; previously a bare `<Media>` placeholder with no
-    image at all, or a reused hero crop).
-  - `magician/portrait.webp` — dark theatrical portrait, fanned cards, gold
-    rim light. Fills `MagicianDemo.tsx`'s `About` section PORTRAIT slot;
-    `Placeholder` gained an optional `img` prop (mirrors `system.tsx`'s
-    `Media`) to carry it, existing gold shimmer sweep plays over it.
-  - `powerwash/driveway-before.webp` + `driveway-after.webp` — same framing,
-    stained/mossy vs. clean. Wired into `PowerWashDemo.tsx`'s
-    `WashTransformation` slider via `BeforeAfterSlider`'s existing
-    `beforeImg`/`afterImg` props (no component change needed there).
-  - `landscaping/patio-night.webp` + `patio-day.webp` — same stone patio/
-    fire-pit seating wall, blue-hour and golden-hour. Both slots of
-    `LandscapingDemo.tsx`'s day/night toggle are now real photos via
-    `Media`'s existing `img` prop.
-  - `bakery/the-case.webp` — the pastry case (croissants, cookies,
-    focaccia). Fills `BakeryDemo.tsx`'s scroll-scaled case photo via
-    `Media`'s `img` prop. `bakery/bakehouse-bench.webp` — proofing baskets,
-    flour, the wood-fired oven — fills the `CakeOrders` section's bench shot
-    the same way.
-  - `barber/shop.webp` — the shop floor, red leather chairs, brass, warm
-    light. Fills `BarberDemo.tsx`'s `FullBleedBreak` "The shop" scene via
-    its existing `img` prop.
-  - `lawncare/hero-lawn.webp` — striped, dew-lit lawn at a white Colonial.
-    **Replaced** `LawnCareDemo.tsx`'s hero photo outright (the old one was a
-    generic grass close-up with apartment buildings in the background —
-    wrong setting for this niche), not just filling a placeholder.
-  - All touched demo files verified clean each round: `tsc --noEmit`,
-    `next lint`, `next build` (all 9 demo routes still prerender).
-- **A full Emil Kowalski / Apple-interface craft pass landed on top of last
-  session's rebuild**, across shared system + all 9 styles. Shared
-  (`components/demos/system.tsx` + `app/globals.css`, all `.demo-shell`
-  scoped, main site untouched):
-  - New motion tokens (`--d-ease-out/-in-out/-drawer`, `--d-dur-press/hover/
-    ui/reveal/media`) extending the existing `--ease-out-expo` pattern.
-  - Reveal (`Rise`/`StickyReveal`) retuned to 8px/420ms/-4% margin.
-  - Hero entrance choreography is now pure CSS keyframes (image settles
-    1.06→1 over 1400ms, headline lines mask in, then kicker/paragraph/
-    buttons rise staggered) — runs off the main thread, both hero tiers
-    share one timing.
-  - `StickyScene`'s scroll-linked image scale now prefers a
-    `view-timeline-name` CSS path (no JS scroll listener) where supported,
-    falling back to the existing rAF mechanism.
-  - `Faq` rebuilt on `grid-template-rows` (was a Motion height animation);
-    `BeforeAfterSlider` got a spring-scaled handle, a first-reveal hint,
-    shift+arrow keyboard step, position-based label fade; `DemoMarquee` gets
-    an edge-fade mask and pauses on hover/offscreen at ~40px/s.
-  - New `MobileStickyCta` component (each style wires one in); `DemoFooter`
-    got the oversized cropped-wordmark treatment; `TwoLine`/`CtaBand`
-    headlines are now full-contrast on both lines (no more greyed second
-    line — that was never an actual design-spec requirement, just an
-    earlier implementation choice).
-  - New CSS utilities, all `.demo-shell`-scoped: `.d-press`, `.d-link`,
-    `.d-img-hover`, `.d-crisp-edge`, `.d-float`, `.d-grain`,
-    `.d-feature-reveal`, `.d-material` (w/ reduced-transparency/contrast
-    fallbacks), `.d-sticky-cta`, plus a mobile-native baseline.
-  - `DemoHero.line1`/`.line2` widened from `string` to `ReactNode` (safe
-    superset) so a caller can style part of a headline without a cast.
-  - `DemoTheme` gained optional `radiusLg`/`radiusSm` tiers.
-- **Per-style signature details**, one subagent per file — see each style's
-  `.review/<slug>/motion.md` (gitignored, local only) for the itemized gate
-  report. Highlights: florist (cursor-follow occasion preview, italic hero
-  word), bakery (open/closed status chip, scroll-scaled case photo),
-  landscaping (day/night now auto-plays once), power wash (full-bleed 88svh
-  slider + text-a-photo thread), lawn care (custom estimate slider, no
-  counting animation), barber (walk-ins status chip, brass price-board
-  frame), magician (interruptible card flip, canvas pause on
-  offscreen/hidden-tab), autobody (layoutId color-ring, found & fixed a
-  real dead-zone bug last session), renovation (scroll-driven progress
-  line).
-- Two review-animations violations found and fixed repo-wide: `HeroReveal`
-  (system.tsx) and `RiseFromDark` (MagicianDemo.tsx) were animating Motion's
-  `y` shorthand (not hardware-accelerated) — both now animate a full
-  `transform` string.
-- **One commit-history wrinkle** (functionally harmless): the AutoBodyDemo
-  and BakeryDemo craft-pass commits collided during a batch commit (a `git
-  add` with an already-gitignored `.review/` path silently failed the whole
-  `&&` chain, but had already staged both files from two separate earlier
-  attempts) — both files' changes are correctly committed and pushed, just
-  both landed under the "Autobody craft pass" commit message instead of two
-  separate ones. Not rewritten/force-pushed to fix since the branch was
-  already pushed; purely cosmetic.
+- Deployed: production (`vilas.studio`) is `READY` as of commit `556f023`
+  (verified via Vercel MCP). The round below (commits `82372cc`/`34b9740`)
+  is pushed to `claude/sleepy-newton-uaamxu` but **not yet merged to
+  `main`** — Noah said he has 2 more upload rounds coming from this same
+  "higgsfield-9-27" folder, so main is being held until all 3 land rather
+  than fast-forwarding after each one. Builds clean locally: `npx tsc
+  --noEmit`, `next lint`, `next build` all pass; all 9 `/demos/demo-*`
+  routes prerender.
+- **Second photo folder, round 1 of 3** — a fresh, separate batch from
+  Noah's own computer (`~/Downloads/higgsfield-9-27`), delivered the same
+  way as before (chat attachments, 5 at a time — this session cannot reach
+  a local folder path directly, only chat uploads; see Gotchas). Verified
+  by eye plus a Playwright pass against a local `next start` build (no
+  direct network to `vilas.studio` or Higgsfield's CDN from this sandbox,
+  so verification runs locally, not against the live URL). Landed and wired:
+  - `autobody/hero.webp` — low-angle front-end shot, dark teal-lit garage.
+    **Replaced** `AutoBodyDemo.tsx`'s hero outright — the old photo (a
+    mechanic pouring oil) visibly showed real **Mercedes-Benz** branding
+    (tristar on the jacket AND the oil bottle), a real-brand exposure this
+    demo shouldn't carry, on top of being a bright mood mismatch for
+    GRAPHITE-DARK. One photo fixed both problems.
+  - `landscaping/hero-patio.webp` — golden-hour patio/seat-wall framed
+    through two porch columns. **Replaced** `LandscapingDemo.tsx`'s hero
+    outright — the old photo was a worker pushing a wheelbarrow through
+    autumn leaf litter, an unrelated fall-cleanup labor shot, not the
+    finished-hardscape aspirational image this niche's hero needs.
+  - `renovation/kitchen-traditional.webp` — traditional wood-tone kitchen
+    island. Added as a 10th `WORK` item in `RenovationDemo.tsx` (tag
+    "Kitchen"). **Had to be sepia/warm-toned with `sharp` (`modulate`
+    saturation .35 + `tint` 214/196/168)** before use — the source was full
+    color and clashed hard against the existing `renovation3.*` set, which
+    all share a warm-sepia grade. Caught by eye during the Playwright pass,
+    not obvious from the source photo alone.
+  - `florist/long-table.webp` — a formal candlelit long table. Given its
+    own dedicated slot on the **Events** occasion specifically (tile,
+    cursor-preview crop, and the "Long-table dinner runner" bouquet row) —
+    Events' own copy says "the long table," a literal match. `FloristDemo`
+    now has `OCCASION_IMAGES`/`BOUQUET_IMAGE_OVERRIDE` picking per-occasion
+    instead of only Weddings having a dedicated photo.
+  - **Bonus fix, found during Playwright verification, unrelated to any new
+    photo**: `FloristDemo.tsx`'s `OccasionCursorPreview` box always cast its
+    drop-shadow, even before the first hover (when nothing is showing) —
+    visible as an empty shadowed square sitting near the section heading on
+    page load. Fixed by gating `boxShadow` on `activeIndex !== null`.
+  - **One image from this round was NOT used as-is**: a magician "cards
+    flying in the dark" photo had a subtle hand-anatomy flaw on close
+    inspection (crop saved for reference: ask Claude or check the session
+    transcript). Generated 2 replacement candidates via
+    `mcp__Higgsfield__generate_image` (`gpt_image_2_5`, job ids
+    `3f981fd4-dba8-48fa-885a-e6d3107905dd` and
+    `4f2e6b03-7725-45b7-8e28-7021b0102b39`, ~2.75 credits each) but **could
+    not download either** — same CDN network block as always. Sitting
+    unused in Higgsfield history until Noah pulls one down and uploads it;
+    `MagicianDemo.tsx`'s "REEL: live performance" `Placeholder` is the
+    intended slot (already has an `img` prop, just needs the path). 4 of
+    the 5 remake credits Noah offered are still unspent.
+- **First photo folder (the original 11-image Higgsfield batch) is fully in
+  and wired**, shipped to `main`/production earlier — see git log around
+  commit `45216ce` for the itemized breakdown (florist cooler + wedding
+  table, magician portrait, powerwash before/after, landscaping day/night,
+  bakery case + bakehouse bench, barber shop, lawncare hero replacement).
+  Not repeated here to keep this file short; nothing from that batch needs
+  further action.
+- **The Emil Kowalski/Apple-interface craft pass** (shared motion tokens in
+  `system.tsx`/`globals.css`, per-style signature details, 2 review-animation
+  fixes) shipped to production earlier this session too — see git log around
+  commit `141f22c` for the full breakdown. Nothing outstanding from it.
 
 ## Blocked on Noah
-- Nothing photo-related — the full 11-image Higgsfield batch is in and
-  wired. Only remaining asset gaps are the ones already listed under Next
-  up (TRFox screenshots, Premium-tier hero clips), unrelated to this batch.
-- No pull request opened; none needed — `main` was fast-forwarded directly
-  (on explicit request) and is now current, identical to
-  `claude/sleepy-newton-uaamxu` at `45216ce`, and live in production.
+- **2 more upload rounds still coming** from the same `~/Downloads/
+  higgsfield-9-27` folder — Noah said "I'll do 3 rounds" and this HANDOFF
+  covers round 1 of 3. Keep using the same flow: he attaches ~5 images in
+  chat (can't hand over a local folder path directly, see Gotchas), Claude
+  identifies each by content, `sharp`-converts to webp q82, finds the best
+  real destination in the relevant demo file (don't assume a manifest
+  exists for this folder the way the original 11-image batch had one —
+  read the target component to find the actual empty/weak slot), wires it,
+  verifies with `tsc`/lint/build + a local Playwright pass, commits images
+  and code separately.
+- **The magician "cards flying" replacement is stuck on the same download
+  block** — see the bullet above for the 2 unclaimed job IDs. Noah needs to
+  pull one of those 2 candidates from his Higgsfield history and upload it
+  like any other image; only then can `MagicianDemo.tsx`'s REEL placeholder
+  get its `img`.
+- No pull request opened. `main` is intentionally NOT fast-forwarded yet —
+  wait for all 3 upload rounds, then fast-forward and confirm the Vercel
+  deploy like the last few rounds.
 
 ## Next up (ordered)
-1. TRFox screenshot capture (pending from before this session).
-2. Real Higgsfield hero clips for Premium tier.
+1. Receive and wire upload rounds 2 and 3 from the higgsfield-9-27 folder.
+2. Get a clean magician "cards" replacement in (2 candidates already
+   generated, just need downloading — see Blocked on Noah).
+3. Fast-forward `main`, confirm Vercel green, once all 3 rounds are in.
+4. TRFox screenshot capture (pending from before this session).
+5. Real Higgsfield hero clips for Premium tier.
 
 ## Gotchas & decisions (standing, trimmed)
+- **This session cannot read Noah's local computer at all** — no mounted
+  drive, no path access, nothing. A folder path like `~/Downloads/
+  higgsfield-9-27` is meaningless here; the only way media reaches this
+  session is a chat attachment. (A `claude remote-control` session on his
+  own machine could read it directly, but that's a different session.)
+  Also still true: this sandbox's egress is blocked to both the Higgsfield
+  CDN (`d8j0ntlcm91z4.cloudfront.net`) and `vilas.studio` itself — a fresh
+  `generate_image` job's result URL and the live production site are
+  equally unreachable from here. Verification runs against a local
+  `next start` + Playwright instead of the real deployed URL.
+- **Don't assume a new image folder maps 1:1 onto the original 11-slot
+  manifest.** This round's images had no prior job-ID table — matching them
+  to a destination meant reading each target demo file fresh. Two of five
+  replaced an existing (flawed) photo instead of filling an empty slot;
+  read the component before assuming "new photo = new placeholder."
+- **Check a new photo against its destination's existing palette/grade**,
+  not just its own quality — a fine photo can still be wrong for a spot
+  (renovation's WORK grid is uniformly sepia-toned; a full-color drop-in
+  needs `sharp` toning to match, see round 1 above).
 - **Concurrent subagents sharing one working tree is genuinely risky**:
   this session hit a `git stash` collision (again) mid-Phase-3, and two
   subagents were cut off mid-task by a session-wide API rate limit. Every
