@@ -558,8 +558,8 @@ export function HeroReveal({ children }: { children: ReactNode[] }) {
       {children.map((child, i) => (
         <motion.div
           key={i}
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, transform: "translateY(18px)" }}
+          animate={{ opacity: 1, transform: "translateY(0px)" }}
           transition={{ duration: 0.55, ease: EASE, delay: i * 0.15 }}
         >
           {child}
