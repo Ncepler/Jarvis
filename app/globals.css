@@ -199,3 +199,220 @@ html:has(.demo-shell) {
 .client-sites-menu .action-button {
   background: var(--color-accent);
 }
+
+/* ── Demo craft pass (2026-09-27) — everything below is scoped to
+   .demo-shell (components/demos/system.tsx's DemoShell) and reads the
+   --d-* tokens that component sets. Never touches the main site. ────────── */
+
+/* Press feedback using the demo's own --d-ease-out/--d-dur-press (0.23,1,.32,1
+   / 160ms) rather than the main site's --ease-out-expo/.press (150ms) — the
+   two are close but this pass's numbers are load-bearing for review-
+   animations. Real presses only; :active already means a real press on
+   touch, so no hover gating needed here (gate :hover separately). */
+.demo-shell .d-press {
+  transition: transform var(--d-dur-press, 160ms) var(--d-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+.demo-shell .d-press:active {
+  transform: scale(0.97);
+}
+
+/* Arrow nudge on hover — gated, GPU-only. */
+.demo-shell .d-arrow {
+  display: inline-block;
+  transition: transform var(--d-dur-hover, 200ms) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .demo-shell .d-hover-arrow:hover .d-arrow {
+    transform: translateX(3px);
+  }
+}
+
+/* Text link underline that draws in from the left on hover, retracts to the
+   right on hover-out — a 1px gradient revealed via background-size, gated to
+   real pointers. */
+.demo-shell .d-link {
+  background-image: linear-gradient(var(--d-accent), var(--d-accent));
+  background-position: 0% 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size var(--d-dur-hover, 200ms) var(--d-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+@media (hover: hover) and (pointer: fine) {
+  .demo-shell .d-link:hover {
+    background-size: 100% 1px;
+  }
+}
+
+/* Image-hover: the inner img scales, the frame never moves. Gated. */
+.demo-shell .d-img-hover {
+  overflow: hidden;
+}
+.demo-shell .d-img-hover img,
+.demo-shell .d-img-hover > div {
+  transition: transform var(--d-dur-media, 700ms) var(--d-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+@media (hover: hover) and (pointer: fine) {
+  .demo-shell .d-img-hover:hover img,
+  .demo-shell .d-img-hover:hover > div {
+    transform: scale(1.03);
+  }
+}
+
+/* Crisp edge on photos over light backgrounds — an inset ring via
+   pseudo-element rather than a border, so it never changes box size. */
+.demo-shell .d-crisp-edge {
+  position: relative;
+}
+.demo-shell .d-crisp-edge::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.06);
+  pointer-events: none;
+}
+
+/* Floating-surface shadow — cards/panels that sit above content, never flat
+   sections. */
+.demo-shell .d-float {
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.04),
+    0 12px 32px -12px rgb(0 0 0 / 0.18);
+}
+
+/* Static noise grain for dark-style sections (barber, autobody, renovation,
+   landscaping, magician) — a data-URI fractal-noise SVG, never animated. */
+.demo-shell .d-grain {
+  position: relative;
+}
+.demo-shell .d-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Feature-image scroll reveal: clip-path inset, once, marketing-only (per
+   animate/RECIPES.md "Scroll reveal" — not for daily-use UI, which this
+   isn't). Toggled by a `data-visible` attribute an IntersectionObserver
+   sets once, so it degrades to visible with no JS at all. */
+.demo-shell .d-feature-reveal {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path var(--d-dur-media, 700ms) var(--d-ease-in-out, cubic-bezier(0.77, 0, 0.175, 1));
+}
+.demo-shell .d-feature-reveal[data-visible="true"] {
+  clip-path: inset(0 0 0 0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .demo-shell .d-feature-reveal {
+    clip-path: inset(0 0 0 0);
+    transition: none;
+  }
+}
+
+/* Materials — the shell pill, a demo's own sticky nav, and the mobile sticky
+   CTA all read this. prefers-reduced-transparency gets a solid fallback;
+   prefers-contrast: more gets a defined border instead of a soft edge. */
+.demo-shell .d-material {
+  background: color-mix(in srgb, var(--d-bg) 72%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .demo-shell .d-material {
+    background: var(--d-bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@media (prefers-contrast: more) {
+  .demo-shell .d-material {
+    border: 1px solid var(--d-line);
+  }
+}
+
+/* Marquee edge fade + pause on hover/offscreen (components/demos/system.tsx
+   DemoMarquee wraps its row in this). */
+.demo-shell .d-marquee-mask {
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+@media (hover: hover) and (pointer: fine) {
+  .demo-shell .d-marquee-mask:hover .d-marquee-track {
+    animation-play-state: paused;
+  }
+}
+
+/* Mobile sticky CTA (components/demos/system.tsx MobileStickyCta) — a
+   material bar that enters/exits by translateY, transition-based (not
+   keyframes) since it can be triggered again quickly by fast scrolling. */
+.demo-shell .d-sticky-cta {
+  transform: translateY(100%);
+  transition: transform var(--d-dur-ui, 240ms) var(--d-ease-drawer, cubic-bezier(0.32, 0.72, 0, 1));
+}
+.demo-shell .d-sticky-cta[data-shown="true"] {
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .demo-shell .d-sticky-cta {
+    transition: opacity 150ms ease;
+    transform: none;
+  }
+  .demo-shell .d-sticky-cta[data-shown="false"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* Mobile-native baseline, scoped to demo pages only (mobile-native/GUIDE.md).
+   The main site sets its own baseline elsewhere; this never touches it. */
+.demo-shell {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+.demo-shell input,
+.demo-shell textarea,
+.demo-shell select {
+  font-size: 16px; /* iOS zooms the page on any input under 16px */
+}
+.demo-shell button,
+.demo-shell a,
+.demo-shell [role="button"] {
+  touch-action: manipulation;
+}
+.demo-shell button,
+.demo-shell [role="button"],
+.demo-shell .d-no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Scroll-driven variant of StickyScene's image scale: where the browser
+   supports it, drive the same 1.00->1.06 scale from actual scroll position
+   via animation-timeline instead of a JS scroll listener (animate/GUIDE.md:
+   "no JS scroll listeners for visuals"). Falls back to the existing
+   rAF+CSS-var mechanism (.scene-scale) everywhere else — both write the same
+   transform, so only one ends up controlling it per browser. */
+@supports (view-timeline-name: --x) {
+  .demo-shell .d-scene-root {
+    view-timeline-name: --d-scene;
+    view-timeline-axis: block;
+  }
+  @keyframes d-scene-scroll-scale {
+    from { transform: scale(1); }
+    to { transform: scale(1.06); }
+  }
+  .demo-shell .d-scene-scale-native {
+    animation: d-scene-scroll-scale linear both;
+    animation-timeline: --d-scene;
+    animation-range: cover 0% cover 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .demo-shell .d-scene-scale-native {
+    animation: none;
+  }
+}

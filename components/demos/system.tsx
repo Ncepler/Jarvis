@@ -29,7 +29,15 @@ import {
 import type { HeroConcept } from "@/lib/heroConcepts";
 import { PremiumHeroMedia } from "./PremiumHeroMedia";
 
-const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+// ── Motion tokens (craft pass 2026-09-27) — one set, extended from the site's
+// existing --ease-out-expo rather than forked: these are the demo layer's own
+// --d-* scoped equivalents (DemoShell sets them as CSS vars below). The
+// in-out and drawer curves are only ever needed as CSS (var(--d-ease-in-out)
+// etc.) in this file, so only the ease-out tuple — the one Motion component
+// below (Rise) actually animates with — exists as a JS value.
+// animate/GUIDE.md's canonical values — don't approximate a new curve here.
+const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1];
+const EASE = EASE_OUT; // back-compat alias for existing call sites below
 
 // Default DARK theme — renovation + landscaping (SKILL §2). Light/warm niches
 // pass their own `theme` (SKILL §13); anything a theme omits falls back here.
@@ -67,24 +75,33 @@ export type DemoTheme = {
 };
 
 // ── Motion: fade + small rise, once on enter. Reduced-motion → final state. ──
+// Retuned in the 2026-09-27 craft pass: 8px (was 20px) and 420ms/-4% margin
+// (was 600ms/-10%) so content resolves to opaque within ~450ms of entering
+// the viewport, matching every other reveal in this system (animate/GUIDE.md
+// "content fully opaque within 450ms"). `aboveFold` skips the animation
+// entirely for anything a caller knows renders in the first viewport —
+// reveals are for content the visitor scrolls to, never for what's already
+// there at first paint.
 export function Rise({
   children,
   delay = 0,
   className,
+  aboveFold = false,
 }: {
   children: ReactNode;
   delay?: number;
   className?: string;
+  aboveFold?: boolean;
 }) {
   const reduced = useReducedMotion();
-  if (reduced) return <div className={className}>{children}</div>;
+  if (reduced || aboveFold) return <div className={className}>{children}</div>;
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "0px 0px -10% 0px" }}
-      transition={{ duration: 0.6, ease: EASE, delay }}
+      initial={{ opacity: 0, transform: "translateY(8px)" }}
+      whileInView={{ opacity: 1, transform: "translateY(0px)" }}
+      viewport={{ once: true, margin: "0px 0px -4% 0px" }}
+      transition={{ duration: 0.42, ease: EASE_OUT, delay }}
     >
       {children}
     </motion.div>
@@ -96,11 +113,14 @@ export function Rise({
 // releases once the stack runs out. Native scroll only — no scroll-jacking,
 // no wheel/touch listeners, no GSAP/Lenis. `svh` (not `vh`) so a mobile
 // browser's toolbar collapsing/expanding never shifts the pinned height.
-// One shared passive scroll listener, rAF-throttled, writes a single CSS
-// custom property (`--scene-p`, 0→1 across the pin) that a CSS-only rule
-// reads to scale the image 1.00→1.06 — no per-frame React state, no layout
-// thrash. `prefers-reduced-motion` drops the scale (see .scene-scale in
-// globals.css) but the pin itself is layout, not "motion", so it stays.
+// Scales the image 1.00->1.06 across the pin. Where the browser supports
+// scroll-driven animations (view-timeline-name), that's pure CSS —
+// `--d-scene`'s progress runs off the compositor, no scroll listener at all
+// (craft pass 2026-09-27: animate/GUIDE.md "no JS scroll listeners for
+// visuals"). Elsewhere, one shared passive listener, rAF-throttled, writes a
+// single CSS custom property the fallback `.scene-scale` rule reads — no
+// per-frame React state, no layout thrash. `prefers-reduced-motion` drops
+// the scale either way; the pin itself is layout, not "motion", and stays.
 export function StickyScene({
   image,
   imageAlt = "",
@@ -117,6 +137,10 @@ export function StickyScene({
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // The CSS path (view-timeline-name, checked via @supports above) already
+    // handles this with no JS at all — skip attaching the fallback listener
+    // when the browser can do it natively.
+    if (typeof CSS !== "undefined" && CSS.supports?.("view-timeline-name: --x")) return;
     const root = rootRef.current;
     const scale = scaleRef.current;
     if (!root || !scale) return;
@@ -142,9 +166,9 @@ export function StickyScene({
   }, []);
 
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className="relative d-scene-root">
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
-        <div ref={scaleRef} className="scene-scale h-full w-full">
+        <div ref={scaleRef} className="scene-scale d-scene-scale-native h-full w-full">
           <Image
             src={image}
             alt={imageAlt}
@@ -234,7 +258,7 @@ export function StickyReveal({
           }
         }
       },
-      { threshold: 0, rootMargin: "0px 0px -8% 0px" },
+      { threshold: 0, rootMargin: "0px 0px -4% 0px" },
     );
     io.observe(el);
     return () => io.disconnect();
@@ -246,10 +270,10 @@ export function StickyReveal({
       className={className}
       style={{
         opacity: shown ? 1 : 0,
-        transform: shown ? "translateY(0)" : "translateY(24px)",
+        transform: shown ? "translateY(0px)" : "translateY(8px)",
         transition: reduced
           ? undefined
-          : "opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1)",
+          : "opacity var(--d-dur-reveal) var(--d-ease-out), transform var(--d-dur-reveal) var(--d-ease-out)",
       }}
     >
       {children}
@@ -283,6 +307,17 @@ export function DemoShell({
     "--d-font": t.font ?? DARK_THEME.font,
     "--d-display": t.display ?? t.font ?? DARK_THEME.font,
     "--d-radius": t.radius ?? DARK_THEME.radius,
+    // Motion tokens — one scale, used by every primitive below and by the
+    // per-style files (animate/GUIDE.md canonical curves + a duration scale
+    // sized to what each moment actually is, not one number everywhere).
+    "--d-ease-out": "cubic-bezier(0.23, 1, 0.32, 1)",
+    "--d-ease-in-out": "cubic-bezier(0.77, 0, 0.175, 1)",
+    "--d-ease-drawer": "cubic-bezier(0.32, 0.72, 0, 1)",
+    "--d-dur-press": "160ms",
+    "--d-dur-hover": "200ms",
+    "--d-dur-ui": "240ms",
+    "--d-dur-reveal": "420ms",
+    "--d-dur-media": "700ms",
     background: "var(--d-bg)",
     color: "var(--d-body)",
     fontFamily: "var(--d-font)",
@@ -334,14 +369,18 @@ export function TwoLine({
   b: string;
   className?: string;
 }) {
+  // Both lines at full contrast (craft pass 2026-09-27, Phase 0 §5 "no
+  // greyed second lines") — the two-line pattern is about the copy break,
+  // not a dimming treatment; a muted second line was never in the design
+  // spec, just an earlier implementation choice.
   return (
     <h2
-      className={`text-[32px] font-semibold leading-[1.08] tracking-[-0.01em] md:text-[52px] ${className}`}
-      style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
+      className={`text-balance text-[32px] font-semibold leading-[1.05] tracking-[-0.022em] md:text-[52px] ${className}`}
+      style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)", fontOpticalSizing: "auto" }}
     >
       {a}
       <br />
-      <span style={{ color: "var(--d-muted)" }}>{b}</span>
+      {b}
     </h2>
   );
 }
@@ -473,14 +512,19 @@ export function DemoHeader({
         </nav>
         <div className="flex items-center gap-5">
           <span
-            className="hidden text-[14px] sm:block"
+            className="hidden text-[14px] tabular-nums sm:block"
             style={{ color: "var(--d-muted)" }}
           >
             {phone}
           </span>
           <span
-            className="px-4 py-2 text-[13px] font-semibold uppercase tracking-[0.08em]"
-            style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
+            className="d-press inline-block px-4 py-2 text-[13px] font-semibold uppercase tracking-[0.08em]"
+            style={{
+              background: "var(--d-accent)",
+              color: "var(--d-onaccent)",
+              boxShadow: "inset 0 1px 0 rgb(255 255 255 / 0.16)",
+              border: "1px solid color-mix(in srgb, var(--d-accent) 92%, black)",
+            }}
           >
             {quoteLabel}
           </span>
@@ -512,6 +556,68 @@ export function HeroReveal({ children }: { children: ReactNode[] }) {
         </motion.div>
       ))}
     </>
+  );
+}
+
+// ── Hero entrance choreography (craft pass 2026-09-27). CSS keyframes, not
+// JS/Motion — they run off the main thread while the rest of the page is
+// still loading (animate/GUIDE.md: "CSS animation runs off the main thread").
+// The image is opaque at first paint and only settles (scale 1.06->1,
+// 1400ms). Each headline line masks in from an overflow:hidden wrapper
+// (translateY(105%)->0, 850ms, 90ms apart, starting at 150ms). Then the
+// kicker, paragraph and buttons rise in together (500ms, 60ms stagger,
+// starting at 450ms) — visually above the headline but choreographed to
+// arrive after it, so the big type gets the first second. Total resolves at
+// ~1.4s (the image's own settle, the longest piece). Reduced motion: no
+// transform anywhere, just a 200ms opacity fade on the text — the image
+// never had motion to begin with once its scale animation is dropped.
+// Rendered unconditionally on every DemoHero mount rather than deduped by a
+// module flag — a module-level "inject once" guard would stay tripped after
+// a client-side route change unmounts this component (e.g. navigating
+// between demo slugs), leaving the next hero with no keyframes at all.
+// Duplicate <style> tags with identical rules cost nothing meaningful.
+function HeroChoreographyStyle() {
+  return (
+    <style>{`
+      @keyframes hero-img-settle { from { transform: scale(1.06); } to { transform: scale(1); } }
+      @keyframes hero-line-in { from { transform: translateY(105%); } to { transform: translateY(0); } }
+      @keyframes hero-rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes hero-fade-in { from { opacity: 0; } to { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) {
+        .hero-img-settle { animation: none !important; transform: none !important; }
+        .hero-line-in, .hero-rise-in {
+          animation: hero-fade-in 200ms ease both !important;
+          transform: none !important;
+          animation-delay: 0ms !important;
+        }
+      }
+    `}</style>
+  );
+}
+
+// A headline line masked in an overflow:hidden box so it slides up from
+// underneath its own baseline, not from off-screen.
+function HeroLine({ children, delayMs }: { children: ReactNode; delayMs: number }) {
+  return (
+    <span className="block overflow-hidden">
+      <span
+        className="hero-line-in block"
+        style={{ animation: `hero-line-in 850ms var(--d-ease-out) both`, animationDelay: `${delayMs}ms` }}
+      >
+        {children}
+      </span>
+    </span>
+  );
+}
+
+function HeroRise({ children, delayMs, className = "" }: { children: ReactNode; delayMs: number; className?: string }) {
+  return (
+    <div
+      className={`hero-rise-in ${className}`}
+      style={{ animation: `hero-rise-in 500ms var(--d-ease-out) both`, animationDelay: `${delayMs}ms` }}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -557,20 +663,25 @@ export function DemoHero({
           when `pinned`: the StickyScene wrapper already paints this (and
           StickyScene's own <Image priority> gets the LCP fast-path there). */}
       {!skipOwnBg && (
-        <div className="group/media absolute inset-0" style={{ backgroundColor: "var(--d-surface)" }}>
+        <div className="group/media absolute inset-0 overflow-hidden" style={{ backgroundColor: "var(--d-surface)" }}>
           <FileBadge file={premium ? undefined : "hero.jpg"} />
           {premium ? (
             <PremiumHeroMedia concept={premium} fallbackImage={heroImage} />
           ) : heroImage ? (
-            <Image
-              src={heroImage}
-              alt=""
-              fill
-              priority
-              fetchPriority="high"
-              sizes="100vw"
-              className="object-cover"
-            />
+            <div
+              className="hero-img-settle h-full w-full"
+              style={{ animation: "hero-img-settle 1400ms var(--d-ease-out) both" }}
+            >
+              <Image
+                src={heroImage}
+                alt=""
+                fill
+                priority
+                fetchPriority="high"
+                sizes="100vw"
+                className="object-cover"
+              />
+            </div>
           ) : (
             <div className="flex h-full w-full items-center justify-center">
               <span
@@ -594,85 +705,47 @@ export function DemoHero({
         className={`${wrap} relative flex flex-col justify-end pt-28`}
         style={{ minHeight: "max(640px, 100svh)", paddingBottom: "8vh" }}
       >
-        {premium ? (
-          <HeroReveal key="premium-hero">
-            {[
-              <div key="headline">
-                <div className="mb-6">
-                  <Eyebrow>{eyebrow}</Eyebrow>
-                </div>
-                <h1
-                  className="max-w-3xl text-[40px] font-bold leading-[1.04] tracking-[-0.02em] md:text-[72px]"
-                  style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
-                >
-                  {line1}
-                  <br />
-                  {line2}
-                </h1>
-                <p
-                  className="mt-6 max-w-xl text-[17px] leading-[1.6]"
-                  style={{ color: "var(--d-body)" }}
-                >
-                  {sub}
-                </p>
-              </div>,
-              <div key="cta" className="mt-9 flex flex-wrap items-center gap-3">
-                <span
-                  className="px-6 py-3.5 text-[14px] font-semibold"
-                  style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
-                >
-                  {primaryCta}
-                </span>
-                <span
-                  className="px-6 py-3.5 text-[14px] font-semibold"
-                  style={{
-                    border: "1px solid var(--d-line)",
-                    color: "var(--d-fg)",
-                  }}
-                >
-                  Call {phone}
-                </span>
-              </div>,
-            ]}
-          </HeroReveal>
-        ) : (
-          <Rise>
-            <div className="mb-6">
-              <Eyebrow>{eyebrow}</Eyebrow>
-            </div>
-            <h1
-              className="max-w-3xl text-[40px] font-bold leading-[1.04] tracking-[-0.02em] md:text-[72px]"
-              style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
-            >
-              {line1}
-              <br />
-              {line2}
-            </h1>
-            <p
-              className="mt-6 max-w-xl text-[17px] leading-[1.6]"
-              style={{ color: "var(--d-body)" }}
-            >
-              {sub}
-            </p>
-            <div className="mt-9 flex flex-wrap items-center gap-3">
-              <span
-                className="px-6 py-3.5 text-[14px] font-semibold"
-                style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
-              >
-                {primaryCta}
-              </span>
-              <span
-                className="px-6 py-3.5 text-[14px] font-semibold"
-                style={{
-                  border: "1px solid var(--d-line)",
-                  color: "var(--d-fg)",
-                }}
-              >
-                Call {phone}
-              </span>
-            </div>
-          </Rise>
-        )}
+        <HeroChoreographyStyle />
+        <HeroRise delayMs={450} className="mb-6">
+          <Eyebrow>{eyebrow}</Eyebrow>
+        </HeroRise>
+        <h1
+          className="max-w-3xl text-balance text-[40px] font-bold leading-[1.04] tracking-[-0.035em] md:text-[72px]"
+          style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)", fontOpticalSizing: "auto" }}
+        >
+          <HeroLine delayMs={150}>{line1}</HeroLine>
+          <HeroLine delayMs={240}>{line2}</HeroLine>
+        </h1>
+        <HeroRise delayMs={510}>
+          <p
+            className="mt-6 max-w-xl text-pretty text-[17px] leading-[1.6]"
+            style={{ color: "var(--d-body)" }}
+          >
+            {sub}
+          </p>
+        </HeroRise>
+        <HeroRise delayMs={570} className="mt-9 flex flex-wrap items-center gap-3">
+          <span
+            className="d-press inline-block px-6 py-3.5 text-[14px] font-semibold"
+            style={{
+              background: "var(--d-accent)",
+              color: "var(--d-onaccent)",
+              boxShadow: "inset 0 1px 0 rgb(255 255 255 / 0.16)",
+              border: "1px solid color-mix(in srgb, var(--d-accent) 92%, black)",
+            }}
+          >
+            {primaryCta}
+          </span>
+          <span
+            className="d-press inline-block px-6 py-3.5 text-[14px] font-semibold"
+            style={{
+              border: "1px solid var(--d-line)",
+              color: "var(--d-fg)",
+            }}
+          >
+            Call {phone}
+          </span>
+        </HeroRise>
       </div>
     </section>
   );
@@ -709,8 +782,10 @@ function MarqueeRow({
 export function DemoMarquee({ terms }: { terms: string[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLSpanElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const [rowW, setRowW] = useState(0);
   const [copies, setCopies] = useState(2);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     const measure = () => {
@@ -728,15 +803,33 @@ export function DemoMarquee({ terms }: { terms: string[] }) {
     return () => ro.disconnect();
   }, [terms]);
 
-  // constant speed (~55px/s) regardless of how many copies render
-  const dur = rowW ? rowW / 55 : 30;
+  // Pause off-thread work while scrolled out of view — an IntersectionObserver
+  // toggling animation-play-state, not a scroll listener (craft pass
+  // 2026-09-27). Hover-pause is pure CSS (.d-marquee-mask:hover, globals.css).
+  useEffect(() => {
+    if (reduced) return;
+    const track = trackRef.current;
+    const container = containerRef.current;
+    if (!track || !container) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        track.style.animationPlayState = entry.isIntersecting ? "running" : "paused";
+      },
+      { threshold: 0 },
+    );
+    io.observe(container);
+    return () => io.disconnect();
+  }, [reduced]);
+
+  // Slow, deliberate constant speed (~40px/s) regardless of how many copies render.
+  const dur = rowW ? rowW / 40 : 40;
 
   return (
     <div
       ref={containerRef}
       role="marquee"
       aria-label="Services"
-      className="w-full overflow-hidden whitespace-nowrap py-7"
+      className="d-marquee-mask w-full overflow-hidden whitespace-nowrap py-7"
       style={{ borderBottom: "1px solid var(--d-line)" }}
     >
       <style>{`
@@ -745,7 +838,8 @@ export function DemoMarquee({ terms }: { terms: string[] }) {
         @media (prefers-reduced-motion: reduce) { .demo-mq { animation: none; } }
       `}</style>
       <div
-        className="demo-mq"
+        ref={trackRef}
+        className="demo-mq d-marquee-track"
         style={
           { "--mq-w": `${rowW}px`, "--mq-dur": `${dur}s` } as CSSProperties
         }
@@ -946,8 +1040,13 @@ export function FullBleedBreak({
           ))}
         </ul>
         <span
-          className="mt-9 inline-block px-6 py-3.5 text-[14px] font-semibold"
-          style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
+          className="d-press mt-9 inline-block px-6 py-3.5 text-[14px] font-semibold"
+          style={{
+            background: "var(--d-accent)",
+            color: "var(--d-onaccent)",
+            boxShadow: "inset 0 1px 0 rgb(255 255 255 / 0.16)",
+            border: "1px solid color-mix(in srgb, var(--d-accent) 92%, black)",
+          }}
         >
           {cta}
         </span>
@@ -1012,8 +1111,11 @@ export function BeforeAfterSlider({
 }) {
   const reduced = useReducedMotion();
   const [pos, setPos] = useState(50);
+  const [pressed, setPressed] = useState(false);
+  const [transitionOk, setTransitionOk] = useState(false); // off during drag/keys, on for the hint
   const wrapRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
+  const interacted = useRef(false);
   const id = useId();
 
   const setFromClientX = useCallback((clientX: number) => {
@@ -1024,8 +1126,40 @@ export function BeforeAfterSlider({
     setPos(Math.max(0, Math.min(100, p)));
   }, []);
 
+  // First-reveal hint (apple-design §8 "hint in the direction of the
+  // gesture"): a single 50->62->50 sweep, 900ms total, so the slider reads as
+  // draggable before anyone touches it. Skipped entirely once the user
+  // interacts, and never runs under reduced motion.
+  useEffect(() => {
+    if (reduced) return;
+    const t1 = window.setTimeout(() => {
+      if (interacted.current) return;
+      setTransitionOk(true);
+      setPos(62);
+    }, 700);
+    const t2 = window.setTimeout(() => {
+      if (interacted.current) return;
+      setPos(50);
+    }, 700 + 450);
+    const t3 = window.setTimeout(() => {
+      setTransitionOk(false);
+    }, 700 + 900 + 50);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.clearTimeout(t3);
+    };
+  }, [reduced]);
+
+  const markInteracted = () => {
+    interacted.current = true;
+    setTransitionOk(false);
+  };
+
   const onDown = (e: ReactPointerEvent) => {
+    markInteracted();
     dragging.current = true;
+    setPressed(true);
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
     setFromClientX(e.clientX);
   };
@@ -1034,6 +1168,17 @@ export function BeforeAfterSlider({
   };
   const onUp = () => {
     dragging.current = false;
+    setPressed(false);
+  };
+  // Shift+arrow moves 20%, plain arrow moves 5% — overrides the range
+  // input's native (1%) step so both live on the same control.
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    markInteracted();
+    const step = e.shiftKey ? 20 : 5;
+    const delta = e.key === "ArrowRight" ? step : -step;
+    setPos((p) => Math.max(0, Math.min(100, p + delta)));
   };
 
   const Slot = ({ img, label, file }: { img?: string; label: string; file: string }) => (
@@ -1094,23 +1239,43 @@ export function BeforeAfterSlider({
       <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
         <Slot img={afterImg} label={afterLabel} file={afterFile} />
       </div>
-      <span className="absolute bottom-3 left-3 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
+      {/* labels fade based on handle position — each one recedes once its
+          own side is nearly fully revealed, per the §14 "hint in the
+          direction of the gesture" spirit rather than sitting static. */}
+      <span
+        className="absolute bottom-3 left-3 text-[11px] font-semibold uppercase tracking-[0.14em] transition-opacity"
+        style={{ color: "var(--d-muted)", opacity: pos > 85 ? Math.max(0, (100 - pos) / 15) : 1, transitionDuration: "var(--d-dur-hover, 200ms)" }}
+      >
         Before
       </span>
-      <span className="absolute bottom-3 right-3 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-accent)" }}>
+      <span
+        className="absolute bottom-3 right-3 text-[11px] font-semibold uppercase tracking-[0.14em] transition-opacity"
+        style={{ color: "var(--d-accent)", opacity: pos < 15 ? Math.max(0, pos / 15) : 1, transitionDuration: "var(--d-dur-hover, 200ms)" }}
+      >
         After
       </span>
-      {/* handle */}
-      <div className="absolute top-0 bottom-0" style={{ left: `${pos}%`, transform: "translateX(-50%)" }}>
+      {/* handle — ≥44px hit area; scales up on press with a soft spring;
+          `left` only transitions during the first-reveal hint or keyboard
+          steps, never while actively dragging (that would lag the pointer). */}
+      <div
+        className="absolute top-0 bottom-0"
+        style={{
+          left: `${pos}%`,
+          transform: "translateX(-50%)",
+          transition: transitionOk ? `left 450ms var(--d-ease-in-out, cubic-bezier(0.77,0,0.175,1))` : undefined,
+        }}
+      >
         <div className="h-full" style={{ width: 2, background: "var(--d-accent)" }} />
-        <div
-          className="absolute top-1/2 left-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[13px] font-bold"
+        <motion.div
+          className="absolute top-1/2 left-1/2 flex h-11 w-11 items-center justify-center rounded-full text-[13px] font-bold"
           style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
+          animate={{ transform: pressed ? "translate(-50%, -50%) scale(1.08)" : "translate(-50%, -50%) scale(1)" }}
+          transition={reduced ? { duration: 0 } : { type: "spring", duration: 0.3, bounce: 0.2 }}
         >
           ⇄
-        </div>
+        </motion.div>
       </div>
-      {/* a11y / keyboard control */}
+      {/* a11y / keyboard control — plain arrow moves 5%, shift+arrow 20% */}
       <label className="sr-only" htmlFor={id}>
         Reveal amount
       </label>
@@ -1119,8 +1284,13 @@ export function BeforeAfterSlider({
         type="range"
         min={0}
         max={100}
+        step={5}
         value={pos}
-        onChange={(e) => setPos(Number(e.target.value))}
+        onChange={(e) => {
+          markInteracted();
+          setPos(Number(e.target.value));
+        }}
+        onKeyDown={onKeyDown}
         className="absolute inset-x-0 bottom-0 h-10 w-full cursor-ew-resize opacity-0"
       />
     </div>
@@ -1437,7 +1607,7 @@ export function Faq({
   items: Qa[];
 }) {
   const [open, setOpen] = useState<number | null>(0);
-  const reduced = useReducedMotion();
+  const uid = useId();
   return (
     <Section>
       <div className="grid gap-12 md:grid-cols-[0.7fr_1fr] md:gap-16">
@@ -1448,15 +1618,46 @@ export function Faq({
           </div>
         </Rise>
         <div style={{ borderTop: "1px solid var(--d-line)" }}>
+          {/* grid-template-rows 0fr->1fr (animate/RECIPES.md accordion), not a
+              Motion height animation — one open at a time, CSS transition so
+              rapid toggling retargets instead of restarting. */}
+          <style>{`
+            .d-faq-panel {
+              display: grid;
+              grid-template-rows: 0fr;
+              transition: grid-template-rows var(--d-dur-ui, 240ms) var(--d-ease-out, cubic-bezier(0.23,1,0.32,1));
+            }
+            .d-faq-panel[data-open="true"] { grid-template-rows: 1fr; }
+            .d-faq-panel > div { overflow: hidden; min-height: 0; }
+            .d-faq-panel .d-faq-answer {
+              opacity: 0;
+              transition: opacity 150ms ease;
+            }
+            .d-faq-panel[data-open="true"] .d-faq-answer {
+              opacity: 1;
+              transition: opacity 150ms ease 60ms;
+            }
+            .d-faq-plus {
+              display: inline-block;
+              transition: transform 200ms var(--d-ease-out, cubic-bezier(0.23,1,0.32,1));
+            }
+            .d-faq-plus[data-open="true"] { transform: rotate(45deg); }
+            @media (prefers-reduced-motion: reduce) {
+              .d-faq-panel { transition: none; }
+              .d-faq-plus { transition: none; }
+            }
+          `}</style>
           {items.map((item, i) => {
             const isOpen = open === i;
+            const panelId = `${uid}-panel-${i}`;
             return (
               <div key={item.q} style={{ borderBottom: "1px solid var(--d-line)" }}>
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : i)}
-                  className="flex w-full items-center gap-4 py-5 text-left"
+                  className="d-press flex w-full items-center gap-4 py-5 text-left"
                   aria-expanded={isOpen}
+                  aria-controls={panelId}
                 >
                   <span
                     className="text-[13px] font-semibold tracking-[0.1em]"
@@ -1468,22 +1669,21 @@ export function Faq({
                     {item.q}
                   </span>
                   <span
-                    className="text-[20px] leading-none"
+                    className="d-faq-plus text-[20px] leading-none"
+                    data-open={isOpen}
+                    aria-hidden
                     style={{ color: "var(--d-muted)" }}
                   >
-                    {isOpen ? "−" : "+"}
+                    +
                   </span>
                 </button>
-                <motion.div
-                  initial={false}
-                  animate={{ height: isOpen ? "auto" : 0, opacity: isOpen ? 1 : 0 }}
-                  transition={reduced ? { duration: 0 } : { duration: 0.3, ease: EASE }}
-                  style={{ overflow: "hidden" }}
-                >
-                  <p className="pb-5 pl-10 text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-                    {item.a}
-                  </p>
-                </motion.div>
+                <div id={panelId} className="d-faq-panel" data-open={isOpen} role="region">
+                  <div>
+                    <p className="d-faq-answer pb-5 pl-10 text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+                      {item.a}
+                    </p>
+                  </div>
+                </div>
               </div>
             );
           })}
@@ -1560,7 +1760,7 @@ export function Contact({
                 <p className="text-[13px]" style={{ color: "var(--d-muted)" }}>
                   Call or text
                 </p>
-                <p className="mt-1 text-[22px] font-semibold" style={{ color: "var(--d-fg)" }}>
+                <p className="mt-1 text-[22px] font-semibold tabular-nums" style={{ color: "var(--d-fg)" }}>
                   {phone}
                 </p>
               </div>
@@ -1605,12 +1805,12 @@ export function CtaBand({
       <div className={`${wrap} py-[80px] text-center md:py-[120px]`}>
         <Rise>
           <h2
-            className="mx-auto text-[36px] font-bold leading-[1.06] tracking-[-0.02em] md:text-[60px]"
-            style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
+            className="mx-auto text-balance text-[36px] font-bold leading-[1.06] tracking-[-0.035em] md:text-[60px]"
+            style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)", fontOpticalSizing: "auto" }}
           >
             {line1}
             <br />
-            <span style={{ color: "var(--d-muted)" }}>{line2}</span>
+            {line2}
           </h2>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <span
@@ -1620,7 +1820,7 @@ export function CtaBand({
               {cta}
             </span>
             <span
-              className="px-7 py-4 text-[14px] font-semibold"
+              className="d-press px-7 py-4 text-[14px] font-semibold tabular-nums"
               style={{ border: "1px solid var(--d-line)", color: "var(--d-fg)" }}
             >
               {phone}
@@ -1704,6 +1904,23 @@ export function DemoFooter({
           <span>{strip}</span>
         </div>
       </div>
+      {/* Oversized wordmark, cropped by overflow — a quiet signature moment,
+          not a reveal (it's below the fold at the very bottom of the page,
+          so there's nothing to gate; it just renders). */}
+      <div
+        aria-hidden
+        className="w-full overflow-hidden text-center leading-[0.85]"
+        style={{
+          fontFamily: "var(--d-display)",
+          fontSize: "clamp(4rem, 14vw, 13rem)",
+          letterSpacing: "-0.04em",
+          color: "var(--d-fg)",
+          opacity: 0.9,
+          marginBottom: "-0.08em",
+        }}
+      >
+        {name}
+      </div>
       <VilasCredit />
     </footer>
   );
@@ -1730,7 +1947,7 @@ function FooterCol({
               {href ? (
                 <a
                   href={href}
-                  className="rounded-sm outline-none transition-opacity duration-150 hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  className="d-link rounded-sm pb-0.5 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   style={{ outlineColor: "var(--d-accent)" }}
                 >
                   {label}
@@ -1742,6 +1959,84 @@ function FooterCol({
           );
         })}
       </ul>
+    </div>
+  );
+}
+
+// ── Mobile sticky CTA (craft pass 2026-09-27, item 17): a translucent bar
+// with the style's two actions, shown only on mobile, only after the hero has
+// scrolled past and only until the contact section comes into view. State
+// toggles are cheap/discrete (not a per-frame visual scrub), so a
+// rAF-throttled scroll check for "past the hero" plus an IntersectionObserver
+// for "near contact" is the right tool — the actual enter/exit motion is a
+// CSS transition (.d-sticky-cta, globals.css), not JS. Add once per demo,
+// near the end of the page (it's `fixed`, position doesn't matter).
+export function MobileStickyCta({
+  phone,
+  bookLabel = "Book",
+  contactId = "contact",
+}: {
+  phone: string;
+  bookLabel?: string;
+  contactId?: string;
+}) {
+  const [pastHero, setPastHero] = useState(false);
+  const [nearContact, setNearContact] = useState(false);
+
+  useEffect(() => {
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        setPastHero(window.scrollY > window.innerHeight * 0.85);
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  useEffect(() => {
+    const el = document.getElementById(contactId);
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setNearContact(entry.isIntersecting),
+      { threshold: 0, rootMargin: "0px 0px -20% 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [contactId]);
+
+  const shown = pastHero && !nearContact;
+  const tel = phone.replace(/[^\d+]/g, "");
+
+  return (
+    <div
+      className="d-material d-sticky-cta fixed inset-x-0 bottom-0 z-40 border-t md:hidden"
+      data-shown={shown}
+      aria-hidden={!shown}
+      style={{ borderColor: "var(--d-line)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+    >
+      <div className="grid grid-cols-2 gap-px" style={{ background: "var(--d-line)" }}>
+        <a
+          href={`tel:${tel}`}
+          className="d-press d-no-select flex items-center justify-center py-4 text-[14px] font-semibold"
+          style={{ background: "var(--d-bg)", color: "var(--d-fg)" }}
+        >
+          Call
+        </a>
+        <a
+          href={`#${contactId}`}
+          className="d-press d-no-select flex items-center justify-center py-4 text-[14px] font-semibold"
+          style={{ background: "var(--d-bg)", color: "var(--d-accent)" }}
+        >
+          {bookLabel}
+        </a>
+      </div>
     </div>
   );
 }
