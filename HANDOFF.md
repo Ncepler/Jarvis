@@ -1,11 +1,35 @@
-# HANDOFF — updated 2026-09-27 (craft/motion pass)
+# HANDOFF — updated 2026-09-27 (real photos, first batch)
 
 ## Current state
 - Deployed: last confirmed production deploy (`vilas.studio`) was built from
   commit `7918f63` and is `READY` — that was BEFORE this session's craft
-  pass below, which is pushed to `claude/sleepy-newton-uaamxu` but not yet
-  merged to `main`/redeployed. Builds clean locally: `npx tsc --noEmit`,
-  `next lint`, `next build` all pass; all 9 `/demos/demo-*` routes prerender.
+  pass and the real-photo wiring below, both pushed to
+  `claude/sleepy-newton-uaamxu` but not yet merged to `main`/redeployed.
+  Builds clean locally: `npx tsc --noEmit`, `next lint`, `next build` all
+  pass; all 9 `/demos/demo-*` routes prerender.
+- **First 5 of the 11 Higgsfield photos are in and wired** (Noah worked
+  around the sandbox's network block by downloading them himself and
+  uploading them as chat attachments 5 at a time — that's the actual
+  resolution path now, not widening network access). Landed in
+  `public/demos/<slug>/*.webp` and wired into their components:
+  - `florist/cooler.webp` — walk-in cooler still life. Replaces the reused
+    hero-photo crops in `FloristDemo.tsx`'s occasion cursor-preview, bouquet
+    row thumbnails, and the occasion tiles grid (previously a bare `<Media>`
+    placeholder with no image at all).
+  - `magician/portrait.webp` — dark theatrical portrait, fanned cards, gold
+    rim light. Fills `MagicianDemo.tsx`'s `About` section PORTRAIT slot;
+    `Placeholder` gained an optional `img` prop (mirrors `system.tsx`'s
+    `Media`) to carry it, existing gold shimmer sweep plays over it.
+  - `powerwash/driveway-before.webp` + `driveway-after.webp` — same framing,
+    stained/mossy vs. clean. Wired into `PowerWashDemo.tsx`'s
+    `WashTransformation` slider via `BeforeAfterSlider`'s existing
+    `beforeImg`/`afterImg` props (no component change needed there).
+  - `landscaping/patio-night.webp` — blue-hour patio, fire pit + path lights
+    on. Fills the night side of `LandscapingDemo.tsx`'s day/night toggle via
+    `Media`'s existing `img` prop; the day side is still a placeholder (its
+    photo, patio-day, hasn't arrived yet).
+  - All 4 touched demo files verified clean: `tsc --noEmit`, `next lint`,
+    `next build` (all 9 demo routes still prerender).
 - **A full Emil Kowalski / Apple-interface craft pass landed on top of last
   session's rebuild**, across shared system + all 9 styles. Shared
   (`components/demos/system.tsx` + `app/globals.css`, all `.demo-shell`
@@ -60,25 +84,30 @@
   separate ones. Not rewritten/force-pushed to fix since the branch was
   already pushed; purely cosmetic.
 
-## Blocked on Noah — unchanged from last session, still true
-- **11 real photos generated on Higgsfield still can't be downloaded** —
-  this sandbox's network policy still denies the CDN host
-  (`d8j0ntlcm91z4.cloudfront.net`), confirmed again this session (retested,
-  still 403). Job IDs, destination paths and what each feeds are unchanged
-  from before — see git history on this file (or ask, they're still valid)
-  rather than duplicating the table here again. **Widen this environment's
-  Network access setting before the next image-focused session.**
-- Every mechanism that needs one of those images (day/night toggle, compare
-  slider, cursor-follow crop, collage) is fully built and interactive on a
-  placeholder — dropping the real file in is a one-line prop change per site.
+## Blocked on Noah
+- **6 of the 11 Higgsfield photos still outstanding** — this sandbox's
+  network policy still can't reach the Higgsfield CDN directly, so Noah is
+  downloading each batch himself and re-uploading as chat attachments
+  (5-at-a-time upload limit is why this is happening in batches). Still
+  waiting on: florist wedding-table, bakery the-case, bakery bakehouse,
+  landscaping patio-day (the day half of the toggle whose night half just
+  landed), lawn care hero-lawn, barber shop. Same process as this batch:
+  identify by content against the original prompts, `sharp`-convert to
+  webp q82 into `public/demos/<slug>/`, wire into the component, verify,
+  commit, push.
+- Every mechanism that needs one of the remaining images (landscaping's day
+  side, the barber/lawncare/bakery slots) is fully built and interactive on
+  a placeholder — dropping the real file in is a small, localized change per
+  site, same shape as this batch's edits.
 - No pull request opened. Everything is on `claude/sleepy-newton-uaamxu`;
   `main` has been fast-forwarded to match it before (once, on explicit
   request) but is currently one round behind — see git log before assuming
   main is current.
 
 ## Next up (ordered)
-1. Merge/deploy this craft pass (fast-forward `main`, confirm Vercel green).
-2. Widen network access, pull the 11 images into `public/demos/`.
+1. Receive and wire the remaining 6 Higgsfield photos (see Blocked on Noah).
+2. Merge/deploy the craft pass + this photo batch (fast-forward `main`,
+   confirm Vercel green) — both are on `claude/sleepy-newton-uaamxu` only.
 3. TRFox screenshot capture (pending from before this session).
 4. Real Higgsfield hero clips for Premium tier.
 
