@@ -78,7 +78,10 @@ function Section({
   );
 }
 
-// ── Reveal from the dark: content rises up out of black (§16d.6). ────────────
+// ── Reveal from the dark: content rises up out of black (§16d.6). Tightened
+// (rebuild dead-zone fix) to match the shared demo Reveal's feel — a shorter
+// rise, a shorter duration, and a trigger margin that fires sooner as a block
+// scrolls in, so a tall dark section never sits fully invisible for long. ───
 function RiseFromDark({
   children,
   delay = 0,
@@ -93,10 +96,10 @@ function RiseFromDark({
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 34 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "0px 0px -12% 0px" }}
-      transition={{ duration: 0.8, ease: EASE, delay }}
+      viewport={{ once: true, margin: "0px 0px -8% 0px" }}
+      transition={{ duration: 0.6, ease: EASE, delay }}
     >
       {children}
     </motion.div>
@@ -435,9 +438,12 @@ function PhraseBand() {
 const HERO_VIDEO_SRC = ""; // set to a real clip path when Noah has one
 // tier (Demo bar ticket, job 5/6): $500 layers the shared PremiumHeroMedia
 // mechanism in underneath the existing velvet field — additive, so the
-// theatrical layers on top (gradient, embers, vignette) are untouched and
-// simply gain a moving/zoomed backdrop showing through their transparent
-// parts. $300 renders exactly as before.
+// theatrical layers on top (glow, embers, vignette) gain a moving/zoomed
+// backdrop showing through their transparent parts. $300 renders exactly as
+// before. (Rebuild fix: the base "dark house" gradient below used solid
+// opaque hex stops, which fully hid this layer in every tier — Premium's
+// hero visual never painted at all. It's rgba now, so the same velvet look
+// renders over BG on Basic and lets the media itself show on Premium.)
 function Hero({ tier = "basic" }: { tier?: Tier }) {
   return (
     <section
@@ -453,7 +459,7 @@ function Hero({ tier = "basic" }: { tier?: Tier }) {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(60% 55% at 50% 28%, rgba(212,165,60,.16), transparent 62%), radial-gradient(90% 70% at 50% 100%, rgba(0,0,0,.7), transparent 60%), linear-gradient(180deg, #0A0711 0%, #0D0A16 55%, #0A0711 100%)",
+            "radial-gradient(60% 55% at 50% 28%, rgba(212,165,60,.16), transparent 62%), radial-gradient(90% 70% at 50% 100%, rgba(0,0,0,.7), transparent 60%), linear-gradient(180deg, rgba(10,7,17,.78) 0%, rgba(13,10,22,.32) 55%, rgba(10,7,17,.82) 100%)",
         }}
       />
       {HERO_VIDEO_SRC ? (
@@ -500,7 +506,7 @@ function Hero({ tier = "basic" }: { tier?: Tier }) {
           </p>
           <a
             href="#magician-book"
-            className="mt-10 inline-block px-8 py-4 text-[13px] font-semibold uppercase tracking-[0.14em] transition-transform duration-200 hover:scale-[1.03]"
+            className="press mt-10 inline-block px-8 py-4 text-[13px] font-semibold uppercase tracking-[0.14em] transition-transform duration-200 hover:scale-[1.03]"
             style={{ background: GOLD, color: "#0A0711" }}
           >
             Book the show
@@ -670,7 +676,7 @@ function Reel() {
           </h2>
         </RiseFromDark>
         <RiseFromDark delay={0.12} className="relative mx-auto mt-12 max-w-3xl">
-          <Placeholder label="REEL: live performance (16:9)" file="reel.mp4" glow />
+          <Placeholder label="REEL: live performance" file="reel.mp4" glow />
           <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -750,7 +756,7 @@ function About() {
     <Section className="" id="magician-about">
       <div className="grid items-center gap-12 md:grid-cols-[0.85fr_1fr] md:gap-16">
         <RiseFromDark>
-          <Placeholder label="PORTRAIT: the magician, low key (4:5)" file="portrait.jpg" ratio="4/5" glow />
+          <Placeholder label="PORTRAIT: the magician, low key" file="portrait.jpg" ratio="4/5" glow />
         </RiseFromDark>
         <RiseFromDark delay={0.1}>
           <span className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: GOLD }}>
