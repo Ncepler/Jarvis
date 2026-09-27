@@ -8,7 +8,8 @@
 // photo grid we don't have real photos for yet. "Fresh Cut Lawn Co." is a
 // sample brand for the demo, not a client.
 
-import { useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useReducedMotion } from "motion/react";
 import {
   ANCHOR_SCROLL_CLASS,
   Contact,
@@ -22,6 +23,7 @@ import {
   Eyebrow,
   Faq,
   Intro,
+  MobileStickyCta,
   Rise,
   Section,
   SceneBlock,
@@ -46,6 +48,9 @@ const THEME: DemoTheme = {
   accent: ACCENT,
   onAccent: "#FFFFFF",
   font: "var(--font-tight)", // friendly grotesque, no serif
+  radius: "6px", // lawncare/powerwash personality tier (SKILL §7): 12/6/3
+  radiusLg: "12px",
+  radiusSm: "3px",
   heroScrim: "linear-gradient(180deg, rgba(246,248,241,.1), rgba(246,248,241,.76))",
   breakScrim: "linear-gradient(180deg, rgba(246,248,241,.38), rgba(246,248,241,.85))",
 };
@@ -105,76 +110,94 @@ const FAQ = [
 ];
 
 // ── Service plans — pricing tiers, one visually lifted as most picked (§14g).
+// The cards are a plain pricing display, not a selectable/toggle group — each
+// CTA is a plain link to #freshcut-contact, not a state change — so there is
+// no shared-highlight `layoutId` here (that pattern belongs to an actual
+// selection interaction, which this data doesn't have; see the gate report).
 function PlanCards() {
   return (
-    <Section className="!py-16 md:!py-[120px]">
-      <Rise>
-        <Eyebrow>What we do</Eyebrow>
-        <div className="mt-5">
-          <TwoLine a="Pick a plan." b="We handle the rest." />
-        </div>
-      </Rise>
-      <div className="mt-12 grid gap-5 md:grid-cols-3">
-        {PLANS.map((p, i) => (
-          <Rise key={p.name} delay={Math.min(i * 0.08, 0.2)}>
-            <div
-              className={`relative flex h-full flex-col p-7 transition-transform duration-300 ${
-                p.popular ? "md:-translate-y-4" : ""
-              }`}
-              style={{
-                background: "var(--d-surface)",
-                border: `1px solid ${p.popular ? "var(--d-accent)" : "var(--d-line)"}`,
-                borderRadius: "var(--d-radius)",
-                boxShadow: p.popular ? "0 20px 40px -14px rgba(78,154,74,.28)" : "none",
-                zIndex: p.popular ? 10 : 1,
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-[19px] font-semibold md:text-[22px]" style={{ color: "var(--d-fg)" }}>
-                  {p.name}
-                </h3>
-                {p.popular && (
-                  <span
-                    className="px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em]"
-                    style={{ background: "var(--d-accent)", color: "var(--d-onaccent)", borderRadius: "var(--d-radius)" }}
-                  >
-                    Most picked
-                  </span>
-                )}
-              </div>
-              <p className="mt-2 text-[15px]" style={{ color: "var(--d-body)" }}>
-                {p.blurb}
-              </p>
-              <p className="mt-5">
-                <span className="text-[28px] font-bold md:text-[32px]" style={{ color: "var(--d-fg)" }}>
-                  {p.price}
-                </span>{" "}
-                <span className="text-[14px]" style={{ color: "var(--d-muted)" }}>
-                  {p.unit}
-                </span>
-              </p>
-              <ul className="mt-6 flex-1 space-y-2.5">
-                {p.includes.map((inc) => (
-                  <li key={inc} className="flex items-start gap-2.5 text-[15px]" style={{ color: "var(--d-body)" }}>
-                    <span style={{ color: "var(--d-accent)" }}>✓</span>
-                    {inc}
-                  </li>
-                ))}
-              </ul>
-              <a
-                href="#freshcut-contact"
-                className="press mt-7 inline-block px-5 py-3 text-center text-[14px] font-semibold"
-                style={
-                  p.popular
-                    ? { background: "var(--d-accent)", color: "var(--d-onaccent)" }
-                    : { border: "1px solid var(--d-line)", color: "var(--d-fg)" }
-                }
+    <Section className="!py-16 md:!py-[120px] relative overflow-hidden">
+      {/* Mow-stripe motif (§14g signature detail #3) — a purely decorative,
+          NEVER-animated band referencing lawn-stripe mowing. Two-tone
+          repeating diagonal at ~2.5% contrast against the section
+          background; static forever, no drift, no scroll-tie. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-1/2 w-screen -translate-x-1/2"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(135deg, transparent 0px, transparent 56px, rgba(0,0,0,0.025) 56px, rgba(0,0,0,0.025) 112px)",
+        }}
+      />
+      <div className="relative z-10">
+        <Rise>
+          <Eyebrow>What we do</Eyebrow>
+          <div className="mt-5">
+            <TwoLine a="Pick a plan." b="We handle the rest." />
+          </div>
+        </Rise>
+        <div className="mt-12 grid gap-5 md:grid-cols-3">
+          {PLANS.map((p, i) => (
+            <Rise key={p.name} delay={Math.min(i * 0.08, 0.2)}>
+              <div
+                className={`relative flex h-full flex-col p-7 transition-transform duration-300 ${
+                  p.popular ? "md:-translate-y-4 d-float" : ""
+                }`}
+                style={{
+                  background: "var(--d-surface)",
+                  border: "1px solid var(--d-line)",
+                  borderTop: p.popular ? "1px solid var(--d-accent)" : undefined,
+                  borderRadius: "var(--d-radius)",
+                  zIndex: p.popular ? 10 : 1,
+                }}
               >
-                Start this plan
-              </a>
-            </div>
-          </Rise>
-        ))}
+                <div className="flex items-center justify-between">
+                  <h3 className="text-[19px] font-semibold md:text-[22px]" style={{ color: "var(--d-fg)" }}>
+                    {p.name}
+                  </h3>
+                  {p.popular && (
+                    <span
+                      className="px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em]"
+                      style={{ background: "var(--d-accent)", color: "var(--d-onaccent)", borderRadius: "var(--d-radius)" }}
+                    >
+                      Most picked
+                    </span>
+                  )}
+                </div>
+                <p className="mt-2 text-[15px]" style={{ color: "var(--d-body)" }}>
+                  {p.blurb}
+                </p>
+                <p className="mt-5">
+                  <span className="text-[28px] font-bold md:text-[32px]" style={{ color: "var(--d-fg)" }}>
+                    {p.price}
+                  </span>{" "}
+                  <span className="text-[14px]" style={{ color: "var(--d-muted)" }}>
+                    {p.unit}
+                  </span>
+                </p>
+                <ul className="mt-6 flex-1 space-y-2.5">
+                  {p.includes.map((inc) => (
+                    <li key={inc} className="flex items-start gap-2.5 text-[15px]" style={{ color: "var(--d-body)" }}>
+                      <span style={{ color: "var(--d-accent)" }}>✓</span>
+                      {inc}
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href="#freshcut-contact"
+                  className="d-press mt-7 inline-block px-5 py-3 text-center text-[14px] font-semibold"
+                  style={
+                    p.popular
+                      ? { background: "var(--d-accent)", color: "var(--d-onaccent)" }
+                      : { border: "1px solid var(--d-line)", color: "var(--d-fg)" }
+                  }
+                >
+                  Start this plan
+                </a>
+              </div>
+            </Rise>
+          ))}
+        </div>
       </div>
     </Section>
   );
@@ -192,13 +215,102 @@ const FREQ = [
 ];
 const round5 = (n: number) => Math.round(n / 5) * 5;
 
+// Custom range-slider chrome for the "Lawn size" control (§14g signature
+// detail #2). Scoped to this one class name so it never leaks outside this
+// file — accent fill up to the thumb, plain line-color track beyond it, a
+// 28px thumb that scales to 1.1 on a real press only. The value itself stays
+// a plain 3-step native <input type="range">, so drag tracking is the
+// browser's own 1:1 pointer mapping — nothing here reimplements dragging.
+function EstimateRangeStyles() {
+  return (
+    <style>{`
+      .lawncare-range {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 4px;
+        border-radius: 999px;
+        background: linear-gradient(to right, var(--d-accent) var(--range-fill, 50%), var(--d-line) var(--range-fill, 50%));
+        outline: none;
+        cursor: pointer;
+      }
+      .lawncare-range::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: var(--d-accent);
+        border: 3px solid var(--d-surface);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        transition: transform var(--d-dur-press, 160ms) var(--d-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+      }
+      .lawncare-range::-moz-range-thumb {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: var(--d-accent);
+        border: 3px solid var(--d-surface);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        transition: transform var(--d-dur-press, 160ms) var(--d-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+      }
+      .lawncare-range::-moz-range-track {
+        height: 4px;
+        border-radius: 999px;
+        background: var(--d-line);
+      }
+      .lawncare-range::-moz-range-progress {
+        height: 4px;
+        border-radius: 999px;
+        background: var(--d-accent);
+      }
+      .lawncare-range:active::-webkit-slider-thumb {
+        transform: scale(1.1);
+      }
+      .lawncare-range:active::-moz-range-thumb {
+        transform: scale(1.1);
+      }
+      .lawncare-range:focus-visible {
+        outline: 2px solid var(--d-accent);
+        outline-offset: 4px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lawncare-range::-webkit-slider-thumb,
+        .lawncare-range::-moz-range-thumb {
+          transition: none;
+        }
+      }
+    `}</style>
+  );
+}
+
 function EstimateWidget() {
+  const reducedMotion = useReducedMotion();
   const [size, setSize] = useState(1);
   const [freq, setFreq] = useState(0);
   const per = round5(SIZES[size].base * FREQ[freq].mult);
 
+  // Crossfade-blur mask on the price number when it changes (Emil Kowalski's
+  // "mask the cut" technique) — never a counting-up animation. The number
+  // itself swaps instantly; a brief blur+fade hides the jump, then clears.
+  // Size/frequency only ever have 3×2 = 6 possible states, so this is a
+  // bounded, occasional change — never the "100+/day" case that should skip
+  // animation entirely.
+  const [priceUnsettled, setPriceUnsettled] = useState(false);
+  const prevPer = useRef(per);
+  useEffect(() => {
+    if (prevPer.current === per) return;
+    prevPer.current = per;
+    setPriceUnsettled(true);
+    const holdMs = reducedMotion ? 0 : 150;
+    const t = setTimeout(() => setPriceUnsettled(false), holdMs);
+    return () => clearTimeout(t);
+  }, [per, reducedMotion]);
+  const priceTransitionMs = reducedMotion ? 0 : 150;
+
   return (
     <Section dark className="!py-14 md:!py-[100px]">
+      <EstimateRangeStyles />
       <Rise>
         <Eyebrow>Instant estimate</Eyebrow>
         <div className="mt-5">
@@ -207,29 +319,32 @@ function EstimateWidget() {
       </Rise>
       <div className="mt-12 grid gap-10 md:grid-cols-[1fr_0.8fr] md:gap-14">
         <Rise>
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--d-muted)" }}>
-                Lawn size
-              </p>
-              <div className="mt-2.5 flex flex-wrap gap-2">
-                {SIZES.map((s, i) => (
-                  <button
-                    key={s.label}
-                    type="button"
-                    onClick={() => setSize(i)}
-                    aria-pressed={i === size}
-                    className="press px-4 py-2.5 text-left transition-colors"
-                    style={{
-                      background: i === size ? "var(--d-accent)" : "transparent",
-                      color: i === size ? "var(--d-onaccent)" : "var(--d-body)",
-                      border: `1px solid ${i === size ? "var(--d-accent)" : "var(--d-line)"}`,
-                      borderRadius: "var(--d-radius)",
-                    }}
-                  >
-                    <span className="block text-[15px] font-semibold">{s.label}</span>
-                    <span className="block text-[12px] opacity-80">{s.note}</span>
-                  </button>
+              <div className="flex items-baseline justify-between">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--d-muted)" }}>
+                  Lawn size
+                </p>
+                <span className="text-[13px] font-semibold" style={{ color: "var(--d-fg)" }}>
+                  {SIZES[size].label}
+                  <span className="font-normal" style={{ color: "var(--d-muted)" }}> · {SIZES[size].note}</span>
+                </span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={SIZES.length - 1}
+                step={1}
+                value={size}
+                onChange={(e) => setSize(Number(e.target.value))}
+                aria-label="Lawn size"
+                aria-valuetext={`${SIZES[size].label}, ${SIZES[size].note}`}
+                className="lawncare-range mt-4 block"
+                style={{ "--range-fill": `${(size / (SIZES.length - 1)) * 100}%` } as CSSProperties}
+              />
+              <div className="mt-2.5 flex justify-between text-[11px] font-medium" style={{ color: "var(--d-muted)" }}>
+                {SIZES.map((s) => (
+                  <span key={s.label}>{s.label}</span>
                 ))}
               </div>
             </div>
@@ -244,7 +359,7 @@ function EstimateWidget() {
                     type="button"
                     onClick={() => setFreq(i)}
                     aria-pressed={i === freq}
-                    className="press px-4 py-2.5 text-[15px] font-semibold transition-colors"
+                    className="d-press px-4 py-2.5 text-[15px] font-semibold transition-colors"
                     style={{
                       background: i === freq ? "var(--d-accent)" : "transparent",
                       color: i === freq ? "var(--d-onaccent)" : "var(--d-body)",
@@ -268,7 +383,15 @@ function EstimateWidget() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--d-muted)" }}>
                 Roughly
               </p>
-              <p className="mt-3 text-[40px] font-bold leading-none" style={{ color: "var(--d-fg)" }}>
+              <p
+                className="mt-3 text-[40px] font-bold leading-none"
+                style={{
+                  color: "var(--d-fg)",
+                  filter: priceUnsettled ? "blur(2px)" : "blur(0px)",
+                  opacity: priceUnsettled ? 0.7 : 1,
+                  transition: `filter ${priceTransitionMs}ms var(--d-ease-out, cubic-bezier(0.23,1,0.32,1)), opacity ${priceTransitionMs}ms var(--d-ease-out, cubic-bezier(0.23,1,0.32,1))`,
+                }}
+              >
                 ${per}
                 <span className="text-[18px] font-medium" style={{ color: "var(--d-muted)" }}>
                   {" "}/ visit
@@ -280,7 +403,7 @@ function EstimateWidget() {
             </div>
             <a
               href="#freshcut-contact"
-              className="press mt-7 inline-block px-6 py-3.5 text-center text-[14px] font-semibold"
+              className="d-press mt-7 inline-block px-6 py-3.5 text-center text-[14px] font-semibold"
               style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
             >
               Lock in this price →
@@ -421,6 +544,7 @@ export function LawnCareDemo({ tier = "basic" }: { tier?: Tier }) {
         strip="Fully Insured · No Contracts · Same-Day Quotes"
         contactId="freshcut-contact"
       />
+      <MobileStickyCta phone={PHONE} bookLabel="Get a quote" contactId="freshcut-contact" />
     </DemoShell>
   );
 }
