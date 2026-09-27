@@ -1,9 +1,9 @@
 // Style demo — a neighborhood bakery homepage in the warm & inviting "Golden
 // Hour" mood (SKILL §13b + §14b): warm cream, espresso text, crust-amber accent,
 // a Fraunces display, softer corners. A bakery sells off a MENU and a CASE, so
-// "what we bake" is a printed-menu layout beside the case, and "why people come
-// back" is a warm narrative band — not the numbered grid. "Golden Hour
-// Bakehouse" is a sample brand for the demo, not a client.
+// "what we bake" is a printed-menu layout beside the case, and the rest of the
+// page follows the case, the ovens, and a cake order — not a numbered grid.
+// "Golden Hour Bakehouse" is a sample brand for the demo, not a client.
 
 import {
   ANCHOR_SCROLL_CLASS,
@@ -22,14 +22,19 @@ import {
   Media,
   Rise,
   SceneBlock,
-  Section,
   StickyReveal,
   StickyScene,
   TwoLine,
-  WorkGrid,
 } from "./system";
 import { heroConceptFor } from "@/lib/heroConcepts";
 import type { Tier } from "./VilasDemoBar";
+
+// Section/Faq/Contact/Intro all share one fixed vertical rhythm (72px/140px)
+// via the shared <Section> primitive in system.tsx, which we're not touching.
+// The two sections built by hand in this file get their own distinct rhythm
+// instead of defaulting to that same number twice in a row — same container
+// width (max-w-1200 + the shared side padding), different vertical air.
+const wrap = "mx-auto w-full max-w-[1200px] px-6 md:px-16";
 
 const PREMIUM_HERO = heroConceptFor("demo-bakery");
 const ACCENT = "#C9802F"; // warm crust amber
@@ -54,8 +59,7 @@ const PHONE = "(631) 555-0173";
 const NAME = "Golden Hour Bakehouse";
 
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
-// Put your hero photo in /public (e.g. /public/demos/bakery-hero.jpg), then
-// set the path below. Leave "" to show the labeled placeholder instead.
+// Real capture, wired and kept: /public/previews/firstBakeryImage.webp.
 const firstBakeryImage = "/previews/firstBakeryImage.webp";
 
 // The menu — category, a short appetizing line, an honest price/note (§14b).
@@ -64,15 +68,6 @@ const MENU = [
   { name: "Morning pastry", desc: "Cardamom morning buns, croissants, and one very good cookie, small batches.", price: "from $4" },
   { name: "Cakes to order", desc: "Vanilla or chocolate, plus seasonal specials. Two days' notice.", price: "from $45" },
   { name: "Wholesale", desc: "Standing morning deliveries of bread and pastry to cafés and restaurants nearby.", price: "ask us" },
-];
-
-const WORK = [
-  { tag: "Bread", caption: "Sourdough loaf: out of the oven at 7am" },
-  { tag: "Pastry", caption: "Cardamom morning buns: gone by 10" },
-  { tag: "Bread", caption: "Seeded rye: dense, dark, keeps all week" },
-  { tag: "Sweet", caption: "Brown-butter chocolate chip cookie" },
-  { tag: "Savory", caption: "Rosemary focaccia, baked in sheets" },
-  { tag: "Cake", caption: "Whole birthday cake: order two days ahead" },
 ];
 
 const FAQ = [
@@ -86,7 +81,8 @@ const FAQ = [
 // ── What we bake — the menu beside the case, like stepping to the counter (§14b).
 function BakeryMenu() {
   return (
-    <Section>
+    <section className="w-full py-24 md:py-32">
+      <div className={wrap}>
       <Rise>
         <Eyebrow>What we bake</Eyebrow>
         <div className="mt-5">
@@ -124,49 +120,51 @@ function BakeryMenu() {
         {/* the case */}
         <Rise delay={0.1}>
           <div className="md:sticky md:top-10">
-            <Media label="THE CASE: morning bake (3:2)" file="the-case.jpg" ratio="3/2" />
+            <Media label="The case" file="the-case.jpg" ratio="4/3" />
             <p className="mt-3 text-[13px]" style={{ color: "var(--d-muted)" }}>
               The case at 7am. When it&apos;s empty, that&apos;s the day.
             </p>
           </div>
         </Rise>
       </div>
-    </Section>
+      </div>
+    </section>
   );
 }
 
-// ── Why people come back — a warm narrative band, not a corporate grid (§14b).
-function WarmNarrative() {
+// ── Whole-cake orders — a centered ask + a bench shot, not a corporate grid.
+function CakeOrders() {
   return (
-    <Section dark>
-      <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
+    <section className="w-full py-20 md:py-[176px]" style={{ background: "var(--d-surface)" }}>
+      <div className={wrap}>
+      <div className="mx-auto max-w-xl text-center">
         <Rise>
-          <Eyebrow>Why people come back</Eyebrow>
+          <div className="flex justify-center">
+            <Eyebrow>Custom orders</Eyebrow>
+          </div>
           <div className="mt-5">
-            <TwoLine a="Baked at 4am." b="Gone by noon." />
+            <TwoLine a="Need a cake?" b="Give us two days." />
           </div>
-          <div className="mt-7 space-y-6">
-            {[
-              ["Everything's from this morning.", "Nothing in the case carried over from yesterday. We bake it, you eat it the same day, and the empty shelf at noon is the point."],
-              ["We bake a short list, well.", "Sourdough on a 36-hour rise, pastry out before the rush, cakes to order. A few things every day instead of a long menu we phone in."],
-              ["Reserve a bag the night before.", "Order by 8pm and it's on the shelf with your name on it. The regulars never gamble on the morning."],
-            ].map(([h, p]) => (
-              <div key={h}>
-                <h3 className="text-[19px] font-semibold" style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}>
-                  {h}
-                </h3>
-                <p className="mt-1.5 text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-                  {p}
-                </p>
-              </div>
-            ))}
-          </div>
-        </Rise>
-        <Rise delay={0.1}>
-          <Media label="THE BAKEHOUSE: morning light (4:5)" file="bakehouse.jpg" ratio="4/5" />
+          <p className="mt-6 text-[17px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+            Vanilla or chocolate, sized for the table, from $45. Order two days ahead and
+            we&apos;ll have it ready when you walk in.
+          </p>
+          <a
+            href="#contact"
+            className="press mt-9 inline-block px-6 py-3.5 text-[14px] font-semibold no-underline"
+            style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
+          >
+            Order a cake
+          </a>
         </Rise>
       </div>
-    </Section>
+      <Rise delay={0.12}>
+        <div className="mx-auto mt-14 max-w-sm">
+          <Media label="The bakehouse bench" file="bakehouse-bench.jpg" ratio="4/5" />
+        </div>
+      </Rise>
+      </div>
+    </section>
   );
 }
 
@@ -184,12 +182,11 @@ export function BakeryDemo({ tier = "basic" }: { tier?: Tier }) {
           sub="Sourdough, morning buns, and one very good cookie, baked in small batches every morning. When the case is empty, that's the day."
           primaryCta="Order ahead"
           phone={PHONE}
-          mediaLabel="HERO VIDEO: the case at 7am (16:9)"
+          mediaLabel="The bakery, from the sidewalk"
           premium={tier === "premium" ? PREMIUM_HERO : undefined}
         />
         <SceneBlock>
           <StickyReveal>
-            <DemoMarquee terms={["Sourdough", "Pastry", "Cakes", "Focaccia", "Cookies"]} />
             <div id="about" className={ANCHOR_SCROLL_CLASS}>
               <Intro
                 eyebrow="Who we are"
@@ -210,36 +207,38 @@ export function BakeryDemo({ tier = "basic" }: { tier?: Tier }) {
           </StickyReveal>
         </SceneBlock>
       </StickyScene>
+      {/* moved out of the pinned scene — it was riding over the hero photo and
+          going unreadable there. Now a plain band on the page's own bg. */}
+      <div
+        style={{ background: "var(--d-bg)", borderTop: "1px solid var(--d-line)", borderBottom: "1px solid var(--d-line)" }}
+        className="py-6"
+      >
+        <DemoMarquee terms={["Sourdough", "Pastry", "Cakes", "Focaccia", "Cookies"]} />
+      </div>
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
         <BakeryMenu />
       </div>
-      <FullBleedBreak
-        eyebrow="Order ahead"
-        line1="Skip the line,"
-        line2="not the bread."
-        paragraph="Order by 8pm and your bag is on the shelf with your name on it the next morning. Cakes need two days' notice; tell us vanilla or chocolate."
-        checklist={[
-          "Reserved with your name",
-          "Out of the oven that morning",
-          "Cakes with two days' notice",
-          "Pickup from 7am",
-        ]}
-        cta="Place an order"
-        mediaLabel="THE CASE: morning bake (16:9)"
-      />
       <div id="work" className={ANCHOR_SCROLL_CLASS}>
-        <WorkGrid
-          eyebrow="The daily case"
-          line1="What's here"
-          line2="most days."
-          items={WORK}
+        <FullBleedBreak
+          eyebrow="Behind the counter"
+          line1="In by 4am,"
+          line2="out the door by noon."
+          paragraph="Every loaf gets mixed, shaped, and baked in this room before the shop opens. Nothing is trucked in — if it's in the case, it came out of these ovens a few hours earlier."
+          checklist={[
+            "Dough mixed by hand",
+            "Shaped on a floured bench",
+            "Baked in small batches",
+            "Case restocked all morning",
+          ]}
+          cta="See today's menu"
+          mediaLabel="The bakehouse, early morning"
         />
       </div>
-      <WarmNarrative />
+      <CakeOrders />
       <Faq
         eyebrow="Questions"
-        line1="The stuff"
-        line2="people ask."
+        line1="Before you"
+        line2="place an order."
         items={FAQ}
       />
       <div id="contact" className={ANCHOR_SCROLL_CLASS}>
