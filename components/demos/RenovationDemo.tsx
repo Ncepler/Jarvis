@@ -80,6 +80,10 @@ const WORK = [
   { tag: "Bath", caption: "Guest bath: floating vanity & tile", img: "/previews/renovation3.7.webp" },
   { tag: "Whole-home", caption: "Cape: second-story gut & rebuild", img: "/previews/renovation3.8.webp" },
   { tag: "Exterior", caption: "Cedar siding & new windows", img: "/previews/renovation3.9.webp" },
+  // 2026-09-27 photo pass. Warm-sepia toned (sharp modulate+tint) to match
+  // the existing renovation3.* set's shared grade — the source photo was
+  // full color and clashed badly against the rest of this grid.
+  { tag: "Kitchen", caption: "Center-island kitchen: custom cabinetry & marble", img: "/demos/renovation/kitchen-traditional.webp" },
 ];
 
 const PROPS = [

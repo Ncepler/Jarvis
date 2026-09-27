@@ -72,15 +72,18 @@ const NAME = "Wildstem Florals";
 const wrap = "mx-auto w-full max-w-[1200px] px-6 md:px-16";
 
 // ── REAL PHOTOGRAPHY ─────────────────────────────────────────────────────
-// Three real photos now back this demo (SKILL §10): the original hero/
+// Four real photos now back this demo (SKILL §10): the original hero/
 // weekly-flowers shot, a walk-in cooler still life (galvanized buckets,
-// roses, ranunculus), and a long-table wedding setting — both added in the
-// 2026-09-27 photo pass. The cooler photo covers Sympathy/Everyday/Events;
-// the wedding photo covers the Weddings occasion specifically, wherever a
-// per-occasion image is needed below.
+// roses, ranunculus), a rustic barn wedding-table setting, and a formal
+// candlelit long table — the last three all added in the 2026-09-27 photo
+// pass. The cooler photo covers Sympathy/Everyday; the wedding photo covers
+// Weddings; the candlelit long table covers Events specifically ("Dinners,
+// openings, the long table" — a literal match), wherever a per-occasion
+// image is needed below.
 const firstFloristImage = "/previews/firstFloristImage.webp";
 const coolerImage = "/demos/florist/cooler.webp";
 const weddingImage = "/demos/florist/wedding-table.webp";
+const longTableImage = "/demos/florist/long-table.webp";
 
 // Same curve system.tsx sets as var(--d-ease-out) (not exported, so mirrored
 // here as the numeric tuple Motion's `ease` needs); entering/exiting content
@@ -105,10 +108,11 @@ function useHoverCapablePointer() {
 
 // One real photo per occasion tile where we have one, otherwise a distinct
 // slice of the cooler photo (§ signature detail 2) — order matches OCCASIONS
-// below (Weddings, Sympathy, Everyday, Events). Weddings gets its own real
-// wedding-table photo; the rest share the cooler image, cropped differently.
-const OCCASION_IMAGES = [weddingImage, coolerImage, coolerImage, coolerImage];
-const OCCASION_CROPS = ["50% 38%", "75% 20%", "35% 75%", "88% 65%"];
+// below (Weddings, Sympathy, Everyday, Events). Weddings and Events each get
+// their own real photo; Sympathy/Everyday share the cooler image, cropped
+// differently.
+const OCCASION_IMAGES = [weddingImage, coolerImage, coolerImage, longTableImage];
+const OCCASION_CROPS = ["50% 38%", "75% 20%", "35% 75%", "50% 55%"];
 const PREVIEW_W = 240;
 const PREVIEW_H = 300;
 
@@ -181,7 +185,10 @@ function OccasionCursorPreview({
         height: PREVIEW_H,
         transform,
         borderRadius: "var(--d-radius-sm)",
-        boxShadow: "0 20px 48px -16px rgba(42,38,34,.28)",
+        // Only cast the shadow while a crop is actually showing — otherwise
+        // this box sits at (0,0) before the first mousemove and the shadow
+        // alone renders as a visible empty square at rest.
+        boxShadow: activeIndex !== null ? "0 20px 48px -16px rgba(42,38,34,.28)" : "none",
       }}
     >
       <AnimatePresence>
@@ -335,6 +342,13 @@ function AboutSection() {
 // occasion crops above — no distinct bouquet photography exists yet).
 const BOUQUET_CROPS = ["30% 20%", "70% 30%", "20% 60%", "80% 70%", "50% 15%", "45% 85%"];
 
+// Rows whose occasion has its own dedicated real photo (mirrors
+// OCCASION_IMAGES above) skip the cooler-photo crop entirely.
+const BOUQUET_IMAGE_OVERRIDE: Record<string, { src: string; crop: string }> = {
+  Weddings: { src: weddingImage, crop: "50% 40%" },
+  Events: { src: longTableImage, crop: "50% 55%" },
+};
+
 function BouquetList() {
   return (
     <section className="relative w-full py-16 md:py-28" style={{ background: "var(--d-surface)" }}>
@@ -387,14 +401,14 @@ function BouquetList() {
                   }}
                 >
                   <Image
-                    src={b.occasion === "Weddings" ? weddingImage : coolerImage}
+                    src={BOUQUET_IMAGE_OVERRIDE[b.occasion]?.src ?? coolerImage}
                     alt=""
                     fill
                     sizes="48px"
                     className="object-cover"
                     style={{
                       objectPosition:
-                        b.occasion === "Weddings" ? "50% 40%" : BOUQUET_CROPS[i % BOUQUET_CROPS.length],
+                        BOUQUET_IMAGE_OVERRIDE[b.occasion]?.crop ?? BOUQUET_CROPS[i % BOUQUET_CROPS.length],
                     }}
                   />
                 </div>

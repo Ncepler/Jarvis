@@ -74,8 +74,13 @@ const PHONE = "(516) 555-0143";
 const NAME = "Apex Collision";
 const EMAIL = "hello@apexcollision.demo";
 
-// Hero background photo (Noah's upload, compressed to WebP). "" → placeholder.
-const firstAutoBodyImage = "/previews/firstAutoBodyImage.webp";
+// Hero background photo. Real photo (2026-09-27 photo pass): a low-angle
+// front-end shot in a dark, teal-lit garage — matches this niche's
+// GRAPHITE-DARK mood. Replaces an earlier photo of a mechanic pouring oil
+// that visibly showed real Mercedes-Benz branding (the tristar on both the
+// jacket and the oil bottle) — a real-brand exposure this demo shouldn't
+// carry, on top of being a bright, mismatched mood for this style.
+const firstAutoBodyImage = "/demos/autobody/hero.webp";
 
 // ── Reusable side-profile car outline (content, not decoration — §14d). ──────
 // viewBox 360×170; used by the damage map and the paint matcher.

@@ -62,9 +62,12 @@ const PHONE = "(516) 555-0123";
 const NAME = "Stone & Sage Landscapes";
 
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
-// Put your hero photo in /public (e.g. /public/demos/landscaping-hero.jpg), then
-// set the path below. Leave "" to show the labeled placeholder instead.
-const firstLandscapingImage = "/previews/firstLandscapingImage.webp";
+// Real photo (2026-09-27 photo pass): a golden-hour patio and stone seat
+// wall framed through two porch columns. Replaces an earlier placeholder
+// shot of a worker pushing a wheelbarrow through autumn leaf litter — a
+// fall-cleanup labor photo, not the finished-hardscape aspirational shot
+// this niche's hero needs.
+const firstLandscapingImage = "/demos/landscaping/hero-patio.webp";
 
 const SERVICES = [
   { title: "Design", copy: "A measured plan for the whole property — plantings, stone, lighting, grading — worked out before anything gets dug." },
