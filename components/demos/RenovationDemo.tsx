@@ -99,7 +99,7 @@ const FAQ = [
 // numbered 01–06 list as a compact strip beneath (§14e). ──────────────────────
 function RoomTransforms() {
   return (
-    <Section>
+    <Section className="pt-14 pb-24 md:pt-24 md:pb-40">
       <Rise>
         <Eyebrow>What we do</Eyebrow>
         <div className="mt-5">
@@ -118,8 +118,8 @@ function RoomTransforms() {
           <BeforeAfterSlider
             beforeImg="/previews/renovation1.before.webp"
             afterImg="/previews/renovation1.after.webp"
-            beforeLabel="BEFORE: kitchen (16:9)"
-            afterLabel="AFTER: kitchen (16:9)"
+            beforeLabel="BEFORE: kitchen"
+            afterLabel="AFTER: kitchen"
             beforeFile="before-1.jpg"
             afterFile="after-1.jpg"
           />
@@ -131,8 +131,8 @@ function RoomTransforms() {
           <BeforeAfterSlider
             beforeImg="/previews/renovation2.before.webp"
             afterImg="/previews/renovation2.after.webp"
-            beforeLabel="BEFORE: bath (16:9)"
-            afterLabel="AFTER: bath (16:9)"
+            beforeLabel="BEFORE: bath"
+            afterLabel="AFTER: bath"
             beforeFile="before-2.jpg"
             afterFile="after-2.jpg"
           />
@@ -175,11 +175,10 @@ export function RenovationDemo({ tier = "basic" }: { tier?: Tier }) {
           sub="Kitchens, baths, additions, and whole-home renovations across the North Shore. One crew, start to finish."
           primaryCta="Get a free estimate"
           phone={PHONE}
-          mediaLabel="HERO VIDEO: renovation b-roll (16:9)"
+          mediaLabel="HERO VIDEO: renovation b-roll"
         />
         <SceneBlock>
           <StickyReveal>
-            <DemoMarquee terms={["Kitchens", "Bathrooms", "Additions", "Basements", "Whole-Home", "Trim & Carpentry"]} />
             <div id="about" className={ANCHOR_SCROLL_CLASS}>
               <Intro
                 eyebrow="What we build"
@@ -200,6 +199,21 @@ export function RenovationDemo({ tier = "basic" }: { tier?: Tier }) {
           </StickyReveal>
         </SceneBlock>
       </StickyScene>
+      {/* Marquee lives here, OUT of the pinned scene above — nested inside the
+          StickyScene/SceneBlock it used to ride over the pinned hero photo
+          mid-scroll (SceneBlock's top gradient is meant for a text block
+          fading in over the image, not a hard-edged marquee band). A plain
+          solid band between the hero+intro scene and services reads clean. */}
+      <div
+        style={{
+          background: "var(--d-bg)",
+          borderTop: "1px solid var(--d-line)",
+          borderBottom: "1px solid var(--d-line)",
+        }}
+        className="py-6"
+      >
+        <DemoMarquee terms={["Kitchens", "Bathrooms", "Additions", "Basements", "Whole-Home", "Trim & Carpentry"]} />
+      </div>
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
         <RoomTransforms />
       </div>
@@ -222,7 +236,7 @@ export function RenovationDemo({ tier = "basic" }: { tier?: Tier }) {
           "Licensed & insured",
         ]}
         cta="Meet the crew"
-        mediaLabel="TRANSFORMATION: before/after (16:9)"
+        mediaLabel="TRANSFORMATION: before/after"
         img="/previews/renovation1.after.webp"
       />
       <div id="work" className={ANCHOR_SCROLL_CLASS}>
@@ -242,8 +256,8 @@ export function RenovationDemo({ tier = "basic" }: { tier?: Tier }) {
       />
       <Faq
         eyebrow="Questions"
-        line1="The stuff"
-        line2="people ask."
+        line1="Straight answers"
+        line2="before you sign."
         items={FAQ}
       />
       <div id="contact" className={ANCHOR_SCROLL_CLASS}>
