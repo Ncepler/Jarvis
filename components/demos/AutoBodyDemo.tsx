@@ -122,7 +122,7 @@ function HeroCarReveal({
   const reduced = useReducedMotion();
   const skipOwnBg = pinned && tier !== "premium";
   return (
-    <section className="relative w-full overflow-hidden" style={{ minHeight: "640px" }}>
+    <section className="relative w-full overflow-hidden" style={{ minHeight: "max(640px, 100svh)" }}>
       {/* full-bleed media slot — premium mechanism, else real photo, else
           placeholder. Skipped when `pinned`: StickyScene already paints it. */}
       {!skipOwnBg && (
@@ -145,7 +145,7 @@ function HeroCarReveal({
                     className="text-[11px] font-semibold uppercase tracking-[0.18em]"
                     style={{ color: "var(--d-muted)" }}
                   >
-                    HERO: car reveal sequence (16:9)
+                    HERO: car reveal sequence
                   </span>
                 </div>
               )}
@@ -196,17 +196,18 @@ function HeroCarReveal({
               <div key="cta" className="mt-9 flex flex-wrap items-center gap-3">
                 <a
                   href="#apex-contact"
-                  className="px-6 py-3.5 text-[14px] font-semibold"
+                  className="press px-6 py-3.5 text-[14px] font-semibold"
                   style={{ background: ACCENT2, color: "#0A0C0F" }}
                 >
                   Get a free estimate
                 </a>
-                <span
-                  className="px-6 py-3.5 text-[14px] font-semibold"
+                <a
+                  href="tel:+15165550143"
+                  className="press px-6 py-3.5 text-[14px] font-semibold"
                   style={{ border: "1px solid var(--d-line)", color: "var(--d-fg)", fontFamily: MONO }}
                 >
                   Call {PHONE}
-                </span>
+                </a>
               </div>,
             ]}
           </HeroReveal>
@@ -230,17 +231,18 @@ function HeroCarReveal({
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <a
                 href="#apex-contact"
-                className="px-6 py-3.5 text-[14px] font-semibold"
+                className="press px-6 py-3.5 text-[14px] font-semibold"
                 style={{ background: ACCENT2, color: "#0A0C0F" }}
               >
                 Get a free estimate
               </a>
-              <span
-                className="px-6 py-3.5 text-[14px] font-semibold"
+              <a
+                href="tel:+15165550143"
+                className="press px-6 py-3.5 text-[14px] font-semibold"
                 style={{ border: "1px solid var(--d-line)", color: "var(--d-fg)", fontFamily: MONO }}
               >
                 Call {PHONE}
-              </span>
+              </a>
             </div>
           </Rise>
         )}
@@ -320,117 +322,119 @@ function DamageMap() {
   const [active, setActive] = useState(0);
   const a = HOTSPOTS[active];
   return (
-    <Section>
-      <Rise>
-        <Eyebrow>What we fix</Eyebrow>
-        <div className="mt-5">
-          <TwoLine a="Point at the damage." b="We've fixed it before." />
-        </div>
-      </Rise>
-      <div className="mt-12 grid items-center gap-10 md:grid-cols-[1.25fr_1fr] md:gap-14">
-        {/* the car + hotspots */}
+    <section className="w-full py-[64px] md:py-[128px]">
+      <div className="mx-auto w-full max-w-[1200px] px-6 md:px-16">
         <Rise>
-          <div className="relative w-full" style={{ aspectRatio: "360/170" }}>
-            <CarOutline stroke="var(--d-muted)" />
-            {HOTSPOTS.map((h, i) => {
-              const on = i === active;
-              return (
+          <Eyebrow>What we fix</Eyebrow>
+          <div className="mt-5">
+            <TwoLine a="Point at the damage." b="We've fixed it before." />
+          </div>
+        </Rise>
+        <div className="mt-12 grid items-center gap-10 md:grid-cols-[1.25fr_1fr] md:gap-14">
+          {/* the car + hotspots */}
+          <Rise>
+            <div className="relative w-full" style={{ aspectRatio: "360/170" }}>
+              <CarOutline stroke="var(--d-muted)" />
+              {HOTSPOTS.map((h, i) => {
+                const on = i === active;
+                return (
+                  <button
+                    key={h.key}
+                    type="button"
+                    onMouseEnter={() => setActive(i)}
+                    onFocus={() => setActive(i)}
+                    onClick={() => setActive(i)}
+                    aria-label={`${h.panel}: ${h.service}`}
+                    aria-pressed={on}
+                    className="absolute -translate-x-1/2 -translate-y-1/2"
+                    style={{ left: `${h.x}%`, top: `${h.y}%` }}
+                  >
+                    {/* pulse ring (static on reduced motion) */}
+                    {on && !reduced && (
+                      <motion.span
+                        aria-hidden
+                        className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                        style={{ border: `1px solid ${ACCENT}` }}
+                        initial={{ scale: 1, opacity: 0.8 }}
+                        animate={{ scale: 3, opacity: 0 }}
+                        transition={{ duration: 1.4, ease: "easeOut", repeat: Infinity }}
+                      />
+                    )}
+                    <span
+                      className="block h-3.5 w-3.5 rounded-full transition-transform duration-200"
+                      style={{
+                        background: on ? ACCENT : "var(--d-surface)",
+                        border: `2px solid ${on ? ACCENT : "var(--d-muted)"}`,
+                        transform: on ? "scale(1.15)" : "scale(1)",
+                        boxShadow: on ? `0 0 0 4px rgba(47,168,255,.18)` : "none",
+                      }}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+            {/* tap-list — mobile + reduced-motion path; also the labeled list */}
+            <div className="mt-6 flex flex-wrap gap-2">
+              {HOTSPOTS.map((h, i) => (
                 <button
                   key={h.key}
                   type="button"
-                  onMouseEnter={() => setActive(i)}
-                  onFocus={() => setActive(i)}
                   onClick={() => setActive(i)}
-                  aria-label={`${h.panel}: ${h.service}`}
-                  aria-pressed={on}
-                  className="absolute -translate-x-1/2 -translate-y-1/2"
-                  style={{ left: `${h.x}%`, top: `${h.y}%` }}
+                  aria-pressed={i === active}
+                  className="press px-3.5 py-2 text-[13px] font-semibold uppercase tracking-[0.1em]"
+                  style={{
+                    border: `1px solid ${i === active ? ACCENT : "var(--d-line)"}`,
+                    color: i === active ? ACCENT : "var(--d-muted)",
+                    borderRadius: "var(--d-radius)",
+                  }}
                 >
-                  {/* pulse ring (static on reduced motion) */}
-                  {on && !reduced && (
-                    <motion.span
-                      aria-hidden
-                      className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full"
-                      style={{ border: `1px solid ${ACCENT}` }}
-                      initial={{ scale: 1, opacity: 0.8 }}
-                      animate={{ scale: 3, opacity: 0 }}
-                      transition={{ duration: 1.4, ease: "easeOut", repeat: Infinity }}
-                    />
-                  )}
-                  <span
-                    className="block h-3.5 w-3.5 rounded-full transition-transform duration-200"
-                    style={{
-                      background: on ? ACCENT : "var(--d-surface)",
-                      border: `2px solid ${on ? ACCENT : "var(--d-muted)"}`,
-                      transform: on ? "scale(1.15)" : "scale(1)",
-                      boxShadow: on ? `0 0 0 4px rgba(47,168,255,.18)` : "none",
-                    }}
-                  />
+                  {h.panel}
                 </button>
-              );
-            })}
-          </div>
-          {/* tap-list — mobile + reduced-motion path; also the labeled list */}
-          <div className="mt-6 flex flex-wrap gap-2">
-            {HOTSPOTS.map((h, i) => (
-              <button
-                key={h.key}
-                type="button"
-                onClick={() => setActive(i)}
-                aria-pressed={i === active}
-                className="px-3 py-1.5 text-[12px] font-semibold uppercase tracking-[0.08em]"
-                style={{
-                  border: `1px solid ${i === active ? ACCENT : "var(--d-line)"}`,
-                  color: i === active ? ACCENT : "var(--d-muted)",
-                  borderRadius: "var(--d-radius)",
-                }}
+              ))}
+            </div>
+          </Rise>
+          {/* the panel that swaps with the active hotspot */}
+          <Rise delay={0.1}>
+            <div
+              className="p-7"
+              style={{
+                background: "var(--d-surface)",
+                border: "1px solid var(--d-line)",
+                borderRadius: "var(--d-radius)",
+              }}
+            >
+              <span
+                className="text-[13px] font-semibold tracking-[0.1em]"
+                style={{ color: "var(--d-accent)", fontFamily: MONO }}
               >
-                {h.panel}
-              </button>
-            ))}
-          </div>
-        </Rise>
-        {/* the panel that swaps with the active hotspot */}
-        <Rise delay={0.1}>
-          <div
-            className="p-7"
-            style={{
-              background: "var(--d-surface)",
-              border: "1px solid var(--d-line)",
-              borderRadius: "var(--d-radius)",
-            }}
-          >
-            <span
-              className="text-[13px] font-semibold tracking-[0.1em]"
-              style={{ color: "var(--d-accent)", fontFamily: MONO }}
-            >
-              0{active + 1} / 0{HOTSPOTS.length}
-            </span>
-            <p
-              className="mt-3 text-[11px] font-semibold uppercase tracking-[0.18em]"
-              style={{ color: "var(--d-muted)" }}
-            >
-              {a.panel}
-            </p>
-            <motion.div key={a.key} initial={reduced ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: EASE }}>
-              <h3 className="mt-2 text-[26px] font-semibold leading-[1.15]" style={{ color: "var(--d-fg)" }}>
-                {a.service}
-              </h3>
-              <p className="mt-3 text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-                {a.desc}
+                0{active + 1} / 0{HOTSPOTS.length}
+              </span>
+              <p
+                className="mt-3 text-[11px] font-semibold uppercase tracking-[0.18em]"
+                style={{ color: "var(--d-muted)" }}
+              >
+                {a.panel}
               </p>
-            </motion.div>
-            <a
-              href="#apex-contact"
-              className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-semibold"
-              style={{ color: "var(--d-accent)" }}
-            >
-              Get this looked at →
-            </a>
-          </div>
-        </Rise>
+              <motion.div key={a.key} initial={reduced ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: EASE }}>
+                <h3 className="mt-2 text-[26px] font-semibold leading-[1.15]" style={{ color: "var(--d-fg)" }}>
+                  {a.service}
+                </h3>
+                <p className="mt-3 text-[15px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+                  {a.desc}
+                </p>
+              </motion.div>
+              <a
+                href="#apex-contact"
+                className="press mt-6 inline-flex items-center gap-1.5 text-[14px] font-semibold"
+                style={{ color: "var(--d-accent)" }}
+              >
+                Get this looked at →
+              </a>
+            </div>
+          </Rise>
+        </div>
       </div>
-    </Section>
+    </section>
   );
 }
 
@@ -456,8 +460,8 @@ function BeforeAfter() {
             <BeforeAfterSlider
               beforeImg="/previews/carBefore.webp"
               afterImg="/previews/carAfter.webp"
-              beforeLabel="BEFORE: collision (16:9)"
-              afterLabel="AFTER: restored (16:9)"
+              beforeLabel="BEFORE: collision"
+              afterLabel="AFTER: restored"
               beforeFile="before-1.jpg"
               afterFile="after-1.jpg"
             />
@@ -575,7 +579,7 @@ function EstimateWidget() {
     onPick: (i: number) => void;
   }) => (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--d-muted)" }}>
+      <p className="text-[12px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
         {title}
       </p>
       <div className="mt-2.5 flex flex-wrap gap-2">
@@ -585,7 +589,7 @@ function EstimateWidget() {
             type="button"
             onClick={() => onPick(i)}
             aria-pressed={i === value}
-            className="px-3.5 py-2 text-[13px] font-semibold transition-colors"
+            className="press px-3.5 py-2 text-[13px] font-semibold transition-colors"
             style={{
               background: i === value ? "var(--d-accent)" : "transparent",
               color: i === value ? "var(--d-onaccent)" : "var(--d-body)",
@@ -622,7 +626,7 @@ function EstimateWidget() {
             style={{ background: "var(--d-surface)", border: "1px solid var(--d-line)", borderRadius: "var(--d-radius)" }}
           >
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--d-muted)" }}>
+              <p className="text-[12px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--d-muted)" }}>
                 Estimated range
               </p>
               <p className="mt-3 text-[36px] font-bold leading-none md:text-[44px]" style={{ color: "var(--d-fg)", fontFamily: MONO }}>
@@ -636,7 +640,7 @@ function EstimateWidget() {
             </div>
             <a
               href="#apex-contact"
-              className="mt-7 inline-block px-6 py-3.5 text-center text-[14px] font-semibold"
+              className="press mt-7 inline-block px-6 py-3.5 text-center text-[14px] font-semibold"
               style={{ background: ACCENT2, color: "#0A0C0F" }}
             >
               Get this in writing →
@@ -658,48 +662,50 @@ const SPECS = [
 
 function SpecStrip() {
   return (
-    <Section dark>
-      <Rise>
-        <Eyebrow>Why bring it here</Eyebrow>
-        <div className="mt-5">
-          <TwoLine a="The fine print," b="up front." />
-        </div>
-      </Rise>
-      <div
-        className="mt-12 grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4"
-        style={{ background: "var(--d-line)", border: "1px solid var(--d-line)" }}
-      >
-        {SPECS.map((s, i) => (
-          <Rise key={s.label} delay={Math.min(i * 0.06, 0.24)}>
-            <div className="h-full p-7" style={{ background: "var(--d-bg)" }}>
-              <p className="text-[34px] font-bold leading-none" style={{ color: "var(--d-accent)", fontFamily: MONO }}>
-                {s.fig}
-              </p>
-              <h3 className="mt-4 text-[18px] font-semibold" style={{ color: "var(--d-fg)" }}>
-                {s.label}
-              </h3>
-              <p className="mt-2 text-[14px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
-                {s.desc}
-              </p>
-            </div>
-          </Rise>
-        ))}
-      </div>
-      {/* honest cert placeholder — never a faked credential (§12) */}
-      <Rise delay={0.1}>
-        <div className="mt-6 flex flex-wrap gap-3">
-          {["CERT: I-CAR (placeholder)", "CERT: manufacturer (placeholder)"].map((c) => (
-            <span
-              key={c}
-              className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em]"
-              style={{ color: "var(--d-muted)", border: "1px dashed var(--d-line)", borderRadius: "var(--d-radius)" }}
-            >
-              {c}
-            </span>
+    <section className="w-full py-[96px] md:py-[160px]" style={{ background: "var(--d-surface)" }}>
+      <div className="mx-auto w-full max-w-[1200px] px-6 md:px-16">
+        <Rise>
+          <Eyebrow>Why bring it here</Eyebrow>
+          <div className="mt-5">
+            <TwoLine a="The fine print," b="up front." />
+          </div>
+        </Rise>
+        <div
+          className="mt-12 grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4"
+          style={{ background: "var(--d-line)", border: "1px solid var(--d-line)" }}
+        >
+          {SPECS.map((s, i) => (
+            <Rise key={s.label} delay={Math.min(i * 0.06, 0.24)}>
+              <div className="h-full p-7" style={{ background: "var(--d-bg)" }}>
+                <p className="text-[34px] font-bold leading-none" style={{ color: "var(--d-accent)", fontFamily: MONO }}>
+                  {s.fig}
+                </p>
+                <h3 className="mt-4 text-[18px] font-semibold" style={{ color: "var(--d-fg)" }}>
+                  {s.label}
+                </h3>
+                <p className="mt-2 text-[14px] leading-[1.6]" style={{ color: "var(--d-body)" }}>
+                  {s.desc}
+                </p>
+              </div>
+            </Rise>
           ))}
         </div>
-      </Rise>
-    </Section>
+        {/* honest cert placeholder — never a faked credential (§12) */}
+        <Rise delay={0.1}>
+          <div className="mt-6 flex flex-wrap gap-3">
+            {["CERT: I-CAR (placeholder)", "CERT: manufacturer (placeholder)"].map((c) => (
+              <span
+                key={c}
+                className="px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.14em]"
+                style={{ color: "var(--d-muted)", border: "1px dashed var(--d-line)", borderRadius: "var(--d-radius)" }}
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        </Rise>
+      </div>
+    </section>
   );
 }
 
@@ -731,26 +737,34 @@ export function AutoBodyDemo({ tier = "basic" }: { tier?: Tier }) {
       <StickyScene image={firstAutoBodyImage} priority>
         <HeroCarReveal tier={tier} pinned />
         <SceneBlock>
+          {/* Marquee gets its own (short) reveal target — wrapping the much
+              taller Intro block in the same StickyReveal made its 0.2
+              IntersectionObserver threshold resolve against ~900px of
+              content, so it needed ~180px of scroll before ANYTHING painted,
+              right as SceneBlock's own gradient had already gone fully
+              opaque: a dead, pure-dark stretch mid-scroll. Intro handles its
+              own staggered reveal internally (Rise/whileInView per block),
+              so it doesn't need — and shouldn't share — an outer gate. */}
           <StickyReveal>
             <DemoMarquee terms={["Collision", "Paint", "Dents", "Frame", "Glass", "Detailing"]} />
-            <div id="about" className={ANCHOR_SCROLL_CLASS}>
-              <Intro
-                eyebrow="Who we are"
-                line1="Back to factory."
-                line2="Claim and all."
-                paragraphs={[
-                  "A collision shop is mostly about two things: getting the car right, and not making the claim your problem. We do both.",
-                  "Apex repairs, refinishes, and reglasses every make in Hicksville: laser-measured frames, booth-baked paint, and an estimate you can read.",
-                ]}
-                badges={[
-                  ["Collision to refinishing", "Full service"],
-                  ["We handle the claim", "Insurance"],
-                  ["Lifetime paint warranty", "Guaranteed"],
-                  ["Free written estimates", "No pressure"],
-                ]}
-              />
-            </div>
           </StickyReveal>
+          <div id="about" className={ANCHOR_SCROLL_CLASS}>
+            <Intro
+              eyebrow="Who we are"
+              line1="Back to factory."
+              line2="Claim and all."
+              paragraphs={[
+                "A collision shop is mostly about two things: getting the car right, and not making the claim your problem. We do both.",
+                "Apex repairs, refinishes, and reglasses every make in Hicksville: laser-measured frames, booth-baked paint, and an estimate you can read.",
+              ]}
+              badges={[
+                ["Collision to refinishing", "Full service"],
+                ["We handle the claim", "Insurance"],
+                ["Lifetime paint warranty", "Guaranteed"],
+                ["Free written estimates", "No pressure"],
+              ]}
+            />
+          </div>
         </SceneBlock>
       </StickyScene>
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
@@ -763,7 +777,7 @@ export function AutoBodyDemo({ tier = "basic" }: { tier?: Tier }) {
       </div>
       <EstimateWidget />
       <SpecStrip />
-      <Faq eyebrow="Questions" line1="The stuff" line2="people ask." items={FAQ} />
+      <Faq eyebrow="Questions" line1="Before you" line2="hand over the keys." items={FAQ} />
       <div id="apex-contact" className={ANCHOR_SCROLL_CLASS}>
         <Contact
           eyebrow="Free estimate"
