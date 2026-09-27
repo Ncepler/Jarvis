@@ -4,8 +4,9 @@
 // (SKILL §13e + §14g): fresh off-white, grass-green accent, a friendly
 // grotesque, sunny photography. Lawn care is a recurring-PLAN business and the
 // whole funnel is "get a price," so "what we do" is plan tier cards plus a live
-// instant-estimate widget, and "why us" is a compact strip — not the numbered
-// grid. "Fresh Cut Lawn Co." is a sample brand for the demo, not a client.
+// instant-estimate widget, and "what we handle" is a plain ruled list — not a
+// photo grid we don't have real photos for yet. "Fresh Cut Lawn Co." is a
+// sample brand for the demo, not a client.
 
 import { useState } from "react";
 import {
@@ -20,16 +21,13 @@ import {
   type DemoTheme,
   Eyebrow,
   Faq,
-  FullBleedBreak,
   Intro,
-  ProofStrip,
   Rise,
   Section,
   SceneBlock,
   StickyReveal,
   StickyScene,
   TwoLine,
-  WorkGrid,
 } from "./system";
 import { heroConceptFor } from "@/lib/heroConcepts";
 import type { Tier } from "./VilasDemoBar";
@@ -87,7 +85,9 @@ const PLANS = [
   },
 ];
 
-const WORK = [
+// What the crew handles, season by season — shown as a plain ruled list
+// rather than a photo grid, since no real job photos exist yet (§10).
+const SEASONS = [
   { tag: "Mowing", caption: "Weekly cut with clean edges" },
   { tag: "Stripes", caption: "Straight mow lines, front to back" },
   { tag: "Cleanup", caption: "Fall leaf cleanup: beds cleared" },
@@ -104,10 +104,10 @@ const FAQ = [
   { q: "Are you insured?", a: "Yes, fully insured. Happy to send proof before your first visit." },
 ];
 
-// ── Service plans — pricing tiers, one marked most popular (§14g). ───────────
+// ── Service plans — pricing tiers, one visually lifted as most picked (§14g).
 function PlanCards() {
   return (
-    <Section>
+    <Section className="!py-16 md:!py-[120px]">
       <Rise>
         <Eyebrow>What we do</Eyebrow>
         <div className="mt-5">
@@ -118,16 +118,19 @@ function PlanCards() {
         {PLANS.map((p, i) => (
           <Rise key={p.name} delay={Math.min(i * 0.08, 0.2)}>
             <div
-              className="flex h-full flex-col p-7"
+              className={`relative flex h-full flex-col p-7 transition-transform duration-300 ${
+                p.popular ? "md:-translate-y-4" : ""
+              }`}
               style={{
                 background: "var(--d-surface)",
                 border: `1px solid ${p.popular ? "var(--d-accent)" : "var(--d-line)"}`,
                 borderRadius: "var(--d-radius)",
-                boxShadow: p.popular ? "0 12px 32px rgba(78,154,74,.12)" : "none",
+                boxShadow: p.popular ? "0 20px 40px -14px rgba(78,154,74,.28)" : "none",
+                zIndex: p.popular ? 10 : 1,
               }}
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-[22px] font-semibold" style={{ color: "var(--d-fg)" }}>
+                <h3 className="text-[19px] font-semibold md:text-[22px]" style={{ color: "var(--d-fg)" }}>
                   {p.name}
                 </h3>
                 {p.popular && (
@@ -143,7 +146,7 @@ function PlanCards() {
                 {p.blurb}
               </p>
               <p className="mt-5">
-                <span className="text-[32px] font-bold" style={{ color: "var(--d-fg)" }}>
+                <span className="text-[28px] font-bold md:text-[32px]" style={{ color: "var(--d-fg)" }}>
                   {p.price}
                 </span>{" "}
                 <span className="text-[14px]" style={{ color: "var(--d-muted)" }}>
@@ -160,7 +163,7 @@ function PlanCards() {
               </ul>
               <a
                 href="#freshcut-contact"
-                className="mt-7 inline-block px-5 py-3 text-center text-[14px] font-semibold"
+                className="press mt-7 inline-block px-5 py-3 text-center text-[14px] font-semibold"
                 style={
                   p.popular
                     ? { background: "var(--d-accent)", color: "var(--d-onaccent)" }
@@ -195,7 +198,7 @@ function EstimateWidget() {
   const per = round5(SIZES[size].base * FREQ[freq].mult);
 
   return (
-    <Section dark>
+    <Section dark className="!py-14 md:!py-[100px]">
       <Rise>
         <Eyebrow>Instant estimate</Eyebrow>
         <div className="mt-5">
@@ -216,7 +219,7 @@ function EstimateWidget() {
                     type="button"
                     onClick={() => setSize(i)}
                     aria-pressed={i === size}
-                    className="px-4 py-2.5 text-left transition-colors"
+                    className="press px-4 py-2.5 text-left transition-colors"
                     style={{
                       background: i === size ? "var(--d-accent)" : "transparent",
                       color: i === size ? "var(--d-onaccent)" : "var(--d-body)",
@@ -241,7 +244,7 @@ function EstimateWidget() {
                     type="button"
                     onClick={() => setFreq(i)}
                     aria-pressed={i === freq}
-                    className="px-4 py-2.5 text-[15px] font-semibold transition-colors"
+                    className="press px-4 py-2.5 text-[15px] font-semibold transition-colors"
                     style={{
                       background: i === freq ? "var(--d-accent)" : "transparent",
                       color: i === freq ? "var(--d-onaccent)" : "var(--d-body)",
@@ -277,13 +280,50 @@ function EstimateWidget() {
             </div>
             <a
               href="#freshcut-contact"
-              className="mt-7 inline-block px-6 py-3.5 text-center text-[14px] font-semibold"
+              className="press mt-7 inline-block px-6 py-3.5 text-center text-[14px] font-semibold"
               style={{ background: "var(--d-accent)", color: "var(--d-onaccent)" }}
             >
               Lock in this price →
             </a>
           </div>
         </Rise>
+      </div>
+    </Section>
+  );
+}
+
+// ── What we handle — a plain ruled list built from the six service/season
+// entries (replaces a photo work-grid we don't have real job photos for). ────
+function SeasonList() {
+  return (
+    <Section className="!py-20 md:!py-[150px]">
+      <Rise>
+        <Eyebrow>What we handle</Eyebrow>
+        <div className="mt-5">
+          <TwoLine a="One call," b="every season." />
+        </div>
+      </Rise>
+      <div className="mt-12" style={{ borderTop: "1px solid var(--d-line)" }}>
+        {SEASONS.map((s, i) => (
+          <Rise key={s.tag} delay={Math.min(i * 0.05, 0.3)}>
+            <div
+              className="flex flex-wrap items-center justify-between gap-3 py-6 md:py-7"
+              style={{ borderBottom: "1px solid var(--d-line)" }}
+            >
+              <div className="flex items-baseline gap-5">
+                <span className="text-[13px] font-semibold tracking-[0.1em]" style={{ color: "var(--d-accent)" }}>
+                  0{i + 1}
+                </span>
+                <span className="text-[17px] font-semibold md:text-[19px]" style={{ color: "var(--d-fg)" }}>
+                  {s.tag}
+                </span>
+              </div>
+              <span className="text-[15px]" style={{ color: "var(--d-body)" }}>
+                {s.caption}
+              </span>
+            </div>
+          </Rise>
+        ))}
       </div>
     </Section>
   );
@@ -303,12 +343,11 @@ export function LawnCareDemo({ tier = "basic" }: { tier?: Tier }) {
           sub="Weekly mowing, cleanups, and edging for homes on the South Shore. No contracts, no voicemail tag. Text a photo, get a price."
           primaryCta="Get a free quote"
           phone={PHONE}
-          mediaLabel="HERO VIDEO: fresh-cut lawn (16:9)"
+          mediaLabel="HERO — fresh-cut lawn"
           premium={tier === "premium" ? PREMIUM_HERO : undefined}
         />
         <SceneBlock>
           <StickyReveal>
-            <DemoMarquee terms={["Mowing", "Cleanups", "Edging", "Mulch", "Fertilizing"]} />
             <div id="about" className={ANCHOR_SCROLL_CLASS}>
               <Intro
                 eyebrow="Who we are"
@@ -329,47 +368,25 @@ export function LawnCareDemo({ tier = "basic" }: { tier?: Tier }) {
           </StickyReveal>
         </SceneBlock>
       </StickyScene>
+      {/* Marquee lives as its own band, outside the pinned hero image, so it
+          never rides over the photo (was nested in the StickyScene stack). */}
+      <div
+        style={{ background: "var(--d-bg)", borderTop: "1px solid var(--d-line)", borderBottom: "1px solid var(--d-line)" }}
+        className="py-6"
+      >
+        <DemoMarquee terms={["Mowing", "Cleanups", "Edging", "Mulch", "Fertilizing"]} />
+      </div>
       <div id="services" className={ANCHOR_SCROLL_CLASS}>
         <PlanCards />
       </div>
       <EstimateWidget />
-      <FullBleedBreak
-        eyebrow="How it works"
-        line1="Text a photo."
-        line2="Get a price that night."
-        paragraph="Send a picture of the yard and your address: that's the whole form. We reply with a firm weekly number, then put you on the route with the same crew, same day."
-        checklist={[
-          "Firm price, no site visit",
-          "Same crew, same day",
-          "No contract, skip anytime",
-          "Fully insured",
-        ]}
-        cta="Text us a photo"
-        mediaLabel="ON THE JOB: crew & route (16:9)"
-      />
       <div id="work" className={ANCHOR_SCROLL_CLASS}>
-        <WorkGrid
-          eyebrow="Recent work"
-          line1="Yards we"
-          line2="keep sharp."
-          items={WORK}
-        />
+        <SeasonList />
       </div>
-      <ProofStrip
-        eyebrow="Why homeowners pick us"
-        line1="Reasons they"
-        line2="don't switch."
-        claims={[
-          { label: "Same crew each week", sub: "The same people, the same set day." },
-          { label: "We text before we come", sub: "No surprise visits, no chasing us down." },
-          { label: "Easy to cancel", sub: "No contract, skip or stop by text." },
-          { label: "We show up", sub: "When we say we'll be there, we're there." },
-        ]}
-      />
       <Faq
         eyebrow="Questions"
-        line1="The stuff"
-        line2="people ask."
+        line1="What neighbors"
+        line2="usually ask."
         items={FAQ}
       />
       <div id="freshcut-contact" className={ANCHOR_SCROLL_CLASS}>
