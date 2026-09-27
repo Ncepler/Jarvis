@@ -1,3 +1,5 @@
+"use client";
+
 // Style demo — a barbershop homepage in the warm leather-lounge "Standard" mood
 // (SKILL §13c + §14c): warm espresso-black, candlelit bone text, BRASS/GOLD
 // accent (oxblood secondary), an Oswald condensed display, warm lamplit
@@ -6,6 +8,7 @@
 // a posted-sign table. "Standard Barber Co." is a sample brand for the demo,
 // not a client.
 
+import { useEffect, useState } from "react";
 import {
   ANCHOR_SCROLL_CLASS,
   Contact,
@@ -20,6 +23,7 @@ import {
   Faq,
   FullBleedBreak,
   Intro,
+  MobileStickyCta,
   Rise,
   Section,
   SceneBlock,
@@ -48,6 +52,11 @@ const THEME: DemoTheme = {
   display: "var(--font-oswald)", // vintage condensed signage
   heroScrim: "linear-gradient(180deg, rgba(22,17,12,.35), rgba(22,17,12,.85))",
   breakScrim: "linear-gradient(180deg, rgba(22,17,12,.55), rgba(22,17,12,.9))",
+  // Sharp-edged niche (SKILL §7 personality scale, tier 4/2/0) — the price
+  // board stays sharp (radiusSm) while a rare larger panel gets radiusLg.
+  radius: "2px",
+  radiusLg: "4px",
+  radiusSm: "0px",
 };
 const PHONE = "(631) 555-0185";
 const NAME = "Standard Barber Co.";
@@ -94,6 +103,77 @@ const HOURS = [
   { day: "Sunday", hours: "Closed" },
 ];
 
+// ── Walk-in status chip — computed client-side from the HOURS data above and
+// the visitor's own clock, the same way a shop's posted hours answer "are you
+// open right now" (craft pass 2026-09-27). Two fixed states only, per spec:
+// open now, or not. Nothing invented — it reads the real HOURS table above.
+function parseClockLabel(raw: string): number | null {
+  const m = raw.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i);
+  if (!m) return null;
+  let h = parseInt(m[1], 10) % 12;
+  if (m[3].toLowerCase() === "pm") h += 12;
+  return h * 60 + (m[2] ? parseInt(m[2], 10) : 0);
+}
+
+function useWalkInStatus() {
+  // null until the first client-side tick — no SSR guess at the visitor's
+  // local clock, so there's nothing to correct after hydration.
+  const [status, setStatus] = useState<{ open: boolean; closeLabel: string } | null>(null);
+  useEffect(() => {
+    const fallbackClose =
+      HOURS.find((h) => h.hours !== "Closed")?.hours.split("–")[1]?.trim() ?? "7pm";
+    const compute = () => {
+      const now = new Date();
+      // HOURS[0] is Monday; Date#getDay() returns 0 for Sunday.
+      const today = HOURS[(now.getDay() + 6) % 7];
+      if (today.hours === "Closed") {
+        setStatus({ open: false, closeLabel: fallbackClose });
+        return;
+      }
+      const [openRaw, closeRaw] = today.hours.split("–");
+      const openMin = parseClockLabel(openRaw);
+      const closeMin = parseClockLabel(closeRaw);
+      const nowMin = now.getHours() * 60 + now.getMinutes();
+      const open = openMin !== null && closeMin !== null && nowMin >= openMin && nowMin < closeMin;
+      setStatus({ open, closeLabel: closeRaw?.trim() ?? fallbackClose });
+    };
+    compute();
+    const id = window.setInterval(compute, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+  return status;
+}
+
+function WalkInStatusChip() {
+  const status = useWalkInStatus();
+  if (!status) return null;
+  return (
+    <span
+      className="inline-flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-[0.08em]"
+      style={{ color: status.open ? "var(--d-fg)" : "var(--d-muted)" }}
+    >
+      {/* a genuine liveness signal (is the shop taking walk-ins right now),
+          not decoration — earns its continuous motion; static + opaque under
+          reduced motion. */}
+      <style>{`
+        @keyframes barber-status-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .barber-status-dot { animation: barber-status-pulse 2s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .barber-status-dot { animation: none; opacity: 1; }
+        }
+      `}</style>
+      <span
+        aria-hidden
+        className="barber-status-dot inline-block h-2 w-2 rounded-full"
+        style={{ background: status.open ? "var(--d-accent)" : "var(--d-muted)" }}
+      />
+      {status.open
+        ? `Walk-ins open · until ${status.closeLabel}`
+        : `Walk-ins by appointment after ${status.closeLabel}`}
+    </span>
+  );
+}
+
 const FAQ = [
   { q: "Do I need an appointment?", a: "No, walk-ins are always welcome. But booking online takes under a minute and skips the wait." },
   { q: "What are your hours?", a: "Tue–Sat, 9am to 7pm. If the pole out front is spinning, we're open and cutting." },
@@ -112,18 +192,36 @@ function PriceBoard() {
           <TwoLine a="The cuts." b="The prices." />
         </div>
       </Rise>
+      {/* Single block reveal (not per-row) — the board reads as one posted
+          sign, not a staggered list. d-grain gives it the same worn-leather
+          film texture as the Hours band below (§13c "film grain"). */}
       <Rise delay={0.1}>
         <div
-          className="mt-12 p-8 md:p-12"
+          className="d-grain mt-12 p-8 md:p-12"
           style={{
             background: "var(--d-surface)",
-            border: "1px solid var(--d-line)",
+            // brass hairline frame, ~40% opacity (§14c's "vintage price
+            // board" spec) rather than the plain --d-line hairline every
+            // other panel uses.
+            border: "1px solid color-mix(in srgb, var(--d-accent) 40%, transparent)",
             borderRadius: "var(--d-radius)",
             // warm lamplight on worn leather — texture, not a shape (§13c)
             backgroundImage:
               "radial-gradient(120% 80% at 50% 0%, rgba(176,131,63,.10), transparent 60%)",
           }}
         >
+          {/* brass corner ticks, inset 2px — a small vintage-signage detail
+              on the frame, not a second border. */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-2 top-2 h-3 w-3"
+            style={{ borderLeft: "2px solid var(--d-accent)", borderTop: "2px solid var(--d-accent)" }}
+          />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute bottom-2 right-2 h-3 w-3"
+            style={{ borderRight: "2px solid var(--d-accent)", borderBottom: "2px solid var(--d-accent)" }}
+          />
           {BOARD.map((b, i) => (
             <div
               key={b.name}
@@ -146,7 +244,7 @@ function PriceBoard() {
                 {b.note}
               </span>
               <span
-                className="text-[24px] font-medium leading-none md:text-[28px]"
+                className="text-[24px] font-medium leading-none tabular-nums md:text-[28px]"
                 style={{ color: "var(--d-accent)", fontFamily: "var(--d-display)" }}
               >
                 {b.price}
@@ -207,7 +305,7 @@ function CutMenu() {
 function HoursBoard() {
   return (
     <section
-      className="w-full py-20 md:py-28"
+      className="d-grain w-full py-20 md:py-28"
       style={{
         background: "var(--d-surface)",
         borderTop: "1px solid var(--d-line)",
@@ -225,6 +323,9 @@ function HoursBoard() {
               No appointment needed. Rather skip the wait? Call ahead and
               we&apos;ll have a chair ready when you get here.
             </p>
+            <div className="mt-5">
+              <WalkInStatusChip />
+            </div>
           </Rise>
           <Rise delay={0.1} className="mt-10">
             <div>
@@ -241,7 +342,7 @@ function HoursBoard() {
                     {h.day}
                   </span>
                   <span
-                    className="text-[15px]"
+                    className="text-[15px] tabular-nums"
                     style={{ color: h.hours === "Closed" ? "var(--d-muted)" : "var(--d-body)" }}
                   >
                     {h.hours}
@@ -253,7 +354,7 @@ function HoursBoard() {
           <Rise delay={0.15} className="mt-9">
             <a
               href="#contact"
-              className="press inline-block px-6 py-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="d-press inline-block px-6 py-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{ background: OXBLOOD, color: "var(--d-fg)", outlineColor: "var(--d-accent)" }}
             >
               Book a chair
@@ -370,6 +471,7 @@ export function BarberDemo({ tier = "basic" }: { tier?: Tier }) {
         hours="Tue–Sat, 9am–7pm"
         strip="Walk-ins Welcome · Cash or Card · Same Barbers"
       />
+      <MobileStickyCta phone={PHONE} bookLabel="Book a chair" contactId="contact" />
     </DemoShell>
   );
 }
