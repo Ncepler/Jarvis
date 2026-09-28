@@ -84,7 +84,8 @@
 
 ## Gotchas & decisions (standing, trimmed)
 - **`brag-output*/` = Instagram reels** (one folder per reel; #2 "Pick a
-  card" is `brag-output-2026-09-27-224111/`). Reel #1 (2026-09-27, via
+  card" is `brag-output-2026-09-27-224111/`, #3 "The receipt" is
+  `brag-output-2026-09-28-231023/`). Reel #1 (2026-09-27, via
   `/brag` → brag-slim) is `brag-output/`: `brag.mp4` (20s, 1080×1920, original score at -14 LUFS),
   `brag.jpg` poster, `share-copy.txt`, and `brag-plan.md` (storyboard +
   timing). Not part of the site build. Render intermediates live in
