@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Vilas reel v2</title>
+    <script src="./node_modules/gsap/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Space Grotesk";
+        font-weight: 500;
+        src: url("./assets/fonts/space-grotesk-500.woff2") format("woff2");
+      }
+      @font-face {
+        font-family: "Space Mono";
+        font-weight: 400;
+        src: url("./assets/fonts/space-mono-400.woff2") format("woff2");
+      }
+      :root {
+        --bone: #efe9dd;
+        --ink: #1f1a14;
+        --cap-bg: #ffffff;
+        --cap-ink: #111111;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #000;
+      }
+      #root {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #000;
+        font-family: Inter, sans-serif;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .shot {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        filter: url("#mb");
+        will-change: transform;
+      }
+      .cam {
+        position: absolute;
+        inset: 0;
+        will-change: transform;
+      }
+      .cam img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1080px;
+        display: block;
+      }
+
+      /* IG-native "strong" captions: each line its own rounded box */
+      .caps {
+        position: absolute;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        z-index: 20;
+      }
+      .cap {
+        background: var(--cap-bg);
+        color: var(--cap-ink);
+        font-weight: 700;
+        font-size: 58px;
+        line-height: 1.12;
+        letter-spacing: -0.015em;
+        padding: 10px 24px 14px;
+        border-radius: 16px;
+        white-space: nowrap;
+      }
+
+      #pour {
+        position: absolute;
+        inset: 0;
+        width: 1080px;
+        height: 1920px;
+        object-fit: cover;
+      }
+      #end-shade {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 38%, rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, 0.45) 100%);
+      }
+      #end-copy {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 600px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: var(--bone);
+        text-align: center;
+      }
+      #end-line {
+        font-weight: 900;
+        font-size: 104px;
+        letter-spacing: -0.035em;
+        line-height: 1;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.35);
+      }
+      #wordmark-wrap {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 1010px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        color: var(--bone);
+      }
+      #wordmark {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 500;
+        font-size: 150px;
+        letter-spacing: 0.02em;
+        line-height: 1;
+        text-shadow: 0 4px 40px rgba(0, 0, 0, 0.4);
+      }
+      #domain {
+        font-family: "Space Mono", monospace;
+        font-size: 40px;
+        letter-spacing: 0.02em;
+        opacity: 0.9;
+      }
+
+      #vignette {
+        position: absolute;
+        inset: 0;
+        z-index: 90;
+        pointer-events: none;
+        background: radial-gradient(ellipse 80% 70% at 50% 48%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.32) 100%);
+      }
+
+      @keyframes hf-grain-noise {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        10% {
+          transform: translate(-5%, -5%);
+        }
+        20% {
+          transform: translate(-10%, 5%);
+        }
+        30% {
+          transform: translate(5%, -10%);
+        }
+        40% {
+          transform: translate(-5%, 15%);
+        }
+        50% {
+          transform: translate(-10%, 5%);
+        }
+        60% {
+          transform: translate(15%, 0);
+        }
+        70% {
+          transform: translate(0, 10%);
+        }
+        80% {
+          transform: translate(-15%, 0);
+        }
+        90% {
+          transform: translate(10%, 5%);
+        }
+      }
+      #grain-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 100;
+        overflow: hidden;
+      }
+      #grain-overlay .grain-texture {
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        opacity: 0.07;
+        mix-blend-mode: overlay;
+        animation: hf-grain-noise 0.5s steps(1) infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-width="1080" data-height="1920" data-duration="15">
+      <svg width="0" height="0" aria-hidden="true" style="position: absolute">
+        <defs>
+          <filter id="mb" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur id="mb-node" in="SourceGraphic" stdDeviation="0 0" />
+          </filter>
+        </defs>
+      </svg>
+
+      <!-- 1 · florist: hook on the peonies, pull back to reveal the site, scroll -->
+      <div id="s-florist" class="clip" data-start="0" data-duration="4.5" data-track-index="0">
+        <div id="florist-shot" class="shot">
+          <div id="florist-cam" class="cam">
+            <img id="florist-img" src="./media/florist.jpg" alt="Wildstem Florals demo site" />
+          </div>
+        </div>
+        <div id="hook-caps" class="caps" style="top: 1180px">
+          <div id="cap-1" class="cap">local shop websites</div>
+          <div id="cap-2" class="cap">that look like they cost 10x more</div>
+        </div>
+      </div>
+
+      <!-- 2 · barber: whip in, scroll to the price list -->
+      <div id="s-barber" class="clip" data-start="4.0" data-duration="2.5" data-track-index="1">
+        <div id="barber-shot" class="shot">
+          <div id="barber-cam" class="cam">
+            <img id="barber-img" src="./media/barber.jpg" alt="Standard Barber Co. demo site" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 · bakery: vertical whip, push in on the headline -->
+      <div id="s-bakery" class="clip" data-start="6.0" data-duration="1.5" data-track-index="0">
+        <div id="bakery-shot" class="shot">
+          <div id="bakery-cam" class="cam">
+            <img id="bakery-img" src="./media/bakery.jpg" alt="Golden Hour Bakehouse demo site" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 4..7 · hard cuts on the beat -->
+      <div id="s-autobody" class="clip" data-start="7.5" data-duration="0.5" data-track-index="1">
+        <div id="autobody-shot" class="shot">
+          <div id="autobody-cam" class="cam">
+            <img id="autobody-img" src="./media/autobody.jpg" alt="Apex Collision demo site" />
+          </div>
+        </div>
+      </div>
+
+      <div id="s-renovation" class="clip" data-start="8.0" data-duration="1.0" data-track-index="0">
+        <div id="renovation-shot" class="shot">
+          <div id="renovation-cam" class="cam">
+            <img id="renovation-img" src="./media/renovation.jpg" alt="Maple and Main Renovation demo site" />
+          </div>
+        </div>
+      </div>
+
+      <div id="s-landscaping" class="clip" data-start="9.0" data-duration="1.0" data-track-index="1">
+        <div id="landscaping-shot" class="shot">
+          <div id="landscaping-cam" class="cam">
+            <img id="landscaping-img" src="./media/landscaping.jpg" alt="Stone and Sage Landscapes demo site" />
+          </div>
+        </div>
+      </div>
+
+      <div id="s-magician" class="clip" data-start="10.0" data-duration="1.5" data-track-index="0">
+        <div id="magician-shot" class="shot">
+          <div id="magician-cam" class="cam">
+            <img id="magician-img" src="./media/magician.jpg" alt="Elias Vane magician demo site" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 8 · the drop: espresso pour, payoff line, wordmark -->
+      <video id="pour" src="./media/pour.mp4" muted playsinline data-start="11.5" data-duration="3.5" data-track-index="2"></video>
+      <div id="s-end" class="clip" data-start="11.5" data-duration="3.5" data-track-index="1">
+        <div id="end-shade"></div>
+        <div id="end-copy">
+          <div id="end-line">they didn't.</div>
+        </div>
+        <div id="wordmark-wrap">
+          <div id="wordmark">VILAS</div>
+          <div id="domain">vilas.studio</div>
+        </div>
+      </div>
+
+      <div id="vignette"></div>
+      <div id="grain-overlay"><div class="grain-texture"></div></div>
+
+      <audio id="sfx-pop-1" src="./assets/sfx/pop.mp3" data-start="0" data-duration="0.7" data-volume="0.35"></audio>
+      <audio id="sfx-pop-2" src="./assets/sfx/pop.mp3" data-start="0.6" data-duration="0.7" data-volume="0.35"></audio>
+      <audio id="sfx-zoom" src="./assets/sfx/whoosh-short.mp3" data-start="1.95" data-duration="0.57" data-volume="0.7"></audio>
+      <audio id="sfx-scroll-1" src="./assets/sfx/whoosh.mp3" data-start="3.0" data-duration="0.57" data-volume="0.35"></audio>
+      <audio id="sfx-whip-1" src="./assets/sfx/whoosh-short.mp3" data-start="4.0" data-duration="0.57" data-volume="0.9"></audio>
+      <audio id="sfx-scroll-2" src="./assets/sfx/whoosh.mp3" data-start="5.0" data-duration="0.57" data-volume="0.35"></audio>
+      <audio id="sfx-whip-2" src="./assets/sfx/whoosh-short.mp3" data-start="6.0" data-duration="0.57" data-volume="0.9"></audio>
+      <audio id="sfx-cut-1" src="./assets/sfx/click-soft.mp3" data-start="7.5" data-duration="0.36" data-volume="0.8"></audio>
+      <audio id="sfx-cut-2" src="./assets/sfx/click-soft.mp3" data-start="8.0" data-duration="0.36" data-volume="0.8"></audio>
+      <audio id="sfx-cut-3" src="./assets/sfx/click-soft.mp3" data-start="9.0" data-duration="0.36" data-volume="0.8"></audio>
+      <audio id="sfx-cut-4" src="./assets/sfx/click-soft.mp3" data-start="10.0" data-duration="0.36" data-volume="0.8"></audio>
+      <audio id="sfx-riser" src="./assets/sfx/riser.mp3" data-start="10.0" data-duration="1.5" data-media-start="8.5" data-volume="0.6"></audio>
+      <audio id="sfx-drop" src="./assets/sfx/impact-bass-1.mp3" data-start="11.5" data-duration="2.1" data-volume="1"></audio>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const mbNode = document.getElementById("mb-node");
+      const mb = { x: 0, y: 0 };
+      const writeBlur = () => mbNode.setAttribute("stdDeviation", mb.x.toFixed(2) + " " + mb.y.toFixed(2));
+      writeBlur();
+
+      // blur envelope that peaks at mid-move (peak velocity) and resolves to 0
+      function blurPulse(axis, peak, at, dur) {
+        tl.to(mb, { [axis]: peak, duration: dur / 2, ease: "power3.in", onUpdate: writeBlur }, at);
+        tl.to(mb, { [axis]: 0, duration: dur / 2, ease: "power3.out", onUpdate: writeBlur }, at + dur / 2);
+      }
+      // quick camera punch that lands a hard cut
+      function punch(cam, at, from = 1.07) {
+        tl.fromTo(cam, { scale: from }, { scale: 1, duration: 0.35, ease: "power3.out", transformOrigin: "50% 45%" }, at);
+      }
+
+      // ── 1 · florist ─────────────────────────────────────────
+      // open tight on the peonies with a slow drift, captions pop on frame one
+      tl.fromTo("#florist-cam", { scale: 2.6, x: 24, y: 16 }, { scale: 2.45, x: -8, y: 0, duration: 2.0, ease: "sine.inOut", transformOrigin: "540px 562px" }, 0);
+      tl.fromTo("#cap-1", { autoAlpha: 0, scale: 0.86 }, { autoAlpha: 1, scale: 1, duration: 0.22, ease: "power3.out" }, 0);
+      tl.fromTo("#cap-2", { autoAlpha: 0, scale: 0.86 }, { autoAlpha: 1, scale: 1, duration: 0.22, ease: "power3.out" }, 0.6);
+      // pull back: the photo was the website all along
+      tl.to("#hook-caps", { autoAlpha: 0, y: 30, duration: 0.18, ease: "power2.in" }, 1.92);
+      tl.to("#florist-cam", { scale: 1, x: 0, y: 0, duration: 0.55, ease: "power3.inOut" }, 2.0);
+      blurPulse("y", 3, 2.0, 0.55);
+      // flick-scroll down into the page
+      tl.fromTo("#florist-img", { y: 0 }, { y: -1890, duration: 0.8, ease: "power3.inOut" }, 3.0);
+      blurPulse("y", 12, 3.0, 0.8);
+
+      // ── whip left → barber ──────────────────────────────────
+      tl.fromTo("#florist-shot", { x: 0 }, { x: -1080, duration: 0.5, ease: "power3.inOut" }, 4.0);
+      tl.fromTo("#barber-shot", { x: 1080 }, { x: 0, duration: 0.5, ease: "power3.inOut" }, 4.0);
+      blurPulse("x", 22, 4.0, 0.5);
+      tl.fromTo("#barber-img", { y: 0 }, { y: -4040, duration: 0.8, ease: "power3.inOut" }, 5.0);
+      blurPulse("y", 16, 5.0, 0.8);
+
+      // ── whip up → bakery ────────────────────────────────────
+      tl.fromTo("#barber-shot", { y: 0 }, { y: -1920, duration: 0.5, ease: "power3.inOut", immediateRender: false }, 6.0);
+      tl.fromTo("#bakery-shot", { y: 1920 }, { y: 0, duration: 0.5, ease: "power3.inOut" }, 6.0);
+      blurPulse("y", 22, 6.0, 0.5);
+      tl.fromTo("#bakery-cam", { scale: 1 }, { scale: 1.16, duration: 1.0, ease: "sine.inOut", transformOrigin: "300px 1420px" }, 6.5);
+
+      // ── hard cuts on the beat ───────────────────────────────
+      punch("#autobody-cam", 7.5, 1.1);
+
+      punch("#renovation-cam", 8.0);
+      tl.fromTo("#renovation-img", { y: 0 }, { y: -4320, duration: 0.6, ease: "power3.inOut" }, 8.3);
+      blurPulse("y", 16, 8.3, 0.6);
+
+      punch("#landscaping-cam", 9.0);
+      tl.fromTo("#landscaping-img", { y: 0 }, { y: -4390, duration: 0.6, ease: "power3.inOut" }, 9.3);
+      blurPulse("y", 16, 9.3, 0.6);
+
+      // magician: the held breath before the drop
+      tl.fromTo("#magician-cam", { scale: 1 }, { scale: 1.18, duration: 1.5, ease: "power2.in", transformOrigin: "540px 930px" }, 10.0);
+
+      // ── the drop ────────────────────────────────────────────
+      tl.fromTo("#end-line", { autoAlpha: 0, scale: 1.12 }, { autoAlpha: 1, scale: 1, duration: 0.3, ease: "power3.out" }, 11.95);
+      tl.fromTo("#wordmark", { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power4.out" }, 12.9);
+      tl.fromTo("#domain", { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.4, ease: "power3.out" }, 13.2);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
