@@ -85,7 +85,10 @@
 ## Gotchas & decisions (standing, trimmed)
 - **`brag-output*/` = Instagram reels** (one folder per reel; #2 "Pick a
   card" is `brag-output-2026-09-27-224111/`, #3 "The receipt" is
-  `brag-output-2026-09-28-231023/`). Reel #1 (2026-09-27, via
+  `brag-output-2026-09-28-231023/`, #4 "Power washing a website" is
+  `brag-output-2026-09-29-wash/` — reel-lab hook 18, 17s, no music, synthesized
+  washer sound; grime is procedural over a real capture of the power-wash demo,
+  ends on the site's own "Site created by vilas.studio" credit). Reel #1 (2026-09-27, via
   `/brag` → brag-slim) is `brag-output/`: `brag.mp4` (20s, 1080×1920, original score at -14 LUFS),
   `brag.jpg` poster, `share-copy.txt`, and `brag-plan.md` (storyboard +
   timing). Not part of the site build. Render intermediates live in
@@ -97,7 +100,9 @@
   Before making a new `/brag` reel, `select title, angle, hook, techniques,
   notes from instagram_posts` and pick a different angle/hook/techniques;
   after rendering, insert a row. The `notes` column on the first row lists
-  untried angles.
+  untried angles. The live client sites (vercel.app, packperfectinc.com) and
+  Supabase Storage captures are blocked by this sandbox's network policy, so a
+  real-client-work reel needs the Network access setting widened first.
 - **Concurrent subagents sharing one working tree is genuinely risky**:
   this session hit a `git stash` collision (again) mid-Phase-3, and two
   subagents were cut off mid-task by a session-wide API rate limit. Every
