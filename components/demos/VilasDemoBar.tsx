@@ -75,9 +75,9 @@ export function VilasDemoBar({
             (drops on mobile, per spec) — toggle + CTA never do */}
         <div className="flex items-center gap-3">
           <Link
-            href="/"
+            href="/#work"
             className="press whitespace-nowrap text-[12px] font-semibold uppercase tracking-[0.06em] text-muted transition-colors duration-150 hover:text-ink sm:text-[13px]"
-            aria-label={`Exit to ${SITE.name} homepage`}
+            aria-label={`Exit to the ${SITE.name} gallery`}
           >
             ← Exit
           </Link>

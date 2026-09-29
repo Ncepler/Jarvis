@@ -51,7 +51,7 @@ export const projects: Project[] = [
     category: "Landscaping",
     caption: "A design-build studio, shown at full scale.",
     url: "",
-    screenshot: "/previews/firstLandscapingImage.webp",
+    screenshot: "/demos/landscaping/hero-patio.webp",
     screenshotFull: "",
     preview: "",
     order: 2,
@@ -90,7 +90,7 @@ export const projects: Project[] = [
     category: "Lawn care",
     caption: "A quote-first layout for steady route work.",
     url: "",
-    screenshot: "/previews/firstLawnCareImage.webp",
+    screenshot: "/demos/lawncare/hero-lawn.webp",
     screenshotFull: "",
     preview: "",
     order: 5,
@@ -129,7 +129,7 @@ export const projects: Project[] = [
     category: "Auto body & collision",
     caption: "Damage map, live paint match, drag-to-reveal repairs.",
     url: "",
-    screenshot: "/previews/firstAutoBodyImage.webp",
+    screenshot: "/demos/autobody/hero.webp",
     screenshotFull: "",
     preview: "",
     order: 0,
@@ -142,9 +142,9 @@ export const projects: Project[] = [
     category: "Entertainer",
     caption: "The theatrical outlier — cards, embers, a booking form.",
     url: "",
-    // no real footage yet — never fabricate one (§7/§12); the card falls
-    // back to a plain "Preview" label until Noah supplies a hero still
-    screenshot: "",
+    // Real photo now exists (2026-09-27 photo pass) — the theatrical
+    // portrait used in the demo's own About section.
+    screenshot: "/demos/magician/portrait.webp",
     screenshotFull: "",
     preview: "",
     order: 8,

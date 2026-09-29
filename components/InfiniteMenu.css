@@ -33,6 +33,11 @@
   position: absolute;
   font-weight: 900;
   font-size: 3rem;
+  line-height: 1.05;
+  /* Capped so a long business name (e.g. "Val's Elegant Barbershop") wraps
+     onto a second line instead of running wide enough to overlap the
+     centered sphere face. */
+  max-width: 8ch;
   left: 1.6em;
   top: 50%;
 }
