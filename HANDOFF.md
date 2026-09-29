@@ -1,13 +1,23 @@
-# HANDOFF — updated 2026-09-29 (chrome fixes + client sites)
+# HANDOFF — updated 2026-09-29 (chrome fixes + client sites + power-wash hero)
 
 ## Current state
 - Deployed: `main` fast-forwarded to `e7eeb3a` (the full 3-round second
   photo folder) and confirmed `READY` on production (`vilas.studio`) via
-  Vercel MCP. Commit `aa49a13` (chrome fixes below) is on
-  `claude/sleepy-newton-uaamxu`, pushed but not yet fast-forwarded to main
-  as of this writing — do that next unless told otherwise, this round of
-  fixes doesn't need a review step. Builds clean locally: `npx tsc
-  --noEmit`, `next lint`, `next build` all pass.
+  Vercel MCP. Commits `aa49a13` (chrome fixes) through `1f094a5`
+  (power-wash hero, below) are on `claude/sleepy-newton-uaamxu`, pushed but
+  not yet fast-forwarded to main as of this writing — do that next unless
+  told otherwise. Builds clean locally: `npx tsc --noEmit`, `next lint`,
+  `next build` all pass.
+- **PowerWashDemo hero replaced** (`22e29b5`/`1f094a5`): the old hero
+  (`/previews/firstPowerWashImage.webp`) was a badly mismatched stock photo
+  of a municipal street cleaner on a busy European sidewalk — no
+  residential/driveway context at all. Generated a real match via
+  Higgsfield (`gpt_image_2_5`, prompt in git log) and Noah picked one of 2
+  candidates; saved as `public/demos/powerwash/hero.webp`. Wired into BOTH
+  `PowerWashDemo.tsx`'s `firstPowerWashImage` const AND `lib/projects.ts`'s
+  `demo-powerwash` gallery-thumbnail `screenshot` field (these are two
+  separate things — see Gotchas). Verified via local Playwright screenshot
+  on both `/demos/demo-powerwash` and `/#work`.
 - **Fixed a real, site-wide sticky-positioning bug** (`aa49a13`): `app/
   globals.css` had `overflow-x: hidden` on BOTH `html` and `body`. That
   combination makes both elements compute to `overflow: hidden auto` and
@@ -68,8 +78,8 @@
 - No pull request opened.
 
 ## Next up (ordered)
-1. Fast-forward `main` to `aa49a13` (this round's chrome fixes), confirm
-   Vercel green.
+1. Fast-forward `main` to `1f094a5` (chrome fixes + power-wash hero),
+   confirm Vercel green.
 2. Confirm the NextGenRest/SporesRUs screenshots landed after the next
    `/api/capture-sites` run; add a real `description` for each if wanted.
 3. If a "before" shot for the power-wash garage-door photo ever comes in,
