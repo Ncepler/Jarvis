@@ -1,74 +1,95 @@
-# HANDOFF — updated 2026-09-27 (second photo folder, round 3 of 3 — done)
+# HANDOFF — updated 2026-09-29 (chrome fixes + client sites)
 
 ## Current state
-- Deployed: production (`vilas.studio`) is `READY` as of commit `556f023`
-  (verified via Vercel MCP). All 3 rounds below are pushed to
-  `claude/sleepy-newton-uaamxu` but **not yet merged to `main`** — this was
-  the last of Noah's 3 planned upload rounds from the "higgsfield-9-27"
-  folder, so main is ready to fast-forward whenever he confirms. Builds
-  clean locally: `npx tsc --noEmit`, `next lint`, `next build` all pass;
-  all 9 `/demos/demo-*` routes prerender.
-- **Second photo folder, all 3 rounds landed** (commits `82372cc` through
-  `d954d97`). Highlights: `autobody/hero.webp` replaced a hero that
-  visibly showed real **Mercedes-Benz** branding; `landscaping/
-  hero-patio.webp` and `renovation/kitchen-traditional.webp` (sepia-toned
-  with `sharp` to match its grid) upgraded weak/mismatched photos; every
-  florist occasion tile and 5 of 6 bouquet rows now have a dedicated real
-  photo (`OCCASION_IMAGES`/`BOUQUET_IMAGE_OVERRIDE` in `FloristDemo.tsx`);
-  bakery's cake and bakehouse-bench photos got swapped into the sections
-  they actually match; `magician/cards.webp` fills the "REEL: live
-  performance" placeholder, replacing round 1's version that had a subtle
-  hand-anatomy flaw (verified clean at full zoom this time). Also fixed a
-  pre-existing bug: `FloristDemo`'s cursor-preview box cast a shadow at
-  rest before any hover. Full itemized detail is in the commit messages
-  across `82372cc..d954d97` if needed — not repeated here.
-- **3 images from this batch were judged not good enough to use, and not
-  forced into any slot just to use them:**
-  - A "power-washed white garage door" photo (round 2) came back almost
-    entirely blown-out/overexposed. 2 regenerated replacements exist but
-    are stuck unclaimed in Higgsfield history (see below) — and even a
-    clean version has no confirmed destination: `PowerWashDemo`'s
-    before/after slider already has real photos, and this one has no
-    "before" companion to pair with. Round 3 included what looks like
-    Noah's own manual fix for this exact shot (`26.webp`, well-exposed,
-    same composition) — still unwired for the same reason: no "before."
-  - A bakery night-case photo (round 3, moody but noticeably softer focus
-    than the crisp `the-case.webp` already in use) and a barber
-    mirror-reflection scene (round 3, good quality, shows 2 people
-    cutting hair) both had no unfilled slot to go in — `BakeryDemo` and
-    `BarberDemo` were already fully photographed. Neither was forced in;
-    both are good enough to use later if a new section ever needs one.
-  - **4 of the 5 remake credits Noah offered were spent** (2 on the
-    magician fix, which worked; 2 on the power-wash fix, which is still
-    unclaimed). 1 remains, unspent.
-- **First photo folder (the original 11-image batch) and the Emil
-  Kowalski/Apple craft pass** are both fully shipped to production already
-  — see git log around `45216ce` and `141f22c`. Nothing outstanding from
-  either; not repeated here to keep this file short.
+- Deployed: `main` fast-forwarded to `e7eeb3a` (the full 3-round second
+  photo folder) and confirmed `READY` on production (`vilas.studio`) via
+  Vercel MCP. Commit `aa49a13` (chrome fixes below) is on
+  `claude/sleepy-newton-uaamxu`, pushed but not yet fast-forwarded to main
+  as of this writing — do that next unless told otherwise, this round of
+  fixes doesn't need a review step. Builds clean locally: `npx tsc
+  --noEmit`, `next lint`, `next build` all pass.
+- **Fixed a real, site-wide sticky-positioning bug** (`aa49a13`): `app/
+  globals.css` had `overflow-x: hidden` on BOTH `html` and `body`. That
+  combination makes both elements compute to `overflow: hidden auto` and
+  register as scroll containers simultaneously, which silently breaks
+  `position: sticky` everywhere on the page — `VilasDemoBar` and
+  `DemoHeader` were scrolling away instead of staying pinned on every demo.
+  Confirmed with a Playwright test before/after (sticky bar's `rect.top`
+  went from drifting to -2988px after a 3000px scroll, to holding at
+  12px). Fix: keep the rule on `body` only, drop it from `html`.
+- **Exit link** (`VilasDemoBar.tsx`) now goes to `/#work` (the homepage
+  gallery section) instead of `/` — a visitor leaving a demo lands back
+  among the style cards, not at the top of the homepage.
+- **Gallery thumbnails were stale** (`lib/projects.ts`'s `screenshot`
+  field — a separate static image per project used only by the homepage
+  `AccordionGallery`, NOT a live render of the demo). 3 of 9 still pointed
+  at old images: autobody's showed the photo with visible Mercedes-Benz
+  branding that was replaced in the demo itself weeks ago, landscaping and
+  lawncare showed their old mismatched heroes, and magician had no image
+  at all. All 9 now match each demo's real current hero
+  (`magician` uses `portrait.webp`, the others use whatever `heroImage`
+  constant that demo file currently sets — checked each one directly
+  rather than assumed).
+- **"Out in the world" client-sites sphere (`InfiniteMenu.tsx`/`.css`)**:
+  `.face-title` had no `max-width`, so a long name like "Val's Elegant
+  Barbershop" or "Jonah Shapiro Magic" ran wide enough at its fixed
+  3rem/900-weight size to overlap the centered sphere face. Capped to
+  `8ch` so it wraps to a second line instead.
+- **Added 2 new client sites** to Supabase (`client_sites` table, not a
+  file — see Gotchas): NextGenRest (`nextgenrest.vercel.app`) and
+  SporesRUs (`sporesrus.vercel.app`), `published: true`, no
+  `screenshot_url` set (so the existing daily auto-capture cron picks them
+  up — see Blocked on Noah). Real business details unknown, so
+  `description` was left `null` rather than invented — Noah should fill
+  it in via the `client_sites` table if he wants one shown.
+- **First+second photo folders and the craft pass** are all fully shipped
+  to production — see git log around `45216ce`, `141f22c`, `e7eeb3a` for
+  the itemized breakdowns. Nothing outstanding from any of them.
 
 ## Blocked on Noah
-- **Ready to fast-forward `main` and confirm the Vercel deploy** — ask
-  before doing it (per this repo's branch-only-unless-asked convention),
-  since a prior fast-forward this session was on his explicit request, not
-  a standing instruction.
-- **2 generated power-wash replacement candidates are stuck unclaimed** in
+- **The two new client-site screenshots aren't live yet.** This sandbox
+  can't reach `nextgenrest.vercel.app`/`sporesrus.vercel.app` (network
+  policy) to capture them directly, and `mcp__Vercel__web_fetch_vercel_url`
+  refused both projects with an authorization-scope error (same for the
+  `jarvis` project itself, so it's not project-specific — that whole tool
+  path looks unauthorized for this session regardless of target). The
+  site's own `/api/capture-sites` cron (`vercel.json`, daily 8am UTC,
+  Puppeteer on Vercel's infra — not this sandbox) already ran successfully
+  as recently as Sep 28 for the existing rows, so the two new ones should
+  get auto-captured at the next run. To force it sooner: visit
+  `https://vilas.studio/api/capture-sites` once (plain GET, no auth
+  needed — `CRON_SECRET` isn't set on this project).
+- **2 generated power-wash replacement candidates are still unclaimed** in
   Higgsfield history (job ids `1d67034b-bab1-4410-b545-bd6965908c8b` and
-  `4a5508a3-4d2a-4e58-8c35-d0e94ec72243`), same CDN download block as
-  always. Not urgent — there's no confirmed destination for this photo
-  yet anyway (see above); ask Noah what it was meant to show, or whether
-  `26.webp` (his own apparent fix, already on disk in the chat images
-  folder but not committed anywhere) was meant to replace it.
+  `4a5508a3-4d2a-4e58-8c35-d0e94ec72243`) — no confirmed destination for
+  this photo either way (`PowerWashDemo`'s slider already has real photos
+  from round 1, this one has no "before" companion). 1 of the 5 remake
+  credits Noah offered is still unspent.
 - No pull request opened.
 
 ## Next up (ordered)
-1. Fast-forward `main`, confirm Vercel green — ask Noah first.
-2. If a "before" shot for the power-wash garage-door photo ever comes in,
+1. Fast-forward `main` to `aa49a13` (this round's chrome fixes), confirm
+   Vercel green.
+2. Confirm the NextGenRest/SporesRUs screenshots landed after the next
+   `/api/capture-sites` run; add a real `description` for each if wanted.
+3. If a "before" shot for the power-wash garage-door photo ever comes in,
    decide whether it becomes a second before/after slider or something
-   else, then wire `26.webp` or a fresh regeneration.
-3. TRFox screenshot capture (pending from before this session).
-4. Real Higgsfield hero clips for Premium tier.
+   else.
+4. TRFox screenshot capture (pending from before this session).
+5. Real Higgsfield hero clips for Premium tier.
 
 ## Gotchas & decisions (standing, trimmed)
+- **"Out in the world" client sites (Val's Barbershop, Jonah Shapiro Magic,
+  PackPerfect, TRFox, now NextGenRest/SporesRUs) are Supabase rows
+  (`client_sites` table, Vilas project), not a file in this repo.** There's
+  no `lib/clientSites.ts` data array to edit — `lib/clientSites.ts` only
+  has the *fetch* code (`listClientSites()`). Add/edit a site with
+  `mcp__Supabase__execute_sql` against `epynfvskwaxejdibvgbr`. A row's
+  image comes from `screenshot_url` if set (manual override), else an
+  auto-captured PNG keyed by `captured_at`'s date — see `lib/screenshot.ts`
+  and `app/api/capture-sites/route.ts` (a Vercel Cron, `vercel.json`, daily
+  8am UTC, runs real Puppeteer on Vercel's infra so it can reach sites this
+  sandbox can't).
 - **This session cannot read Noah's local computer at all** — no mounted
   drive, no path access, nothing. A folder path like `~/Downloads/
   higgsfield-9-27` is meaningless here; the only way media reaches this
