@@ -31,10 +31,8 @@ import {
   StickyScene,
   TwoLine,
 } from "./system";
-import { heroConceptFor } from "@/lib/heroConcepts";
+import { RenovationScrollHero } from "./RenovationScrollHero";
 import type { Tier } from "./VilasDemoBar";
-
-const PREMIUM_HERO = heroConceptFor("demo-landscaping");
 
 const ACCENT = "#6E9A5C"; // moss / sage green, nudged brighter to pop on green-black
 
@@ -412,19 +410,32 @@ export function LandscapingDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free consult" />
-      <StickyScene image={firstLandscapingImage} priority>
-        <DemoHero
-          pinned
-          heroImage={firstLandscapingImage}
+      {/* Premium: scroll-scrubbed video hero (same copy as the Basic hero below). */}
+      {tier === "premium" && (
+        <RenovationScrollHero
+          videoSrc="/videos/landscaping-hero.mp4"
+          posterSrc="/videos/landscaping-hero-poster.jpg"
           eyebrow="Landscape design & build · North Shore"
           line1="Built to be lived in."
           line2="Built to stay."
-          sub="We design and build the whole property (stone, plantings, lighting, water), then we keep it. One studio, one crew, one standard."
-          primaryCta="Book a consultation"
-          phone={PHONE}
-          mediaLabel="Hero — finished property"
-          premium={tier === "premium" ? PREMIUM_HERO : undefined}
+          subline="We design and build the whole property (stone, plantings, lighting, water), then we keep it. One studio, one crew, one standard."
+          cta="Book a consultation"
         />
+      )}
+      <StickyScene image={firstLandscapingImage} priority={tier !== "premium"}>
+        {tier !== "premium" && (
+          <DemoHero
+            pinned
+            heroImage={firstLandscapingImage}
+            eyebrow="Landscape design & build · North Shore"
+            line1="Built to be lived in."
+            line2="Built to stay."
+            sub="We design and build the whole property (stone, plantings, lighting, water), then we keep it. One studio, one crew, one standard."
+            primaryCta="Book a consultation"
+            phone={PHONE}
+            mediaLabel="Hero — finished property"
+          />
+        )}
         <SceneBlock>
           <StickyReveal>
             <div id="about" className={ANCHOR_SCROLL_CLASS}>

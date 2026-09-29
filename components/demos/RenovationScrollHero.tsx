@@ -31,7 +31,7 @@ const CTA = "Get a free estimate";
 const SCRIM =
   "linear-gradient(0deg, color-mix(in srgb, var(--d-bg) 78%, transparent) 0%, color-mix(in srgb, var(--d-bg) 40%, transparent) 30%, transparent 58%)";
 
-function CopyCta() {
+function CopyCta({ label }: { label: string }) {
   return (
     <a
       href="#contact"
@@ -43,30 +43,48 @@ function CopyCta() {
         border: "1px solid color-mix(in srgb, var(--d-accent) 92%, black)",
       }}
     >
-      {CTA}
+      {label}
     </a>
   );
 }
 
-function Headline() {
+function Headline({ eyebrow, line1, line2 }: { eyebrow: string; line1: string; line2: string }) {
   return (
     <>
       <div className="mb-6">
-        <Eyebrow>{EYEBROW}</Eyebrow>
+        <Eyebrow>{eyebrow}</Eyebrow>
       </div>
       <h1
         className="max-w-3xl text-balance text-[40px] font-bold leading-[1.04] tracking-[-0.035em] md:text-[72px]"
         style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
       >
-        {LINE1}
+        {line1}
         <br />
-        {LINE2}
+        {line2}
       </h1>
     </>
   );
 }
 
-export function RenovationScrollHero() {
+// Every prop defaults to the renovation values above, so <RenovationScrollHero />
+// renders exactly as before; other demos (landscaping) pass their own clip + copy.
+export function RenovationScrollHero({
+  videoSrc = VIDEO_SRC,
+  posterSrc = POSTER_SRC,
+  eyebrow = EYEBROW,
+  line1 = LINE1,
+  line2 = LINE2,
+  subline = SUBLINE,
+  cta = CTA,
+}: {
+  videoSrc?: string;
+  posterSrc?: string;
+  eyebrow?: string;
+  line1?: string;
+  line2?: string;
+  subline?: string;
+  cta?: string;
+} = {}) {
   const [reduced, setReduced] = useState<boolean | null>(null);
   const wrapRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -143,12 +161,12 @@ export function RenovationScrollHero() {
   if (reduced) {
     return (
       <section className="relative w-full overflow-hidden" style={{ height: "100svh", minHeight: 560 }}>
-        <Image src={POSTER_SRC} alt="" fill priority sizes="100vw" className="object-cover" />
+        <Image src={posterSrc} alt="" fill priority sizes="100vw" className="object-cover" />
         <div aria-hidden className="absolute inset-0" style={{ background: SCRIM }} />
         <div className="relative mx-auto flex h-full w-full max-w-[1200px] flex-col justify-end px-6 pb-20 md:px-16">
-          <Headline />
+          <Headline eyebrow={eyebrow} line1={line1} line2={line2} />
           <div>
-            <CopyCta />
+            <CopyCta label={cta} />
           </div>
         </div>
       </section>
@@ -159,11 +177,11 @@ export function RenovationScrollHero() {
     <section ref={wrapRef} className="relative w-full" style={{ height: "400vh" }}>
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden" style={{ background: "var(--d-bg)" }}>
         {/* poster shows until the first frame is ready (and if the video fails) */}
-        <Image src={POSTER_SRC} alt="" fill priority sizes="100vw" className="object-cover" />
+        <Image src={posterSrc} alt="" fill priority sizes="100vw" className="object-cover" />
         {reduced === false && (
           <video
             ref={videoRef}
-            src={VIDEO_SRC}
+            src={videoSrc}
             muted
             playsInline
             preload="auto"
@@ -181,14 +199,14 @@ export function RenovationScrollHero() {
               style={{ willChange: "transform, opacity" }}
             >
               <p className="text-[19px] leading-[1.55] md:text-[22px]" style={{ color: "var(--d-fg)" }}>
-                {SUBLINE}
+                {subline}
               </p>
             </div>
             <div ref={headRef} style={{ willChange: "transform, opacity" }}>
-              <Headline />
+              <Headline eyebrow={eyebrow} line1={line1} line2={line2} />
             </div>
             <div ref={ctaRef} className="pointer-events-none opacity-0" style={{ willChange: "transform, opacity" }}>
-              <CopyCta />
+              <CopyCta label={cta} />
             </div>
           </div>
         </div>
