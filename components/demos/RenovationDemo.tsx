@@ -33,16 +33,10 @@ import {
   ValueProps,
   type Step,
 } from "./system";
-import { heroConceptFor } from "@/lib/heroConcepts";
+import { RenovationScrollHero } from "./RenovationScrollHero";
 import type { Tier } from "./VilasDemoBar";
 
 const ACCENT = "#C8893F"; // warm finished-wood caramel
-// Premium hero mechanism (round 2, job 5), now driven by the demo bar's tier
-// toggle (Demo bar ticket, job 5/6) instead of always-on. No video asset
-// exists yet, so the $500 state renders PremiumHeroMedia's zoom/stagger
-// fallback until one lands at /public/premium/demo-renovation.mp4 (see
-// lib/heroConcepts.ts).
-const PREMIUM_HERO = heroConceptFor("demo-renovation");
 const PHONE = "(516) 555-0000";
 const NAME = "Maple & Main Renovation Co.";
 
@@ -345,19 +339,22 @@ export function RenovationDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT}>
       <DemoHeader name={NAME} phone={PHONE} />
-      <StickyScene image={firstRenovationImage} priority>
-        <DemoHero
-          pinned
-          heroImage={firstRenovationImage}
-          premium={tier === "premium" ? PREMIUM_HERO : undefined}
-          eyebrow="Renovation & remodeling · North Shore"
-          line1="Old house."
-          line2="New everything."
-          sub="Kitchens, baths, additions, and whole-home renovations across the North Shore. One crew, start to finish."
-          primaryCta="Get a free estimate"
-          phone={PHONE}
-          mediaLabel="HERO VIDEO: renovation b-roll"
-        />
+      {/* Premium: scroll-scrubbed video hero replaces the hero below. */}
+      {tier === "premium" && <RenovationScrollHero />}
+      <StickyScene image={firstRenovationImage} priority={tier !== "premium"}>
+        {tier !== "premium" && (
+          <DemoHero
+            pinned
+            heroImage={firstRenovationImage}
+            eyebrow="Renovation & remodeling · North Shore"
+            line1="Old house."
+            line2="New everything."
+            sub="Kitchens, baths, additions, and whole-home renovations across the North Shore. One crew, start to finish."
+            primaryCta="Get a free estimate"
+            phone={PHONE}
+            mediaLabel="HERO VIDEO: renovation b-roll"
+          />
+        )}
         <SceneBlock>
           <StickyReveal>
             <div id="about" className={ANCHOR_SCROLL_CLASS}>
