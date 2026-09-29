@@ -36,6 +36,7 @@ import {
 } from "./system";
 import { heroConceptFor } from "@/lib/heroConcepts";
 import { PremiumHeroMedia } from "./PremiumHeroMedia";
+import { AutoBodyScrollHero } from "./AutoBodyScrollHero";
 import type { Tier } from "./VilasDemoBar";
 
 const AUTO_BODY_HERO = heroConceptFor("demo-autobody");
@@ -898,8 +899,10 @@ export function AutoBodyDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free estimate" contactId="apex-contact" />
-      <StickyScene image={firstAutoBodyImage} priority>
-        <HeroCarReveal tier={tier} pinned />
+      {/* Premium: scroll-scrubbed video hero replaces the hero below. */}
+      {tier === "premium" && <AutoBodyScrollHero accent2={ACCENT2} />}
+      <StickyScene image={firstAutoBodyImage} priority={tier !== "premium"}>
+        {tier !== "premium" && <HeroCarReveal tier={tier} pinned />}
         <SceneBlock>
           {/* Marquee gets its own (short) reveal target — wrapping the much
               taller Intro block in the same StickyReveal made its 0.2

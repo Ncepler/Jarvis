@@ -1,6 +1,11 @@
 # HANDOFF — updated 2026-09-29 (chrome fixes + client sites + power-wash hero)
 
 ## Current state
+- **Auto body Premium hero = scroll-scrubbed video** (`components/demos/AutoBodyScrollHero.tsx`,
+  wired in `AutoBodyDemo.tsx` when `tier === "premium"`; Basic untouched). Video +
+  poster in `public/videos/` (all-keyframe H.264, 1s frozen tail). `HeroCarReveal`'s
+  premium branch / `PremiumHeroMedia` use for auto body is now dead code. Not yet
+  checked in a real H.264 browser (sandbox Chromium has no H.264) or on iOS Safari.
 - Deployed: `main` fast-forwarded to `e7eeb3a` (the full 3-round second
   photo folder) and confirmed `READY` on production (`vilas.studio`) via
   Vercel MCP. Commits `aa49a13` (chrome fixes) through `1f094a5`
