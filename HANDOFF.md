@@ -96,10 +96,18 @@
   the demos at 360×640 @3x, then render the composition page frame by frame.
   Headless Chromium doesn't trust the sandbox proxy CA, so self-host any web
   fonts instead of loading Google Fonts.
-- **Supabase `instagram_posts` = the log of every IG post** (migration 0017).
-  Before making a new `/brag` reel, `select title, angle, hook, techniques,
-  notes from instagram_posts` and pick a different angle/hook/techniques;
-  after rendering, insert a row. The `notes` column on the first row lists
+- **Supabase `instagram_posts` = the log of every IG post AND the reel idea
+  queue** (migrations 0017 + 0018). 20 ideas were added 2026-09-29 as
+  `status = 'idea'`, ordered by `queue_position`, each with a beat sheet,
+  on-screen text, music, caption and notes (send/duh tests, honesty rules,
+  dependencies). **When Noah says "make another reel":** `select * from
+  instagram_posts where status = 'idea' order by queue_position limit 1`,
+  build that one with the /brag (Hyperframes) pipeline, then UPDATE that same
+  row to `status = 'rendered'`, `queue_position = null`, plus video_path /
+  commit_sha. Don't insert a new row. Check the idea's notes first: some need
+  Noah's OK (#20 free-mockup offer) or a full grid (#19 3-2-1). Idea #3 is ep 1
+  of a 9-part series, so insert the next episode as a new idea once it's built.
+  The Supabase MCP tools are pre-allowed in `.claude/settings.json`. The `notes` column on the first row lists
   untried angles. The live client sites (vercel.app, packperfectinc.com) and
   Supabase Storage captures are blocked by this sandbox's network policy, so a
   real-client-work reel needs the Network access setting widened first.
