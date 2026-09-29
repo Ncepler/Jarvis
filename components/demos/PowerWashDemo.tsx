@@ -67,7 +67,7 @@ const SMS_HREF = `sms:+1${PHONE_DIGITS}`;
 const NAME = "Tide Line Power Washing";
 
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
-const firstPowerWashImage = "/previews/firstPowerWashImage.webp";
+const firstPowerWashImage = "/demos/powerwash/hero.webp";
 
 const WASH = [
   {

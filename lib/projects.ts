@@ -64,7 +64,7 @@ export const projects: Project[] = [
     category: "Power washing",
     caption: "Before and after up top, booking right behind it.",
     url: "",
-    screenshot: "/previews/firstPowerWashImage.webp",
+    screenshot: "/demos/powerwash/hero.webp",
     screenshotFull: "",
     preview: "",
     order: 3,
