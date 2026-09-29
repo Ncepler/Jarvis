@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <title>Vilas — why-first reel</title>
+    <script src="./node_modules/gsap/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Syne";
+        font-weight: 700;
+        font-style: normal;
+        src: url("./assets/fonts/syne-700.woff2") format("woff2");
+      }
+      @font-face {
+        font-family: "Space Grotesk";
+        font-weight: 500;
+        font-style: normal;
+        src: url("./assets/fonts/space-grotesk-500.woff2") format("woff2");
+      }
+      @font-face {
+        font-family: "Space Mono";
+        font-weight: 400;
+        font-style: normal;
+        src: url("./assets/fonts/space-mono-400.woff2") format("woff2");
+      }
+      :root {
+        --bg: #efe9dd;
+        --surface: #f6f1e8;
+        --ink: #1f1a14;
+        --muted: #5f574a;
+        --line: #d9d0c1;
+        --accent: #8a5a2b;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: "Space Grotesk", sans-serif;
+        color: var(--ink);
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: flex;
+      }
+      .scene-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        height: 100%;
+        padding: 220px 96px;
+        gap: 28px;
+        box-sizing: border-box;
+      }
+      .center {
+        align-items: center;
+        text-align: center;
+      }
+      .accent {
+        color: var(--accent);
+      }
+      .mono {
+        font-family: "Space Mono", monospace;
+      }
+      .syne {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+      }
+
+      /* Scene: hook */
+      #hook .line {
+        font-size: 128px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+      }
+
+      /* Scene: name */
+      #name .line {
+        font-family: "Space Mono", monospace;
+        font-size: 52px;
+        line-height: 1.35;
+        color: var(--muted);
+        max-width: 880px;
+      }
+
+      /* Scene: belief */
+      #belief .line {
+        font-size: 78px;
+        line-height: 1.18;
+        letter-spacing: -0.01em;
+        max-width: 900px;
+      }
+
+      /* Scene: gap */
+      #gap .line {
+        font-size: 66px;
+        line-height: 1.25;
+        max-width: 880px;
+        position: absolute;
+      }
+      #gap .scene-content {
+        position: relative;
+      }
+
+      /* Scene: thing */
+      #thing .scene-content {
+        justify-content: center;
+        align-items: center;
+      }
+      #thing .wordmark {
+        font-size: 220px;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        color: var(--ink);
+      }
+      #thing .sweep {
+        width: 420px;
+        height: 6px;
+        background: var(--accent);
+        margin-top: 40px;
+        transform-origin: left center;
+        transform: scaleX(0);
+      }
+
+      /* Scene: tribe */
+      #tribe .scene-content {
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+      }
+      #tribe .tagline {
+        font-size: 58px;
+        line-height: 1.3;
+        max-width: 860px;
+      }
+      #tribe .domain {
+        font-family: "Space Mono", monospace;
+        font-size: 40px;
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-qv3y" id="root" data-composition-id="main" data-start="0" data-width="1080" data-height="1920" data-duration="15">
+      <!-- Scene 1 — HOOK 0.0–2.0 -->
+      <section data-hf-id="hf-1ke9" id="hook" class="clip" data-start="0" data-duration="2.0" data-track-index="0">
+        <div data-hf-id="hf-cn5c" class="scene-content">
+          <div data-hf-id="hf-kd7h" id="hook-line" class="line">50 milliseconds.</div>
+        </div>
+      </section>
+
+      <!-- Scene 2 — NAME 2.0–4.2 -->
+      <section data-hf-id="hf-srnf" id="name" class="clip" data-start="2.0" data-duration="2.2" data-track-index="0">
+        <div data-hf-id="hf-o0eg" class="scene-content">
+          <div data-hf-id="hf-92wl" id="name-line" class="line">That's all it takes to judge your website.</div>
+        </div>
+      </section>
+
+      <!-- Scene 3 — BELIEF 4.2–8.0 -->
+      <section data-hf-id="hf-31hu" id="belief" class="clip" data-start="4.2" data-duration="3.8" data-track-index="0">
+        <div data-hf-id="hf-mthd" class="scene-content">
+          <div data-hf-id="hf-0m1s" id="belief-line" class="line syne">
+            We believe a website should look like it costs <span data-hf-id="hf-c3hl" id="belief-emph" class="accent">10x more</span> than it did.
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 4 — GAP 8.0–10.2 -->
+      <section data-hf-id="hf-hlw8" id="gap" class="clip" data-start="8.0" data-duration="2.2" data-track-index="0">
+        <div data-hf-id="hf-viw3" class="scene-content center">
+          <div data-hf-id="hf-qeyv" id="gap-line-1" class="line syne" data-layout-allow-overlap="true">Most templates can't.</div>
+          <div data-hf-id="hf-sklb" id="gap-line-2" class="line syne" data-layout-allow-overlap="true">Most agencies overcharge for it.</div>
+        </div>
+      </section>
+
+      <!-- Scene 5 — THING 10.2–12.6 -->
+      <section data-hf-id="hf-jse3" id="thing" class="clip" data-start="10.2" data-duration="2.4" data-track-index="0">
+        <div data-hf-id="hf-n7se" class="scene-content">
+          <div data-hf-id="hf-lwvt" id="wordmark" class="wordmark">VILAS</div>
+          <div data-hf-id="hf-9a6y" id="sweep" class="sweep"></div>
+        </div>
+      </section>
+
+      <!-- Scene 6 — TRIBE 12.6–15.0 -->
+      <section data-hf-id="hf-ng3h" id="tribe" class="clip" data-start="12.6" data-duration="2.4" data-track-index="0">
+        <div data-hf-id="hf-m0vb" class="scene-content">
+          <div data-hf-id="hf-a8id" id="tribe-tagline" class="tagline syne">A website that looks expensive. It wasn't.</div>
+          <div data-hf-id="hf-hqp6" id="tribe-domain" class="domain">vilas.studio</div>
+        </div>
+      </section>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Scene 1 — hook
+      tl.fromTo(
+        "#hook-line",
+        { autoAlpha: 0, y: 44 },
+        { autoAlpha: 1, y: 0, duration: 0.7, ease: "power4.out" },
+        0.15
+      );
+
+      // Scene 2 — name
+      tl.fromTo(
+        "#name-line",
+        { autoAlpha: 0, y: 20, filter: "blur(14px)" },
+        { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.65, ease: "power2.out" },
+        2.12
+      );
+
+      // Scene 3 — belief (word-line reveal + emphasis pulse)
+      tl.fromTo(
+        "#belief-line",
+        { autoAlpha: 0, y: 30 },
+        { autoAlpha: 1, y: 0, duration: 0.7, ease: "power4.out" },
+        4.35
+      );
+      tl.fromTo(
+        "#belief-emph",
+        { scale: 1 },
+        { scale: 1.08, duration: 0.35, ease: "sine.inOut", yoyo: true, repeat: 1, transformOrigin: "left center" },
+        6.55
+      );
+
+      // Scene 4 — gap (two-line swap)
+      tl.fromTo(
+        "#gap-line-1",
+        { autoAlpha: 0, x: 60 },
+        { autoAlpha: 1, x: 0, duration: 0.5, ease: "power2.out" },
+        8.05
+      );
+      tl.to("#gap-line-1", { autoAlpha: 0, x: -60, duration: 0.4, ease: "power2.in" }, 9.15);
+      tl.fromTo(
+        "#gap-line-2",
+        { autoAlpha: 0, x: 60 },
+        { autoAlpha: 1, x: 0, duration: 0.5, ease: "power2.out" },
+        9.3
+      );
+
+      // Scene 5 — thing (wordmark reveal + sweep)
+      tl.fromTo(
+        "#wordmark",
+        { autoAlpha: 0, scale: 0.94 },
+        { autoAlpha: 1, scale: 1, duration: 0.6, ease: "power4.out" },
+        10.35
+      );
+      tl.fromTo("#sweep", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.out" }, 10.9);
+
+      // Scene 6 — tribe (final hold, no exit)
+      tl.fromTo(
+        "#tribe-tagline",
+        { autoAlpha: 0, y: 16 },
+        { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out" },
+        12.75
+      );
+      tl.fromTo(
+        "#tribe-domain",
+        { autoAlpha: 0, y: 12 },
+        { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" },
+        13.05
+      );
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

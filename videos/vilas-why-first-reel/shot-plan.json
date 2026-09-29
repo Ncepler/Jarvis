@@ -1,0 +1,76 @@
+{
+  "category": "kinetic-type",
+  "duration_s": 15,
+  "fps": 30,
+  "canvas": { "w": 1080, "h": 1920, "aspect": "9:16" },
+  "style": "Apple-restraint kinetic type; why-first brand reveal (reel-lab hook 21, adapted for a design studio, no montage/footage). Calm, editorial, transform+opacity only, generous holds, one motif per scene.",
+  "palette": ["#efe9dd", "#f6f1e8", "#1f1a14", "#5f574a", "#d9d0c1", "#8a5a2b"],
+  "font": "Syne / Space Grotesk / Space Mono",
+  "beats": [2.0, 4.2, 8.0, 10.2, 12.6],
+  "export": "mp4",
+  "asset_needs": [],
+  "content": {
+    "scenes": [
+      {
+        "id": "hook",
+        "start": 0.0,
+        "end": 2.0,
+        "text": "50 milliseconds.",
+        "emphasis_words": ["50 milliseconds"],
+        "emotion": "cold open, matter-of-fact",
+        "motion": "slide_bottom + fade_in, power4.out",
+        "beats": [0.3]
+      },
+      {
+        "id": "name",
+        "start": 2.0,
+        "end": 4.2,
+        "text": "That's all it takes to judge your website.",
+        "emphasis_words": ["judge"],
+        "emotion": "naming the stakes",
+        "motion": "fade_blur in, hold, fade_out",
+        "beats": [2.2]
+      },
+      {
+        "id": "belief",
+        "start": 4.2,
+        "end": 8.0,
+        "text": "We believe a website should look like it costs 10x more than it did.",
+        "emphasis_words": ["10x more"],
+        "emotion": "conviction, calm confidence",
+        "motion": "word_reveal (per-line stagger), color_shift accent on emphasis",
+        "beats": [5.4, 6.6]
+      },
+      {
+        "id": "gap",
+        "start": 8.0,
+        "end": 10.2,
+        "text": "Most templates can't. Most agencies overcharge for it.",
+        "emphasis_words": ["can't", "overcharge"],
+        "emotion": "the gap, understated",
+        "motion": "slide_left/slide_right two-line swap, power2.out",
+        "beats": [8.3, 9.3]
+      },
+      {
+        "id": "thing",
+        "start": 10.2,
+        "end": 12.6,
+        "text": "VILAS",
+        "emphasis_words": ["VILAS"],
+        "emotion": "the reveal, understated, no fanfare",
+        "motion": "scale_grow from 0.94, uniform-weight letters (VilasReveal wordmark motif), single underline_sweep in accent",
+        "beats": [10.4]
+      },
+      {
+        "id": "tribe",
+        "start": 12.6,
+        "end": 15.0,
+        "text": "A website that looks expensive. It wasn't. — vilas.studio",
+        "emphasis_words": ["vilas.studio"],
+        "emotion": "closing bookend, quiet",
+        "motion": "fade_in, hold to black-safe bone bg, no exit (last frame holds)",
+        "beats": [12.8]
+      }
+    ]
+  }
+}
