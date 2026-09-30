@@ -1,0 +1,5 @@
+Nobody notices this either.
+
+The barber style reads its own posted hours and tells you if they're taking walk-ins right now. At 7:00 it switches itself to "by appointment". Standard Barber Co. is a demo we built, not a real shop. Episode 2 of 9.
+
+#webdesign #uidesign #barber #details
