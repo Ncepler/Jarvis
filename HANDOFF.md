@@ -109,6 +109,18 @@
   ≤1.4×); Rise-revealed demo sections render blank unless you scroll to them
   gradually; drive live-status chips with `page.clock.setFixedTime` +
   `timezoneId: 'UTC'`.
+- **Reels #10–#14 (built 2026-09-30, second batch)**: `brag-output-2026-09-30-keynote-2/`
+  ("Introducing: the before & after", keynote vol. 2 on the renovation demo),
+  `-details-2/` (series ep 2/9, barber walk-in chip), `-groupchat/` (referral dies
+  in the group chat, florist), `-museum/` (museum of dead website features, on the
+  keynote stage), `-expensive/` (motion-only A/B, answer B A A B in share-copy.txt).
+  All five rows are updated to `rendered` in Supabase and ep 3/9 is queued at
+  position 10. Gotchas: `page.clock.setFixedTime` + `reducedMotion: 'reduce'`
+  left the barber Hours section blank (drop reducedMotion, kill the dot animation
+  with CSS instead); CSS entrance keyframes can be seeked frame by frame with
+  `document.getAnimations()` (skip scroll-timeline ones, `finish()` throws on
+  infinite ones); `/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/`
+  holds the only ffmpeg (not on PATH).
 - **Supabase `instagram_posts` = the log of every IG post AND the reel idea
   queue** (migrations 0017 + 0018). 20 ideas were added 2026-09-29 as
   `status = 'idea'`, ordered by `queue_position`, each with a beat sheet,

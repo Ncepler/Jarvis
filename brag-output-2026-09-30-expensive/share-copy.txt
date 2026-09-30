@@ -1,0 +1,11 @@
+Same card. Same colours. Same timing. The only thing different is the curve it moves on.
+
+Comment your 4 (like ABBA). Answer's in the pinned comment.
+
+#motiondesign #uidesign #webdesign #animation
+
+PIN AS FIRST COMMENT:
+Answers: B A A B.
+Expensive = cubic-bezier(0.16, 1, 0.3, 1). Fast start, long soft landing.
+Cheap = ease-in-out (0.42, 0, 0.58, 1). Same duration, but it starts slow and brakes like it's unsure.
+Our own site moves on the first one.
