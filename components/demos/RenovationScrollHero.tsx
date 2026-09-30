@@ -31,6 +31,16 @@ const CTA = "Get a free estimate";
 const SCRIM =
   "linear-gradient(0deg, color-mix(in srgb, var(--d-bg) 78%, transparent) 0%, color-mix(in srgb, var(--d-bg) 40%, transparent) 30%, transparent 58%)";
 
+// dualTone (light demos over a dark-start clip): light text on a dark scrim for
+// the first beats, crossfading to the demo's dark text on a light scrim for the
+// closing state. Tokens only, so it follows the demo's theme.
+const SCRIM_DARK =
+  "linear-gradient(0deg, color-mix(in srgb, var(--d-fg) 68%, transparent) 0%, color-mix(in srgb, var(--d-fg) 34%, transparent) 30%, transparent 58%)";
+const SCRIM_LIGHT =
+  "linear-gradient(0deg, color-mix(in srgb, var(--d-bg) 60%, transparent) 0%, color-mix(in srgb, var(--d-bg) 30%, transparent) 30%, transparent 58%)";
+const TONE_START = 0.7; // crossfade window, while no text is visible
+const TONE_END = 0.8;
+
 function CopyCta({ label }: { label: string }) {
   return (
     <a
@@ -48,15 +58,33 @@ function CopyCta({ label }: { label: string }) {
   );
 }
 
-function Headline({ eyebrow, line1, line2 }: { eyebrow: string; line1: string; line2: string }) {
+function Headline({
+  eyebrow,
+  line1,
+  line2,
+  inherit,
+}: {
+  eyebrow: string;
+  line1: string;
+  line2: string;
+  // dualTone: text color comes from the parent so it can crossfade
+  inherit?: boolean;
+}) {
   return (
     <>
       <div className="mb-6">
-        <Eyebrow>{eyebrow}</Eyebrow>
+        {inherit ? (
+          <p className="flex items-center gap-2.5 text-[15px] font-bold uppercase tracking-[0.12em]">
+            <span aria-hidden className="inline-block h-px w-6" style={{ background: "var(--d-accent)" }} />
+            {eyebrow}
+          </p>
+        ) : (
+          <Eyebrow>{eyebrow}</Eyebrow>
+        )}
       </div>
       <h1
         className="max-w-3xl text-balance text-[40px] font-bold leading-[1.04] tracking-[-0.035em] md:text-[72px]"
-        style={{ color: "var(--d-fg)", fontFamily: "var(--d-display)" }}
+        style={{ color: inherit ? "inherit" : "var(--d-fg)", fontFamily: "var(--d-display)" }}
       >
         {line1}
         <br />
@@ -76,6 +104,7 @@ export function RenovationScrollHero({
   line2 = LINE2,
   subline = SUBLINE,
   cta = CTA,
+  dualTone = false,
 }: {
   videoSrc?: string;
   posterSrc?: string;
@@ -84,6 +113,7 @@ export function RenovationScrollHero({
   line2?: string;
   subline?: string;
   cta?: string;
+  dualTone?: boolean;
 } = {}) {
   const [reduced, setReduced] = useState<boolean | null>(null);
   const wrapRef = useRef<HTMLElement>(null);
@@ -91,6 +121,9 @@ export function RenovationScrollHero({
   const headRef = useRef<HTMLDivElement>(null);
   const subRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  const darkScrimRef = useRef<HTMLDivElement>(null);
+  const lightScrimRef = useRef<HTMLDivElement>(null);
+  const toneRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -126,6 +159,14 @@ export function RenovationScrollHero({
       set(subRef.current, Math.min(ramp(p, 0.42, 0.5), 1 - ramp(p, 0.64, 0.72)), 16);
       // primary CTA: 0.8–1, stays
       set(ctaRef.current, ramp(p, 0.8, 0.88), 12);
+      if (dualTone) {
+        const t = ramp(p, TONE_START, TONE_END);
+        if (darkScrimRef.current) darkScrimRef.current.style.opacity = (1 - t).toFixed(3);
+        if (lightScrimRef.current) lightScrimRef.current.style.opacity = t.toFixed(3);
+        if (toneRef.current) {
+          toneRef.current.style.color = `color-mix(in srgb, var(--d-fg) ${(t * 100).toFixed(1)}%, var(--d-surface))`;
+        }
+      }
     };
 
     const tick = () => {
@@ -155,14 +196,14 @@ export function RenovationScrollHero({
       cancelAnimationFrame(raf);
       video.removeEventListener("loadedmetadata", prime);
     };
-  }, [reduced]);
+  }, [reduced, dualTone]);
 
   // Reduced motion: static 100svh poster with the final text state.
   if (reduced) {
     return (
       <section className="relative w-full overflow-hidden" style={{ height: "100svh", minHeight: 560 }}>
         <Image src={posterSrc} alt="" fill priority sizes="100vw" className="object-cover" />
-        <div aria-hidden className="absolute inset-0" style={{ background: SCRIM }} />
+        <div aria-hidden className="absolute inset-0" style={{ background: dualTone ? SCRIM_LIGHT : SCRIM }} />
         <div className="relative mx-auto flex h-full w-full max-w-[1200px] flex-col justify-end px-6 pb-20 md:px-16">
           <Headline eyebrow={eyebrow} line1={line1} line2={line2} />
           <div>
@@ -189,21 +230,28 @@ export function RenovationScrollHero({
             aria-hidden
           />
         )}
-        <div aria-hidden className="absolute inset-0" style={{ background: SCRIM }} />
+        {dualTone ? (
+          <>
+            <div ref={lightScrimRef} aria-hidden className="absolute inset-0 opacity-0" style={{ background: SCRIM_LIGHT }} />
+            <div ref={darkScrimRef} aria-hidden className="absolute inset-0" style={{ background: SCRIM_DARK }} />
+          </>
+        ) : (
+          <div aria-hidden className="absolute inset-0" style={{ background: SCRIM }} />
+        )}
         <div className="relative mx-auto flex h-full w-full max-w-[1200px] flex-col justify-end px-6 pb-20 md:px-16">
-          <div className="relative">
+          <div ref={toneRef} className="relative" style={dualTone ? { color: "var(--d-surface)" } : undefined}>
             {/* supporting line sits in the same lower-left slot, between headline states */}
             <div
               ref={subRef}
               className="pointer-events-none absolute bottom-0 left-0 max-w-xl opacity-0"
               style={{ willChange: "transform, opacity" }}
             >
-              <p className="text-[19px] leading-[1.55] md:text-[22px]" style={{ color: "var(--d-fg)" }}>
+              <p className="text-[19px] leading-[1.55] md:text-[22px]" style={{ color: dualTone ? "inherit" : "var(--d-fg)" }}>
                 {subline}
               </p>
             </div>
             <div ref={headRef} style={{ willChange: "transform, opacity" }}>
-              <Headline eyebrow={eyebrow} line1={line1} line2={line2} />
+              <Headline eyebrow={eyebrow} line1={line1} line2={line2} inherit={dualTone} />
             </div>
             <div ref={ctaRef} className="pointer-events-none opacity-0" style={{ willChange: "transform, opacity" }}>
               <CopyCta label={cta} />

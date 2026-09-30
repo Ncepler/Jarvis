@@ -31,14 +31,13 @@ import {
   StickyScene,
   TwoLine,
 } from "./system";
-import { heroConceptFor } from "@/lib/heroConcepts";
+import { RenovationScrollHero } from "./RenovationScrollHero";
 import type { Tier } from "./VilasDemoBar";
 
 // Matches --d-ease-out exactly (system.tsx sets it to this cubic-bezier) —
 // Motion needs a numeric curve, not the CSS var itself.
 const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1];
 
-const PREMIUM_HERO = heroConceptFor("demo-powerwash");
 const ACCENT = "#1E86C4"; // clean water blue (deeper for contrast on white)
 
 // Clean & crisp power-washing mood (SKILL §13d) — matches the spec exactly,
@@ -353,19 +352,32 @@ export function PowerWashDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" />
-      <StickyScene image={firstPowerWashImage} priority>
-        <DemoHero
-          pinned
-          heroImage={firstPowerWashImage}
+      {tier === "premium" && (
+        <RenovationScrollHero
+          videoSrc="/videos/power-washing-hero.mp4"
+          posterSrc="/videos/power-washing-hero-poster.jpg"
           eyebrow="Power washing · Suffolk County"
           line1="Like the day"
           line2="it was built."
-          sub="Houses, driveways, decks, and fences washed back to new in one visit. Flat quotes, no surprises."
-          primaryCta="Get a free quote"
-          phone={PHONE}
-          mediaLabel="HERO VIDEO: wash footage"
-          premium={tier === "premium" ? PREMIUM_HERO : undefined}
+          subline="Houses, driveways, decks, and fences washed back to new in one visit. Flat quotes, no surprises."
+          cta="Get a free quote"
+          dualTone
         />
+      )}
+      <StickyScene image={firstPowerWashImage} priority={tier !== "premium"}>
+        {tier !== "premium" && (
+          <DemoHero
+            pinned
+            heroImage={firstPowerWashImage}
+            eyebrow="Power washing · Suffolk County"
+            line1="Like the day"
+            line2="it was built."
+            sub="Houses, driveways, decks, and fences washed back to new in one visit. Flat quotes, no surprises."
+            primaryCta="Get a free quote"
+            phone={PHONE}
+            mediaLabel="HERO VIDEO: wash footage"
+          />
+        )}
         <SceneBlock>
           <StickyReveal>
             <div id="about" className={ANCHOR_SCROLL_CLASS}>
