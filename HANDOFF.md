@@ -121,6 +121,14 @@
   `document.getAnimations()` (skip scroll-timeline ones, `finish()` throws on
   infinite ones); `/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/`
   holds the only ffmpeg (not on PATH).
+- **Reel "Motivation Comes Second"** (`brag-output-2026-09-30-stickman/`, built
+  2026-09-30): a 59s 9:16 stick-figure motivational short, not a Vilas promo. It was
+  planned with the `directing-stickman-videos` skill and rendered with full `/brag` →
+  Hyperframes, with Kokoro VO (`af_heart`). Not logged in `instagram_posts`. Gotchas:
+  the Hyperframes runtime runs `<script src>` before the body exists (look up
+  elements lazily), give an absolute SVG layer explicit px size (100% collapses
+  to 0), and an `hf-seek` listener works for immediate-mode SVG frames.
+  ffmpeg can be `apt-get install`ed.
 - **Supabase `instagram_posts` = the log of every IG post AND the reel idea
   queue** (migrations 0017 + 0018). 20 ideas were added 2026-09-29 as
   `status = 'idea'`, ordered by `queue_position`, each with a beat sheet,
