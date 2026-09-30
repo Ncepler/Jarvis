@@ -57,4 +57,29 @@ The barber style reads its own posted hours and tells you if they're taking walk
   $$SERIES: copy the template in brag-output-2026-09-30-details-1/brag-plan.md exactly (grade, type, positions, sound). Capture with timezoneId UTC + page.clock.setFixedTime on a Tue–Sat. Walk-in chip sits in the HoursBoard section, which is Rise-revealed: scroll to it gradually before the screenshot (a direct scrollTo leaves it blank). Insert ep 3 when this one is built.$$
 );
 
+-- Reel #6 — queue idea 2
+update public.instagram_posts set
+  status = 'rendered', queue_position = null,
+  video_path = 'brag-output-2026-09-30-keynote/brag.mp4',
+  poster_path = 'brag-output-2026-09-30-keynote/brag.jpg',
+  commit_sha = '18125db',
+  duration_s = 24,
+  notes = notes || $$
+
+BUILT 2026-09-30: real three.js stage (Reflector floor, volumetric cone beam, RoundedBox phone, per-frame CanvasTexture screen from 3x captures). The "photo of your actual shop" beat shows the hero with a LABELED PLACEHOLDER frame, not the demo's stand-in photo (captioning that image "your actual shop" would mislead). Silence before "One more thing." is true digital silence, reverb tails included.$$
+where id = 'ab34ed79-4c37-4023-a59f-3bc6aa946185' and status = 'idea';
+
+-- Reel #8 — queue idea 4
+update public.instagram_posts set
+  status = 'rendered', queue_position = null,
+  video_path = 'brag-output-2026-09-30-haircut/brag.mp4',
+  poster_path = 'brag-output-2026-09-30-haircut/brag.jpg',
+  commit_sha = '6bb4aa7',
+  duration_s = 15,
+  on_screen_text = on_screen_text || ARRAY[$$one tap. calling…$$],
+  notes = notes || $$
+
+BUILT 2026-09-30: attempts 1-5 are a made-up generic booking site built in HTML/CSS (no name, no platform). Attempt 6 lands on the real barber demo's Hours section (walk-in chip from useWalkInStatus under a fixed Wed 2:30pm clock) and taps the page's own sticky Call button. Every retry hard-cuts the jingle back to bar 1 (faster, more detuned, more bit-crushed each time).$$
+where id = '9329cef1-b916-4bc3-ae81-e0452eeeea00' and status = 'idea';
+
 commit;
