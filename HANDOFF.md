@@ -101,9 +101,9 @@
   brag.mp4 / brag.jpg / share-copy.txt / brag-plan.md; `work/` (gitignored) holds
   the capture script, comp, `render.mjs` (generic canvas/DOM/WebGL frame renderer,
   `PORT` + optional `F0`/`F1` to re-render a span) and `synth.py` (shared numpy
-  instrument kit + -14 LUFS master). **`supabase/pending/2026-09-30-reels-5-9.sql`
-  is NOT applied yet:** it marks those 5 rows rendered and inserts series ep 2/9.
-  Run it once in the SQL editor, then delete the file. The "Details nobody notices"
+  instrument kit + -14 LUFS master). The Supabase write-back for them was applied
+  2026-09-30 (5 rows rendered, series ep 2/9 queued at position 5); the pending SQL
+  file is deleted. `brag-output-2026-09-30-spot-v2/` is an alternate cut of #5. The "Details nobody notices"
   **series template** (reel #7's brag-plan.md) must be copied exactly for eps 2–9.
   Gotchas: Chrome canvas clips images taller than 16384px (capture long pages
   ≤1.4×); Rise-revealed demo sections render blank unless you scroll to them
