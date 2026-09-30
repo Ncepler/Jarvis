@@ -115,7 +115,7 @@
   in the group chat, florist), `-museum/` (museum of dead website features, on the
   keynote stage), `-expensive/` (motion-only A/B, answer B A A B in share-copy.txt).
   All five rows are updated to `rendered` in Supabase and ep 3/9 is queued at
-  position 10. Gotchas: `page.clock.setFixedTime` + `reducedMotion: 'reduce'`
+  position 9 (next up is #8 "It's 2:14am"). Gotchas: `page.clock.setFixedTime` + `reducedMotion: 'reduce'`
   left the barber Hours section blank (drop reducedMotion, kill the dot animation
   with CSS instead); CSS entrance keyframes can be seeked frame by frame with
   `document.getAnimations()` (skip scroll-timeline ones, `finish()` throws on
