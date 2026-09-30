@@ -1,0 +1,5 @@
+Nobody notices this. That's the point.
+
+The bakery style checks the time and tells you if it's open right now, so nobody drives over after the case is empty. Golden Hour Bakehouse is a demo we built, not a real shop. Episode 1 of 9, one tiny detail per style.
+
+#webdesign #uidesign #bakery #details
