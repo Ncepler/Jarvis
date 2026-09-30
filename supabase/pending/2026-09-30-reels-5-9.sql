@@ -82,4 +82,20 @@ update public.instagram_posts set
 BUILT 2026-09-30: attempts 1-5 are a made-up generic booking site built in HTML/CSS (no name, no platform). Attempt 6 lands on the real barber demo's Hours section (walk-in chip from useWalkInStatus under a fixed Wed 2:30pm clock) and taps the page's own sticky Call button. Every retry hard-cuts the jingle back to bar 1 (faster, more detuned, more bit-crushed each time).$$
 where id = '9329cef1-b916-4bc3-ae81-e0452eeeea00' and status = 'idea';
 
+-- Reel #9 — queue idea 5
+update public.instagram_posts set
+  status = 'rendered', queue_position = null,
+  video_path = 'brag-output-2026-09-30-val/brag.mp4',
+  poster_path = 'brag-output-2026-09-30-val/brag.jpg',
+  commit_sha = '798e775',
+  duration_s = 14.17,
+  music = 'Original numpy-synth, minimal marimba + soft kick, ~110 BPM; the loop is exactly 52 eighths. Each tour word lands on a marimba note one step up C pentatonic (C5 -> A6); kick drops out for the revolve, rising 16th arpeggio, VILAS lands on C major + bell + held pad; descending figure back to VAL.',
+  notes = notes || $$
+
+BUILT 2026-09-30: VilasReveal.tsx no longer exists on the site (removed in 8123421), so the reel re-creates it from its git-history source for a frame-exact render: same face/weight/colour, persistent V·A·L FLIP on (0.16,1,0.3,1), scale-to-fit, and the ORIGINAL VALIS -> VILAS finale (V/S fly out, L shrinks to a dot, A revolves over, I under). Words: value valid invaluable approval evaluate festival arrival survival carnival interval (all checked).$$
+where id = '1eeddc77-b704-46af-8ee8-d8948b0cfbfa' and status = 'idea';
+
+-- sanity check: should list the five rows above as rendered, and ep 2/9 at queue_position 5
+-- select title, status, queue_position, commit_sha from public.instagram_posts order by created_at;
+
 commit;

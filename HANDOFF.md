@@ -1,4 +1,4 @@
-# HANDOFF — updated 2026-09-27 (craft/motion pass)
+# HANDOFF — updated 2026-09-30 (reels #5–#9; craft/motion pass state below unchanged)
 
 ## Current state
 - Deployed: last confirmed production deploy (`vilas.studio`) was built from
@@ -96,6 +96,19 @@
   the demos at 360×640 @3x, then render the composition page frame by frame.
   Headless Chromium doesn't trust the sandbox proxy CA, so self-host any web
   fonts instead of loading Google Fonts.
+- **Reels #5–#9 (built 2026-09-30, queue ideas 1–5)** live in
+  `brag-output-2026-09-30-{spot,keynote,details-1,haircut,val}/`. Each folder has
+  brag.mp4 / brag.jpg / share-copy.txt / brag-plan.md; `work/` (gitignored) holds
+  the capture script, comp, `render.mjs` (generic canvas/DOM/WebGL frame renderer,
+  `PORT` + optional `F0`/`F1` to re-render a span) and `synth.py` (shared numpy
+  instrument kit + -14 LUFS master). **`supabase/pending/2026-09-30-reels-5-9.sql`
+  is NOT applied yet:** it marks those 5 rows rendered and inserts series ep 2/9.
+  Run it once in the SQL editor, then delete the file. The "Details nobody notices"
+  **series template** (reel #7's brag-plan.md) must be copied exactly for eps 2–9.
+  Gotchas: Chrome canvas clips images taller than 16384px (capture long pages
+  ≤1.4×); Rise-revealed demo sections render blank unless you scroll to them
+  gradually; drive live-status chips with `page.clock.setFixedTime` +
+  `timezoneId: 'UTC'`.
 - **Supabase `instagram_posts` = the log of every IG post AND the reel idea
   queue** (migrations 0017 + 0018). 20 ideas were added 2026-09-29 as
   `status = 'idea'`, ordered by `queue_position`, each with a beat sheet,
