@@ -1,4 +1,4 @@
-# HANDOFF — updated 2026-09-30 (reels #5–#9; craft/motion pass state below unchanged)
+# HANDOFF — updated 2026-10-01 (stickman Vilas promo reel; craft/motion pass state below unchanged)
 
 ## Current state
 - Deployed: last confirmed production deploy (`vilas.studio`) was built from
@@ -129,6 +129,14 @@
   elements lazily), give an absolute SVG layer explicit px size (100% collapses
   to 0), and an `hf-seek` listener works for immediate-mode SVG frames.
   ffmpeg can be `apt-get install`ed.
+- **Reel "The Customer You Never Met"** (`brag-output-2026-10-01-customer/`, built
+  2026-10-01): a 56s 9:16 stick-figure Vilas promo (lost walk-in → dusty site → rebuild →
+  she walks in). It was planned with `directing-stickman-videos` (Phase A approved) and
+  rendered with Hyperframes on the same SVG rig as the motivation reel. The Phase B Gemini
+  Omni Flash prompts are in `omni-flash-prompts.md` but not generated: Higgsfield had 3.86
+  credits, and six clips need ~60 (360p) to ~180 (720p). Not logged in `instagram_posts`.
+  Spell "Vilas" as "Veelas" in TTS input. Whisper transcription 403s here, so time beats
+  from `ffmpeg silencedetect`.
 - **Supabase `instagram_posts` = the log of every IG post AND the reel idea
   queue** (migrations 0017 + 0018). 20 ideas were added 2026-09-29 as
   `status = 'idea'`, ordered by `queue_position`, each with a beat sheet,
