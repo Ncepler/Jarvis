@@ -30,7 +30,7 @@ import {
   StickyScene,
   TwoLine,
 } from "./system";
-import { heroConceptFor } from "@/lib/heroConcepts";
+import { RenovationScrollHero } from "./RenovationScrollHero";
 import type { Tier } from "./VilasDemoBar";
 
 // Section/Faq/Contact/Intro all share one fixed vertical rhythm (72px/140px)
@@ -40,7 +40,6 @@ import type { Tier } from "./VilasDemoBar";
 // width (max-w-1200 + the shared side padding), different vertical air.
 const wrap = "mx-auto w-full max-w-[1200px] px-6 md:px-16";
 
-const PREMIUM_HERO = heroConceptFor("demo-bakery");
 const ACCENT = "#C9802F"; // warm crust amber
 
 // Warm & inviting bakery mood (SKILL §13b).
@@ -334,26 +333,40 @@ export function BakeryDemo({ tier = "basic" }: { tier?: Tier }) {
         }
       `}</style>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Order ahead" />
-      <StickyScene image={firstBakeryImage} priority>
-        <div className="relative">
-          <DemoHero
-            pinned
-            heroImage={firstBakeryImage}
-            eyebrow="Bakery · Sayville"
-            line1="Baked at 4am."
-            line2="Gone by noon."
-            sub="Sourdough, morning buns, and one very good cookie, baked in small batches every morning. When the case is empty, that's the day."
-            primaryCta="Order ahead"
-            phone={PHONE}
-            mediaLabel="The bakery, from the sidewalk"
-            premium={tier === "premium" ? PREMIUM_HERO : undefined}
-          />
-          {/* overlaid on the hero's own empty top corner (content sits bottom-
-              aligned) — a live open/closed read the instant the page loads. */}
-          <div className="absolute right-6 top-8 z-10 md:right-16 md:top-10">
-            <StatusChip status={status} />
+      {tier === "premium" && (
+        <RenovationScrollHero
+          videoSrc="/videos/bakery-hero.mp4"
+          posterSrc="/videos/bakery-hero-poster.jpg"
+          eyebrow="Bakery · Sayville"
+          line1="Baked at 4am."
+          line2="Gone by noon."
+          subline="Sourdough, morning buns, and one very good cookie, baked in small batches every morning. When the case is empty, that's the day."
+          cta="Order ahead"
+          dualTone
+          scrollVh={500}
+        />
+      )}
+      <StickyScene image={firstBakeryImage} priority={tier !== "premium"}>
+        {tier !== "premium" && (
+          <div className="relative">
+            <DemoHero
+              pinned
+              heroImage={firstBakeryImage}
+              eyebrow="Bakery · Sayville"
+              line1="Baked at 4am."
+              line2="Gone by noon."
+              sub="Sourdough, morning buns, and one very good cookie, baked in small batches every morning. When the case is empty, that's the day."
+              primaryCta="Order ahead"
+              phone={PHONE}
+              mediaLabel="The bakery, from the sidewalk"
+            />
+            {/* overlaid on the hero's own empty top corner (content sits bottom-
+                aligned) — a live open/closed read the instant the page loads. */}
+            <div className="absolute right-6 top-8 z-10 md:right-16 md:top-10">
+              <StatusChip status={status} />
+            </div>
           </div>
-        </div>
+        )}
         <SceneBlock>
           <StickyReveal>
             <div id="about" className={ANCHOR_SCROLL_CLASS}>

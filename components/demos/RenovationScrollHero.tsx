@@ -105,6 +105,7 @@ export function RenovationScrollHero({
   subline = SUBLINE,
   cta = CTA,
   dualTone = false,
+  scrollVh = 400,
 }: {
   videoSrc?: string;
   posterSrc?: string;
@@ -114,6 +115,8 @@ export function RenovationScrollHero({
   subline?: string;
   cta?: string;
   dualTone?: boolean;
+  // total wrapper height in vh; longer for clips with more than one beat
+  scrollVh?: number;
 } = {}) {
   const [reduced, setReduced] = useState<boolean | null>(null);
   const wrapRef = useRef<HTMLElement>(null);
@@ -215,7 +218,7 @@ export function RenovationScrollHero({
   }
 
   return (
-    <section ref={wrapRef} className="relative w-full" style={{ height: "400vh" }}>
+    <section ref={wrapRef} className="relative w-full" style={{ height: `${scrollVh}vh` }}>
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden" style={{ background: "var(--d-bg)" }}>
         {/* poster shows until the first frame is ready (and if the video fails) */}
         <Image src={posterSrc} alt="" fill priority sizes="100vw" className="object-cover" />
