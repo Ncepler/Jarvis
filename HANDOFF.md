@@ -1,6 +1,14 @@
 # HANDOFF — updated 2026-09-29 (chrome fixes + client sites + power-wash hero)
 
 ## Current state
+- **Demo header is no longer sticky** (2026-10-01, Noah): `DemoHeader` in
+  `components/demos/system.tsx` is now `relative` and scrolls away with the page;
+  only `VilasDemoBar`'s pill stays pinned, on all 8 demos that use `DemoHeader`
+  (Magician has its own chrome, no header). Header background is now solid
+  `--d-bg` (the blur only mattered while content scrolled under it).
+  `ANCHOR_SCROLL_CLASS` dropped 168px → 88px (clears just the 56px Vilas bar).
+  Verified with Playwright at 1280 + 390 widths: bar `top` holds at 12px after
+  a 2500px scroll, header goes off-screen. tsc / lint / build clean.
 - **Auto body Premium hero = scroll-scrubbed video** (`components/demos/AutoBodyScrollHero.tsx`,
   wired in `AutoBodyDemo.tsx` when `tier === "premium"`; Basic untouched). Video +
   poster in `public/videos/` (all-keyframe H.264, 1s frozen tail). `HeroCarReveal`'s
@@ -27,8 +35,8 @@
   globals.css` had `overflow-x: hidden` on BOTH `html` and `body`. That
   combination makes both elements compute to `overflow: hidden auto` and
   register as scroll containers simultaneously, which silently breaks
-  `position: sticky` everywhere on the page — `VilasDemoBar` and
-  `DemoHeader` were scrolling away instead of staying pinned on every demo.
+  `position: sticky` everywhere on the page — `VilasDemoBar` (and then-sticky
+  `DemoHeader`) were scrolling away instead of staying pinned on every demo.
   Confirmed with a Playwright test before/after (sticky bar's `rect.top`
   went from drifting to -2988px after a 3000px scroll, to holding at
   12px). Fix: keep the rule on `body` only, drop it from `html`.

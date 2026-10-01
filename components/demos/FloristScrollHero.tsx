@@ -197,7 +197,7 @@ export function FloristScrollHero({
         <div ref={lightScrimRef} aria-hidden className="absolute inset-0" style={{ background: SCRIM_LIGHT }} />
         <div ref={darkScrimRef} aria-hidden className="absolute inset-0 opacity-0" style={{ background: SCRIM_DARK }} />
         {/* opening headline: a decorative copy (the real h1 is the closing one below).
-            top padding clears the sticky demo bar + header. */}
+            top padding clears the sticky demo bar. */}
         <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0">
           <div
             ref={openRef}

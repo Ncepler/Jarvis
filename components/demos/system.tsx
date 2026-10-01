@@ -352,10 +352,9 @@ export function DemoShell({
 const wrap = "mx-auto w-full max-w-[1200px] px-6 md:px-16";
 
 // Anchor targets need to clear the sticky Vilas demo bar (56px — VilasDemoBar
-// is `sticky top-3` + h-11) plus this shared DemoHeader, now also sticky
-// (top-14, min-h-72px, taller once it wraps) so a clicked nav item's heading
-// never lands underneath either bar.
-export const ANCHOR_SCROLL_CLASS = "scroll-mt-[168px]";
+// is `sticky top-3` + h-11) plus a little air so a clicked nav item's heading
+// never lands underneath it. DemoHeader is not sticky, so it needs no offset.
+export const ANCHOR_SCROLL_CLASS = "scroll-mt-[88px]";
 
 // ── Eyebrow: uppercase label with an accent tick. Sized and weighted to read
 // as an intentional section marker, not an afterthought (Noah's fix, §3 note)
@@ -470,14 +469,10 @@ export function Media({
 }
 
 // ── Header: name left, nav + phone + accent quote button right. ──────────────
-// Sticky (not fixed) so it never escapes a transform-scaled gallery-card
-// preview of this same demo — sticky respects the nearest scrolling ancestor
-// instead of the viewport, so it degrades to "just scrolls" there and pins
-// properly on the full standalone /demos/<slug> route. Stacks directly below
-// VilasDemoBar's floating pill (sticky top-3, h-11 → bottom edge at 56px), so
-// this header picks up at top-14 (56px) with a lower z-index. Background uses
-// --d-bg (themed per demo) through color-mix + blur, so it reads correctly
-// over both light and dark demo moods without a per-style override.
+// NOT sticky (Noah, 2026-10-01): it sits in normal flow and scrolls away with
+// the page. The only pinned chrome on a demo is VilasDemoBar's floating pill
+// (sticky top-3). Solid --d-bg (themed per demo) so it reads correctly over
+// both light and dark demo moods without a per-style override.
 export function DemoHeader({
   name,
   phone,
@@ -500,12 +495,10 @@ export function DemoHeader({
   ];
   return (
     <header
-      className="sticky top-14 z-40 w-full"
+      className="relative z-40 w-full"
       style={{
         borderBottom: "1px solid var(--d-line)",
-        background: "color-mix(in srgb, var(--d-bg) 86%, transparent)",
-        backdropFilter: "blur(16px) saturate(160%)",
-        WebkitBackdropFilter: "blur(16px) saturate(160%)",
+        background: "var(--d-bg)",
       }}
     >
       <div
