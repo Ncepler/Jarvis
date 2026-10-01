@@ -37,10 +37,8 @@ import {
   StickyScene,
   TwoLine,
 } from "./system";
-import { heroConceptFor } from "@/lib/heroConcepts";
+import { FloristScrollHero } from "./FloristScrollHero";
 import type { Tier } from "./VilasDemoBar";
-
-const PREMIUM_HERO = heroConceptFor("demo-florist");
 
 const ACCENT = "#B14A63"; // deep bloom rose
 
@@ -568,21 +566,31 @@ export function FloristDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Order flowers" />
-      <StickyScene image={firstFloristImage} priority>
-        <DemoHero
-          pinned
-          heroImage={firstFloristImage}
+      {tier === "premium" && (
+        <FloristScrollHero
           eyebrow="Flower shop · Rockville Centre"
           line1="Picked,"
-          // Pure typography, no motion (§ signature detail 1): last word set
-          // in italic Fraunces at the same size as the rest of the line.
           line2={<>not <em style={{ fontStyle: "italic" }}>produced.</em></>}
-          sub="Seasonal stems, arranged the morning you order them. Walk in, call ahead, or set up weekly flowers for the house."
-          primaryCta="Order for pickup"
-          phone={PHONE}
-          mediaLabel="Shop & blooms"
-          premium={tier === "premium" ? PREMIUM_HERO : undefined}
+          subline="Seasonal stems, arranged the morning you order them. Walk in, call ahead, or set up weekly flowers for the house."
+          cta="Order for pickup"
         />
+      )}
+      <StickyScene image={firstFloristImage} priority={tier !== "premium"}>
+        {tier !== "premium" && (
+          <DemoHero
+            pinned
+            heroImage={firstFloristImage}
+            eyebrow="Flower shop · Rockville Centre"
+            line1="Picked,"
+            // Pure typography, no motion (§ signature detail 1): last word set
+            // in italic Fraunces at the same size as the rest of the line.
+            line2={<>not <em style={{ fontStyle: "italic" }}>produced.</em></>}
+            sub="Seasonal stems, arranged the morning you order them. Walk in, call ahead, or set up weekly flowers for the house."
+            primaryCta="Order for pickup"
+            phone={PHONE}
+            mediaLabel="Shop & blooms"
+          />
+        )}
         <SceneBlock>
           <StickyReveal>
             <div id="about" className={ANCHOR_SCROLL_CLASS}>
