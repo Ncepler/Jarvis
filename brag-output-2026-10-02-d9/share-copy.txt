@@ -1,0 +1,3 @@
+Tap a card on our magician style, then tap it again before it finishes. It turns around from wherever it is. Elias Vane is a demo we built, not a real performer. Episode 9 of 9.
+
+#webdesign #uidesign #interactiondesign #details
