@@ -1,5 +1,7 @@
 Your site took 8 seconds. Their whole afternoon took less.
 
-Okay, not really. But that's what it feels like to the person waiting. Every Vilas style is built to load fast.
+Okay, not really. But that's how it feels to the person waiting, and they've already tapped the next result. Every Vilas style is built to load fast. The slow site here is made up.
 
-#webdesign #smallbusiness #pagespeed #relatable
+Send this to someone whose site is still loading.
+
+#webdesign #pagespeed #smallbusiness #relatable

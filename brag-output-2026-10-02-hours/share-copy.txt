@@ -1,5 +1,7 @@
 Your customers shouldn't need a detective badge to find out if you're open.
 
-The barber style is a demo we built, not a real shop.
+Hours, phone number and address belong on the first screen, not three taps deep. The barbershop shown is a demo style we built.
 
-#webdesign #barbershop #smallbusiness #relatable
+Send this to a shop that still hides its hours.
+
+#barbershop #webdesign #smallbusiness #localbusiness

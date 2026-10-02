@@ -1,3 +1,7 @@
-What building one of these looks like, in 9 seconds. The finished one is on our grid.
+What building one of these actually looks like.
+
+Real code, grey placeholder boxes, an animation curve getting dialed in and the build going green. The finished site is on our grid.
+
+Follow to see the rest of the grid.
 
 #webdesign #webdev #nextjs #buildinpublic

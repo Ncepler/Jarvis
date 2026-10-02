@@ -1,5 +1,7 @@
-Nobody notices this either.
+Nobody notices this. That's kind of the point.
 
-The landscaping style shows you the patio at night the first time you scroll past it, without being asked. Stone & Sage Landscapes is a demo we built, not a real company. Episode 3 of 9.
+Scroll past the patio on our landscaping style and it turns to night on its own, lights on. Stone & Sage Landscapes is a demo we built, not a real company. Episode 3 of 9.
+
+Follow for the other six.
 
 #webdesign #uidesign #landscaping #details

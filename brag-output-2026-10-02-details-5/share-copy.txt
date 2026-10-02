@@ -1,5 +1,7 @@
-Nobody notices this either.
+The price doesn't spin like a slot machine. On purpose.
 
-When the lawn care style's estimate changes, the price doesn't spin up like a slot machine. It blurs for a split second and lands. Fresh Cut Lawn Co. is a demo we built, not a real company. Episode 5 of 9.
+Change the estimate on our lawn care style and the number blurs for a split second and lands. Calm reads as honest. Fresh Cut Lawn Co. is a demo we built, not a real company. Episode 5 of 9.
+
+Follow for episode 6.
 
 #webdesign #uidesign #lawncare #details

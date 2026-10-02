@@ -1,5 +1,7 @@
-Same site. Every screen. Most of your customers will see the phone version first, so we build that one first.
+Same site. Every screen.
 
-Wildstem Florals is a demo brand. Every frame is the real page at that width.
+Watch the florist site rebuild itself from a desktop down to a phone. Most of your customers see the phone version first, so we build that one first. Wildstem Florals is a demo brand.
+
+Save this for your next website check.
 
 #webdesign #responsivedesign #smallbusiness #longisland
