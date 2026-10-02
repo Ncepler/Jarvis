@@ -26,7 +26,7 @@ Hashtags avoid #longisland: the site now says it works with businesses anywhere 
 | 27 | elevator | The elevator pitch | metaphor | three floors, one line each |
 | 28 | lockscreen | Notifications from a good website | metaphor | lock screen (labelled example) |
 | 29 | lost | Lost in the search results | line art | figure wades through listings |
-| 30 | door3s | The three-second door | line art | a door that closes |
+| 30 | thumb | The thumb test | line art + real captures | can you reach the button with your thumb? (three real demos, a drawn thumb zone) |
 | 31 | bouncer | The bouncer | line art | a bouncer checks the site's credentials |
 | 32 | stairs | Five stairs | line art | each stair a reason to bail |
 | 33 | treasure | Treasure map | line art | X marks hours, phone, price |
@@ -46,4 +46,14 @@ Hashtags avoid #longisland: the site now says it works with businesses anywhere 
 | 47 | homework | Your homework | real copy | logo, photos, hours |
 | 48 | math | Do the math | real UI | the site's calculator, the visitor's own numbers |
 | 49 | googletest | When they Google you | mockup | generic search page (no real brand) |
-| 50 | hover | Hover over everything | ASMR | desktop hover states across demos |
+| 50 | addons | What can a website add on? | real prices | the site's four add-ons with their real prices (stands in for 'hover', see below) |
+
+## Notes
+- **#50 changed from `hover` to `addons`.** The plan was a real screen recording of vilas.studio on desktop (service cards opening on hover, the image
+  accordion widening). Real-time recording at 1100×1500 under software rendering ran at about one mouse event per second, so the hover animations
+  and the cursor couldn't be captured faithfully. A faithful version needs either an idle machine and a smaller viewport, or a deterministic
+  frame-stepped capture (virtual time via CDP). The recording attempts live in the session scratchpad only. `hover` is still a good idea for the next batch.
+- Reels that were rebuilt after a contact-sheet check: `vending` (phone faded out too late, overlapped the end card), `unbox` (domain text overflowed
+  the tag), `manual` (outro line cut off), `googletest` (results appeared before the query finished typing), `headlines` (29s, cut to 5 headlines / 22s),
+  `d8` (annotation pill clipped).
+- Captions deliberately skip `#longisland` (the site says it works anywhere in the US). 13 of the earlier 30 captions still carry it.

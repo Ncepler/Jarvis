@@ -1,4 +1,4 @@
-# HANDOFF — updated 2026-10-02 (overnight reel batch; site state below is from main, merged in)
+# HANDOFF — updated 2026-10-02 (reel batches 1–3; site state below is from main, merged in)
 
 ## Reels — state as of 2026-10-02 (branch `claude/eager-fermat-5bv4m7`)
 - **10 new reels rendered + committed tonight** (one folder each, `brag-output-2026-10-02-<slug>/` with
@@ -25,6 +25,24 @@
   sheet), `synth.py`. Each folder's `work/` (gitignored) has its own copy + a Rebuild line in brag-plan.md.
 - Merged `origin/main` into this branch first (real demo photos + the non-sticky demo header), so captures show the current site.
   HANDOFF conflicted, so main's site state was kept and this reel section was re-added.
+
+- **Batch 3 (same day, NO Supabase, NO Composio for these): 50 more reels rendered + committed** (folders `brag-output-2026-10-02-<slug>/`, same layout).
+  The idea list is `reels-batch-3-ideas.md` (local only; **not in Supabase**, so there is no write-back SQL for batch 3). Slugs by family:
+  series 7–9 (`d7` paint ring, `d8` progress line, `d9` card flip: the series is now complete, 9/9);
+  "5 things every [trade] website needs" (`need-barber`, `need-bakery`, `need-florist`, `need-lawn`, `need-wash`, `need-auto`, `need-landscape`, `need-reno`);
+  scroll ASMR (`asmr-florist`, `asmr-barber`, `asmr-auto`); quizzes/polls (`fivesec`, `guess-headline`, `lightdark`); design (`colors`, `typefaces`, `tierlist`);
+  metaphors (`scanner`, `manual`, `recipe`, `tracker`, `unbox`, `vending`, `elevator`, `lockscreen`); line art (`lost`, `thumb`, `bouncer`, `stairs`, `treasure`, `legit`, `whisper`);
+  edu (`domain`, `words5`, `notasite`, `needsite`, `photos`, `redgreen`, `alphabet`, `seohonest`); real copy/UI (`headlines`, `menu`, `changes`, `homework`, `math`, `googletest`, `addons`).
+  `d7`/`d8`/`d9` are real captures: d7 redraws the layoutId ring on the component's own spring over four real states; d8 is 180 real scroll frames with the line's
+  live scaleY measured each frame; d9 plays the card's real rotateY angle (recorded from the live component, including a mid-turn reversal) against real plates every 5°.
+- **#50 is `addons`, not `hover`** (real-time screen recording was too slow on this machine; see the Notes in `reels-batch-3-ideas.md`).
+- Batch 3 honesty rules held: every demo labelled a demo, no invented stats or clients, copy quoted from `lib/site.ts` / `lib/pricing.ts` where it quotes the site,
+  no real search-engine or brand names (placeholder names on `.example` domains). Captions avoid `#longisland`; **13 of the earlier 30 captions still carry it**
+  (`214am board busy commute oneline questions3 race reflow shy speedrun threelines wheel yourname`), which clashes with the site's "anywhere in the US" line. Not edited (some are already posted).
+- Posting: the first 10 reels went out via Composio (Instagram `@vilaswebdesign`). Two routines were scheduled for the next 20 (A 8pm ET Oct 2, B 8am ET Oct 3).
+  **None of batch 3 has been posted**: waiting on Noah's go-ahead before any Composio work.
+- Build kit (scratchpad, not committed): per-family templates (`tpl/{list,need,rapid,quiz,seq,line,asmr}`), `enqueue.sh` + `worker.sh` (max 3 concurrent builds on 4 cores),
+  `build.sh`, `ship.sh`, `peek.py` (8-frame contact row from a finished mp4), `look.sh` (stills before building). Every reel's `work/` has its own copy and a Rebuild line in `brag-plan.md`.
 
 
 ## Current state
