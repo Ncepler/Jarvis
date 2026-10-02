@@ -1,4 +1,19 @@
-# HANDOFF — updated 2026-09-29 (chrome fixes + client sites + power-wash hero)
+# HANDOFF — updated 2026-10-02 (overnight reel batch; site state below is from main, merged in)
+
+## Reels — state as of 2026-10-02 (branch `claude/eager-fermat-5bv4m7`)
+- **10 new reels rendered + committed tonight** (one folder each, `brag-output-2026-10-02-<slug>/` with
+  brag.mp4, brag.jpg (poster, baked in as frame 0), share-copy.txt, brag-plan.md). From the queue: `214am` (#8),
+  `details-3` (#9, series ep 3/9), `noir` (#10), `speedrun` (#11), `calm` (#12). Stickman-inspired (#21–25, built with
+  /brag-slim + canvas line art, NOT Gemini Omni): `oneline`, `hours`, `commute`, `storefront`, `questions`.
+- **Supabase is NOT written back yet.** `supabase/pending/2026-10-02-reels-batch.sql` marks the 10 rows
+  rendered and inserts series ep 4/9 at queue position 13 (it shifts the rest down by one). Noah runs or approves it, then delete the file.
+  The only Supabase writes tonight: one SELECT of the queue + one INSERT of 10 stickman-inspired ideas (positions 21–30).
+- Queue after the write-back: 13 = Details 4/9, then the old 13–20 (dating profiles … © 2019) as 14–21, then stickman ideas 26–30 as 27–31.
+- Honesty calls made tonight (details are in each brag-plan.md): the speedrun is labelled **TAS** (bot run), because there was no human time;
+  noir's string is grey so the magician demo stays the only colour; every demo is labelled a demo on screen.
+- Merged `origin/main` into this branch first (real demo photos + the non-sticky demo header), so captures show the current site.
+  HANDOFF conflicted, so main's site state was kept and this reel section was re-added.
+
 
 ## Current state
 - **Demo header is no longer sticky** (2026-10-01, Noah): `DemoHeader` in
@@ -102,6 +117,19 @@
 5. Real Higgsfield hero clips for Premium tier.
 
 ## Gotchas & decisions (standing, trimmed)
+- **Reel pipeline (brag-slim path)**: each reel's `work/` (gitignored) has `cap.mjs` (Playwright against `next start -p 3456`),
+  `comp/index.html` (canvas, every frame a pure function of t, using the shared `comp/common.js` kit: easing, text, phone mock,
+  grain, and a **stick-figure rig** with poses and line boil), `render.mjs` (JPEG-piped frame renderer, ~0.4s/frame), `sound.py` + `synth.py`
+  (numpy synth, master -15 LUFS), and `finish.sh <posterFrame>` (mux + poster as frame 0; `CRF=24` for grainy reels). The kit
+  isn't committed, but every reel's work/ has a copy. Gotchas: canvas font family names must be quoted (`"Press Start 2P"`
+  silently fails unquoted); headless Chromium had a transient all-black frame once (scan every final with ffmpeg blackdetect);
+  hide the Vilas demo bar in captures with `div.sticky.top-3.z-50{display:none}`; CSS transitions (DayNight wipe, FAQ accordion)
+  can be caught at t=0 via `document.getAnimations()` and seeked frame by frame; landscaping DayNight auto-plays as soon as the
+  section intersects at all; local /start shows a "not wired up" notice (no backend env), so hide it, and nothing can submit.
+- **Supabase `instagram_posts` = the log of every IG post AND the reel idea queue.** "Make another reel" → take the lowest
+  `queue_position` idea, build it with /brag, then UPDATE that row to rendered (queue_position null, video_path, commit_sha). The
+  Details series needs the next episode inserted each time one is built. Supabase MCP tools are pre-allowed in `.claude/settings.json`.
+- Older reel folders (`brag-output*`, 2026-09-27 → 10-01) are listed in git history of this file; same layout.
 - **"Out in the world" client sites (Val's Barbershop, Jonah Shapiro Magic,
   PackPerfect, TRFox, now NextGenRest/SporesRUs) are Supabase rows
   (`client_sites` table, Vilas project), not a file in this repo.** There's
