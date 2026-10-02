@@ -1,0 +1,7 @@
+A selection ring that slides to wherever you tap.
+
+On our body shop style the blue ring is one element that travels between paint swatches, then the car repaints under it. Apex Collision is a demo we built, not a real shop. Episode 7 of 9.
+
+Follow for episode 8.
+
+#webdesign #uidesign #autobody #details
