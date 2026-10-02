@@ -1,0 +1,7 @@
+The thumb test: can you reach the button?
+
+On a phone, the easiest place to reach is the bottom. So our demo sites put the call and quote buttons right there. Standard Barber Co., Fresh Cut Lawn Co. and Golden Hour Bakehouse are demo brands.
+
+Send this to someone whose button is stuck in the top corner.
+
+#webdesign #smallbusiness #uxdesign #mobilefirst
