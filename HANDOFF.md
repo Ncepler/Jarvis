@@ -39,8 +39,13 @@
 - Batch 3 honesty rules held: every demo labelled a demo, no invented stats or clients, copy quoted from `lib/site.ts` / `lib/pricing.ts` where it quotes the site,
   no real search-engine or brand names (placeholder names on `.example` domains). Captions avoid `#longisland`; **13 of the earlier 30 captions still carry it**
   (`214am board busy commute oneline questions3 race reflow shy speedrun threelines wheel yourname`), which clashes with the site's "anywhere in the US" line. Not edited (some are already posted).
-- Posting: the first 10 reels went out via Composio (Instagram `@vilaswebdesign`). Two routines were scheduled for the next 20 (A 8pm ET Oct 2, B 8am ET Oct 3).
-  **None of batch 3 has been posted**: waiting on Noah's go-ahead before any Composio work.
+- Posting (updated Oct 2, ~7pm ET): batch 3 is being posted via Composio to `@vilaswebdesign`. **Posted now (10):** legit, tierlist, math, lost, lockscreen, need-barber, scanner, menu, fivesec, bouncer.
+  **Scheduled (Claude Code Remote routines firing into the main session, 5 reels each, all ET):** Sat 12pm `d7 googletest vending need-bakery colors` · Sat 6pm `thumb recipe guess-headline domain asmr-florist` ·
+  Sun 12pm `d8 stairs need-florist notasite headlines` · Sun 6pm `tracker lightdark words5 elevator asmr-barber` · Mon 12pm `unbox need-lawn whisper changes typefaces` ·
+  Mon 6pm `d9 manual redgreen need-wash seohonest` · Tue 12pm `addons need-auto needsite alphabet asmr-auto` · Tue 6pm `homework need-landscape photos need-reno treasure` (final; also audits all 50).
+  The older 20 (routines A, 8pm Fri, and B, 8am Sat) are unchanged. Series order held: details-4/5/6 (tonight) then d7 (Sat), d8 (Sun), d9 (Mon).
+  Gotchas: in the Composio workbench `upload_local_file` returns a **tuple** `(dict, err)`, so take `r[0]["s3key"]`; a long-running background thread can stall on a hung call
+  (a publish succeeded but the progress file never updated), so check the account's recent media before retrying, and `items.clear()` the shared list to stop a stalled worker before starting another.
 - Build kit (scratchpad, not committed): per-family templates (`tpl/{list,need,rapid,quiz,seq,line,asmr}`), `enqueue.sh` + `worker.sh` (max 3 concurrent builds on 4 cores),
   `build.sh`, `ship.sh`, `peek.py` (8-frame contact row from a finished mp4), `look.sh` (stills before building). Every reel's `work/` has its own copy and a Rebuild line in `brag-plan.md`.
 
