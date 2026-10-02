@@ -1,6 +1,6 @@
-# Reel: "The owner who hid from the internet" (batch-2 idea, stickman-inspired · SHARE)
+# Reel: "The owner who hid from the internet" (stickman-inspired idea #30 · SHARE)
 
-Batch 2, built 2026-10-02 with /brag (brag-slim path) + canvas. **Not** a Gemini Omni clip. No Supabase row yet (no Supabase this batch; see `supabase/pending/2026-10-02-reels-batch-2.sql`). 20s.
+Batch 2, built 2026-10-02 with /brag (brag-slim path) + canvas. **Not** a Gemini Omni clip. One of the 10 stickman-inspired ideas (position 30, local copy; no Supabase this batch, write-back in `supabase/pending/2026-10-02-reels-batch-2.sql`). 20s.
 
 ## Where the stickman skill came in (ideas only)
 A small motivational arc, emotion carried by line jitter (nervous boil → calm), a giant-prop scale gag, the figure walking *into* the real capture, and an ending that mirrors the opening.

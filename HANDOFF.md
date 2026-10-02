@@ -11,6 +11,18 @@
 - Queue after the write-back: 13 = Details 4/9, then the old 13–20 (dating profiles … © 2019) as 14–21, then stickman ideas 26–30 as 27–31.
 - Honesty calls made tonight (details are in each brag-plan.md): the speedrun is labelled **TAS** (bot run), because there was no human time;
   noir's string is grey so the magician demo stays the only colour; every demo is labelled a demo on screen.
+- **Batch 2 (same day, NO Supabase that turn — Noah's rule): 20 more reels rendered + committed**, same folder layout.
+  From the queue: `dating` (#13), `busy` (#14), `board` (#15), `meanwhile` (#16), `fw26` (#17), `race` (#18), `countdown` (#19).
+  Series: `details-4`, `details-5`, `details-6`. Stickman-inspired ideas: `draw` (#26), `twoshops` (#27), `threelines` (#28), `waiting` (#29), `shy` (#30)
+  (so all 10 stickman ideas are built). New ideas with no row yet: `reflow`, `yourname`, `questions3`, `wheel`, `soundtrack`.
+  Skipped: #20 "Still says © 2019?" (needs Noah's OK, see its row); after the write-back it's the only idea left in the queue.
+- **Batch-2 write-back = `supabase/pending/2026-10-02-reels-batch-2.sql`** (not applied). Run batch 1's file FIRST (it creates
+  the Details 4/9 row). It marks 13 rows rendered, inserts 7 new rendered rows, then renumbers the remaining ideas 1..n.
+  The 5 stickman rows and the ep-4 row are matched by title, so check that each UPDATE count is 1 before committing.
+- Posting-order notes live in each brag-plan.md: `countdown` only after 6+ posts and after the power-wash reel; `meanwhile` and
+  `waiting` are the same joke family (space them out); `dating` should go well after reel #4 (same Tide Line hero).
+- Pipeline kit (scratchpad, not committed): `newreel.sh`, `caplib.mjs`, `render.mjs`, `finish.sh`, `ship.sh` (mux + blackdetect + check
+  sheet), `synth.py`. Each folder's `work/` (gitignored) has its own copy + a Rebuild line in brag-plan.md.
 - Merged `origin/main` into this branch first (real demo photos + the non-sticky demo header), so captures show the current site.
   HANDOFF conflicted, so main's site state was kept and this reel section was re-added.
 

@@ -1,6 +1,6 @@
-# Reel: "Three lines to launch" (batch-2 idea, stickman-inspired · SAVE)
+# Reel: "Three lines to launch" (stickman-inspired idea #28 · SAVE)
 
-Batch 2, built 2026-10-02 with /brag (brag-slim path) + canvas. **Not** a Gemini Omni clip. No Supabase row yet (this batch ran with no Supabase; see `supabase/pending/2026-10-02-reels-batch-2.sql`). 15s, exact loop.
+Batch 2, built 2026-10-02 with /brag (brag-slim path) + canvas. **Not** a Gemini Omni clip. One of the 10 stickman-inspired ideas (position 28, local copy; no Supabase this batch, write-back in `supabase/pending/2026-10-02-reels-batch-2.sql`). 15s, exact loop.
 
 ## Where the stickman skill came in (ideas only)
 Numbered step lines on a floor, a figure that walks between beats, real UI shown between line-art moments, a rewind that makes it loop.
