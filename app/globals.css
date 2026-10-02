@@ -39,8 +39,16 @@
 
 /* Backstop only, not the fix — a layout bug that pushes content past the
    viewport should still be fixed at its source; this just keeps a future
-   regression of that kind from drifting the whole page horizontally. */
-html,
+   regression of that kind from drifting the whole page horizontally.
+   `body` ONLY — setting this on `html` too made both html and body compute
+   as scroll containers (`overflow: hidden auto` on each), which broke every
+   `position: sticky` element on the page (VilasDemoBar, the demo scroll
+   heroes): with
+   two nested scrolling ancestors, the browser anchors sticky's containing
+   block to one while the page actually scrolls via the other, so sticky
+   elements just scroll away instead of pinning. Confirmed empirically
+   (Playwright: a sticky top-3 bar's rect.top drifted to -2988px after
+   scrolling 3000px) and confirmed fixed by dropping `html` from this rule. */
 body {
   overflow-x: hidden;
 }

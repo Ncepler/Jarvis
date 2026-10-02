@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { Logo } from "@/components/Logo";
 import { SITE } from "@/lib/site";
+import SquishSwitch from "@/components/SquishSwitch";
 
 export type Tier = "basic" | "premium";
 
@@ -70,9 +71,17 @@ export function VilasDemoBar({
           WebkitBackdropFilter: "blur(20px) saturate(180%)",
         }}
       >
-        {/* wordmark — drops on mobile, per spec; toggle + CTA never do */}
-        <div className="hidden items-center sm:flex">
-          <Link href="/" className="flex items-center gap-2" aria-label={SITE.name}>
+        {/* left: exit control (always visible, every breakpoint) + wordmark
+            (drops on mobile, per spec) — toggle + CTA never do */}
+        <div className="flex items-center gap-3">
+          <Link
+            href="/#work"
+            className="press whitespace-nowrap text-[12px] font-semibold uppercase tracking-[0.06em] text-muted transition-colors duration-150 hover:text-ink sm:text-[13px]"
+            aria-label={`Exit to the ${SITE.name} gallery`}
+          >
+            ← Exit
+          </Link>
+          <Link href="/" className="hidden items-center gap-2 sm:flex" aria-label={SITE.name}>
             <Logo size={22} />
             <span className="font-display text-base text-ink">{SITE.name}</span>
           </Link>
@@ -89,20 +98,18 @@ export function VilasDemoBar({
           >
             $300 + $50/mo
           </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={isPremium}
-            aria-label="Style price: $300 or $500"
-            onClick={() => handleChange(isPremium ? "basic" : "premium")}
-            className="press relative h-6 w-11 shrink-0 rounded-full border border-line bg-bg outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          >
-            <span
-              aria-hidden
-              className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-ink transition-transform duration-200 ease-out"
-              style={{ transform: isPremium ? "translateX(20px)" : "translateX(0)" }}
-            />
-          </button>
+          <SquishSwitch
+            id="vilas-tier-switch"
+            checked={isPremium}
+            onChange={(next: boolean) => handleChange(next ? "premium" : "basic")}
+            ariaLabel="Style price: $300 or $500"
+            width={44}
+            height={24}
+            radius={12}
+            trackColor="var(--color-bg)"
+            trackOnColor="var(--color-ink)"
+            className="shrink-0"
+          />
           <span
             className={`text-[11px] font-mono transition-opacity duration-200 sm:text-[13px] ${
               isPremium ? "font-semibold text-ink opacity-100" : "font-normal text-muted opacity-50"

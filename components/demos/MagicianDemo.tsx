@@ -22,6 +22,7 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
+import Image from "next/image";
 import {
   useEffect,
   useRef,
@@ -135,6 +136,7 @@ function RiseFromDark({
 function Placeholder({
   label,
   file,
+  img,
   ratio = "16/9",
   className = "",
   glow = false,
@@ -142,13 +144,13 @@ function Placeholder({
 }: {
   label: string;
   file?: string; // filename a client should give their own media
+  img?: string; // a real photo, once one exists for this slot
   ratio?: string;
   className?: string;
   glow?: boolean;
   // one-time gold rim-light sweep on first reveal — reserved for the
-  // portrait slot (§ signature detail 3); no real photo exists yet, so it
-  // plays over the placeholder box itself and will read the same way once
-  // Noah drops a real image in.
+  // portrait slot (§ signature detail 3); plays over the real photo the same
+  // way it played over the placeholder box before one existed.
   shimmer?: boolean;
 }) {
   const reduced = useReducedMotion();
@@ -158,6 +160,15 @@ function Placeholder({
       className={`group/media relative w-full overflow-hidden rounded-[6px] ${className}`}
       style={{ aspectRatio: ratio, background: SURFACE, border: `1px solid ${LINE}` }}
     >
+      {img && (
+        <Image
+          src={img}
+          alt=""
+          fill
+          sizes="(min-width: 768px) 40vw, 90vw"
+          className="object-cover"
+        />
+      )}
       {file && (
         <span
           aria-hidden
@@ -205,12 +216,14 @@ function Placeholder({
         </div>
       )}
       <div className="absolute inset-3 flex items-end justify-start">
-        <span
-          className="text-[10px] font-semibold uppercase tracking-[0.18em]"
-          style={{ color: MUTED }}
-        >
-          {label}
-        </span>
+        {!img && (
+          <span
+            className="text-[10px] font-semibold uppercase tracking-[0.18em]"
+            style={{ color: MUTED }}
+          >
+            {label}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -783,7 +796,12 @@ function Reel() {
           </h2>
         </RiseFromDark>
         <RiseFromDark delay={0.12} className="relative mx-auto mt-12 max-w-3xl">
-          <Placeholder label="REEL: live performance" file="reel.mp4" glow />
+          <Placeholder
+            label="REEL: live performance"
+            img="/demos/magician/cards.webp"
+            file="reel.mp4"
+            glow
+          />
           <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -863,7 +881,14 @@ function About() {
     <Section className="" id="magician-about">
       <div className="grid items-center gap-12 md:grid-cols-[0.85fr_1fr] md:gap-16">
         <RiseFromDark>
-          <Placeholder label="PORTRAIT: the magician, low key" file="portrait.jpg" ratio="4/5" glow shimmer />
+          <Placeholder
+            label="PORTRAIT: the magician, low key"
+            file="portrait.jpg"
+            img="/demos/magician/portrait.webp"
+            ratio="4/5"
+            glow
+            shimmer
+          />
         </RiseFromDark>
         <RiseFromDark delay={0.1}>
           <span className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: GOLD }}>

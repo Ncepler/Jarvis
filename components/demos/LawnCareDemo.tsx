@@ -31,10 +31,9 @@ import {
   StickyScene,
   TwoLine,
 } from "./system";
-import { heroConceptFor } from "@/lib/heroConcepts";
+import { LawnCareScrollHero } from "./LawnCareScrollHero";
 import type { Tier } from "./VilasDemoBar";
 
-const PREMIUM_HERO = heroConceptFor("demo-lawncare");
 const ACCENT = "#4E9A4A"; // fresh grass green
 
 // Fresh daylight lawn-care mood (SKILL §13e).
@@ -58,9 +57,11 @@ const PHONE = "(516) 555-0148";
 const NAME = "Fresh Cut Lawn Co.";
 
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
-// Put your hero photo in /public (e.g. /public/demos/lawncare-hero.jpg), then
-// set the path below. Leave "" to show the labeled placeholder instead.
-const firstLawnCareImage = "/previews/firstLawnCareImage.webp";
+// Real photo (2026-09-27 photo pass): a striped, dew-lit front lawn at a
+// white Colonial, the actual look this niche sells. Replaces an earlier
+// placeholder shot that was a generic close-up of grass with apartment
+// buildings in the background — the wrong setting entirely for this niche.
+const firstLawnCareImage = "/demos/lawncare/hero-lawn.webp";
 
 // Recurring plans, laid out like pricing tiers (§14g). Starting prices, clear.
 const PLANS = [
@@ -456,19 +457,30 @@ export function LawnCareDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" contactId="freshcut-contact" />
-      <StickyScene image={firstLawnCareImage} priority>
-        <DemoHero
-          pinned
-          heroImage={firstLawnCareImage}
+      {tier === "premium" && (
+        <LawnCareScrollHero
           eyebrow="Lawn care · Nassau County"
           line1="Your lawn,"
           line2="handled."
-          sub="Weekly mowing, cleanups, and edging for homes on the South Shore. No contracts, no voicemail tag. Text a photo, get a price."
-          primaryCta="Get a free quote"
-          phone={PHONE}
-          mediaLabel="HERO — fresh-cut lawn"
-          premium={tier === "premium" ? PREMIUM_HERO : undefined}
+          subline="Weekly mowing, cleanups, and edging for homes on the South Shore. No contracts, no voicemail tag. Text a photo, get a price."
+          cta="Get a free quote"
+          contactId="freshcut-contact"
         />
+      )}
+      <StickyScene image={firstLawnCareImage} priority={tier !== "premium"}>
+        {tier !== "premium" && (
+          <DemoHero
+            pinned
+            heroImage={firstLawnCareImage}
+            eyebrow="Lawn care · Nassau County"
+            line1="Your lawn,"
+            line2="handled."
+            sub="Weekly mowing, cleanups, and edging for homes on the South Shore. No contracts, no voicemail tag. Text a photo, get a price."
+            primaryCta="Get a free quote"
+            phone={PHONE}
+            mediaLabel="HERO — fresh-cut lawn"
+          />
+        )}
         <SceneBlock>
           <StickyReveal>
             <div id="about" className={ANCHOR_SCROLL_CLASS}>

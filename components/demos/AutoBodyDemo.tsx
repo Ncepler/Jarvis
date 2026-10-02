@@ -36,6 +36,7 @@ import {
 } from "./system";
 import { heroConceptFor } from "@/lib/heroConcepts";
 import { PremiumHeroMedia } from "./PremiumHeroMedia";
+import { AutoBodyScrollHero } from "./AutoBodyScrollHero";
 import type { Tier } from "./VilasDemoBar";
 
 const AUTO_BODY_HERO = heroConceptFor("demo-autobody");
@@ -74,8 +75,13 @@ const PHONE = "(516) 555-0143";
 const NAME = "Apex Collision";
 const EMAIL = "hello@apexcollision.demo";
 
-// Hero background photo (Noah's upload, compressed to WebP). "" → placeholder.
-const firstAutoBodyImage = "/previews/firstAutoBodyImage.webp";
+// Hero background photo. Real photo (2026-09-27 photo pass): a low-angle
+// front-end shot in a dark, teal-lit garage — matches this niche's
+// GRAPHITE-DARK mood. Replaces an earlier photo of a mechanic pouring oil
+// that visibly showed real Mercedes-Benz branding (the tristar on both the
+// jacket and the oil bottle) — a real-brand exposure this demo shouldn't
+// carry, on top of being a bright, mismatched mood for this style.
+const firstAutoBodyImage = "/demos/autobody/hero.webp";
 
 // ── Reusable side-profile car outline (content, not decoration — §14d). ──────
 // viewBox 360×170; used by the damage map and the paint matcher.
@@ -893,8 +899,10 @@ export function AutoBodyDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free estimate" contactId="apex-contact" />
-      <StickyScene image={firstAutoBodyImage} priority>
-        <HeroCarReveal tier={tier} pinned />
+      {/* Premium: scroll-scrubbed video hero replaces the hero below. */}
+      {tier === "premium" && <AutoBodyScrollHero accent2={ACCENT2} />}
+      <StickyScene image={firstAutoBodyImage} priority={tier !== "premium"}>
+        {tier !== "premium" && <HeroCarReveal tier={tier} pinned />}
         <SceneBlock>
           {/* Marquee gets its own (short) reveal target — wrapping the much
               taller Intro block in the same StickyReveal made its 0.2

@@ -31,14 +31,13 @@ import {
   StickyScene,
   TwoLine,
 } from "./system";
-import { heroConceptFor } from "@/lib/heroConcepts";
+import { RenovationScrollHero } from "./RenovationScrollHero";
 import type { Tier } from "./VilasDemoBar";
 
 // Matches --d-ease-out exactly (system.tsx sets it to this cubic-bezier) —
 // Motion needs a numeric curve, not the CSS var itself.
 const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1];
 
-const PREMIUM_HERO = heroConceptFor("demo-powerwash");
 const ACCENT = "#1E86C4"; // clean water blue (deeper for contrast on white)
 
 // Clean & crisp power-washing mood (SKILL §13d) — matches the spec exactly,
@@ -67,7 +66,7 @@ const SMS_HREF = `sms:+1${PHONE_DIGITS}`;
 const NAME = "Tide Line Power Washing";
 
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
-const firstPowerWashImage = "/previews/firstPowerWashImage.webp";
+const firstPowerWashImage = "/demos/powerwash/hero.webp";
 
 const WASH = [
   {
@@ -124,10 +123,8 @@ const FAQ = [
 // wrapping `<div style={{height}}>` would not, since aspect-ratio would still
 // drive the slider's auto height from its full-bleed width. Clamped so it
 // never gets absurd on very short or very tall viewports.
-// The real before/after driveway photo pair couldn't be sourced for this
-// pass (network policy blocked the host), so the slider runs on its built-in
-// labeled-placeholder fallback — fully functional and correctly shaped,
-// ready to take real images later.
+// Real before/after driveway photos (2026-09-27 photo pass) — same framing,
+// stained/mossy concrete vs. clean.
 function WashTransformation() {
   return (
     <section className="w-full" style={{ borderTop: "1px solid var(--d-line)", borderBottom: "1px solid var(--d-line)" }}>
@@ -148,7 +145,14 @@ function WashTransformation() {
           className="mt-10 grid w-full"
           style={{ height: "clamp(460px, 88svh, 880px)", gridTemplateRows: "1fr", gridTemplateColumns: "1fr" }}
         >
-          <BeforeAfterSlider beforeLabel="BEFORE: driveway" afterLabel="AFTER: driveway" beforeFile="before-1.jpg" afterFile="after-1.jpg" />
+          <BeforeAfterSlider
+            beforeImg="/demos/powerwash/driveway-before.webp"
+            afterImg="/demos/powerwash/driveway-after.webp"
+            beforeLabel="BEFORE: driveway"
+            afterLabel="AFTER: driveway"
+            beforeFile="before-1.jpg"
+            afterFile="after-1.jpg"
+          />
         </div>
       </Rise>
       <div className="mx-auto w-full max-w-[1200px] px-6 pb-[80px] md:px-16 md:pb-[120px]">
@@ -348,19 +352,32 @@ export function PowerWashDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free quote" />
-      <StickyScene image={firstPowerWashImage} priority>
-        <DemoHero
-          pinned
-          heroImage={firstPowerWashImage}
+      {tier === "premium" && (
+        <RenovationScrollHero
+          videoSrc="/videos/power-washing-hero.mp4"
+          posterSrc="/videos/power-washing-hero-poster.jpg"
           eyebrow="Power washing · Suffolk County"
           line1="Like the day"
           line2="it was built."
-          sub="Houses, driveways, decks, and fences washed back to new in one visit. Flat quotes, no surprises."
-          primaryCta="Get a free quote"
-          phone={PHONE}
-          mediaLabel="HERO VIDEO: wash footage"
-          premium={tier === "premium" ? PREMIUM_HERO : undefined}
+          subline="Houses, driveways, decks, and fences washed back to new in one visit. Flat quotes, no surprises."
+          cta="Get a free quote"
+          dualTone
         />
+      )}
+      <StickyScene image={firstPowerWashImage} priority={tier !== "premium"}>
+        {tier !== "premium" && (
+          <DemoHero
+            pinned
+            heroImage={firstPowerWashImage}
+            eyebrow="Power washing · Suffolk County"
+            line1="Like the day"
+            line2="it was built."
+            sub="Houses, driveways, decks, and fences washed back to new in one visit. Flat quotes, no surprises."
+            primaryCta="Get a free quote"
+            phone={PHONE}
+            mediaLabel="HERO VIDEO: wash footage"
+          />
+        )}
         <SceneBlock>
           <StickyReveal>
             <div id="about" className={ANCHOR_SCROLL_CLASS}>

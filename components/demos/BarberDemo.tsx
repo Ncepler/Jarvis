@@ -430,6 +430,11 @@ export function BarberDemo({ tier = "basic" }: { tier?: Tier }) {
         ]}
         cta="Book a chair"
         mediaLabel="The shop: chairs, brass, lamplight"
+        img="/demos/barber/shop.webp"
+        // shop.webp has an out-of-focus foreground lamp filling its left
+        // third; the chairs and mirrors — the actual content — sit in the
+        // right two-thirds, so the crop favors that side instead of center.
+        imgPosition="72% 50%"
       />
       <div id="work" className={ANCHOR_SCROLL_CLASS}>
         <CutMenu />

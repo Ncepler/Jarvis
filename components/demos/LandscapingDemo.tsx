@@ -31,10 +31,8 @@ import {
   StickyScene,
   TwoLine,
 } from "./system";
-import { heroConceptFor } from "@/lib/heroConcepts";
+import { RenovationScrollHero } from "./RenovationScrollHero";
 import type { Tier } from "./VilasDemoBar";
-
-const PREMIUM_HERO = heroConceptFor("demo-landscaping");
 
 const ACCENT = "#6E9A5C"; // moss / sage green, nudged brighter to pop on green-black
 
@@ -62,9 +60,12 @@ const PHONE = "(516) 555-0123";
 const NAME = "Stone & Sage Landscapes";
 
 // ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
-// Put your hero photo in /public (e.g. /public/demos/landscaping-hero.jpg), then
-// set the path below. Leave "" to show the labeled placeholder instead.
-const firstLandscapingImage = "/previews/firstLandscapingImage.webp";
+// Real photo (2026-09-27 photo pass): a golden-hour patio and stone seat
+// wall framed through two porch columns. Replaces an earlier placeholder
+// shot of a worker pushing a wheelbarrow through autumn leaf litter — a
+// fall-cleanup labor photo, not the finished-hardscape aspirational shot
+// this niche's hero needs.
+const firstLandscapingImage = "/demos/landscaping/hero-patio.webp";
 
 const SERVICES = [
   { title: "Design", copy: "A measured plan for the whole property — plantings, stone, lighting, grading — worked out before anything gets dug." },
@@ -112,10 +113,9 @@ const FAQ = [
 // (~900ms, eased) — the same pitch real landscape lighting sites make with a
 // day rendering and a night one. This is the page's one named exception to
 // the 300ms UI ceiling: it's a rare, marketing-grade moment, not a control
-// used dozens of times a visit. Real day/night photography isn't in the
-// build yet, so both slots are labeled Media placeholders; the mechanism
-// itself is fully working, so dropping real photos in later is a one-line
-// swap.
+// used dozens of times a visit. Both shots are now real photos (2026-09-27
+// photo pass) of the same stone patio/fire-pit seating wall: golden-hour day,
+// then blue-hour with the fire pit and path lights on.
 //
 // It plays itself once — the section auto-wipes day→night the first time
 // it's 60% in view (named purpose: show the feature without asking anyone to
@@ -159,7 +159,12 @@ function DayNightSignature() {
       style={{ minHeight: "100svh" }}
     >
       <div className="absolute inset-0">
-        <Media label="Patio — day" className="h-full w-full" rounded={false} />
+        <Media
+          label="Patio — day"
+          img="/demos/landscaping/patio-day.webp"
+          className="h-full w-full"
+          rounded={false}
+        />
       </div>
       <div
         className="absolute inset-0"
@@ -168,7 +173,12 @@ function DayNightSignature() {
           transition: reduced ? undefined : "clip-path 900ms var(--d-ease-out)",
         }}
       >
-        <Media label="Patio — night, lights on" className="h-full w-full" rounded={false} />
+        <Media
+          label="Patio — night, lights on"
+          img="/demos/landscaping/patio-night.webp"
+          className="h-full w-full"
+          rounded={false}
+        />
       </div>
       <div aria-hidden className="absolute inset-0" style={{ background: "var(--d-break-scrim)" }} />
       <div
@@ -198,9 +208,14 @@ function DayNightSignature() {
                 : "Showing the day view. Switch to after dark."
             }
             onClick={toggle}
-            className="d-press relative mt-9 inline-flex overflow-hidden outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="d-press relative mt-9 flex w-full max-w-[280px] overflow-hidden outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             style={{ border: "1px solid var(--d-line)", borderRadius: "var(--d-radius)", outlineColor: "var(--d-accent)" }}
           >
+            {/* Highlight is `w-1/2`, so both labels must actually occupy an
+                equal half each (flex-1 + text-center) — "Day" is far shorter
+                than "After dark", and without matched widths the highlight's
+                assumed 50% boundary lands mid-word instead of between them,
+                covering the first letter of whichever label follows. */}
             <span
               aria-hidden
               className="absolute inset-y-0 left-0 w-1/2"
@@ -212,14 +227,14 @@ function DayNightSignature() {
             />
             <span
               aria-hidden
-              className="relative px-6 py-3.5 text-[13px] font-semibold uppercase tracking-[0.08em]"
+              className="relative flex-1 px-4 py-3.5 text-center text-[13px] font-semibold uppercase tracking-[0.08em]"
               style={{ color: night ? "var(--d-fg)" : "var(--d-onaccent)", transition: "color var(--d-dur-hover) ease" }}
             >
               Day
             </span>
             <span
               aria-hidden
-              className="relative px-6 py-3.5 text-[13px] font-semibold uppercase tracking-[0.08em]"
+              className="relative flex-1 px-4 py-3.5 text-center text-[13px] font-semibold uppercase tracking-[0.08em]"
               style={{ color: night ? "var(--d-onaccent)" : "var(--d-fg)", transition: "color var(--d-dur-hover) ease" }}
             >
               After dark
@@ -395,19 +410,32 @@ export function LandscapingDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Free consult" />
-      <StickyScene image={firstLandscapingImage} priority>
-        <DemoHero
-          pinned
-          heroImage={firstLandscapingImage}
+      {/* Premium: scroll-scrubbed video hero (same copy as the Basic hero below). */}
+      {tier === "premium" && (
+        <RenovationScrollHero
+          videoSrc="/videos/landscaping-hero.mp4"
+          posterSrc="/videos/landscaping-hero-poster.jpg"
           eyebrow="Landscape design & build · North Shore"
           line1="Built to be lived in."
           line2="Built to stay."
-          sub="We design and build the whole property (stone, plantings, lighting, water), then we keep it. One studio, one crew, one standard."
-          primaryCta="Book a consultation"
-          phone={PHONE}
-          mediaLabel="Hero — finished property"
-          premium={tier === "premium" ? PREMIUM_HERO : undefined}
+          subline="We design and build the whole property (stone, plantings, lighting, water), then we keep it. One studio, one crew, one standard."
+          cta="Book a consultation"
         />
+      )}
+      <StickyScene image={firstLandscapingImage} priority={tier !== "premium"}>
+        {tier !== "premium" && (
+          <DemoHero
+            pinned
+            heroImage={firstLandscapingImage}
+            eyebrow="Landscape design & build · North Shore"
+            line1="Built to be lived in."
+            line2="Built to stay."
+            sub="We design and build the whole property (stone, plantings, lighting, water), then we keep it. One studio, one crew, one standard."
+            primaryCta="Book a consultation"
+            phone={PHONE}
+            mediaLabel="Hero — finished property"
+          />
+        )}
         <SceneBlock>
           <StickyReveal>
             <div id="about" className={ANCHOR_SCROLL_CLASS}>

@@ -28,8 +28,8 @@ import {
   type DemoTheme,
   Eyebrow,
   Faq,
+  FileBadge,
   FullBleedBreak,
-  Media,
   MobileStickyCta,
   Rise,
   SceneBlock,
@@ -37,10 +37,8 @@ import {
   StickyScene,
   TwoLine,
 } from "./system";
-import { heroConceptFor } from "@/lib/heroConcepts";
+import { FloristScrollHero } from "./FloristScrollHero";
 import type { Tier } from "./VilasDemoBar";
-
-const PREMIUM_HERO = heroConceptFor("demo-florist");
 
 const ACCENT = "#B14A63"; // deep bloom rose
 
@@ -71,11 +69,21 @@ const NAME = "Wildstem Florals";
 // the shared primitives around them).
 const wrap = "mx-auto w-full max-w-[1200px] px-6 md:px-16";
 
-// ── HERO BACKGROUND IMAGE ────────────────────────────────────────────────
-// The only real photo on this demo — everything else below is a labeled
-// placeholder (SKILL §10). New cooler/wedding-table photography was planned
-// for this rebuild but couldn't be fetched, so this stays the sole image.
+// ── REAL PHOTOGRAPHY ─────────────────────────────────────────────────────
+// Seven real photos now back this demo (SKILL §10), all but the original
+// hero/weekly-flowers shot and the cooler still life added in the
+// 2026-09-27 photo pass. Every occasion tile and almost every bouquet row
+// now has its own dedicated photo instead of a reused cooler-photo crop —
+// see OCCASION_IMAGES and BOUQUET_IMAGE_OVERRIDE below. The cooler photo is
+// kept only as the fallback for the one bouquet row ("Weekly café
+// arrangement") that still doesn't have one.
 const firstFloristImage = "/previews/firstFloristImage.webp";
+const coolerImage = "/demos/florist/cooler.webp";
+const weddingImage = "/demos/florist/wedding-table.webp";
+const longTableImage = "/demos/florist/long-table.webp";
+const sympathySprayImage = "/demos/florist/sympathy-spray.webp";
+const marketBunchImage = "/demos/florist/market-bunch.webp";
+const handTieImage = "/demos/florist/hand-tie.webp";
 
 // Same curve system.tsx sets as var(--d-ease-out) (not exported, so mirrored
 // here as the numeric tuple Motion's `ease` needs); entering/exiting content
@@ -98,11 +106,12 @@ function useHoverCapablePointer() {
   return capable;
 }
 
-// One real photo, four different slices of it (§ signature detail 2 — no
-// second photo exists yet, see the HERO BACKGROUND IMAGE note above, so each
-// occasion gets a distinct object-position crop of the same shop image
-// rather than a fabricated second asset).
-const OCCASION_CROPS = ["18% 25%", "75% 20%", "35% 75%", "88% 65%"];
+// One real photo per occasion tile where we have one, otherwise a distinct
+// slice of the cooler photo (§ signature detail 2) — order matches OCCASIONS
+// below (Weddings, Sympathy, Everyday, Events). All four now have their own
+// dedicated real photo (2026-09-27 photo pass, round 2).
+const OCCASION_IMAGES = [weddingImage, sympathySprayImage, marketBunchImage, longTableImage];
+const OCCASION_CROPS = ["50% 38%", "50% 32%", "50% 42%", "50% 55%"];
 const PREVIEW_W = 240;
 const PREVIEW_H = 300;
 
@@ -175,7 +184,10 @@ function OccasionCursorPreview({
         height: PREVIEW_H,
         transform,
         borderRadius: "var(--d-radius-sm)",
-        boxShadow: "0 20px 48px -16px rgba(42,38,34,.28)",
+        // Only cast the shadow while a crop is actually showing — otherwise
+        // this box sits at (0,0) before the first mousemove and the shadow
+        // alone renders as a visible empty square at rest.
+        boxShadow: activeIndex !== null ? "0 20px 48px -16px rgba(42,38,34,.28)" : "none",
       }}
     >
       <AnimatePresence>
@@ -190,7 +202,7 @@ function OccasionCursorPreview({
             transition={{ duration: 0.2, ease: EASE_OUT }}
           >
             <Image
-              src={firstFloristImage}
+              src={OCCASION_IMAGES[activeIndex]}
               alt=""
               fill
               sizes={`${PREVIEW_W}px`}
@@ -212,11 +224,11 @@ const OCCASIONS = [
   { name: "Events", note: "Dinners, openings, the long table." },
 ];
 
-// The shop, as a plain price list — no photo-collage (see IMAGE CONSTRAINT in
-// the rebuild brief: the cooler still life couldn't be sourced). Every $
-// figure below is unchanged from the original demo; items that only ever
-// carried an occasion label (not a price) now say so plainly instead of
-// guessing a number.
+// The shop, as a plain ruled price list rather than a photo grid — the real
+// photos live in the hover thumbnails (see BouquetList below), not as a
+// collage here. Every $ figure below is unchanged from the original demo;
+// items that only ever carried an occasion label (not a price) now say so
+// plainly instead of guessing a number.
 const BOUQUETS = [
   { name: "Seasonal hand-tie", occasion: "Everyday", price: "from $55" },
   { name: "Garden-style ceremony arch", occasion: "Weddings", price: "let's talk" },
@@ -324,10 +336,22 @@ function AboutSection() {
   );
 }
 
-// ── The shop — a plain ruled price list, no photos (IMAGE CONSTRAINT). ───────
-// One real photo, sliced differently per row (same IMAGE CONSTRAINT as the
-// occasion crops above — no distinct bouquet photography exists yet).
+// ── The shop — a plain ruled price list, thumbnails only on hover. ──────────
+// The cooler photo, sliced differently per row — now only the fallback for
+// whichever row has no dedicated photo of its own (see the override below).
 const BOUQUET_CROPS = ["30% 20%", "70% 30%", "20% 60%", "80% 70%", "50% 15%", "45% 85%"];
+
+// Rows with their own dedicated real photo, keyed by bouquet name rather
+// than occasion — "Everyday" alone covers two rows (hand-tie, market
+// bunch) that each need a different photo. Only "Weekly café arrangement"
+// still falls back to a cooler-photo crop.
+const BOUQUET_IMAGE_OVERRIDE: Record<string, { src: string; crop: string }> = {
+  "Seasonal hand-tie": { src: handTieImage, crop: "50% 35%" },
+  "Garden-style ceremony arch": { src: weddingImage, crop: "50% 40%" },
+  "Long-table dinner runner": { src: longTableImage, crop: "50% 55%" },
+  "Soft white standing spray": { src: sympathySprayImage, crop: "50% 30%" },
+  "Market bunch, wrapped": { src: marketBunchImage, crop: "50% 42%" },
+};
 
 function BouquetList() {
   return (
@@ -381,12 +405,15 @@ function BouquetList() {
                   }}
                 >
                   <Image
-                    src={firstFloristImage}
+                    src={BOUQUET_IMAGE_OVERRIDE[b.name]?.src ?? coolerImage}
                     alt=""
                     fill
                     sizes="48px"
                     className="object-cover"
-                    style={{ objectPosition: BOUQUET_CROPS[i % BOUQUET_CROPS.length] }}
+                    style={{
+                      objectPosition:
+                        BOUQUET_IMAGE_OVERRIDE[b.name]?.crop ?? BOUQUET_CROPS[i % BOUQUET_CROPS.length],
+                    }}
                   />
                 </div>
                 <p
@@ -446,10 +473,23 @@ function OccasionTiles() {
                 onMouseEnter={showCursorPreview ? () => setActiveIndex(i) : undefined}
               >
                 <div
-                  className="overflow-hidden transition-transform duration-500 group-hover:-translate-y-1"
-                  style={{ borderRadius: "var(--d-radius)", boxShadow: "0 8px 24px rgba(42,38,34,.06)" }}
+                  className="group/media relative overflow-hidden transition-transform duration-500 group-hover:-translate-y-1"
+                  style={{
+                    aspectRatio: "3/4",
+                    borderRadius: "var(--d-radius)",
+                    boxShadow: "0 8px 24px rgba(42,38,34,.06)",
+                    border: "1px solid var(--d-line)",
+                  }}
                 >
-                  <Media label={`Occasion — ${o.name}`} file={`occasion-${i + 1}.jpg`} ratio="3/4" rounded={false} />
+                  <FileBadge file={`occasion-${i + 1}.jpg`} />
+                  <Image
+                    src={OCCASION_IMAGES[i]}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 25vw, 50vw"
+                    className="object-cover"
+                    style={{ objectPosition: OCCASION_CROPS[i] }}
+                  />
                 </div>
                 <figcaption className="mt-3">
                   <h3
@@ -526,21 +566,31 @@ export function FloristDemo({ tier = "basic" }: { tier?: Tier }) {
   return (
     <DemoShell accent={ACCENT} theme={THEME}>
       <DemoHeader name={NAME} phone={PHONE} quoteLabel="Order flowers" />
-      <StickyScene image={firstFloristImage} priority>
-        <DemoHero
-          pinned
-          heroImage={firstFloristImage}
+      {tier === "premium" && (
+        <FloristScrollHero
           eyebrow="Flower shop · Rockville Centre"
           line1="Picked,"
-          // Pure typography, no motion (§ signature detail 1): last word set
-          // in italic Fraunces at the same size as the rest of the line.
           line2={<>not <em style={{ fontStyle: "italic" }}>produced.</em></>}
-          sub="Seasonal stems, arranged the morning you order them. Walk in, call ahead, or set up weekly flowers for the house."
-          primaryCta="Order for pickup"
-          phone={PHONE}
-          mediaLabel="Shop & blooms"
-          premium={tier === "premium" ? PREMIUM_HERO : undefined}
+          subline="Seasonal stems, arranged the morning you order them. Walk in, call ahead, or set up weekly flowers for the house."
+          cta="Order for pickup"
         />
+      )}
+      <StickyScene image={firstFloristImage} priority={tier !== "premium"}>
+        {tier !== "premium" && (
+          <DemoHero
+            pinned
+            heroImage={firstFloristImage}
+            eyebrow="Flower shop · Rockville Centre"
+            line1="Picked,"
+            // Pure typography, no motion (§ signature detail 1): last word set
+            // in italic Fraunces at the same size as the rest of the line.
+            line2={<>not <em style={{ fontStyle: "italic" }}>produced.</em></>}
+            sub="Seasonal stems, arranged the morning you order them. Walk in, call ahead, or set up weekly flowers for the house."
+            primaryCta="Order for pickup"
+            phone={PHONE}
+            mediaLabel="Shop & blooms"
+          />
+        )}
         <SceneBlock>
           <StickyReveal>
             <div id="about" className={ANCHOR_SCROLL_CLASS}>

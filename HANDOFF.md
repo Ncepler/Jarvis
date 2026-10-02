@@ -1,157 +1,137 @@
-# HANDOFF — updated 2026-10-01 (stickman Vilas promo reel; craft/motion pass state below unchanged)
+# HANDOFF — updated 2026-09-29 (chrome fixes + client sites + power-wash hero)
 
 ## Current state
-- Deployed: last confirmed production deploy (`vilas.studio`) was built from
-  commit `7918f63` and is `READY` — that was BEFORE this session's craft
-  pass below, which is pushed to `claude/sleepy-newton-uaamxu` but not yet
-  merged to `main`/redeployed. Builds clean locally: `npx tsc --noEmit`,
-  `next lint`, `next build` all pass; all 9 `/demos/demo-*` routes prerender.
-- **A full Emil Kowalski / Apple-interface craft pass landed on top of last
-  session's rebuild**, across shared system + all 9 styles. Shared
-  (`components/demos/system.tsx` + `app/globals.css`, all `.demo-shell`
-  scoped, main site untouched):
-  - New motion tokens (`--d-ease-out/-in-out/-drawer`, `--d-dur-press/hover/
-    ui/reveal/media`) extending the existing `--ease-out-expo` pattern.
-  - Reveal (`Rise`/`StickyReveal`) retuned to 8px/420ms/-4% margin.
-  - Hero entrance choreography is now pure CSS keyframes (image settles
-    1.06→1 over 1400ms, headline lines mask in, then kicker/paragraph/
-    buttons rise staggered) — runs off the main thread, both hero tiers
-    share one timing.
-  - `StickyScene`'s scroll-linked image scale now prefers a
-    `view-timeline-name` CSS path (no JS scroll listener) where supported,
-    falling back to the existing rAF mechanism.
-  - `Faq` rebuilt on `grid-template-rows` (was a Motion height animation);
-    `BeforeAfterSlider` got a spring-scaled handle, a first-reveal hint,
-    shift+arrow keyboard step, position-based label fade; `DemoMarquee` gets
-    an edge-fade mask and pauses on hover/offscreen at ~40px/s.
-  - New `MobileStickyCta` component (each style wires one in); `DemoFooter`
-    got the oversized cropped-wordmark treatment; `TwoLine`/`CtaBand`
-    headlines are now full-contrast on both lines (no more greyed second
-    line — that was never an actual design-spec requirement, just an
-    earlier implementation choice).
-  - New CSS utilities, all `.demo-shell`-scoped: `.d-press`, `.d-link`,
-    `.d-img-hover`, `.d-crisp-edge`, `.d-float`, `.d-grain`,
-    `.d-feature-reveal`, `.d-material` (w/ reduced-transparency/contrast
-    fallbacks), `.d-sticky-cta`, plus a mobile-native baseline.
-  - `DemoHero.line1`/`.line2` widened from `string` to `ReactNode` (safe
-    superset) so a caller can style part of a headline without a cast.
-  - `DemoTheme` gained optional `radiusLg`/`radiusSm` tiers.
-- **Per-style signature details**, one subagent per file — see each style's
-  `.review/<slug>/motion.md` (gitignored, local only) for the itemized gate
-  report. Highlights: florist (cursor-follow occasion preview, italic hero
-  word), bakery (open/closed status chip, scroll-scaled case photo),
-  landscaping (day/night now auto-plays once), power wash (full-bleed 88svh
-  slider + text-a-photo thread), lawn care (custom estimate slider, no
-  counting animation), barber (walk-ins status chip, brass price-board
-  frame), magician (interruptible card flip, canvas pause on
-  offscreen/hidden-tab), autobody (layoutId color-ring, found & fixed a
-  real dead-zone bug last session), renovation (scroll-driven progress
-  line).
-- Two review-animations violations found and fixed repo-wide: `HeroReveal`
-  (system.tsx) and `RiseFromDark` (MagicianDemo.tsx) were animating Motion's
-  `y` shorthand (not hardware-accelerated) — both now animate a full
-  `transform` string.
-- **One commit-history wrinkle** (functionally harmless): the AutoBodyDemo
-  and BakeryDemo craft-pass commits collided during a batch commit (a `git
-  add` with an already-gitignored `.review/` path silently failed the whole
-  `&&` chain, but had already staged both files from two separate earlier
-  attempts) — both files' changes are correctly committed and pushed, just
-  both landed under the "Autobody craft pass" commit message instead of two
-  separate ones. Not rewritten/force-pushed to fix since the branch was
-  already pushed; purely cosmetic.
+- **Demo header is no longer sticky** (2026-10-01, Noah): `DemoHeader` in
+  `components/demos/system.tsx` is now `relative` and scrolls away with the page;
+  only `VilasDemoBar`'s pill stays pinned, on all 8 demos that use `DemoHeader`
+  (Magician has its own chrome, no header). Header background is now solid
+  `--d-bg` (the blur only mattered while content scrolled under it).
+  `ANCHOR_SCROLL_CLASS` dropped 168px → 88px (clears just the 56px Vilas bar).
+  Verified with Playwright at 1280 + 390 widths: bar `top` holds at 12px after
+  a 2500px scroll, header goes off-screen. tsc / lint / build clean.
+- **Auto body Premium hero = scroll-scrubbed video** (`components/demos/AutoBodyScrollHero.tsx`,
+  wired in `AutoBodyDemo.tsx` when `tier === "premium"`; Basic untouched). Video +
+  poster in `public/videos/` (all-keyframe H.264, 1s frozen tail). `HeroCarReveal`'s
+  premium branch / `PremiumHeroMedia` use for auto body is now dead code. Not yet
+  checked in a real H.264 browser (sandbox Chromium has no H.264) or on iOS Safari.
+- Deployed: `main` fast-forwarded to `e7eeb3a` (the full 3-round second
+  photo folder) and confirmed `READY` on production (`vilas.studio`) via
+  Vercel MCP. Commits `aa49a13` (chrome fixes) through `1f094a5`
+  (power-wash hero, below) are on `claude/sleepy-newton-uaamxu`, pushed but
+  not yet fast-forwarded to main as of this writing — do that next unless
+  told otherwise. Builds clean locally: `npx tsc --noEmit`, `next lint`,
+  `next build` all pass.
+- **PowerWashDemo hero replaced** (`22e29b5`/`1f094a5`): the old hero
+  (`/previews/firstPowerWashImage.webp`) was a badly mismatched stock photo
+  of a municipal street cleaner on a busy European sidewalk — no
+  residential/driveway context at all. Generated a real match via
+  Higgsfield (`gpt_image_2_5`, prompt in git log) and Noah picked one of 2
+  candidates; saved as `public/demos/powerwash/hero.webp`. Wired into BOTH
+  `PowerWashDemo.tsx`'s `firstPowerWashImage` const AND `lib/projects.ts`'s
+  `demo-powerwash` gallery-thumbnail `screenshot` field (these are two
+  separate things — see Gotchas). Verified via local Playwright screenshot
+  on both `/demos/demo-powerwash` and `/#work`.
+- **Fixed a real, site-wide sticky-positioning bug** (`aa49a13`): `app/
+  globals.css` had `overflow-x: hidden` on BOTH `html` and `body`. That
+  combination makes both elements compute to `overflow: hidden auto` and
+  register as scroll containers simultaneously, which silently breaks
+  `position: sticky` everywhere on the page — `VilasDemoBar` (and then-sticky
+  `DemoHeader`) were scrolling away instead of staying pinned on every demo.
+  Confirmed with a Playwright test before/after (sticky bar's `rect.top`
+  went from drifting to -2988px after a 3000px scroll, to holding at
+  12px). Fix: keep the rule on `body` only, drop it from `html`.
+- **Exit link** (`VilasDemoBar.tsx`) now goes to `/#work` (the homepage
+  gallery section) instead of `/` — a visitor leaving a demo lands back
+  among the style cards, not at the top of the homepage.
+- **Gallery thumbnails were stale** (`lib/projects.ts`'s `screenshot`
+  field — a separate static image per project used only by the homepage
+  `AccordionGallery`, NOT a live render of the demo). 3 of 9 still pointed
+  at old images: autobody's showed the photo with visible Mercedes-Benz
+  branding that was replaced in the demo itself weeks ago, landscaping and
+  lawncare showed their old mismatched heroes, and magician had no image
+  at all. All 9 now match each demo's real current hero
+  (`magician` uses `portrait.webp`, the others use whatever `heroImage`
+  constant that demo file currently sets — checked each one directly
+  rather than assumed).
+- **"Out in the world" client-sites sphere (`InfiniteMenu.tsx`/`.css`)**:
+  `.face-title` had no `max-width`, so a long name like "Val's Elegant
+  Barbershop" or "Jonah Shapiro Magic" ran wide enough at its fixed
+  3rem/900-weight size to overlap the centered sphere face. Capped to
+  `8ch` so it wraps to a second line instead.
+- **Added 2 new client sites** to Supabase (`client_sites` table, not a
+  file — see Gotchas): NextGenRest (`nextgenrest.vercel.app`) and
+  SporesRUs (`sporesrus.vercel.app`), `published: true`, no
+  `screenshot_url` set (so the existing daily auto-capture cron picks them
+  up — see Blocked on Noah). Real business details unknown, so
+  `description` was left `null` rather than invented — Noah should fill
+  it in via the `client_sites` table if he wants one shown.
+- **First+second photo folders and the craft pass** are all fully shipped
+  to production — see git log around `45216ce`, `141f22c`, `e7eeb3a` for
+  the itemized breakdowns. Nothing outstanding from any of them.
 
-## Blocked on Noah — unchanged from last session, still true
-- **11 real photos generated on Higgsfield still can't be downloaded** —
-  this sandbox's network policy still denies the CDN host
-  (`d8j0ntlcm91z4.cloudfront.net`), confirmed again this session (retested,
-  still 403). Job IDs, destination paths and what each feeds are unchanged
-  from before — see git history on this file (or ask, they're still valid)
-  rather than duplicating the table here again. **Widen this environment's
-  Network access setting before the next image-focused session.**
-- Every mechanism that needs one of those images (day/night toggle, compare
-  slider, cursor-follow crop, collage) is fully built and interactive on a
-  placeholder — dropping the real file in is a one-line prop change per site.
-- No pull request opened. Everything is on `claude/sleepy-newton-uaamxu`;
-  `main` has been fast-forwarded to match it before (once, on explicit
-  request) but is currently one round behind — see git log before assuming
-  main is current.
+## Blocked on Noah
+- **The two new client-site screenshots aren't live yet.** This sandbox
+  can't reach `nextgenrest.vercel.app`/`sporesrus.vercel.app` (network
+  policy) to capture them directly, and `mcp__Vercel__web_fetch_vercel_url`
+  refused both projects with an authorization-scope error (same for the
+  `jarvis` project itself, so it's not project-specific — that whole tool
+  path looks unauthorized for this session regardless of target). The
+  site's own `/api/capture-sites` cron (`vercel.json`, daily 8am UTC,
+  Puppeteer on Vercel's infra — not this sandbox) already ran successfully
+  as recently as Sep 28 for the existing rows, so the two new ones should
+  get auto-captured at the next run. To force it sooner: visit
+  `https://vilas.studio/api/capture-sites` once (plain GET, no auth
+  needed — `CRON_SECRET` isn't set on this project).
+- **2 generated power-wash replacement candidates are still unclaimed** in
+  Higgsfield history (job ids `1d67034b-bab1-4410-b545-bd6965908c8b` and
+  `4a5508a3-4d2a-4e58-8c35-d0e94ec72243`) — no confirmed destination for
+  this photo either way (`PowerWashDemo`'s slider already has real photos
+  from round 1, this one has no "before" companion). 1 of the 5 remake
+  credits Noah offered is still unspent.
+- No pull request opened.
 
 ## Next up (ordered)
-1. Merge/deploy this craft pass (fast-forward `main`, confirm Vercel green).
-2. Widen network access, pull the 11 images into `public/demos/`.
-3. TRFox screenshot capture (pending from before this session).
-4. Real Higgsfield hero clips for Premium tier.
+1. Fast-forward `main` to `1f094a5` (chrome fixes + power-wash hero),
+   confirm Vercel green.
+2. Confirm the NextGenRest/SporesRUs screenshots landed after the next
+   `/api/capture-sites` run; add a real `description` for each if wanted.
+3. If a "before" shot for the power-wash garage-door photo ever comes in,
+   decide whether it becomes a second before/after slider or something
+   else.
+4. TRFox screenshot capture (pending from before this session).
+5. Real Higgsfield hero clips for Premium tier.
 
 ## Gotchas & decisions (standing, trimmed)
-- **`brag-output*/` = Instagram reels** (one folder per reel; #2 "Pick a
-  card" is `brag-output-2026-09-27-224111/`, #3 "The receipt" is
-  `brag-output-2026-09-28-231023/`, #4 "Power washing a website" is
-  `brag-output-2026-09-29-wash/` — reel-lab hook 18, 17s, no music, synthesized
-  washer sound; grime is procedural over a real capture of the power-wash demo,
-  ends on the site's own "Site created by vilas.studio" credit). Reel #1 (2026-09-27, via
-  `/brag` → brag-slim) is `brag-output/`: `brag.mp4` (20s, 1080×1920, original score at -14 LUFS),
-  `brag.jpg` poster, `share-copy.txt`, and `brag-plan.md` (storyboard +
-  timing). Not part of the site build. Render intermediates live in
-  `brag-output/work/` and are gitignored. To rebuild: `next start`, capture
-  the demos at 360×640 @3x, then render the composition page frame by frame.
-  Headless Chromium doesn't trust the sandbox proxy CA, so self-host any web
-  fonts instead of loading Google Fonts.
-- **Reels #5–#9 (built 2026-09-30, queue ideas 1–5)** live in
-  `brag-output-2026-09-30-{spot,keynote,details-1,haircut,val}/`. Each folder has
-  brag.mp4 / brag.jpg / share-copy.txt / brag-plan.md; `work/` (gitignored) holds
-  the capture script, comp, `render.mjs` (generic canvas/DOM/WebGL frame renderer,
-  `PORT` + optional `F0`/`F1` to re-render a span) and `synth.py` (shared numpy
-  instrument kit + -14 LUFS master). The Supabase write-back for them was applied
-  2026-09-30 (5 rows rendered, series ep 2/9 queued at position 5); the pending SQL
-  file is deleted. `brag-output-2026-09-30-spot-v2/` is an alternate cut of #5. The "Details nobody notices"
-  **series template** (reel #7's brag-plan.md) must be copied exactly for eps 2–9.
-  Gotchas: Chrome canvas clips images taller than 16384px (capture long pages
-  ≤1.4×); Rise-revealed demo sections render blank unless you scroll to them
-  gradually; drive live-status chips with `page.clock.setFixedTime` +
-  `timezoneId: 'UTC'`.
-- **Reels #10–#14 (built 2026-09-30, second batch)**: `brag-output-2026-09-30-keynote-2/`
-  ("Introducing: the before & after", keynote vol. 2 on the renovation demo),
-  `-details-2/` (series ep 2/9, barber walk-in chip), `-groupchat/` (referral dies
-  in the group chat, florist), `-museum/` (museum of dead website features, on the
-  keynote stage), `-expensive/` (motion-only A/B, answer B A A B in share-copy.txt).
-  All five rows are updated to `rendered` in Supabase and ep 3/9 is queued at
-  position 9 (next up is #8 "It's 2:14am"). Gotchas: `page.clock.setFixedTime` + `reducedMotion: 'reduce'`
-  left the barber Hours section blank (drop reducedMotion, kill the dot animation
-  with CSS instead); CSS entrance keyframes can be seeked frame by frame with
-  `document.getAnimations()` (skip scroll-timeline ones, `finish()` throws on
-  infinite ones); `/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/`
-  holds the only ffmpeg (not on PATH).
-- **Reel "Motivation Comes Second"** (`brag-output-2026-09-30-stickman/`, built
-  2026-09-30): a 59s 9:16 stick-figure motivational short, not a Vilas promo. It was
-  planned with the `directing-stickman-videos` skill and rendered with full `/brag` →
-  Hyperframes, with Kokoro VO (`af_heart`). Not logged in `instagram_posts`. Gotchas:
-  the Hyperframes runtime runs `<script src>` before the body exists (look up
-  elements lazily), give an absolute SVG layer explicit px size (100% collapses
-  to 0), and an `hf-seek` listener works for immediate-mode SVG frames.
-  ffmpeg can be `apt-get install`ed.
-- **Reel "The Customer You Never Met"** (`brag-output-2026-10-01-customer/`, built
-  2026-10-01): a 56s 9:16 stick-figure Vilas promo (lost walk-in → dusty site → rebuild →
-  she walks in). It was planned with `directing-stickman-videos` (Phase A approved) and
-  rendered with Hyperframes on the same SVG rig as the motivation reel. The Phase B Gemini
-  Omni Flash prompts are in `omni-flash-prompts.md` but not generated: Higgsfield had 3.86
-  credits, and six clips need ~60 (360p) to ~180 (720p). Not logged in `instagram_posts`.
-  Spell "Vilas" as "Veelas" in TTS input. Whisper transcription 403s here, so time beats
-  from `ffmpeg silencedetect`.
-- **Supabase `instagram_posts` = the log of every IG post AND the reel idea
-  queue** (migrations 0017 + 0018). 20 ideas were added 2026-09-29 as
-  `status = 'idea'`, ordered by `queue_position`, each with a beat sheet,
-  on-screen text, music, caption and notes (send/duh tests, honesty rules,
-  dependencies). **When Noah says "make another reel":** `select * from
-  instagram_posts where status = 'idea' order by queue_position limit 1`,
-  build that one with the /brag (Hyperframes) pipeline, then UPDATE that same
-  row to `status = 'rendered'`, `queue_position = null`, plus video_path /
-  commit_sha. Don't insert a new row. Check the idea's notes first: some need
-  Noah's OK (#20 free-mockup offer) or a full grid (#19 3-2-1). Idea #3 is ep 1
-  of a 9-part series, so insert the next episode as a new idea once it's built.
-  The Supabase MCP tools are pre-allowed in `.claude/settings.json`. The `notes` column on the first row lists
-  untried angles. The live client sites (vercel.app, packperfectinc.com) and
-  Supabase Storage captures are blocked by this sandbox's network policy, so a
-  real-client-work reel needs the Network access setting widened first.
+- **"Out in the world" client sites (Val's Barbershop, Jonah Shapiro Magic,
+  PackPerfect, TRFox, now NextGenRest/SporesRUs) are Supabase rows
+  (`client_sites` table, Vilas project), not a file in this repo.** There's
+  no `lib/clientSites.ts` data array to edit — `lib/clientSites.ts` only
+  has the *fetch* code (`listClientSites()`). Add/edit a site with
+  `mcp__Supabase__execute_sql` against `epynfvskwaxejdibvgbr`. A row's
+  image comes from `screenshot_url` if set (manual override), else an
+  auto-captured PNG keyed by `captured_at`'s date — see `lib/screenshot.ts`
+  and `app/api/capture-sites/route.ts` (a Vercel Cron, `vercel.json`, daily
+  8am UTC, runs real Puppeteer on Vercel's infra so it can reach sites this
+  sandbox can't).
+- **This session cannot read Noah's local computer at all** — no mounted
+  drive, no path access, nothing. A folder path like `~/Downloads/
+  higgsfield-9-27` is meaningless here; the only way media reaches this
+  session is a chat attachment. (A `claude remote-control` session on his
+  own machine could read it directly, but that's a different session.)
+  Also still true: this sandbox's egress is blocked to both the Higgsfield
+  CDN (`d8j0ntlcm91z4.cloudfront.net`) and `vilas.studio` itself — a fresh
+  `generate_image` job's result URL and the live production site are
+  equally unreachable from here. Verification runs against a local
+  `next start` + Playwright instead of the real deployed URL.
+- **Don't assume a new image folder maps 1:1 onto the original 11-slot
+  manifest.** This round's images had no prior job-ID table — matching them
+  to a destination meant reading each target demo file fresh. Two of five
+  replaced an existing (flawed) photo instead of filling an empty slot;
+  read the component before assuming "new photo = new placeholder."
+- **Check a new photo against its destination's existing palette/grade**,
+  not just its own quality — a fine photo can still be wrong for a spot
+  (renovation's WORK grid is uniformly sepia-toned; a full-color drop-in
+  needs `sharp` toning to match, see round 1 above).
 - **Concurrent subagents sharing one working tree is genuinely risky**:
   this session hit a `git stash` collision (again) mid-Phase-3, and two
   subagents were cut off mid-task by a session-wide API rate limit. Every

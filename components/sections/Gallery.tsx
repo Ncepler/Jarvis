@@ -5,8 +5,9 @@
 // React Bits' AccordionGallery (vendored, converted to TS — see
 // components/AccordionGallery.tsx) wired to the real style data. Panel
 // hover/click expands it (the old chip/thumbnail-select behavior); clicking
-// an already-expanded panel follows its `link` to the live demo in a new
-// tab (the old "Step inside" fullscreen preview's deepest interaction). The
+// an already-expanded panel follows its `link` to the demo in the same tab
+// (the old "Step inside" fullscreen preview's deepest interaction — these are
+// internal /demos/<slug> routes, not external sites). The
 // "Start with this style" CTA tracks whichever panel is currently expanded
 // via AccordionGallery's onActiveIndexChange, same destination as before
 // (/start?style=<slug>).
@@ -54,7 +55,6 @@ export function Gallery() {
             accentColor="var(--color-accent)"
             overlayColor="var(--color-ink)"
             textColor="var(--color-surface)"
-            linkTarget="_blank"
             onActiveIndexChange={setActiveIndex}
           />
         </div>
