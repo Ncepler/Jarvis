@@ -143,7 +143,7 @@ A('''      <div id="outro">
       </div>
 ''')
 # audio
-aud=[("music",0,DUR,0.15,"assets/music/bed-cut.mp3"),("v1",0.4,2.26,1,"assets/vo/v1.wav"),("v2",4.45,3.69,1,"assets/vo/v2.wav"),("v3",8.45,3.22,1,"assets/vo/v3.wav"),
+aud=[("music",0,DUR,0.27,"assets/music/bed-cut.mp3"),("v1",0.4,2.26,1,"assets/vo/v1.wav"),("v2",4.45,3.69,1,"assets/vo/v2.wav"),("v3",8.45,3.22,1,"assets/vo/v3.wav"),
  ("n1",11.57,1.0,1,"assets/vo/n1.wav"),("n2",13.21,0.83,1,"assets/vo/n2.wav"),("n3",14.83,1.04,1,"assets/vo/n3.wav"),("n4",16.48,1.02,1,"assets/vo/n4.wav"),("n5",18.11,0.94,1,"assets/vo/n5.wav"),
  ("v7",19.9,3.2,1,"assets/vo/v7.wav"),("v8",24.0,3.73,1,"assets/vo/l8.wav")]
 tr=2
@@ -153,6 +153,15 @@ for k,t in enumerate([2.46,3.55,8.22,19.64,21.28]):
     A(f'      <audio id="clk{k}" data-start="{t}" data-duration="0.1" data-track-index="{tr}" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>\n'); tr+=1
 for k,g in enumerate(G):
     A(f'      <audio id="cut{k}" data-start="{g["start"]}" data-duration="0.1" data-track-index="{tr}" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>\n'); tr+=1
+for k,t in enumerate(HOOK_BEATS):
+    A(f'      <audio id="pop{k}" data-start="{t}" data-duration="0.2" data-track-index="{tr}" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>\n'); tr+=1
+for k,g in enumerate(G):
+    A(f'      <audio id="hit{k}" data-start="{g["start"]}" data-duration="0.3" data-track-index="{tr}" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>\n'); tr+=1
+for k,t in enumerate([20.0,20.15,20.3,20.45,20.6,20.75]):
+    A(f'      <audio id="sp{k}" data-start="{t}" data-duration="0.2" data-track-index="{tr}" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>\n'); tr+=1
+A(f'      <audio id="boom1" data-start="8.22" data-duration="0.6" data-track-index="{tr}" data-volume="0.6" src="assets/sfx/impactSoft_heavy_000.ogg"></audio>\n'); tr+=1
+A(f'      <audio id="boom2" data-start="24.01" data-duration="0.6" data-track-index="{tr}" data-volume="0.65" src="assets/sfx/impactSoft_heavy_003.ogg"></audio>\n'); tr+=1
+A(f'      <audio id="bong" data-start="21.28" data-duration="0.3" data-track-index="{tr}" data-volume="0.5" src="assets/sfx/bong_001.ogg"></audio>\n'); tr+=1
 A(f'      <audio id="rol" data-start="24.01" data-duration="0.1" data-track-index="{tr}" data-volume="0.45" src="assets/sfx/rollover2.ogg"></audio>\n')
 A('    </div>\n')
 
