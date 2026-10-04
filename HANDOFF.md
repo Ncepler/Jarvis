@@ -102,12 +102,18 @@
 5. Real Higgsfield hero clips for Premium tier.
 
 ## Gotchas & decisions (standing, trimmed)
-- **Remotion agent skills are installed (2026-10-04), not the Remotion
-  package.** `npx skills add remotion-dev/skills` put 12 skills in
-  `.agents/skills/remotion-*`, symlinked into `.claude/skills/`, pinned
-  by `skills-lock.json`. Their example `.ts/.tsx` files don't reach the
-  build: tsc skips dot-dirs (0 `.agents` files in `--listFilesOnly`). No
-  `remotion` npm dep was added — the stack (§3) is unchanged.
+- **Remotion lives in `video/` — its own project, NOT part of the site
+  (2026-10-04).** Scaffolded with `npx create-video@latest --yes --blank
+  --no-tailwind video` (Remotion 4.0.532, own `package.json` +
+  `node_modules`). `cd video && npm i && npm run dev` opens Studio;
+  `npx remotion render`. The site's `tsconfig.json` excludes `video` —
+  without that, Vercel (which never installs `video/`'s deps) fails the
+  typecheck. Never add `remotion` to the root `package.json`; the site
+  stack (§3) is unchanged. In a cloud session, render with
+  `--browser-executable=/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell`
+  (verified working). Agent skills: `npx skills add remotion-dev/skills`
+  put 12 in `.agents/skills/remotion-*`, symlinked into `.claude/skills/`,
+  pinned by `skills-lock.json`; tsc skips dot-dirs so they never hit the build.
 - **"Out in the world" client sites (Val's Barbershop, Jonah Shapiro Magic,
   PackPerfect, TRFox, now NextGenRest/SporesRUs) are Supabase rows
   (`client_sites` table, Vilas project), not a file in this repo.** There's
