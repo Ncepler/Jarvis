@@ -102,6 +102,12 @@
 5. Real Higgsfield hero clips for Premium tier.
 
 ## Gotchas & decisions (standing, trimmed)
+- **Remotion agent skills are installed (2026-10-04), not the Remotion
+  package.** `npx skills add remotion-dev/skills` put 12 skills in
+  `.agents/skills/remotion-*`, symlinked into `.claude/skills/`, pinned
+  by `skills-lock.json`. Their example `.ts/.tsx` files don't reach the
+  build: tsc skips dot-dirs (0 `.agents` files in `--listFilesOnly`). No
+  `remotion` npm dep was added — the stack (§3) is unchanged.
 - **"Out in the world" client sites (Val's Barbershop, Jonah Shapiro Magic,
   PackPerfect, TRFox, now NextGenRest/SporesRUs) are Supabase rows
   (`client_sites` table, Vilas project), not a file in this repo.** There's
