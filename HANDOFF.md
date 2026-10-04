@@ -117,7 +117,16 @@
   VAL→VALIS→VILAS reveal; last frame is pixel-identical to frame 0 so it
   loops. Type-only on purpose: the IG account is pre-client, so no demo or
   client screenshots. Colours/fonts mirror the site in `video/src/brand.ts`
-  (fonts are local woff2 in `video/public/fonts`, OFL). Agent skills: `npx skills add remotion-dev/skills`
+  (fonts are local woff2 in `video/public/fonts`, OFL). Second video:
+  `Showcase` (`video/src/showcase/`, 23s, loops) — WebGL: GPU particles
+  (galaxy → VAL, positions computed in the vertex shader from the frame),
+  extruded 3D Space Grotesk letters from the real glyph outlines
+  (opentype.js → three ExtrudeGeometry), a live silk shader, a CSS-3D drum
+  of COPY.marquee trades, finale dissolves back into frame 0. The camera
+  never moves — the world group orbits (`stage.tsx` Rig); never use R3F
+  `useFrame` (Remotion rule: everything from `useCurrentFrame`). Renders
+  need WebGL: config sets ANGLE; in the cloud it falls back to
+  SwiftShader (~1s/frame). Agent skills: `npx skills add remotion-dev/skills`
   put 12 in `.agents/skills/remotion-*`, symlinked into `.claude/skills/`,
   pinned by `skills-lock.json`; tsc skips dot-dirs so they never hit the build.
 - **"Out in the world" client sites (Val's Barbershop, Jonah Shapiro Magic,

@@ -14,3 +14,6 @@ Config.setVideoImageFormat("png");
 Config.setPixelFormat("yuv420p");
 Config.setCrf(16);
 Config.setOverwriteOutput(true);
+// The showcase is WebGL (three.js + shaders). ANGLE works on a GPU and falls
+// back to SwiftShader on GPU-less machines like the cloud container.
+Config.setChromiumOpenGlRenderer("angle");
