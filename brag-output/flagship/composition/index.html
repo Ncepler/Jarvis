@@ -62,7 +62,7 @@
       .big em { font-style:normal; color:var(--accent); }
 
       /* outro */
-      #outro { position:absolute; inset:0; background:var(--bg); z-index:70; }
+      #outro-unused { position:absolute; inset:0; background:var(--bg); z-index:70; }
       #outroInner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 60px; }
       #outro .mark { width:170px; height:170px; border-radius:85px; display:block; opacity:0; }
       #outro .word { font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:84px; letter-spacing:-0.02em; margin-top:30px; opacity:0; }
@@ -75,7 +75,7 @@
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="29.4" data-width="1080" data-height="1920">
+    <div id="root" data-composition-id="main" data-start="0" data-duration="23.9" data-width="1080" data-height="1920">
       <div class="abs syne" id="hookT" style="top:250px;font-size:84px;">Every style we build<br />comes in <em>two</em> tiers.</div>
       <div class="abs syne" id="stateT" style="top:250px;font-size:80px;">Same build everywhere else.<br />Only the hero <em>changes.</em></div>
       <div id="thumbs">
@@ -155,16 +155,7 @@
         <div id="tog"><span id="lblA">$300 + $50/mo</span><div id="sw"><div id="swfill"></div><div id="knob"></div></div><span id="lblB">$500 + $80/mo</span></div>
       </div>
       <div id="cursor"></div>
-      <div id="outro">
-        <div id="outroInner">
-          <img class="mark" id="omark" src="assets/img/vilas-mark.png" alt="Vilas mark" />
-          <div class="word" id="oword">Vilas Studio</div>
-          <div class="dom" id="odom">vilas.studio</div>
-          <div class="tl"><div id="ot1">A website that looks expensive.</div><div id="ot2" class="b">It wasn't.</div></div>
-          <div class="prices" id="oprices"><b>Basic</b> — $300 + $50/month<br /><b>Premium</b> — $500 + $80/month<br /><b>Custom</b> — let's talk</div>
-        </div>
-      </div>
-      <audio id="music" data-start="0" data-duration="29.4" data-track-index="2" data-volume="0.27" src="assets/music/bed-cut.mp3"></audio>
+      <audio id="music" data-start="0" data-duration="23.9" data-track-index="2" data-volume="0.27" src="assets/music/bed-cut.mp3"></audio>
       <audio id="v1" data-start="0.4" data-duration="2.26" data-track-index="3" data-volume="1" src="assets/vo/v1.wav"></audio>
       <audio id="v2" data-start="4.45" data-duration="3.69" data-track-index="4" data-volume="1" src="assets/vo/v2.wav"></audio>
       <audio id="v3" data-start="8.45" data-duration="3.22" data-track-index="5" data-volume="1" src="assets/vo/v3.wav"></audio>
@@ -174,40 +165,37 @@
       <audio id="n4" data-start="16.48" data-duration="1.02" data-track-index="9" data-volume="1" src="assets/vo/n4.wav"></audio>
       <audio id="n5" data-start="18.11" data-duration="0.94" data-track-index="10" data-volume="1" src="assets/vo/n5.wav"></audio>
       <audio id="v7" data-start="19.9" data-duration="3.2" data-track-index="11" data-volume="1" src="assets/vo/v7.wav"></audio>
-      <audio id="v8" data-start="24.0" data-duration="3.73" data-track-index="12" data-volume="1" src="assets/vo/l8.wav"></audio>
-      <audio id="clk0" data-start="2.46" data-duration="0.1" data-track-index="13" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
-      <audio id="clk1" data-start="3.55" data-duration="0.1" data-track-index="14" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
-      <audio id="clk2" data-start="8.22" data-duration="0.1" data-track-index="15" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
-      <audio id="clk3" data-start="19.64" data-duration="0.1" data-track-index="16" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
-      <audio id="clk4" data-start="21.28" data-duration="0.1" data-track-index="17" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
-      <audio id="cut0" data-start="4.1" data-duration="0.1" data-track-index="18" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
-      <audio id="cut1" data-start="11.47" data-duration="0.1" data-track-index="19" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
-      <audio id="cut2" data-start="13.11" data-duration="0.1" data-track-index="20" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
-      <audio id="cut3" data-start="14.73" data-duration="0.1" data-track-index="21" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
-      <audio id="cut4" data-start="16.38" data-duration="0.1" data-track-index="22" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
-      <audio id="cut5" data-start="18.01" data-duration="0.1" data-track-index="23" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
-      <audio id="pop0" data-start="0.82" data-duration="0.2" data-track-index="24" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
-      <audio id="pop1" data-start="1.37" data-duration="0.2" data-track-index="25" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
-      <audio id="pop2" data-start="1.9" data-duration="0.2" data-track-index="26" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
-      <audio id="pop3" data-start="2.46" data-duration="0.2" data-track-index="27" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
-      <audio id="pop4" data-start="3.01" data-duration="0.2" data-track-index="28" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
-      <audio id="pop5" data-start="3.55" data-duration="0.2" data-track-index="29" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
-      <audio id="hit0" data-start="4.1" data-duration="0.3" data-track-index="30" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
-      <audio id="hit1" data-start="11.47" data-duration="0.3" data-track-index="31" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
-      <audio id="hit2" data-start="13.11" data-duration="0.3" data-track-index="32" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
-      <audio id="hit3" data-start="14.73" data-duration="0.3" data-track-index="33" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
-      <audio id="hit4" data-start="16.38" data-duration="0.3" data-track-index="34" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
-      <audio id="hit5" data-start="18.01" data-duration="0.3" data-track-index="35" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
-      <audio id="sp0" data-start="20.0" data-duration="0.2" data-track-index="36" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
-      <audio id="sp1" data-start="20.15" data-duration="0.2" data-track-index="37" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
-      <audio id="sp2" data-start="20.3" data-duration="0.2" data-track-index="38" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
-      <audio id="sp3" data-start="20.45" data-duration="0.2" data-track-index="39" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
-      <audio id="sp4" data-start="20.6" data-duration="0.2" data-track-index="40" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
-      <audio id="sp5" data-start="20.75" data-duration="0.2" data-track-index="41" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
-      <audio id="boom1" data-start="8.22" data-duration="0.6" data-track-index="42" data-volume="0.6" src="assets/sfx/impactSoft_heavy_000.ogg"></audio>
-      <audio id="boom2" data-start="24.01" data-duration="0.6" data-track-index="43" data-volume="0.65" src="assets/sfx/impactSoft_heavy_003.ogg"></audio>
-      <audio id="bong" data-start="21.28" data-duration="0.3" data-track-index="44" data-volume="0.5" src="assets/sfx/bong_001.ogg"></audio>
-      <audio id="rol" data-start="24.01" data-duration="0.1" data-track-index="45" data-volume="0.45" src="assets/sfx/rollover2.ogg"></audio>
+      <audio id="clk0" data-start="2.46" data-duration="0.1" data-track-index="12" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
+      <audio id="clk1" data-start="3.55" data-duration="0.1" data-track-index="13" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
+      <audio id="clk2" data-start="8.22" data-duration="0.1" data-track-index="14" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
+      <audio id="clk3" data-start="19.64" data-duration="0.1" data-track-index="15" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
+      <audio id="clk4" data-start="21.28" data-duration="0.1" data-track-index="16" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
+      <audio id="cut0" data-start="4.1" data-duration="0.1" data-track-index="17" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
+      <audio id="cut1" data-start="11.47" data-duration="0.1" data-track-index="18" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
+      <audio id="cut2" data-start="13.11" data-duration="0.1" data-track-index="19" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
+      <audio id="cut3" data-start="14.73" data-duration="0.1" data-track-index="20" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
+      <audio id="cut4" data-start="16.38" data-duration="0.1" data-track-index="21" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
+      <audio id="cut5" data-start="18.01" data-duration="0.1" data-track-index="22" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
+      <audio id="pop0" data-start="0.82" data-duration="0.2" data-track-index="23" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
+      <audio id="pop1" data-start="1.37" data-duration="0.2" data-track-index="24" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
+      <audio id="pop2" data-start="1.9" data-duration="0.2" data-track-index="25" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
+      <audio id="pop3" data-start="2.46" data-duration="0.2" data-track-index="26" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
+      <audio id="pop4" data-start="3.01" data-duration="0.2" data-track-index="27" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
+      <audio id="pop5" data-start="3.55" data-duration="0.2" data-track-index="28" data-volume="0.3" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
+      <audio id="hit0" data-start="4.1" data-duration="0.3" data-track-index="29" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
+      <audio id="hit1" data-start="11.47" data-duration="0.3" data-track-index="30" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
+      <audio id="hit2" data-start="13.11" data-duration="0.3" data-track-index="31" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
+      <audio id="hit3" data-start="14.73" data-duration="0.3" data-track-index="32" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
+      <audio id="hit4" data-start="16.38" data-duration="0.3" data-track-index="33" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
+      <audio id="hit5" data-start="18.01" data-duration="0.3" data-track-index="34" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
+      <audio id="sp0" data-start="20.0" data-duration="0.2" data-track-index="35" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
+      <audio id="sp1" data-start="20.15" data-duration="0.2" data-track-index="36" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
+      <audio id="sp2" data-start="20.3" data-duration="0.2" data-track-index="37" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
+      <audio id="sp3" data-start="20.45" data-duration="0.2" data-track-index="38" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
+      <audio id="sp4" data-start="20.6" data-duration="0.2" data-track-index="39" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
+      <audio id="sp5" data-start="20.75" data-duration="0.2" data-track-index="40" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>
+      <audio id="boom1" data-start="8.22" data-duration="0.6" data-track-index="41" data-volume="0.6" src="assets/sfx/impactSoft_heavy_000.ogg"></audio>
+      <audio id="bong" data-start="21.28" data-duration="0.3" data-track-index="42" data-volume="0.5" src="assets/sfx/bong_001.ogg"></audio>
     </div>
     <script>
       const EASE = "expo.out";
@@ -294,7 +282,7 @@
       // ── statement ──
       tl.to("#bar", { y: 0, duration: 0.7, ease: EASE }, 19.64);
       goBasic(19.64);
-      show("#stateT", 19.9, 0.7); hide("#stateT", 23.15, 0.3);
+      show("#stateT", 19.9, 0.7);
       const SB = [19.95, 20.1, 20.25, 20.4, 20.55, 20.7];
       SB.forEach((t, k) => tl.fromTo("#sh" + k, { opacity: 0, y: 50, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: EASE }, t));
       goPrem(21.28);
@@ -302,17 +290,7 @@
         tl.to("#pi" + k, { opacity: 1, duration: 0.35, ease: "power2.out" }, 21.28 + k * 0.1);
         tl.to("#sh" + k, { borderColor: "#8a5a2b", duration: 0.3 }, 21.28 + k * 0.1);
       });
-      tl.to(["#thumbs2", "#bar"], { opacity: 0, duration: 0.2 }, 23.3);
 
-      // ── outro ──
-      tl.fromTo("#outro", { y: 1920 }, { y: 0, duration: 0.7, ease: "power3.inOut" }, 23.46);
-      tl.fromTo("#omark", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.7, ease: EASE }, 23.9); // beat-locked: 24.01s
-      tl.fromTo("#oword", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: EASE }, 24.01);
-      tl.fromTo("#odom", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 24.4);
-      tl.fromTo("#ot1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 25.0);
-      tl.fromTo("#ot2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 26.6);
-      tl.fromTo("#oprices", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 27.2);
-      tl.fromTo("#omark", { boxShadow: "0 0 0 0 rgba(138,90,43,0)" }, { boxShadow: "0 0 90px 20px rgba(138,90,43,.25)", duration: 0.55, ease: "sine.inOut", yoyo: true, repeat: 5, immediateRender: false }, 24.5);
       window.__timelines = window.__timelines || {};
       window.__timelines["main"] = tl;
     </script>

@@ -9,7 +9,7 @@ G = [
 THUMBS = ["florist","autobody","bakery","landscaping","powerwash","renovation"]
 PREM = ["florist","autobody","bakery","landscaping","power-washing","renovation"]
 HOOK_BEATS = [0.82,1.37,1.90,2.46,3.01,3.55]
-DUR = 29.4
+DUR = 23.9
 
 html = []
 A = html.append
@@ -77,7 +77,7 @@ A("""<!doctype html>
       .big em { font-style:normal; color:var(--accent); }
 
       /* outro */
-      #outro { position:absolute; inset:0; background:var(--bg); z-index:70; }
+      #outro-unused { position:absolute; inset:0; background:var(--bg); z-index:70; }
       #outroInner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 60px; }
       #outro .mark { width:170px; height:170px; border-radius:85px; display:block; opacity:0; }
       #outro .word { font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:84px; letter-spacing:-0.02em; margin-top:30px; opacity:0; }
@@ -131,21 +131,10 @@ A('''      <div id="bar">
       </div>
       <div id="cursor"></div>
 ''')
-# outro
-A('''      <div id="outro">
-        <div id="outroInner">
-          <img class="mark" id="omark" src="assets/img/vilas-mark.png" alt="Vilas mark" />
-          <div class="word" id="oword">Vilas Studio</div>
-          <div class="dom" id="odom">vilas.studio</div>
-          <div class="tl"><div id="ot1">A website that looks expensive.</div><div id="ot2" class="b">It wasn't.</div></div>
-          <div class="prices" id="oprices"><b>Basic</b> — $300 + $50/month<br /><b>Premium</b> — $500 + $80/month<br /><b>Custom</b> — let's talk</div>
-        </div>
-      </div>
-''')
 # audio
 aud=[("music",0,DUR,0.27,"assets/music/bed-cut.mp3"),("v1",0.4,2.26,1,"assets/vo/v1.wav"),("v2",4.45,3.69,1,"assets/vo/v2.wav"),("v3",8.45,3.22,1,"assets/vo/v3.wav"),
  ("n1",11.57,1.0,1,"assets/vo/n1.wav"),("n2",13.21,0.83,1,"assets/vo/n2.wav"),("n3",14.83,1.04,1,"assets/vo/n3.wav"),("n4",16.48,1.02,1,"assets/vo/n4.wav"),("n5",18.11,0.94,1,"assets/vo/n5.wav"),
- ("v7",19.9,3.2,1,"assets/vo/v7.wav"),("v8",24.0,3.73,1,"assets/vo/l8.wav")]
+ ("v7",19.9,3.2,1,"assets/vo/v7.wav")]
 tr=2
 for id_,st,d,vol,src in aud:
     A(f'      <audio id="{id_}" data-start="{st}" data-duration="{d}" data-track-index="{tr}" data-volume="{vol}" src="{src}"></audio>\n'); tr+=1
@@ -160,9 +149,7 @@ for k,g in enumerate(G):
 for k,t in enumerate([20.0,20.15,20.3,20.45,20.6,20.75]):
     A(f'      <audio id="sp{k}" data-start="{t}" data-duration="0.2" data-track-index="{tr}" data-volume="0.28" src="assets/sfx/impactSoft_medium_003.ogg"></audio>\n'); tr+=1
 A(f'      <audio id="boom1" data-start="8.22" data-duration="0.6" data-track-index="{tr}" data-volume="0.6" src="assets/sfx/impactSoft_heavy_000.ogg"></audio>\n'); tr+=1
-A(f'      <audio id="boom2" data-start="24.01" data-duration="0.6" data-track-index="{tr}" data-volume="0.65" src="assets/sfx/impactSoft_heavy_003.ogg"></audio>\n'); tr+=1
 A(f'      <audio id="bong" data-start="21.28" data-duration="0.3" data-track-index="{tr}" data-volume="0.5" src="assets/sfx/bong_001.ogg"></audio>\n'); tr+=1
-A(f'      <audio id="rol" data-start="24.01" data-duration="0.1" data-track-index="{tr}" data-volume="0.45" src="assets/sfx/rollover2.ogg"></audio>\n')
 A('    </div>\n')
 
 # script
@@ -234,7 +221,7 @@ J('''      // pane A of first group must not be covered text-wise; florist group
       // ── statement ──
       tl.to("#bar", { y: 0, duration: 0.7, ease: EASE }, 19.64);
       goBasic(19.64);
-      show("#stateT", 19.9, 0.7); hide("#stateT", 23.15, 0.3);
+      show("#stateT", 19.9, 0.7);
       const SB = [19.95, 20.1, 20.25, 20.4, 20.55, 20.7];
       SB.forEach((t, k) => tl.fromTo("#sh" + k, { opacity: 0, y: 50, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: EASE }, t));
       goPrem(21.28);
@@ -242,17 +229,7 @@ J('''      // pane A of first group must not be covered text-wise; florist group
         tl.to("#pi" + k, { opacity: 1, duration: 0.35, ease: "power2.out" }, 21.28 + k * 0.1);
         tl.to("#sh" + k, { borderColor: "#8a5a2b", duration: 0.3 }, 21.28 + k * 0.1);
       });
-      tl.to(["#thumbs2", "#bar"], { opacity: 0, duration: 0.2 }, 23.3);
 
-      // ── outro ──
-      tl.fromTo("#outro", { y: 1920 }, { y: 0, duration: 0.7, ease: "power3.inOut" }, 23.46);
-      tl.fromTo("#omark", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.7, ease: EASE }, 23.9); // beat-locked: 24.01s
-      tl.fromTo("#oword", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: EASE }, 24.01);
-      tl.fromTo("#odom", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 24.4);
-      tl.fromTo("#ot1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 25.0);
-      tl.fromTo("#ot2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 26.6);
-      tl.fromTo("#oprices", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 27.2);
-      tl.fromTo("#omark", { boxShadow: "0 0 0 0 rgba(138,90,43,0)" }, { boxShadow: "0 0 90px 20px rgba(138,90,43,.25)", duration: 0.55, ease: "sine.inOut", yoyo: true, repeat: 5, immediateRender: false }, 24.5);
       window.__timelines = window.__timelines || {};
       window.__timelines["main"] = tl;
 ''')
