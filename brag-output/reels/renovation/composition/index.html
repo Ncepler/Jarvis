@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vilas × Maple & Main Renovation Co.</title>
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="assets/gsap.min.js"></script>
+    <style>
+      @font-face{font-family:'Fraunces';font-style:italic;font-weight:600;src:url('assets/fonts/Fraunces-italic-600.ttf') format('truetype');}
+      @font-face{font-family:'Fraunces';font-style:normal;font-weight:600;src:url('assets/fonts/Fraunces-normal-600.ttf') format('truetype');}
+      @font-face{font-family:'Inter';font-style:normal;font-weight:400;src:url('assets/fonts/Inter-normal-400.ttf') format('truetype');}
+      @font-face{font-family:'Inter';font-style:normal;font-weight:600;src:url('assets/fonts/Inter-normal-600.ttf') format('truetype');}
+      @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;src:url('assets/fonts/SpaceMono-normal-400.ttf') format('truetype');}
+      @font-face{font-family:'Space Mono';font-style:normal;font-weight:700;src:url('assets/fonts/SpaceMono-normal-700.ttf') format('truetype');}
+      @font-face{font-family:'Inter Tight';font-style:normal;font-weight:700;src:url('assets/fonts/InterTight-normal-700.ttf') format('truetype');}
+      @font-face{font-family:'Syne';font-style:normal;font-weight:700;src:url('assets/fonts/Syne-normal-700.ttf') format('truetype');}
+      @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500;src:url('assets/fonts/SpaceGrotesk-normal-500.ttf') format('truetype');}
+
+      :root {
+        --bg: #efe9dd;
+        --surface: #f6f1e8;
+        --ink: #1f1a14;
+        --muted: #4d4638;
+        --line: #d9d0c1;
+        --accent: #8a5a2b;
+        --rose: #C8893F;
+        --em: #8f5f1f;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Inter', sans-serif; color: var(--ink); }
+
+      /* ── Vilas demo bar ── */
+      #bar { position: absolute; left: 40px; top: 310px; width: 1000px; height: 104px; border-radius: 52px;
+        background: var(--surface); border: 2px solid var(--line);
+        box-shadow: 0 2px 4px rgba(31,26,20,.05), 0 16px 40px -16px rgba(31,26,20,.18);
+        display: flex; align-items: center; justify-content: space-between; padding: 0 40px 0 24px; }
+      #bar .brand { display: flex; align-items: center; gap: 16px; }
+      #bar .brand img { width: 56px; height: 56px; border-radius: 28px; display: block; }
+      #bar .brand span { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 30px; letter-spacing: -0.01em; }
+      #tog { display: flex; align-items: center; gap: 18px; font-family: 'Space Mono', monospace; font-size: 25px; }
+      #lblA { font-weight: 700; color: var(--ink); }
+      #lblB { font-weight: 400; color: var(--muted); opacity: .5; }
+      #sw { position: relative; width: 92px; height: 50px; border-radius: 25px; background: var(--bg); border: 2px solid var(--line); }
+      #swfill { position: absolute; inset: -2px; border-radius: 25px; background: var(--ink); opacity: 0; }
+      #knob { position: absolute; left: 5px; top: 5px; width: 36px; height: 36px; border-radius: 18px; background: var(--surface); box-shadow: 0 2px 6px rgba(31,26,20,.35); }
+
+      /* ── Site frame ── */
+      #frame { position: absolute; left: 40px; top: 452px; width: 1000px; height: 820px; border-radius: 28px; overflow: hidden;
+        background: #fbf8f3; border: 2px solid var(--line); }
+      #still, #vidwrap { position: absolute; inset: 0; }
+      #still img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      #vidwrap { opacity: 0; }
+      #hero { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      #scrimDark { position: absolute; inset: 0; opacity: 0;
+        background: linear-gradient(0deg, rgba(42,38,34,.88) 0%, rgba(42,38,34,.55) 32%, rgba(42,38,34,.15) 58%, rgba(42,38,34,0) 74%); }
+      #stillShade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(251,248,243,.0), rgba(251,248,243,.0)); }
+      .tag { position: absolute; left: 32px; top: 30px; padding: 12px 20px 12px 16px; border-radius: 8px; background: rgba(251,248,243,.9); font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700;
+        letter-spacing: .12em; text-transform: uppercase; color: var(--ink); display: flex; align-items: center; gap: 14px; }
+      .tag i { display: block; width: 40px; height: 2px; background: var(--rose); }
+      #hlwrap { position: absolute; left: 32px; bottom: 150px; opacity: 0; }
+      #hl { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 76px; line-height: 1.04; letter-spacing: -0.03em; color: #fbf8f3; }
+      #cta { position: absolute; left: 32px; bottom: 40px; padding: 26px 40px; background: var(--rose); color: #1f1a14; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 30px; border-radius: 8px; opacity: 0; }
+      #prog { position: absolute; left: 0; bottom: 0; height: 8px; width: 100%; background: rgba(31,26,20,.12); opacity: 0; }
+      #progfill { position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: var(--rose); transform-origin: left center; }
+      #scrollhint { position: absolute; right: 28px; top: 28px; padding: 12px 22px; border-radius: 30px; background: rgba(251,248,243,.88);
+        font-family: 'Space Mono', monospace; font-weight: 700; font-size: 22px; letter-spacing: .1em; color: var(--ink); opacity: 0; }
+
+      /* ── Captions ── */
+      .cap { position: absolute; left: 60px; width: 960px; top: 1320px; opacity: 0; }
+      .eyebrow { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 28px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+      .eyebrow i { display: block; width: 44px; height: 3px; background: var(--accent); }
+      .big { font-family: 'Fraunces', serif; font-weight: 600; font-size: 88px; line-height: 1.02; letter-spacing: -0.035em; color: var(--ink); }
+      .big em { font-style: italic; color: var(--em); }
+      .mid { font-family: 'Fraunces', serif; font-weight: 600; font-size: 70px; line-height: 1.05; letter-spacing: -0.03em; color: var(--ink); }
+      .mid em { font-style: italic; color: var(--em); }
+
+      /* cursor */
+      #cursor { position: absolute; left: 0; top: 0; width: 64px; height: 64px; border-radius: 32px; border: 4px solid var(--ink); background: rgba(31,26,20,.12); opacity: 0; }
+
+      /* ── Outro ── */
+      #outro { position: absolute; inset: 0; background: var(--bg); opacity: 1; }
+      #outroInner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 60px; }
+      #outro .mark { width: 170px; height: 170px; border-radius: 85px; display: block; opacity: 0; }
+      #outro .word { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 84px; letter-spacing: -0.02em; margin-top: 30px; opacity: 0; }
+      #outro .dom { font-family: 'Space Mono', monospace; font-size: 30px; color: var(--muted); margin-top: 8px; opacity: 0; }
+      #outro .tl { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 88px; line-height: 1.02; letter-spacing: -0.03em; margin-top: 90px; }
+      #outro .tl div { opacity: 0; }
+      #outro .tl .b { color: var(--accent); }
+      #outro .prices { margin-top: 90px; font-family: 'Space Mono', monospace; font-size: 30px; line-height: 1.7; color: var(--muted); opacity: 0; border-top: 2px solid var(--line); padding-top: 34px; width: 900px; }
+      #outro .prices b { color: var(--ink); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="22.6" data-width="1080" data-height="1920">
+
+      <div id="bar">
+        <div class="brand"><img src="assets/img/vilas-mark.png" alt="Vilas mark" /><span>Vilas Studio</span></div>
+        <div id="tog">
+          <span id="lblA">$300 + $50/mo</span>
+          <div id="sw"><div id="swfill"></div><div id="knob"></div></div>
+          <span id="lblB">$500 + $80/mo</span>
+        </div>
+      </div>
+
+      <div id="frame">
+        <div id="still"><img src="assets/img/still.jpg" alt="Vilas × Maple & Main Renovation Co. still hero" /></div>
+        <div id="vidwrap">
+          <video id="hero" class="clip" data-start="8" data-duration="10.6" data-track-index="1" src="assets/hero-fast.mp4" muted playsinline></video>
+        </div>
+        <div id="scrimDark"></div>
+        <div class="tag" id="tag"><i></i><span>Renovation & remodeling · North Shore</span></div>
+        <div id="hlwrap"><div id="hl">Old house.<br />New everything.</div></div>
+        <div id="cta">Get a free estimate</div>
+        <div id="scrollhint">SCROLL ↓</div>
+        <div id="prog"><div id="progfill"></div></div>
+      </div>
+
+      <div class="cap" id="c1"><div class="big">One renovation website.<br /><em>Two</em> prices.</div></div>
+      <div class="cap" id="c2"><div class="eyebrow"><i></i>Basic · $300 + $50/mo</div><div class="big">A still hero,<br />done well.</div></div>
+      <div class="cap" id="c3"><div class="eyebrow"><i></i>Premium · $500 + $80/mo</div><div class="big">The hero <em>moves.</em></div></div>
+      <div class="cap" id="c4"><div class="eyebrow"><i></i>Premium</div><div class="mid">Scroll, and the front door opens <em>on the finished room.</em></div></div>
+
+      <div id="cursor"></div>
+
+      <div id="outro">
+        <div id="outroInner">
+          <img class="mark" id="omark" src="assets/img/vilas-mark.png" alt="Vilas mark" />
+          <div class="word" id="oword">Vilas Studio</div>
+          <div class="dom" id="odom">vilas.studio</div>
+          <div class="tl"><div id="ot1">A website that looks expensive.</div><div id="ot2" class="b">It wasn't.</div></div>
+          <div class="prices" id="oprices"><b>Basic</b> — $300 + $50/month<br /><b>Premium</b> — $500 + $80/month<br /><b>Custom</b> — let's talk</div>
+        </div>
+      </div>
+
+      <audio id="music" data-start="0" data-duration="22.6" data-track-index="2" data-volume="0.16" src="assets/music/bed-cut.mp3"></audio>
+      <audio id="vo1" data-start="0.4" data-duration="2.50" data-track-index="3" data-volume="1" src="assets/vo/l1.wav"></audio>
+      <audio id="vo2" data-start="3.35" data-duration="3.57" data-track-index="4" data-volume="1" src="assets/vo/l2.wav"></audio>
+      <audio id="vo3" data-start="7.5" data-duration="3.23" data-track-index="5" data-volume="1" src="assets/vo/l3.wav"></audio>
+      <audio id="vo4" data-start="11.0" data-duration="2.86" data-track-index="6" data-volume="1" src="assets/vo/l4.wav"></audio>
+      <audio id="vo5" data-start="17.7" data-duration="3.74" data-track-index="7" data-volume="1" src="assets/vo/l5.wav"></audio>
+      <audio id="sfx1" data-start="7.35" data-duration="0.1" data-track-index="8" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
+      <audio id="sfx2" data-start="18.01" data-duration="0.1" data-track-index="9" data-volume="0.45" src="assets/sfx/rollover2.ogg"></audio>
+    </div>
+
+    <script>
+      const EASE = "expo.out";
+      const tl = gsap.timeline({ paused: true });
+      const show = (sel, at, dur = 0.5, y = 24) => tl.fromTo(sel, { opacity: 0, y }, { opacity: 1, y: 0, duration: dur, ease: EASE }, at);
+      const hide = (sel, at, dur = 0.35) => tl.to(sel, { opacity: 0, duration: dur, ease: "power2.in" }, at);
+
+      // intro
+      tl.fromTo("#bar", { opacity: 0, y: -40 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 0.1);
+      tl.fromTo("#frame", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.8, ease: EASE }, 0.2);
+      tl.fromTo("#still img", { scale: 1.0 }, { scale: 1.1, duration: 7.4, ease: "none" }, 0.2);
+      tl.fromTo("#tag", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: EASE }, 0.8);
+
+      // captions
+      show("#c1", 0.45, 0.7); hide("#c1", 3.0);
+      show("#c2", 3.3, 0.6); hide("#c2", 7.15);
+      tl.fromTo("#lblA", { scale: 1 }, { scale: 1.08, duration: 0.3, ease: EASE, yoyo: true, repeat: 1, transformOrigin: "left center" }, 3.4);
+
+      // cursor tap on the switch, then flip (beat-locked: 7.35s)
+      tl.fromTo("#cursor", { opacity: 0, x: 760, y: 500 }, { opacity: 1, x: 724, y: 342, duration: 0.5, ease: "power2.out" }, 6.6);
+      tl.to("#cursor", { scale: 0.8, duration: 0.12, ease: "power2.in" }, 7.25);
+      tl.to("#cursor", { scale: 1, duration: 0.2, ease: EASE }, 7.37);
+      tl.to("#cursor", { opacity: 0, x: 780, y: 410, duration: 0.5, ease: "power2.in" }, 7.7);
+      // beat-locked: 7.35s
+      tl.to("#knob", { scaleX: 1.3, duration: 0.1, ease: "power2.in" }, 7.28);
+      tl.to("#knob", { x: 42, duration: 0.3, ease: EASE }, 7.35);
+      tl.to("#knob", { scaleX: 1, duration: 0.25, ease: EASE }, 7.5);
+      tl.to("#swfill", { opacity: 1, duration: 0.3, ease: "power2.out" }, 7.35);
+      tl.to("#lblA", { opacity: 0.5, fontWeight: 400, color: "#4d4638", duration: 0.25 }, 7.35);
+      tl.to("#lblB", { opacity: 1, color: "#1f1a14", duration: 0.25 }, 7.35);
+      tl.fromTo("#lblB", { scale: 1 }, { scale: 1.12, duration: 0.3, ease: EASE, yoyo: true, repeat: 1, transformOrigin: "right center" }, 7.4);
+
+      // premium: the still gives way to the video
+      show("#c3", 7.6, 0.6); hide("#c3", 10.7);
+      tl.to("#tag", { opacity: 0, duration: 0.25 }, 7.4);
+      tl.to("#vidwrap", { opacity: 1, duration: 0.45, ease: "power2.out" }, 7.75);
+      tl.to("#scrimDark", { opacity: 1, duration: 0.5 }, 8.0);
+      tl.fromTo("#hlwrap", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 8.3);
+      tl.to("#hlwrap", { opacity: 0, duration: 0.4, ease: "power2.in" }, 10.2);
+      tl.to("#scrimDark", { opacity: 0, duration: 0.5 }, 10.2);
+      tl.fromTo("#scrollhint", { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.5, ease: EASE }, 8.3);
+      tl.to("#scrollhint", { opacity: 0, duration: 0.4 }, 10.6);
+      tl.fromTo("#prog", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 8.0);
+      tl.fromTo("#progfill", { scaleX: 0 }, { scaleX: 1, duration: 9.0, ease: "none" }, 8.0);
+      show("#c4", 11.0, 0.6); hide("#c4", 16.9);
+
+      // closing state of the site hero: headline + CTA (beat-locked: 15.82s)
+      tl.to("#scrimDark", { opacity: 1, duration: 0.7 }, 15.1);
+      tl.fromTo("#hlwrap", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE, immediateRender: false }, 15.82);
+      tl.fromTo("#cta", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: EASE }, 16.2);
+
+      // outro
+      tl.set(["#bar", "#frame", "#cursor"], { opacity: 0 }, 17.75);
+      tl.fromTo("#outro", { y: 1920 }, { y: 0, duration: 0.7, ease: "power3.inOut" }, 17.0);
+      tl.fromTo("#omark", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.7, ease: EASE }, 17.85); // beat-locked: 18.01s
+      tl.fromTo("#oword", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: EASE }, 18.01);
+      tl.fromTo("#odom", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 18.4);
+      tl.fromTo("#ot1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 18.9);
+      tl.fromTo("#ot2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 20.45);
+      tl.fromTo("#oprices", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 21.0);
+
+      // audio-reactive-lite: gentle breathing glow on the outro mark (music-paced, 110 BPM)
+      tl.fromTo("#omark", { boxShadow: "0 0 0 0 rgba(138,90,43,0)" }, { boxShadow: "0 0 90px 20px rgba(138,90,43,.25)", duration: 0.55, ease: "sine.inOut", yoyo: true, repeat: 5, immediateRender: false }, 18.55);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
