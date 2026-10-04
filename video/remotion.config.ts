@@ -8,5 +8,9 @@
 import { Config } from "@remotion/cli/config";
 
 Config.setRspack(true);
-Config.setVideoImageFormat("jpeg");
+// PNG frames, not JPEG: flat bone fields + thin type show JPEG ringing, and
+// JPEG frames also forced a full-range yuvj420p file some apps wash out.
+Config.setVideoImageFormat("png");
+Config.setPixelFormat("yuv420p");
+Config.setCrf(16);
 Config.setOverwriteOutput(true);

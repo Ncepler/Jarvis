@@ -111,7 +111,13 @@
   typecheck. Never add `remotion` to the root `package.json`; the site
   stack (§3) is unchanged. In a cloud session, render with
   `--browser-executable=/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell`
-  (verified working). Agent skills: `npx skills add remotion-dev/skills`
+  (verified working). First video: `VilasReel` (Instagram, 1080×1920,
+  15s, `video/src/reel/`) — "Great at the work. Invisible online." →
+  struck-through dated-site signs → "It's not you. It's the website." →
+  VAL→VALIS→VILAS reveal; last frame is pixel-identical to frame 0 so it
+  loops. Type-only on purpose: the IG account is pre-client, so no demo or
+  client screenshots. Colours/fonts mirror the site in `video/src/brand.ts`
+  (fonts are local woff2 in `video/public/fonts`, OFL). Agent skills: `npx skills add remotion-dev/skills`
   put 12 in `.agents/skills/remotion-*`, symlinked into `.claude/skills/`,
   pinned by `skills-lock.json`; tsc skips dot-dirs so they never hit the build.
 - **"Out in the world" client sites (Val's Barbershop, Jonah Shapiro Magic,
