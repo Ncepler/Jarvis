@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vilas Studio — Basic vs Premium</title>
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="assets/gsap.min.js"></script>
+    <style>
+      @font-face{font-family:'Inter';font-style:normal;font-weight:600;src:url('assets/fonts/Inter-normal-600.ttf') format('truetype');}
+      @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;src:url('assets/fonts/SpaceMono-normal-400.ttf') format('truetype');}
+      @font-face{font-family:'Space Mono';font-style:normal;font-weight:700;src:url('assets/fonts/SpaceMono-normal-700.ttf') format('truetype');}
+      @font-face{font-family:'Syne';font-style:normal;font-weight:700;src:url('assets/fonts/Syne-normal-700.ttf') format('truetype');}
+      @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500;src:url('assets/fonts/SpaceGrotesk-normal-500.ttf') format('truetype');}
+      :root { --bg:#efe9dd; --surface:#f6f1e8; --ink:#1f1a14; --muted:#4d4638; --line:#d9d0c1; --accent:#8a5a2b; }
+      * { margin:0; padding:0; box-sizing:border-box; }
+      html, body { width:1080px; height:1920px; overflow:hidden; background:var(--bg); }
+      #root { position:relative; width:100%; height:100%; overflow:hidden; background:var(--bg); font-family:'Inter',sans-serif; color:var(--ink); }
+
+      .syne { font-family:'Syne',sans-serif; font-weight:700; letter-spacing:-0.03em; line-height:1.04; color:var(--ink); }
+      .syne em { font-style:normal; color:var(--accent); }
+      .mono { font-family:'Space Mono',monospace; }
+      .abs { position:absolute; left:60px; width:960px; opacity:0; }
+
+      /* bar */
+      #bar { position:absolute; left:40px; top:800px; width:1000px; height:104px; border-radius:52px; background:var(--surface); border:2px solid var(--line);
+        box-shadow:0 2px 4px rgba(31,26,20,.05), 0 16px 40px -16px rgba(31,26,20,.18); display:flex; align-items:center; justify-content:space-between; padding:0 40px 0 24px; opacity:0; z-index:50; }
+      #bar .brand { display:flex; align-items:center; gap:16px; }
+      #bar .brand img { width:56px; height:56px; border-radius:28px; display:block; }
+      #bar .brand span { font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:30px; letter-spacing:-0.01em; }
+      #tog { display:flex; align-items:center; gap:18px; font-family:'Space Mono',monospace; font-size:25px; }
+      #lblA { font-weight:700; color:var(--ink); }
+      #lblB { font-weight:400; color:var(--muted); opacity:.5; }
+      #sw { position:relative; width:92px; height:50px; border-radius:25px; background:var(--bg); border:2px solid var(--line); }
+      #swfill { position:absolute; inset:-2px; border-radius:25px; background:var(--ink); opacity:0; }
+      #knob { position:absolute; left:5px; top:5px; width:36px; height:36px; border-radius:18px; background:var(--surface); box-shadow:0 2px 6px rgba(31,26,20,.35); }
+      #cursor { position:absolute; left:0; top:0; width:64px; height:64px; border-radius:32px; border:4px solid var(--ink); background:rgba(31,26,20,.12); opacity:0; z-index:60; }
+
+      /* hook / statement thumbs */
+      .th { position:absolute; width:316px; height:200px; border-radius:16px; overflow:hidden; border:2px solid var(--line); opacity:0; }
+      .th img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+      .th .pi { opacity:0; }
+      .th::after { content:''; position:absolute; inset:0; border-radius:14px; box-shadow:inset 0 0 0 3px transparent; }
+      #thumbs, #thumbs2 { position:absolute; left:40px; top:1000px; width:1000px; height:430px; }
+
+      /* groups */
+      .grp { position:absolute; inset:0; }
+      .gt { position:absolute; left:60px; top:196px; font-family:'Space Mono',monospace; font-weight:700; font-size:26px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); opacity:0; display:flex; align-items:center; gap:16px; }
+      .gt i { display:block; width:44px; height:3px; background:var(--accent); }
+      .pane { position:absolute; left:40px; width:1000px; height:562px; border-radius:24px; overflow:hidden; background:#14110d; }
+      .pa { top:270px; border:2px solid var(--line); }
+      .pb { top:984px; box-shadow:0 0 0 4px var(--accent), 0 28px 60px -24px rgba(138,90,43,.55); }
+      .pane img.bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+      .vw { position:absolute; inset:0; }
+      .vw video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+      .ptag { position:absolute; left:24px; top:24px; padding:12px 20px; border-radius:10px; background:rgba(246,241,232,.94); font-family:'Space Mono',monospace; font-weight:700; font-size:23px; letter-spacing:.06em; color:var(--ink); }
+      .ptag b { color:var(--accent); font-weight:700; }
+      .ph { position:absolute; inset:0; background:var(--surface); border:3px dashed var(--line); border-radius:24px; display:flex; align-items:center; justify-content:center; text-align:center; font-family:'Space Mono',monospace; font-size:30px; line-height:1.6; color:var(--ink); }
+      .gcap { position:absolute; left:60px; width:960px; top:1600px; opacity:0; }
+      .eyebrow { font-family:'Space Mono',monospace; font-weight:700; font-size:26px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); display:flex; align-items:center; gap:16px; margin-bottom:18px; }
+      .eyebrow i { display:block; width:44px; height:3px; background:var(--accent); }
+      .big { font-family:'Syne',sans-serif; font-weight:700; font-size:92px; line-height:1.02; letter-spacing:-0.035em; color:var(--ink); }
+      .big em { font-style:normal; color:var(--accent); }
+
+      /* outro */
+      #outro { position:absolute; inset:0; background:var(--bg); z-index:70; }
+      #outroInner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 60px; }
+      #outro .mark { width:170px; height:170px; border-radius:85px; display:block; opacity:0; }
+      #outro .word { font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:84px; letter-spacing:-0.02em; margin-top:30px; opacity:0; }
+      #outro .dom { font-family:'Space Mono',monospace; font-size:30px; color:var(--muted); margin-top:8px; opacity:0; }
+      #outro .tl { font-family:'Syne',sans-serif; font-weight:700; font-size:88px; line-height:1.02; letter-spacing:-0.03em; margin-top:90px; }
+      #outro .tl div { opacity:0; }
+      #outro .tl .b { color:var(--accent); }
+      #outro .prices { margin-top:90px; font-family:'Space Mono',monospace; font-size:30px; line-height:1.7; color:var(--muted); opacity:0; border-top:2px solid var(--line); padding-top:34px; width:900px; }
+      #outro .prices b { color:var(--ink); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="29.4" data-width="1080" data-height="1920">
+      <div class="abs syne" id="hookT" style="top:250px;font-size:84px;">Every style we build<br />comes in <em>two</em> tiers.</div>
+      <div class="abs syne" id="stateT" style="top:250px;font-size:80px;">Same build everywhere else.<br />Only the hero <em>changes.</em></div>
+      <div id="thumbs">
+        <div class="th" id="th0" style="left:0px;top:0px;"><img src="assets/img/t_florist.jpg" alt="florist basic hero" /></div>
+        <div class="th" id="th1" style="left:342px;top:0px;"><img src="assets/img/t_autobody.jpg" alt="autobody basic hero" /></div>
+        <div class="th" id="th2" style="left:684px;top:0px;"><img src="assets/img/t_bakery.jpg" alt="bakery basic hero" /></div>
+        <div class="th" id="th3" style="left:0px;top:226px;"><img src="assets/img/t_landscaping.jpg" alt="landscaping basic hero" /></div>
+        <div class="th" id="th4" style="left:342px;top:226px;"><img src="assets/img/t_powerwash.jpg" alt="powerwash basic hero" /></div>
+        <div class="th" id="th5" style="left:684px;top:226px;"><img src="assets/img/t_renovation.jpg" alt="renovation basic hero" /></div>
+      </div>
+      <div id="thumbs2">
+        <div class="th" id="sh0" style="left:0px;top:0px;"><img src="assets/img/t_florist.jpg" alt="florist basic hero" /><img class="pi" id="pi0" src="assets/img/p_florist.jpg" alt="florist premium hero" /></div>
+        <div class="th" id="sh1" style="left:342px;top:0px;"><img src="assets/img/t_autobody.jpg" alt="autobody basic hero" /><img class="pi" id="pi1" src="assets/img/p_autobody.jpg" alt="autobody premium hero" /></div>
+        <div class="th" id="sh2" style="left:684px;top:0px;"><img src="assets/img/t_bakery.jpg" alt="bakery basic hero" /><img class="pi" id="pi2" src="assets/img/p_bakery.jpg" alt="bakery premium hero" /></div>
+        <div class="th" id="sh3" style="left:0px;top:226px;"><img src="assets/img/t_landscaping.jpg" alt="landscaping basic hero" /><img class="pi" id="pi3" src="assets/img/p_landscaping.jpg" alt="landscaping premium hero" /></div>
+        <div class="th" id="sh4" style="left:342px;top:226px;"><img src="assets/img/t_powerwash.jpg" alt="powerwash basic hero" /><img class="pi" id="pi4" src="assets/img/p_power-washing.jpg" alt="powerwash premium hero" /></div>
+        <div class="th" id="sh5" style="left:684px;top:226px;"><img src="assets/img/t_renovation.jpg" alt="renovation basic hero" /><img class="pi" id="pi5" src="assets/img/p_renovation.jpg" alt="renovation premium hero" /></div>
+      </div>
+      <div class="grp" id="g0">
+        <div class="gt" id="g0t"><i></i>Florist · Wildstem Florals</div>
+        <div class="pane pa" id="g0a"><img class="bg" src="assets/img/a_florist.jpg" alt="Florist basic hero still" /><div class="ptag" id="g0at">BASIC · <b>$300 + $50/mo</b></div></div>
+        <div class="pane pb" id="g0b">
+          <div class="ph" id="g0ph">$500 + $80/mo<br />tap the toggle</div>
+          <div class="vw" id="g0v"><video id="vid0" class="clip" data-start="8.22" data-duration="3.8" data-track-index="1" src="assets/clips/florist.mp4" muted playsinline></video></div>
+          <div class="ptag" id="g0pt">PREMIUM · <b>$500 + $80/mo</b></div>
+        </div>
+        <div class="gcap" id="g0ca"><div class="eyebrow"><i></i>Basic · $300 + $50/mo</div><div class="big">A still hero,<br />done well.</div></div>
+        <div class="gcap" id="g0cb"><div class="eyebrow"><i></i>Premium · $500 + $80/mo</div><div class="big">The hero <em>moves.</em></div></div>
+      </div>
+      <div class="grp" id="g1">
+        <div class="gt" id="g1t"><i></i>Auto body · Apex Collision</div>
+        <div class="pane pa" id="g1a"><img class="bg" src="assets/img/a_autobody.jpg" alt="Auto body basic hero still" /><div class="ptag" id="g1at">BASIC · <b>$300 + $50/mo</b></div></div>
+        <div class="pane pb" id="g1b">
+          <div class="vw" id="g1v"><video id="vid1" class="clip" data-start="11.47" data-duration="2.5" data-track-index="2" src="assets/clips/autobody.mp4" muted playsinline></video></div>
+          <div class="ptag" id="g1pt">PREMIUM · <b>$500 + $80/mo</b></div>
+        </div>
+        <div class="gcap" id="g1c"><div class="eyebrow"><i></i>Premium hero</div><div class="big">Auto body.</div></div>
+      </div>
+      <div class="grp" id="g2">
+        <div class="gt" id="g2t"><i></i>Bakery · Golden Hour Bakehouse</div>
+        <div class="pane pa" id="g2a"><img class="bg" src="assets/img/a_bakery.jpg" alt="Bakery basic hero still" /><div class="ptag" id="g2at">BASIC · <b>$300 + $50/mo</b></div></div>
+        <div class="pane pb" id="g2b">
+          <div class="vw" id="g2v"><video id="vid2" class="clip" data-start="13.11" data-duration="2.5" data-track-index="3" src="assets/clips/bakery.mp4" muted playsinline></video></div>
+          <div class="ptag" id="g2pt">PREMIUM · <b>$500 + $80/mo</b></div>
+        </div>
+        <div class="gcap" id="g2c"><div class="eyebrow"><i></i>Premium hero</div><div class="big">Bakery.</div></div>
+      </div>
+      <div class="grp" id="g3">
+        <div class="gt" id="g3t"><i></i>Landscaping · Stone &amp; Sage Landscapes</div>
+        <div class="pane pa" id="g3a"><img class="bg" src="assets/img/a_landscaping.jpg" alt="Landscaping basic hero still" /><div class="ptag" id="g3at">BASIC · <b>$300 + $50/mo</b></div></div>
+        <div class="pane pb" id="g3b">
+          <div class="vw" id="g3v"><video id="vid3" class="clip" data-start="14.73" data-duration="2.5" data-track-index="4" src="assets/clips/landscaping.mp4" muted playsinline></video></div>
+          <div class="ptag" id="g3pt">PREMIUM · <b>$500 + $80/mo</b></div>
+        </div>
+        <div class="gcap" id="g3c"><div class="eyebrow"><i></i>Premium hero</div><div class="big">Landscaping.</div></div>
+      </div>
+      <div class="grp" id="g4">
+        <div class="gt" id="g4t"><i></i>Power washing · Tide Line Power Washing</div>
+        <div class="pane pa" id="g4a"><img class="bg" src="assets/img/a_powerwash.jpg" alt="Power washing basic hero still" /><div class="ptag" id="g4at">BASIC · <b>$300 + $50/mo</b></div></div>
+        <div class="pane pb" id="g4b">
+          <div class="vw" id="g4v"><video id="vid4" class="clip" data-start="16.38" data-duration="2.5" data-track-index="5" src="assets/clips/power-washing.mp4" muted playsinline></video></div>
+          <div class="ptag" id="g4pt">PREMIUM · <b>$500 + $80/mo</b></div>
+        </div>
+        <div class="gcap" id="g4c"><div class="eyebrow"><i></i>Premium hero</div><div class="big">Power washing.</div></div>
+      </div>
+      <div class="grp" id="g5">
+        <div class="gt" id="g5t"><i></i>Renovation · Maple &amp; Main Renovation Co.</div>
+        <div class="pane pa" id="g5a"><img class="bg" src="assets/img/a_renovation.jpg" alt="Renovation basic hero still" /><div class="ptag" id="g5at">BASIC · <b>$300 + $50/mo</b></div></div>
+        <div class="pane pb" id="g5b">
+          <div class="vw" id="g5v"><video id="vid5" class="clip" data-start="18.01" data-duration="2.5" data-track-index="6" src="assets/clips/renovation.mp4" muted playsinline></video></div>
+          <div class="ptag" id="g5pt">PREMIUM · <b>$500 + $80/mo</b></div>
+        </div>
+        <div class="gcap" id="g5c"><div class="eyebrow"><i></i>Premium hero</div><div class="big">Renovation.</div></div>
+      </div>
+      <div id="bar">
+        <div class="brand"><img src="assets/img/vilas-mark.png" alt="Vilas mark" /><span>Vilas Studio</span></div>
+        <div id="tog"><span id="lblA">$300 + $50/mo</span><div id="sw"><div id="swfill"></div><div id="knob"></div></div><span id="lblB">$500 + $80/mo</span></div>
+      </div>
+      <div id="cursor"></div>
+      <div id="outro">
+        <div id="outroInner">
+          <img class="mark" id="omark" src="assets/img/vilas-mark.png" alt="Vilas mark" />
+          <div class="word" id="oword">Vilas Studio</div>
+          <div class="dom" id="odom">vilas.studio</div>
+          <div class="tl"><div id="ot1">A website that looks expensive.</div><div id="ot2" class="b">It wasn't.</div></div>
+          <div class="prices" id="oprices"><b>Basic</b> — $300 + $50/month<br /><b>Premium</b> — $500 + $80/month<br /><b>Custom</b> — let's talk</div>
+        </div>
+      </div>
+      <audio id="music" data-start="0" data-duration="29.4" data-track-index="2" data-volume="0.15" src="assets/music/bed-cut.mp3"></audio>
+      <audio id="v1" data-start="0.4" data-duration="2.26" data-track-index="3" data-volume="1" src="assets/vo/v1.wav"></audio>
+      <audio id="v2" data-start="4.45" data-duration="3.69" data-track-index="4" data-volume="1" src="assets/vo/v2.wav"></audio>
+      <audio id="v3" data-start="8.45" data-duration="3.22" data-track-index="5" data-volume="1" src="assets/vo/v3.wav"></audio>
+      <audio id="n1" data-start="11.57" data-duration="1.0" data-track-index="6" data-volume="1" src="assets/vo/n1.wav"></audio>
+      <audio id="n2" data-start="13.21" data-duration="0.83" data-track-index="7" data-volume="1" src="assets/vo/n2.wav"></audio>
+      <audio id="n3" data-start="14.83" data-duration="1.04" data-track-index="8" data-volume="1" src="assets/vo/n3.wav"></audio>
+      <audio id="n4" data-start="16.48" data-duration="1.02" data-track-index="9" data-volume="1" src="assets/vo/n4.wav"></audio>
+      <audio id="n5" data-start="18.11" data-duration="0.94" data-track-index="10" data-volume="1" src="assets/vo/n5.wav"></audio>
+      <audio id="v7" data-start="19.9" data-duration="3.2" data-track-index="11" data-volume="1" src="assets/vo/v7.wav"></audio>
+      <audio id="v8" data-start="24.0" data-duration="3.73" data-track-index="12" data-volume="1" src="assets/vo/l8.wav"></audio>
+      <audio id="clk0" data-start="2.46" data-duration="0.1" data-track-index="13" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
+      <audio id="clk1" data-start="3.55" data-duration="0.1" data-track-index="14" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
+      <audio id="clk2" data-start="8.22" data-duration="0.1" data-track-index="15" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
+      <audio id="clk3" data-start="19.64" data-duration="0.1" data-track-index="16" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
+      <audio id="clk4" data-start="21.28" data-duration="0.1" data-track-index="17" data-volume="0.7" src="assets/sfx/click2.ogg"></audio>
+      <audio id="cut0" data-start="4.1" data-duration="0.1" data-track-index="18" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
+      <audio id="cut1" data-start="11.47" data-duration="0.1" data-track-index="19" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
+      <audio id="cut2" data-start="13.11" data-duration="0.1" data-track-index="20" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
+      <audio id="cut3" data-start="14.73" data-duration="0.1" data-track-index="21" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
+      <audio id="cut4" data-start="16.38" data-duration="0.1" data-track-index="22" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
+      <audio id="cut5" data-start="18.01" data-duration="0.1" data-track-index="23" data-volume="0.35" src="assets/sfx/switch18.ogg"></audio>
+      <audio id="rol" data-start="24.01" data-duration="0.1" data-track-index="24" data-volume="0.45" src="assets/sfx/rollover2.ogg"></audio>
+    </div>
+    <script>
+      const EASE = "expo.out";
+      const tl = gsap.timeline({ paused: true });
+      const show = (sel, at, dur = 0.5, y = 24) => tl.fromTo(sel, { opacity: 0, y }, { opacity: 1, y: 0, duration: dur, ease: EASE }, at);
+      const hide = (sel, at, dur = 0.3) => tl.to(sel, { opacity: 0, duration: dur, ease: "power2.in" }, at);
+      const goPrem = (t) => {
+        tl.to("#knob", { scaleX: 1.3, duration: 0.1, ease: "power2.in" }, t - 0.07);
+        tl.to("#knob", { x: 42, duration: 0.3, ease: EASE }, t);
+        tl.to("#knob", { scaleX: 1, duration: 0.25, ease: EASE }, t + 0.15);
+        tl.to("#swfill", { opacity: 1, duration: 0.3 }, t);
+        tl.to("#lblA", { opacity: 0.5, fontWeight: 400, color: "#4d4638", duration: 0.25 }, t);
+        tl.to("#lblB", { opacity: 1, fontWeight: 700, color: "#1f1a14", duration: 0.25 }, t);
+      };
+      const goBasic = (t) => {
+        tl.to("#knob", { scaleX: 1.3, duration: 0.1, ease: "power2.in" }, t - 0.07);
+        tl.to("#knob", { x: 0, duration: 0.3, ease: EASE }, t);
+        tl.to("#knob", { scaleX: 1, duration: 0.25, ease: EASE }, t + 0.15);
+        tl.to("#swfill", { opacity: 0, duration: 0.3 }, t);
+        tl.to("#lblA", { opacity: 1, fontWeight: 700, color: "#1f1a14", duration: 0.25 }, t);
+        tl.to("#lblB", { opacity: 0.5, fontWeight: 400, color: "#4d4638", duration: 0.25 }, t);
+      };
+
+      // ── hook ──
+      show("#hookT", 0.4, 0.7); hide("#hookT", 3.85, 0.3);
+      tl.fromTo("#bar", { opacity: 0, y: -40 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 0.2);
+      const HB = [0.82, 1.37, 1.9, 2.46, 3.01, 3.55];
+      HB.forEach((t, k) => tl.fromTo("#th" + k, { opacity: 0, y: 50, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: EASE }, t)); // beat-grid: 0.82 1.37 1.90 2.46 3.01 3.55
+      goPrem(2.46); goBasic(3.55);
+      tl.to("#thumbs", { opacity: 0, y: 40, duration: 0.35, ease: "power2.in" }, 3.95);
+      // ── group 0 (Florist) ──
+      tl.fromTo("#g0a", { x: -1100 }, { x: 0, duration: 0.6, ease: EASE }, 4.1);
+      tl.fromTo("#g0b", { x: 1100 }, { x: 0, duration: 0.6, ease: EASE }, 4.17);
+      show("#g0t", 4.30, 0.5, 16);
+      tl.to("#bar", { y: 60, duration: 0.7, ease: EASE }, 4.1);
+      show("#g0ca", 4.4, 0.6); hide("#g0ca", 8.1);
+      tl.fromTo("#cursor", { opacity: 0, x: 760, y: 1010 }, { opacity: 1, x: 724, y: 892, duration: 0.5, ease: "power2.out" }, 7.45);
+      tl.to("#cursor", { scale: 0.8, duration: 0.12, ease: "power2.in" }, 8.1);
+      tl.to("#cursor", { scale: 1, duration: 0.2, ease: EASE }, 8.24);
+      tl.to("#cursor", { opacity: 0, x: 790, y: 1000, duration: 0.5, ease: "power2.in" }, 8.55);
+      goPrem(8.22); // beat-locked: 8.22s
+      tl.to("#g0ph", { opacity: 0, duration: 0.2 }, 8.1);
+      tl.fromTo("#g0v", { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power2.out" }, 8.22);
+      tl.fromTo("#g0pt", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: EASE }, 8.3);
+      show("#g0cb", 8.45, 0.6); hide("#g0cb", 11.3);
+      hide(["#g0t", "#g0at", "#g0pt"], 11.42, 0.2);
+      tl.set("#g0", { opacity: 0 }, 12.12);
+      // ── group 1 (Auto body) ──
+      tl.fromTo("#g1a", { x: -1100 }, { x: 0, duration: 0.6, ease: EASE }, 11.47);
+      tl.fromTo("#g1b", { x: 1100 }, { x: 0, duration: 0.6, ease: EASE }, 11.54);
+      show("#g1t", 11.67, 0.5, 16);
+      show("#g1c", 11.62, 0.5); hide("#g1c", 13.06, 0.25);
+      hide(["#g1t", "#g1at", "#g1pt"], 13.06, 0.2);
+      tl.set("#g1", { opacity: 0 }, 13.76);
+      // ── group 2 (Bakery) ──
+      tl.fromTo("#g2a", { x: -1100 }, { x: 0, duration: 0.6, ease: EASE }, 13.11);
+      tl.fromTo("#g2b", { x: 1100 }, { x: 0, duration: 0.6, ease: EASE }, 13.18);
+      show("#g2t", 13.31, 0.5, 16);
+      show("#g2c", 13.26, 0.5); hide("#g2c", 14.68, 0.25);
+      hide(["#g2t", "#g2at", "#g2pt"], 14.68, 0.2);
+      tl.set("#g2", { opacity: 0 }, 15.38);
+      // ── group 3 (Landscaping) ──
+      tl.fromTo("#g3a", { x: -1100 }, { x: 0, duration: 0.6, ease: EASE }, 14.73);
+      tl.fromTo("#g3b", { x: 1100 }, { x: 0, duration: 0.6, ease: EASE }, 14.80);
+      show("#g3t", 14.93, 0.5, 16);
+      show("#g3c", 14.88, 0.5); hide("#g3c", 16.33, 0.25);
+      hide(["#g3t", "#g3at", "#g3pt"], 16.33, 0.2);
+      tl.set("#g3", { opacity: 0 }, 17.03);
+      // ── group 4 (Power washing) ──
+      tl.fromTo("#g4a", { x: -1100 }, { x: 0, duration: 0.6, ease: EASE }, 16.38);
+      tl.fromTo("#g4b", { x: 1100 }, { x: 0, duration: 0.6, ease: EASE }, 16.45);
+      show("#g4t", 16.58, 0.5, 16);
+      show("#g4c", 16.53, 0.5); hide("#g4c", 17.96, 0.25);
+      hide(["#g4t", "#g4at", "#g4pt"], 17.96, 0.2);
+      tl.set("#g4", { opacity: 0 }, 18.66);
+      // ── group 5 (Renovation) ──
+      tl.fromTo("#g5a", { x: -1100 }, { x: 0, duration: 0.6, ease: EASE }, 18.01);
+      tl.fromTo("#g5b", { x: 1100 }, { x: 0, duration: 0.6, ease: EASE }, 18.08);
+      show("#g5t", 18.21, 0.5, 16);
+      show("#g5c", 18.16, 0.5); hide("#g5c", 19.59, 0.25);
+      hide(["#g5t", "#g5at", "#g5pt"], 19.59, 0.2);
+      tl.to("#g5", { opacity: 0, duration: 0.3, ease: "power2.in" }, 19.64);
+      // pane A of first group must not be covered text-wise; florist group hides at next cut
+      // ── statement ──
+      tl.to("#bar", { y: 0, duration: 0.7, ease: EASE }, 19.64);
+      goBasic(19.64);
+      show("#stateT", 19.9, 0.7); hide("#stateT", 23.15, 0.3);
+      const SB = [19.95, 20.1, 20.25, 20.4, 20.55, 20.7];
+      SB.forEach((t, k) => tl.fromTo("#sh" + k, { opacity: 0, y: 50, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: EASE }, t));
+      goPrem(21.28);
+      [0,1,2,3,4,5].forEach((k) => {
+        tl.to("#pi" + k, { opacity: 1, duration: 0.35, ease: "power2.out" }, 21.28 + k * 0.1);
+        tl.to("#sh" + k, { borderColor: "#8a5a2b", duration: 0.3 }, 21.28 + k * 0.1);
+      });
+      tl.to(["#thumbs2", "#bar"], { opacity: 0, duration: 0.2 }, 23.3);
+
+      // ── outro ──
+      tl.fromTo("#outro", { y: 1920 }, { y: 0, duration: 0.7, ease: "power3.inOut" }, 23.46);
+      tl.fromTo("#omark", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.7, ease: EASE }, 23.9); // beat-locked: 24.01s
+      tl.fromTo("#oword", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: EASE }, 24.01);
+      tl.fromTo("#odom", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 24.4);
+      tl.fromTo("#ot1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 25.0);
+      tl.fromTo("#ot2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 26.6);
+      tl.fromTo("#oprices", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE }, 27.2);
+      tl.fromTo("#omark", { boxShadow: "0 0 0 0 rgba(138,90,43,0)" }, { boxShadow: "0 0 90px 20px rgba(138,90,43,.25)", duration: 0.55, ease: "sine.inOut", yoyo: true, repeat: 5, immediateRender: false }, 24.5);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
