@@ -12,13 +12,19 @@
 // using whichever is SMALLER, so the grid covers the full frame on both
 // axes (cropping whichever axis has excess) rather than letterboxing.
 //
-// Reduced motion AND mobile both skip the Three.js grid entirely (no
-// Canvas, no WebGL context, no mention of it in the DOM at all) and instead
-// render the SAME baked content as a plain static <img> (via
+// Reduced motion skips the Three.js grid (no Canvas, no WebGL context) and
+// instead renders the same baked content as a plain static <img> (via
 // canvas.toDataURL) — same wordmark/tagline/fonts/colors as the interactive
-// version, just not the grid, the pointer effect, or (on mobile) the old
-// VILAS-reveal text animation this replaced — so those visitors see the
-// same hero, held still, not a different one.
+// version, just not the grid or the pointer effect.
+//
+// Mobile is different: it never touches the canvas bake OR the 3D grid at
+// all. The baked texture is COLS:ROWS (27:16, landscape) and was being
+// `object-cover`'d into a narrow portrait viewport, which crops almost the
+// whole image down to a sliver of the center — visitors were seeing "ILA"
+// and half a V/S instead of the wordmark. Mobile instead renders real,
+// reflowing HTML text (the `md:hidden` block below) — always present in the
+// DOM via a CSS breakpoint, not a JS decision, so there's no flash and no
+// aspect-ratio cropping at any width.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
@@ -377,13 +383,20 @@ export function FracturedHero() {
   const textureRef = useRef<THREE.CanvasTexture | null>(null);
   const activeRef = useRef(false);
 
+  const dotted = SITE.domain.slice(SITE.domain.indexOf("."));
+  const wordmark = `${SITE.brand.toUpperCase()}${dotted}`;
+
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
+      const mobile = window.matchMedia(MOBILE_QUERY).matches;
+      // Mobile renders the plain-text block below instead — skip the bake
+      // and the 3D grid entirely, no need to even touch fonts.ready for it.
+      if (mobile) return;
+
       const reduced = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       ).matches;
-      const mobile = window.matchMedia(MOBILE_QUERY).matches;
       try {
         await document.fonts?.ready; // bake against the real face, not a fallback
       } catch {
@@ -391,13 +404,9 @@ export function FracturedHero() {
       }
       if (cancelled) return;
 
-      const dotted = SITE.domain.slice(SITE.domain.indexOf("."));
-      const wordmark = `${SITE.brand.toUpperCase()}${dotted}`;
-
-      // Reduced motion or mobile: paint the same content but never touch
-      // Three.js at all — no Canvas, no WebGL context, just a static <img>.
-      // The interactive grid is desktop-only.
-      if (reduced || mobile) {
+      // Reduced motion: paint the same content but never touch Three.js at
+      // all — no Canvas, no WebGL context, just a static <img>.
+      if (reduced) {
         const canvas = paintCanvas(wordmark, SITE.tagline);
         if (!cancelled && canvas) setStaticSrc(canvas.toDataURL());
         return;
@@ -416,7 +425,7 @@ export function FracturedHero() {
       cancelled = true;
       textureRef.current?.dispose();
     };
-  }, []);
+  }, [wordmark]);
 
   return (
     <div
@@ -435,30 +444,59 @@ export function FracturedHero() {
         activeRef.current = false;
       }}
     >
-      {staticSrc ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={staticSrc}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      ) : (
-        texture && (
-          <Canvas
-            dpr={[1, 2]}
-            camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0, 10] }}
-            // R3F's default renderer runs ACESFilmicToneMapping, which
-            // compresses/desaturates bright, low-contrast colors like this
-            // cream non-uniformly per channel — confirmed live (gl.toneMapping
-            // read back as 4 = ACESFilmicToneMapping) as the actual cause of
-            // the boxes rendering visibly grayer than the true #EDE7DA.
-            // NoToneMapping renders flat material colors exactly as authored.
-            gl={{ toneMapping: THREE.NoToneMapping }}
-          >
-            <Scene texture={texture} activeRef={activeRef} />
-          </Canvas>
-        )
-      )}
+      {/* Mobile: real, reflowing text — no canvas bake, no WebGL, nothing
+          that can crop against an aspect ratio. Present via CSS breakpoint
+          (matches MOBILE_QUERY's 767px) so it's there from first paint. */}
+      <div className="flex h-full w-full flex-col items-center justify-center gap-4 px-6 text-center md:hidden">
+        <p
+          style={{
+            fontFamily: "var(--font-wordmark)",
+            fontWeight: 500,
+            fontSize: "clamp(2.25rem, 11vw, 3.5rem)",
+            lineHeight: 1,
+            color: CREAM,
+          }}
+        >
+          {wordmark}
+        </p>
+        <p
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "clamp(0.75rem, 3vw, 0.95rem)",
+            color: "rgba(237, 231, 218, 0.65)",
+          }}
+        >
+          {SITE.tagline}
+        </p>
+      </div>
+
+      {/* Desktop: the fractured grid, or its reduced-motion static fallback. */}
+      <div className="hidden h-full w-full md:block">
+        {staticSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={staticSrc}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          texture && (
+            <Canvas
+              dpr={[1, 2]}
+              camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0, 10] }}
+              // R3F's default renderer runs ACESFilmicToneMapping, which
+              // compresses/desaturates bright, low-contrast colors like this
+              // cream non-uniformly per channel — confirmed live (gl.toneMapping
+              // read back as 4 = ACESFilmicToneMapping) as the actual cause of
+              // the boxes rendering visibly grayer than the true #EDE7DA.
+              // NoToneMapping renders flat material colors exactly as authored.
+              gl={{ toneMapping: THREE.NoToneMapping }}
+            >
+              <Scene texture={texture} activeRef={activeRef} />
+            </Canvas>
+          )
+        )}
+      </div>
     </div>
   );
 }
