@@ -1,8 +1,12 @@
 # HANDOFF — updated 2026-10-02 (reel batches 1–3; site state below is from main, merged in)
 
 ## Marketing — new format (2026-10-06)
-- **New skill `.claude/skills/trojan-reel/`** (`/trojan-reel`): an ad that plays as a real "what if" physics hypothetical and then, mid-sentence with no cut, lands on vilas.studio (~60/40 split).
-  Reverse-engineered from a BRGR BOX pole-vault TikTok Noah sent; the teardown is in `references/brgr-box-teardown.md`. Still rendered with HyperFrames using the /brag folder layout. No reel built yet. Next: pick a seed, check the maths, build reel #1.
+- **Skill `.claude/skills/zach-d-reel/`** (replaces the short-lived `trojan-reel`): Noah uploads a Zack D Films-style story video (part 1).
+  We append a part 2 that hooks the video's last line/last image and lands it on vilas.studio. **The original is never edited unless Noah asks.**
+  `scripts/join.sh` stream-copies the original's video (it verifies the frames are bit-identical) and re-encodes the soundtrack once, because TikTok downloads are HE-AACv2.
+  `references/teardowns.md` breaks down the 3 reference ads (pole vault/BRGR BOX, gas drip/Maps, drainpipe/Local Area Burger). `references/vilas.md` has the facts and allowed claims (prices from lib/pricing.ts).
+  A zip of the same folder was sent to Noah to upload as a claude.ai skill. No reel built with it yet.
+- Gotcha: Hugging Face model downloads are blocked by the proxy, so local speech-to-text (whisper) can't fetch models. Read the burned-in captions instead.
 
 ## Reels — state as of 2026-10-02 (branch `claude/eager-fermat-5bv4m7`)
 - **10 new reels rendered + committed tonight** (one folder each, `brag-output-2026-10-02-<slug>/` with
