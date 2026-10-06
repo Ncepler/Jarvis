@@ -1,0 +1,24 @@
+{
+  "siteSlug": "demo-autobody",
+  "businessName": "Apex Collision",
+  "whatTheyDo": "A collision and auto body repair shop — works directly with every major insurance carrier, offers loaner cars, and guarantees its paint and structural work.",
+  "services": [
+    "Collision repair",
+    "Paint & refinishing",
+    "Frame & structural repair",
+    "Insurance claim handling"
+  ],
+  "hours": "Mon–Fri 8am–6pm · Sat 9am–1pm",
+  "areaServed": "All of Nassau County: Hicksville, Levittown, Bethpage, Plainview, Westbury, Syosset, and nearby towns",
+  "phone": "(516) 555-0143",
+  "contactUrl": "#apex-contact",
+  "isDemo": true,
+  "faqs": [
+    { "q": "What areas do you serve?", "a": "All of Nassau County: Hicksville, Levittown, Bethpage, Plainview, Westbury, Syosset, and nearby towns." },
+    { "q": "Do you work with my insurance?", "a": "Yes. We work with every major carrier, handle the claim directly with your adjuster, and keep you out of the back-and-forth." },
+    { "q": "Do you offer loaner cars?", "a": "We keep a few loaners on hand and can help set up a rental through your claim. Ask when you drop the car off." },
+    { "q": "How long will my repair take?", "a": "A bumper or small panel is usually a few days; heavier collision and frame work runs one to two weeks. You get a real timeline at drop-off." },
+    { "q": "Is your work guaranteed?", "a": "Our paint and refinishing carry a lifetime warranty for as long as you own the vehicle, and body and structural repairs are guaranteed too." },
+    { "q": "Do you give free estimates?", "a": "Always. Bring the car by or send photos and we'll write up a free estimate, no obligation." }
+  ]
+}

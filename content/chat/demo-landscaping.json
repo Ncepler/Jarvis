@@ -1,0 +1,26 @@
+{
+  "siteSlug": "demo-landscaping",
+  "businessName": "Stone & Sage Landscapes",
+  "whatTheyDo": "A design-build landscaping studio — patios, walls, gardens, and lighting, designed and built by the same crew, with seasonal maintenance after.",
+  "services": [
+    "Patios",
+    "Retaining walls & steps",
+    "Garden design",
+    "Low-voltage landscape lighting",
+    "Fire pits",
+    "Seasonal maintenance"
+  ],
+  "hours": "",
+  "areaServed": "The North Shore of Long Island: Huntington, Northport, Port Washington, Cold Spring Harbor, and nearby towns",
+  "phone": "(516) 555-0123",
+  "contactUrl": "#contact",
+  "isDemo": true,
+  "faqs": [
+    { "q": "What areas do you serve?", "a": "The North Shore of Long Island: Huntington, Northport, Port Washington, Cold Spring Harbor, and nearby towns." },
+    { "q": "Do you do design and build, or just one?", "a": "Both, and we prefer to do both. When the crew that builds it drew it, far less gets lost between the plan and the ground." },
+    { "q": "Do you install landscape lighting?", "a": "Yes, low-voltage path, uplighting, and fixtures for fire and water features. It's the part of a project most people underestimate, and the part you enjoy most after dark." },
+    { "q": "How long does a project take?", "a": "A patio is usually a couple of weeks; a full property runs a season. We give you a real schedule before we start." },
+    { "q": "Do you give free estimates?", "a": "Yes. We walk the property, talk through what you want, and put a written number in front of you. No pressure." },
+    { "q": "Do you maintain what you build?", "a": "We do, and we'd rather. Seasonal care by the people who built it keeps it looking right for years." }
+  ]
+}

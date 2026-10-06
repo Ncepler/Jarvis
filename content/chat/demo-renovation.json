@@ -1,0 +1,24 @@
+{
+  "siteSlug": "demo-renovation",
+  "businessName": "Maple & Main Renovation Co.",
+  "whatTheyDo": "A full-service renovation and remodeling contractor — single rooms up to whole-home gut renovations, with their own crew start to finish.",
+  "services": [
+    "Kitchen remodels",
+    "Bathroom remodels",
+    "Whole-home renovations",
+    "Additions"
+  ],
+  "hours": "",
+  "areaServed": "The North Shore of Long Island: Huntington, Northport, Cold Spring Harbor, Port Washington, and surrounding towns",
+  "phone": "(516) 555-0000",
+  "contactUrl": "#contact",
+  "isDemo": true,
+  "faqs": [
+    { "q": "What areas do you serve?", "a": "The North Shore of Long Island: Huntington, Northport, Cold Spring Harbor, Port Washington, and the surrounding towns. If you're nearby, just ask." },
+    { "q": "Do you handle small remodels and whole-home?", "a": "Both. A single bathroom or a full gut down to the studs, same crew, same standard. Tell us the scope and we'll tell you straight." },
+    { "q": "Are you licensed and insured?", "a": "Yes. Fully licensed and insured, and happy to send proof before any work starts." },
+    { "q": "Do you give free estimates?", "a": "Always. We walk the house, talk through what you want, and put a real written number in front of you. No pressure." },
+    { "q": "How long does a renovation take?", "a": "A bathroom is usually a few weeks; a whole-home runs a few months. We give you a real schedule up front and keep you posted as we go." },
+    { "q": "Do you use your own crew?", "a": "Yes, no subs. The people who quote the job are the people doing it. That's how the quality stays consistent." }
+  ]
+}

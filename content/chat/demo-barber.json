@@ -1,0 +1,25 @@
+{
+  "siteSlug": "demo-barber",
+  "businessName": "Standard Barber Co.",
+  "whatTheyDo": "A walk-in-friendly barbershop — haircuts, skin fades, beard line-ups, and hot-towel shaves, Tuesday through Saturday.",
+  "services": [
+    "Haircut — $35",
+    "Skin Fade — $40",
+    "Beard & Line-up — $20",
+    "Hot-towel Shave — $45",
+    "The Works (cut, shave, towel) — $70",
+    "Kids' cut (12 and under) — $25"
+  ],
+  "hours": "Tue–Sat, 9am–7pm. Closed Sunday and Monday.",
+  "areaServed": "",
+  "phone": "(631) 555-0185",
+  "contactUrl": "#contact",
+  "isDemo": true,
+  "faqs": [
+    { "q": "Do I need an appointment?", "a": "No, walk-ins are always welcome. But booking online takes under a minute and skips the wait." },
+    { "q": "What are your hours?", "a": "Tue–Sat, 9am to 7pm. If the pole out front is spinning, we're open and cutting." },
+    { "q": "Do you cut kids' hair?", "a": "We do. Kids 12 and under are $25, and we keep it quick and easy for the first-timers." },
+    { "q": "How much is a cut?", "a": "Haircut $35, skin fade $40, beard line-up $20, hot-towel shave $45. The works (cut, shave, towel) is $70." },
+    { "q": "Cash or card?", "a": "Either. And if you rebook on the way out, your next chair's already on the calendar." }
+  ]
+}

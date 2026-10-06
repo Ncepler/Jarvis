@@ -1,0 +1,22 @@
+{
+  "siteSlug": "demo-powerwash",
+  "businessName": "Tide Line Power Washing",
+  "whatTheyDo": "Residential power washing — houses, driveways, and decks, using a low-pressure soft wash on siding so it cleans without damage.",
+  "services": [
+    "House soft washing",
+    "Driveway power washing",
+    "Deck cleaning"
+  ],
+  "hours": "",
+  "areaServed": "Suffolk County: Sayville, Patchogue, Bayport, Blue Point, Oakdale, Bohemia, Holbrook, and nearby towns",
+  "phone": "(631) 555-0192",
+  "contactUrl": "#contact",
+  "isDemo": true,
+  "faqs": [
+    { "q": "What areas do you serve?", "a": "Suffolk County: Sayville, Patchogue, Bayport, Blue Point, Oakdale, Bohemia, Holbrook, and nearby towns." },
+    { "q": "Will pressure washing damage my siding?", "a": "Not the way we do it. Houses get a low-pressure soft wash that cleans the surface without forcing water behind it." },
+    { "q": "Can I just text a photo for a price?", "a": "Yes, that's the fastest way. Send a picture of the house or driveway and we'll send back a flat quote, usually the same day." },
+    { "q": "Are you licensed and insured?", "a": "Fully licensed and insured. We'll send proof before we start if you'd like to see it." },
+    { "q": "How long does a wash take?", "a": "Most homes and driveways are a single morning. We'll give you a real time window when we quote it." }
+  ]
+}

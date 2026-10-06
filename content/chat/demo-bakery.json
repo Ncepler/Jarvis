@@ -1,0 +1,23 @@
+{
+  "siteSlug": "demo-bakery",
+  "businessName": "Golden Hour Bakehouse",
+  "whatTheyDo": "A small bakery — daily bread, morning pastry, cakes to order, and wholesale deliveries to cafés — open Wednesday through Sunday until sold out.",
+  "services": [
+    "Daily bread",
+    "Morning pastry",
+    "Cakes to order",
+    "Wholesale deliveries"
+  ],
+  "hours": "Wed–Sun, 7am until sold out. Closed Monday and Tuesday.",
+  "areaServed": "",
+  "phone": "(631) 555-0173",
+  "contactUrl": "#contact",
+  "isDemo": true,
+  "faqs": [
+    { "q": "What days are you open?", "a": "Wed–Sun, 7am until sold out. We post the morning's bake so you know what's in the case before you come." },
+    { "q": "Can I order ahead?", "a": "Yes, order by 8pm and your bag is on the shelf with your name on it the next morning." },
+    { "q": "How much notice for a cake?", "a": "Two days for whole cakes. Tell us vanilla or chocolate and the size and we'll have it ready." },
+    { "q": "Do you sell wholesale to cafés?", "a": "We do, with standing morning deliveries of bread and pastry. Reach out and we'll talk about a route." },
+    { "q": "Do you do gluten-free?", "a": "Not yet. We're a small flour-and-water shop and can't promise a clean kitchen for it. We'd rather be honest than careless." }
+  ]
+}

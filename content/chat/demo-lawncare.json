@@ -1,0 +1,22 @@
+{
+  "siteSlug": "demo-lawncare",
+  "businessName": "Fresh Cut Lawn Co.",
+  "whatTheyDo": "Weekly residential lawn care on the South Shore — no contracts, a firm price by text photo, and the same crew on the same day every week.",
+  "services": [
+    "Basic Mow",
+    "Full Care",
+    "Seasonal lawn programs"
+  ],
+  "hours": "",
+  "areaServed": "The South Shore of Nassau County and nearby towns",
+  "phone": "(516) 555-0148",
+  "contactUrl": "#contact",
+  "isDemo": true,
+  "faqs": [
+    { "q": "What areas do you serve?", "a": "The South Shore of Nassau County and nearby towns. Send your address and we'll confirm you're on the route." },
+    { "q": "Do I need a contract?", "a": "No. We run week to week. Skip a cut or cancel entirely by text, no penalty, no paperwork." },
+    { "q": "How do I get a price?", "a": "Text a photo of the yard and your address. You'll have a firm weekly number that night, no site visit required." },
+    { "q": "What day will you come?", "a": "You get a set day each week with the same crew. If weather pushes it, we'll text you the new day." },
+    { "q": "Are you insured?", "a": "Yes, fully insured. Happy to send proof before your first visit." }
+  ]
+}

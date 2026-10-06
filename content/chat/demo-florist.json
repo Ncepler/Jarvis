@@ -1,0 +1,24 @@
+{
+  "siteSlug": "demo-florist",
+  "businessName": "Wildstem Florals",
+  "whatTheyDo": "A flower shop doing everyday arrangements, weddings, sympathy, events, and standing weekly orders, with same-day local delivery.",
+  "services": [
+    "Everyday arrangements",
+    "Weddings",
+    "Sympathy arrangements",
+    "Events",
+    "Standing weekly flower orders"
+  ],
+  "hours": "",
+  "areaServed": "Rockville Centre & nearby Long Island towns",
+  "phone": "(516) 555-0167",
+  "contactUrl": "#contact",
+  "isDemo": true,
+  "faqs": [
+    { "q": "Do you deliver?", "a": "Yes, same-day across Rockville Centre and nearby towns for orders placed by 2pm, and scheduled delivery beyond that." },
+    { "q": "How far ahead should I book a wedding?", "a": "The best dates book a season out. Reach out early with the venue and the month and we'll bring ideas to a first call." },
+    { "q": "Can I just say a budget and let you design?", "a": "Absolutely. That's most of what we do. Give us a number and a vibe and we'll run with it." },
+    { "q": "Do you do sympathy arrangements on short notice?", "a": "We do, same-day when we can. Call the shop and we'll handle it gently." },
+    { "q": "Can I set up weekly flowers?", "a": "Yes. A standing weekly order for the house or a business, billed simply, skip any week by text." }
+  ]
+}

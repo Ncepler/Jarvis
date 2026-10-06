@@ -1,0 +1,18 @@
+{
+  "siteSlug": "demo-magician",
+  "businessName": "Elias Vane",
+  "whatTheyDo": "A close-up and stage magician & mentalist performing close-up/strolling magic, stage illusions, mentalism, corporate galas, and private events and weddings.",
+  "services": [
+    "Close-up & strolling magic",
+    "Stage illusions",
+    "Mentalism",
+    "Corporate & galas",
+    "Private events & weddings"
+  ],
+  "hours": "",
+  "areaServed": "Based on Long Island, NY, available across the tri-state area",
+  "phone": "(516) 555-0199",
+  "contactUrl": "#magician-book",
+  "isDemo": true,
+  "faqs": []
+}

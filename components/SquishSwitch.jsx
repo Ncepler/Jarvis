@@ -96,6 +96,11 @@ export default function SquishSwitch({
   };
   const down = e => {
     if (disabled || grip.current || e.button !== 0) return;
+    // Safety net for the edge case below: a pointer sequence that ends in
+    // pointercancel never gets a trailing click to clear this flag, which
+    // would otherwise swallow the next real tap forever. A fresh
+    // pointerdown always means an old click (if any) already landed.
+    skipClick.current = false;
     grip.current = {
       id: e.pointerId,
       grab: null,
@@ -132,10 +137,16 @@ export default function SquishSwitch({
     } catch {}
     if (cancelled) commit(g.onAtPress);
     else if (!g.moved) commit(!onRef.current);
+    // Touch (and some pointer-event mice) fire a synthetic click after
+    // pointerup — sometimes a full task later, behind the legacy ~300ms tap
+    // delay. A `setTimeout(…, 0)` reset here used to race that click: the
+    // timeout often ran first, clearing the guard before the click arrived,
+    // so click() ran commit() a second time and flipped the switch right
+    // back (the "taps but immediately un-switches" mobile bug). Clearing
+    // the flag only happens in click() now — see the pointerdown comment
+    // above for how a stuck flag (pointercancel with no trailing click)
+    // still recovers.
     skipClick.current = true;
-    setTimeout(() => {
-      skipClick.current = false;
-    }, 0);
     setDragging(false);
   };
   const click = () => {

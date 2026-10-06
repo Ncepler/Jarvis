@@ -1,197 +1,93 @@
-# HANDOFF — updated 2026-09-29 (chrome fixes + client sites + power-wash hero)
+# HANDOFF — updated 2026-10-06 (chat add-on finished + mobile toggle fix)
 
 ## Current state
-- **Demo header is no longer sticky** (2026-10-01, Noah): `DemoHeader` in
-  `components/demos/system.tsx` is now `relative` and scrolls away with the page;
-  only `VilasDemoBar`'s pill stays pinned, on all 8 demos that use `DemoHeader`
-  (Magician has its own chrome, no header). Header background is now solid
-  `--d-bg` (the blur only mattered while content scrolled under it).
-  `ANCHOR_SCROLL_CLASS` dropped 168px → 88px (clears just the 56px Vilas bar).
-  Verified with Playwright at 1280 + 390 widths: bar `top` holds at 12px after
-  a 2500px scroll, header goes off-screen. tsc / lint / build clean.
-- **Auto body Premium hero = scroll-scrubbed video** (`components/demos/AutoBodyScrollHero.tsx`,
-  wired in `AutoBodyDemo.tsx` when `tier === "premium"`; Basic untouched). Video +
-  poster in `public/videos/` (all-keyframe H.264, 1s frozen tail). `HeroCarReveal`'s
-  premium branch / `PremiumHeroMedia` use for auto body is now dead code. Not yet
-  checked in a real H.264 browser (sandbox Chromium has no H.264) or on iOS Safari.
-- Deployed: `main` fast-forwarded to `e7eeb3a` (the full 3-round second
-  photo folder) and confirmed `READY` on production (`vilas.studio`) via
-  Vercel MCP. Commits `aa49a13` (chrome fixes) through `1f094a5`
-  (power-wash hero, below) are on `claude/sleepy-newton-uaamxu`, pushed but
-  not yet fast-forwarded to main as of this writing — do that next unless
-  told otherwise. Builds clean locally: `npx tsc --noEmit`, `next lint`,
-  `next build` all pass.
-- **PowerWashDemo hero replaced** (`22e29b5`/`1f094a5`): the old hero
-  (`/previews/firstPowerWashImage.webp`) was a badly mismatched stock photo
-  of a municipal street cleaner on a busy European sidewalk — no
-  residential/driveway context at all. Generated a real match via
-  Higgsfield (`gpt_image_2_5`, prompt in git log) and Noah picked one of 2
-  candidates; saved as `public/demos/powerwash/hero.webp`. Wired into BOTH
-  `PowerWashDemo.tsx`'s `firstPowerWashImage` const AND `lib/projects.ts`'s
-  `demo-powerwash` gallery-thumbnail `screenshot` field (these are two
-  separate things — see Gotchas). Verified via local Playwright screenshot
-  on both `/demos/demo-powerwash` and `/#work`.
-- **Fixed a real, site-wide sticky-positioning bug** (`aa49a13`): `app/
-  globals.css` had `overflow-x: hidden` on BOTH `html` and `body`. That
-  combination makes both elements compute to `overflow: hidden auto` and
-  register as scroll containers simultaneously, which silently breaks
-  `position: sticky` everywhere on the page — `VilasDemoBar` (and then-sticky
-  `DemoHeader`) were scrolling away instead of staying pinned on every demo.
-  Confirmed with a Playwright test before/after (sticky bar's `rect.top`
-  went from drifting to -2988px after a 3000px scroll, to holding at
-  12px). Fix: keep the rule on `body` only, drop it from `html`.
-- **Exit link** (`VilasDemoBar.tsx`) now goes to `/#work` (the homepage
-  gallery section) instead of `/` — a visitor leaving a demo lands back
-  among the style cards, not at the top of the homepage.
-- **Gallery thumbnails were stale** (`lib/projects.ts`'s `screenshot`
-  field — a separate static image per project used only by the homepage
-  `AccordionGallery`, NOT a live render of the demo). 3 of 9 still pointed
-  at old images: autobody's showed the photo with visible Mercedes-Benz
-  branding that was replaced in the demo itself weeks ago, landscaping and
-  lawncare showed their old mismatched heroes, and magician had no image
-  at all. All 9 now match each demo's real current hero
-  (`magician` uses `portrait.webp`, the others use whatever `heroImage`
-  constant that demo file currently sets — checked each one directly
-  rather than assumed).
-- **"Out in the world" client-sites sphere (`InfiniteMenu.tsx`/`.css`)**:
-  `.face-title` had no `max-width`, so a long name like "Val's Elegant
-  Barbershop" or "Jonah Shapiro Magic" ran wide enough at its fixed
-  3rem/900-weight size to overlap the centered sphere face. Capped to
-  `8ch` so it wraps to a second line instead.
-- **Added 2 new client sites** to Supabase (`client_sites` table, not a
-  file — see Gotchas): NextGenRest (`nextgenrest.vercel.app`) and
-  SporesRUs (`sporesrus.vercel.app`), `published: true`, no
-  `screenshot_url` set (so the existing daily auto-capture cron picks them
-  up — see Blocked on Noah). Real business details unknown, so
-  `description` was left `null` rather than invented — Noah should fill
-  it in via the `client_sites` table if he wants one shown.
-- **First+second photo folders and the craft pass** are all fully shipped
-  to production — see git log around `45216ce`, `141f22c`, `e7eeb3a` for
-  the itemized breakdowns. Nothing outstanding from any of them.
+- **Fixed a real mobile bug in `VilasDemoBar`'s tier toggle**
+  (`components/SquishSwitch.jsx`): tapping it on a touch device flipped it
+  then immediately flipped back. Cause: `pointerup` set a `skipClick` guard
+  (to swallow the browser's trailing synthetic `click` after a tap) and
+  reset it on a `setTimeout(…, 0)`. On touch, that synthetic click can land
+  a full task later than the timeout, so the timeout cleared the guard
+  first, `click()` ran a second `commit()`, and it reverted. Fix: only
+  `click()` clears the flag now (no timer); `pointerdown` also clears it
+  defensively so a `pointercancel` (which never gets a trailing click)
+  can't leave it stuck. Verified with a real Playwright touch `tap()`
+  against a built+served page — flips once, holds. `tsc`/`build` clean.
+- **Chat assistant add-on (the 3-session brief) is now fully done** —
+  sessions 1 and 2 had already landed (different implementation than this
+  session's first pass, done by a parallel session; same outcome: inline
+  chat under the FAQ on vilas.studio, `/api/chat`, `chat_usage`/
+  `chat_site_usage` tables, the `$30/month` pricing line, the `/start`
+  checkbox, the admin build-prompt section — all verified present).
+  **This session did session 3**: every demo now mounts `ChatAssistant` in
+  `floating` mode, wired once in `components/demos/DemoRoute.tsx` (not
+  per-demo file) alongside `VilasDemoBar`. Added
+  `content/chat/demo-{renovation,landscaping,powerwash,florist,lawncare,
+  bakery,barber,autobody,magician}.json`, each `isDemo: true` and filled
+  only from copy already in that demo file (business name, services,
+  hours, phone, service area, FAQs — nothing invented). `tsc`/`lint`/
+  `build` all clean; `.next/static` grepped for `OPENAI` — zero hits.
+- Not yet pushed to `main` — stays on this branch until asked. Not yet
+  verified live on a real phone (sandbox has no device, see Gotchas).
+- Demo header is `relative` (not sticky) in `components/demos/system.tsx`;
+  only `VilasDemoBar`'s pill stays pinned on all 8 `DemoHeader` demos
+  (Magician has its own chrome). Auto body Premium hero is a
+  scroll-scrubbed video (`AutoBodyScrollHero.tsx`) — unverified in a real
+  H.264 browser/iOS Safari (sandbox Chromium has no H.264).
+- `main` was last fast-forwarded to `e7eeb3a`; commits since then
+  (chrome fixes, power-wash hero, chat add-on, demo chat mounts, this
+  toggle fix) are on this branch, pushed but not yet merged.
 
 ## Blocked on Noah
-- **The two new client-site screenshots aren't live yet.** This sandbox
-  can't reach `nextgenrest.vercel.app`/`sporesrus.vercel.app` (network
-  policy) to capture them directly, and `mcp__Vercel__web_fetch_vercel_url`
-  refused both projects with an authorization-scope error (same for the
-  `jarvis` project itself, so it's not project-specific — that whole tool
-  path looks unauthorized for this session regardless of target). The
-  site's own `/api/capture-sites` cron (`vercel.json`, daily 8am UTC,
-  Puppeteer on Vercel's infra — not this sandbox) already ran successfully
-  as recently as Sep 28 for the existing rows, so the two new ones should
-  get auto-captured at the next run. To force it sooner: visit
-  `https://vilas.studio/api/capture-sites` once (plain GET, no auth
-  needed — `CRON_SECRET` isn't set on this project).
-- **2 generated power-wash replacement candidates are still unclaimed** in
-  Higgsfield history (job ids `1d67034b-bab1-4410-b545-bd6965908c8b` and
-  `4a5508a3-4d2a-4e58-8c35-d0e94ec72243`) — no confirmed destination for
-  this photo either way (`PowerWashDemo`'s slider already has real photos
-  from round 1, this one has no "before" companion). 1 of the 5 remake
-  credits Noah offered is still unspent.
+- Real `OPENAI_API_KEY`/`CHAT_MODEL`/`IP_HASH_SALT`/`CHAT_ALLOWED_ORIGINS`
+  env vars — `.env.example` has the keys, blank. Chat returns a clean 503
+  until they're set; nothing breaks without them.
+- A real mobile device to confirm the toggle fix feels right (sandbox only
+  has emulated touch via Playwright).
+- The two new client-site screenshots (NextGenRest/SporesRUs) — same
+  network-reachability blocker as before, should auto-capture on the next
+  `/api/capture-sites` cron run.
 - No pull request opened.
 
 ## Next up (ordered)
-1. Fast-forward `main` to `1f094a5` (chrome fixes + power-wash hero),
-   confirm Vercel green.
-2. Confirm the NextGenRest/SporesRUs screenshots landed after the next
-   `/api/capture-sites` run; add a real `description` for each if wanted.
-3. If a "before" shot for the power-wash garage-door photo ever comes in,
-   decide whether it becomes a second before/after slider or something
-   else.
-4. TRFox screenshot capture (pending from before this session).
-5. Real Higgsfield hero clips for Premium tier.
+1. Fast-forward `main` once this session's work is reviewed and approved.
+2. Set the chat env vars in Vercel and confirm a real round-trip on a demo
+   and on vilas.studio itself.
+3. Confirm NextGenRest/SporesRUs screenshots landed; add descriptions.
+4. Real Higgsfield hero clips for the remaining Premium tiers.
 
 ## Gotchas & decisions (standing, trimmed)
-- **Remotion lives in `video/` — its own project, NOT part of the site
-  (2026-10-04).** Scaffolded with `npx create-video@latest --yes --blank
-  --no-tailwind video` (Remotion 4.0.532, own `package.json` +
-  `node_modules`). `cd video && npm i && npm run dev` opens Studio;
-  `npx remotion render`. The site's `tsconfig.json` excludes `video` —
-  without that, Vercel (which never installs `video/`'s deps) fails the
-  typecheck. Never add `remotion` to the root `package.json`; the site
-  stack (§3) is unchanged. In a cloud session, render with
-  `--browser-executable=/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell`
-  (verified working). First video: `VilasReel` (Instagram, 1080×1920,
-  15s, `video/src/reel/`) — "Great at the work. Invisible online." →
-  struck-through dated-site signs → "It's not you. It's the website." →
-  VAL→VALIS→VILAS reveal; last frame is pixel-identical to frame 0 so it
-  loops. Type-only on purpose: the IG account is pre-client, so no demo or
-  client screenshots. Colours/fonts mirror the site in `video/src/brand.ts`
-  (fonts are local woff2 in `video/public/fonts`, OFL). Second video:
-  `Showcase` (`video/src/showcase/`, 23s, loops) — WebGL: GPU particles
-  (galaxy → VAL, positions computed in the vertex shader from the frame),
-  extruded 3D Space Grotesk letters from the real glyph outlines
-  (opentype.js → three ExtrudeGeometry), a live silk shader, a CSS-3D drum
-  of COPY.marquee trades, finale dissolves back into frame 0. The camera
-  never moves — the world group orbits (`stage.tsx` Rig); never use R3F
-  `useFrame` (Remotion rule: everything from `useCurrentFrame`). Renders
-  need WebGL: config sets ANGLE; in the cloud it falls back to
-  SwiftShader (~1s/frame). Agent skills: `npx skills add remotion-dev/skills`
-  put 12 in `.agents/skills/remotion-*`, symlinked into `.claude/skills/`,
-  pinned by `skills-lock.json`; tsc skips dot-dirs so they never hit the build.
-- **"Out in the world" client sites (Val's Barbershop, Jonah Shapiro Magic,
-  PackPerfect, TRFox, now NextGenRest/SporesRUs) are Supabase rows
-  (`client_sites` table, Vilas project), not a file in this repo.** There's
-  no `lib/clientSites.ts` data array to edit — `lib/clientSites.ts` only
-  has the *fetch* code (`listClientSites()`). Add/edit a site with
-  `mcp__Supabase__execute_sql` against `epynfvskwaxejdibvgbr`. A row's
-  image comes from `screenshot_url` if set (manual override), else an
-  auto-captured PNG keyed by `captured_at`'s date — see `lib/screenshot.ts`
-  and `app/api/capture-sites/route.ts` (a Vercel Cron, `vercel.json`, daily
-  8am UTC, runs real Puppeteer on Vercel's infra so it can reach sites this
-  sandbox can't).
-- **This session cannot read Noah's local computer at all** — no mounted
-  drive, no path access, nothing. A folder path like `~/Downloads/
-  higgsfield-9-27` is meaningless here; the only way media reaches this
-  session is a chat attachment. (A `claude remote-control` session on his
-  own machine could read it directly, but that's a different session.)
-  Also still true: this sandbox's egress is blocked to both the Higgsfield
-  CDN (`d8j0ntlcm91z4.cloudfront.net`) and `vilas.studio` itself — a fresh
-  `generate_image` job's result URL and the live production site are
-  equally unreachable from here. Verification runs against a local
-  `next start` + Playwright instead of the real deployed URL.
-- **Don't assume a new image folder maps 1:1 onto the original 11-slot
-  manifest.** This round's images had no prior job-ID table — matching them
-  to a destination meant reading each target demo file fresh. Two of five
-  replaced an existing (flawed) photo instead of filling an empty slot;
-  read the component before assuming "new photo = new placeholder."
-- **Check a new photo against its destination's existing palette/grade**,
-  not just its own quality — a fine photo can still be wrong for a spot
-  (renovation's WORK grid is uniformly sepia-toned; a full-color drop-in
-  needs `sharp` toning to match, see round 1 above).
-- **Concurrent subagents sharing one working tree is genuinely risky**:
-  this session hit a `git stash` collision (again) mid-Phase-3, and two
-  subagents were cut off mid-task by a session-wide API rate limit. Every
-  case was recoverable (`git checkout stash@{0} -- <path>`, or just
-  verifying the interrupted agent's last edit was actually already
-  complete before treating it as done) — but budget time for this kind of
-  recovery when running 9 parallel file-editing agents in one checkout.
-- **This devcontainer flakes on `next build` under concurrent sessions**
-  (SIGKILL/stale-cache errors) — `tsc`/`eslint` stay reliable throughout;
-  re-run build once contention clears.
-- `.review/` (gitignored) holds per-style gate reports and screenshots —
-  **`git add` on an explicitly-named gitignored path exits non-zero and
-  silently kills the rest of an `&&` chain**, including a `git commit` after
-  it. Add real files and ignored files in separate commands, not one `git
-  add realfile ignoredfile && git commit`.
-- `public/vilasherovideo.mp4` still does not decode (falls back to the
-  static poster) — unrelated to demos.
+- **This sandbox's `next start`/`next build` test loop is unreliable for
+  verifying client-side bugs**: stale/mismatched chunk hashes showed up
+  between a `rm -rf .next && npm run build` and the next `next start` more
+  than once this session, independent of any code change. If a Playwright
+  check against a locally-served build gives a confusing 400/404 on a
+  `_next/static/chunks/...js`, don't chase it — kill all `next` processes,
+  `rm -rf .next`, rebuild, and restart once; if it still doesn't line up,
+  trust `tsc`/`lint`/the build's own success and move on rather than
+  burning time on the harness.
+- **Remotion lives in `video/`, its own project, NOT part of the site.**
+  `cd video && npm i && npm run dev`. The root `tsconfig.json` excludes
+  `video/`; never add `remotion` to the root `package.json`.
+- **"Out in the world" client sites are Supabase rows** (`client_sites`
+  table, Vilas project), not a file in this repo — edit via
+  `mcp__Supabase__execute_sql` against `epynfvskwaxejdibvgbr`.
+- **This session cannot read Noah's local computer** — no mounted drive.
+  Also still true: this sandbox's egress is blocked to the Higgsfield CDN
+  and to `vilas.studio` itself — verify against a local build, not prod.
+- **Concurrent subagents sharing one working tree is risky** — budget time
+  for `git stash` collisions if running several file-editing agents at once.
+- `.review/` (gitignored) holds per-style gate reports — `git add` on an
+  explicitly-named gitignored path exits non-zero and silently kills the
+  rest of an `&&` chain. Add real and ignored files in separate commands.
+- `public/vilasherovideo.mp4` still does not decode (falls back to poster).
 - **Demos live in `components/demos/`, not `app/demos/`.**
-- **Demos vary by mood (SKILL §13).** DARK = renovation + landscaping.
-  FOREST-DARK = landscaping specifically. LIGHT = florist/bakery/powerwash/
-  lawncare. WARM-DARK = barber. GRAPHITE-DARK = auto body. THEATRICAL = the
-  Magician (§16).
-- Renovation and florist's *existing* hero photos read a bit hazy/soft
-  compared to barber's crisp one — asset quality, not a code/scrim bug.
-- `Faq`/`Contact` in `system.tsx` both render a fixed two-column layout and
-  sit adjacent in every demo — the one unavoidable back-to-back layout
-  repeat without a `system.tsx` structural change.
-- **Known pre-existing bug, still not fixed:** `Marquee.tsx` (main site, not
-  the demo one) hydration mismatch under `prefers-reduced-motion: reduce`
-  at first paint (React self-heals, nothing visibly breaks).
+- Demos vary by mood (SKILL §13): DARK = renovation; FOREST-DARK =
+  landscaping; LIGHT = florist/bakery/powerwash/lawncare; WARM-DARK =
+  barber; GRAPHITE-DARK = auto body; THEATRICAL = Magician.
+- **Known pre-existing bug, still not fixed:** `Marquee.tsx` (main site)
+  hydration mismatch under `prefers-reduced-motion: reduce` at first paint.
 
 ## Supabase
 - Canonical project: **"Vilas"**, ref `epynfvskwaxejdibvgbr`, us-west-2.
-  RLS deny-all on `intake_submissions`/`update_requests` (service role
-  bypasses). Free tier pauses after ~1wk idle; a cold request just needs a
-  retry.
+  RLS deny-all on every table (service role bypasses). Free tier pauses
+  after ~1wk idle; a cold request just needs a retry.
