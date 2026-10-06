@@ -1,5 +1,9 @@
 # HANDOFF — updated 2026-10-02 (reel batches 1–3; site state below is from main, merged in)
 
+## Marketing — new format (2026-10-06)
+- **New skill `.claude/skills/trojan-reel/`** (`/trojan-reel`): an ad that plays as a real "what if" physics hypothetical and then, mid-sentence with no cut, lands on vilas.studio (~60/40 split).
+  Reverse-engineered from a BRGR BOX pole-vault TikTok Noah sent; the teardown is in `references/brgr-box-teardown.md`. Still rendered with HyperFrames using the /brag folder layout. No reel built yet. Next: pick a seed, check the maths, build reel #1.
+
 ## Reels — state as of 2026-10-02 (branch `claude/eager-fermat-5bv4m7`)
 - **10 new reels rendered + committed tonight** (one folder each, `brag-output-2026-10-02-<slug>/` with
   brag.mp4, brag.jpg (poster, baked in as frame 0), share-copy.txt, brag-plan.md). From the queue: `214am` (#8),
