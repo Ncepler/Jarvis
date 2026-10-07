@@ -9,11 +9,19 @@ switch to Vilas there, keep the same voice, change nothing else, ~5s of hype Vil
 - Sound: original audio to 33.42s (the pause between "until it" and "hit"), 30 ms fade. Original section SNR 30 dB vs the
   upload (re-encoded once to AAC because TikTok downloads are HE-AACv2). Nothing after "until it" from the original is kept.
 
+## Fixes (Noah, 2026-10-07, round 2)
+- **Watermark covered:** the drifting "ZACK D FILMS" title (≈5.3–8.7s) is keyed out by its blue (rings/stars/Moon protected) and
+  filled with dark space + a streaming star field (`work/wm.py`). Only the first GOP (0–8.75s, frames 0–209) is re-encoded
+  (frames before the title: 45.5 dB PSNR vs the upload); 8.75s → the cut stays stream-copied and bit-identical.
+- **Double "hit" fixed:** the original narration already says "until it hit" before the cut (33.32s; "Earth" was 33.52–34.05),
+  so the clone's own "hit" is trimmed off — the clone now says only "Vilas Studio", landing on impact 1.
+
 ## Part 2 (5.85s, 720x1280 @ 24fps to match)
 | t (from cut) | picture | sound |
 |---|---|---|
 | 0.00–0.66 | the tungsten round (same back-view as the original's last shot) falls onto a dim VILAS / STUDIO wordmark; red lock-on lasers | falling whistle + whoosh |
-| 0.30 | caption "hit Vilas Studio" in the original's caption style | cloned narrator: "hit Vilas Studio." |
+| 0.00 | caption "hit Vilas Studio" in the original's caption style | (original narrator already said "until it hit") |
+| 0.62 | — | cloned narrator: "Vilas Studio." |
 | 0.66 | IMPACT 1: flash, shock rings, sparks, radial laser burst, VILAS ignites | boom + zaps (on "Vilas") |
 | 1.17 | IMPACT 2: STUDIO ignites | second hit (on "Studio") |
 | 1.2–1.8 | laser fans build from the bottom corners, strobe | riser + accelerating snare roll |
@@ -33,5 +41,5 @@ The narrator's voice belongs to the original creator. Posting a clone of it sayi
 and is the riskiest part of this reel. Noah's call.
 
 ## Rebuild
-cd work && (python3 -m http.server 8931 &) && python3 audio.py && PORT=8931 FPS=24 FFMPEG=/usr/bin/ffmpeg node render.mjs video part2_1080.mp4 && bash finish.sh <original.mp4> ../brag.mp4
+cd work && (python3 -m http.server 8931 &) && ffmpeg -i <original.mp4> -frames:v 210 -start_number 0 seg1/f%04d.png && python3 wm.py seg1 seg1c 0 209 && python3 audio.py && PORT=8931 FPS=24 FFMPEG=/usr/bin/ffmpeg node render.mjs video part2_1080.mp4 && bash finish.sh <original.mp4> ../brag.mp4
 (work/ is gitignored; render.mjs, comp/, audio.py, synth.py, finish.sh, voice.opus live there.)
