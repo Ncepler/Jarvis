@@ -13,6 +13,9 @@ switch to Vilas there, keep the same voice, change nothing else, ~5s of hype Vil
 - **Watermark covered:** the drifting "ZACK D FILMS" title (≈5.3–8.7s) is keyed out by its blue (rings/stars/Moon protected) and
   filled with dark space + a streaming star field (`work/wm.py`). Only the first GOP (0–8.75s, frames 0–209) is re-encoded
   (frames before the title: 45.5 dB PSNR vs the upload); 8.75s → the cut stays stream-copied and bit-identical.
+- **Logo on the tungsten rod covered (round 3):** the gray "ZACK D FILMS" print right of "TUNGSTEN" (≈21.4–22.3s) is replaced
+  with the panel's own shading (robust polynomial fit to the non-letter pixels, logo box tracked by hand at 9 keyframes —
+  `work/bullet.py`). Only that GOP (20.375–25.79s, frames 489–618) is re-encoded; 8.75–20.375s and 25.79s → cut stay bit-identical.
 - **Double "hit" fixed:** the original narration already says "until it hit" before the cut (33.32s; "Earth" was 33.52–34.05),
   so the clone's own "hit" is trimmed off — the clone now says only "Vilas Studio", landing on impact 1.
 
@@ -41,5 +44,5 @@ The narrator's voice belongs to the original creator. Posting a clone of it sayi
 and is the riskiest part of this reel. Noah's call.
 
 ## Rebuild
-cd work && (python3 -m http.server 8931 &) && ffmpeg -i <original.mp4> -frames:v 210 -start_number 0 seg1/f%04d.png && python3 wm.py seg1 seg1c 0 209 && python3 audio.py && PORT=8931 FPS=24 FFMPEG=/usr/bin/ffmpeg node render.mjs video part2_1080.mp4 && bash finish.sh <original.mp4> ../brag.mp4
+cd work && (python3 -m http.server 8931 &) && ffmpeg -i <original.mp4> -frames:v 210 -start_number 0 seg1/f%04d.png && python3 wm.py seg1 seg1c 0 209 && ffmpeg -ss 20.375 -i <original.mp4> -frames:v 130 -start_number 489 seg2/f%04d.png && python3 bullet.py seg2 seg2c 489 618 && python3 audio.py && PORT=8931 FPS=24 FFMPEG=/usr/bin/ffmpeg node render.mjs video part2_1080.mp4 && bash finish.sh <original.mp4> ../brag.mp4
 (work/ is gitignored; render.mjs, comp/, audio.py, synth.py, finish.sh, voice.opus live there.)
