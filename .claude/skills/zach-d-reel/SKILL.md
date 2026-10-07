@@ -120,7 +120,7 @@ It stream-copies every untouched original frame and verifies them bit-identical,
 
 ### 8. Deliver
 - `final.mp4`, `plan.md` (the ending read, hinge candidates and scores, the edit list, the part 2 script with timings, sources for any number, the asset list) and `caption.txt`.
-- The caption is about **part 1's topic**, not Vilas ("What if you fired a railgun from the Moon at Earth?"), so it doesn't give away the turn. Add 3–5 hashtags, two about the topic and #smallbusiness #webdesign. Suggest a pinned comment that rewards the people who laughed ("the physics is real. so is the website → vilas.studio").
+- **The caption is about Vilas** (Noah's call on railgun: "almost entirely Vilas related"). House style, like the other reel captions: one hook line that nods at the video, then 2-3 plain sentences using only message-bank claims (what Vilas builds, the niches that have a demo, "from $300", anywhere in the US), a "See the work and start a project at vilas.studio." line, a "Send this to…" line, and 4 hashtags (#webdesign #smallbusiness #localbusiness #websitedesign). No emoji, no #longisland. Suggest a pinned comment ("the railgun was a bit. the websites are real → vilas.studio"). Credit the creator only if Noah asks.
 - In the Jarvis repo, outputs go in `brag-output-YYYY-MM-DD-<slug>/` (final as `brag.mp4`, poster `brag.jpg` = a frame from part 1, never the end card; `work/` is gitignored). Anywhere else, put them in the outputs folder.
 - Tell Noah in a few lines: which hinge you used and why; **exactly which ranges of the original were edited** (or that it is verified untouched); that you can't hear audio and what to listen for (the brand's pronunciation, "VEE-las"); and, if you cloned the narrator, the endorsement risk, once.
 
