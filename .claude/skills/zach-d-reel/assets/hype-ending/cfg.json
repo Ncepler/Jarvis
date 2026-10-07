@@ -1,0 +1,55 @@
+{
+  "fps": 24,
+  "duration": 5.85,
+  "tImp1": 0.66,
+  "tImp2": 1.17,
+  "tDrop": 1.8,
+  "beat": 0.4,
+  "tEnd": 4.2,
+  "wordmark": [
+    "VILAS",
+    "STUDIO"
+  ],
+  "slams": [
+    {
+      "t": 1.8,
+      "text": "WEBSITES"
+    },
+    {
+      "t": 2.2,
+      "text": "THAT LOOK"
+    },
+    {
+      "t": 2.6,
+      "text": "EXPENSIVE."
+    },
+    {
+      "t": 3.0,
+      "text": "IT WASN'T.",
+      "glitch": true
+    },
+    {
+      "t": 3.6,
+      "text": "FROM $300",
+      "accent": "$300"
+    }
+  ],
+  "endCard": {
+    "word": "Vilas",
+    "sub": ".studio",
+    "tagline": [
+      "websites that look expensive.",
+      "they weren’t."
+    ]
+  },
+  "caption": {
+    "text": "hit Vilas Studio",
+    "until": 1.85
+  },
+  "voice": {
+    "file": "voice.wav",
+    "trimStart": 0.31,
+    "onsetInClip": 0.042,
+    "landsOn": "tImp1"
+  }
+}

@@ -3,11 +3,14 @@
 ## Marketing — new format (2026-10-06)
 - **Skill `.claude/skills/zach-d-reel/`** (replaces the short-lived `trojan-reel`): Noah uploads a Zack D Films-style story video (part 1).
   We append a part 2 that hooks the video's last line/last image and lands it on vilas.studio. **The original is never edited unless Noah asks.**
-  `scripts/join.sh` stream-copies the original's video (it verifies the frames are bit-identical) and re-encodes the soundtrack once, because TikTok downloads are HE-AACv2.
-  `references/teardowns.md` breaks down the 3 reference ads (pole vault/BRGR BOX, gas drip/Maps, drainpipe/Local Area Burger). `references/vilas.md` has the facts and allowed claims (prices from lib/pricing.ts).
-  A zip of the same folder was sent to Noah to upload as a claude.ai skill. No reel built with it yet.
+  Updated 2026-10-07 with everything learned on the railgun reel: word-swap hinge, voice clone recipe (Higgsfield), covering the creator's marks,
+  the hype laser-drop ending (config-driven template in `assets/hype-ending/`), and tested scripts: `gop.py` (keyframes / GOP extract),
+  `assemble.py` (cut + cover + append; stream-copies untouched frames and verifies them bit-identical, PSNR-checks every re-encoded range,
+  checks the audio; replaces `join.sh`), `strip.sh` and `envelope.py` (frame/audio timing). `references/` has the teardowns, `vilas.md`,
+  `editing-the-original.md`, `voice-clone.md`, `hype-ending.md`, `environment.md` and `worked-example-railgun.md`.
+  A zip of the folder was sent to Noah to upload as a claude.ai skill (re-send it after any change).
 - **First zach-d reel built: `brag-output-2026-10-07-railgun/`.** A railgun-from-the-Moon video, cut at 33.167s (Noah asked for this cut) so "until it hit Earth" becomes "until it hit Vilas Studio" in a Higgsfield clone of the narrator's voice, then a 5.85s laser drop. Not posted.
-  Still to check: listen to whether the clone says "VEE-las". Noah also needs to decide whether to post a clone of the creator's voice at all (see its brag-plan.md).
+  Still to check: listen to whether the clone says "VEE-las". Also: the delivered mix has only ~0.8 dB of voice-over-snare-roll on the last syllable of "Studio" (template's `audio.py` now ducks the roll, 9.0/22.1/10.5 dB); the delivered file is unchanged, offer a re-render. Noah also needs to decide whether to post a clone of the creator's voice at all (see its brag-plan.md).
 - Gotcha: upload.higgsfield.ai, the Higgsfield CDN and backend.composio.dev are all blocked by the egress proxy. Workaround: send files to Higgsfield via a public raw.githubusercontent URL (`media_import_url`), and bring results back through the Composio workbench as md5-checked base64.
 - Gotcha: Hugging Face model downloads are blocked by the proxy, so local speech-to-text (whisper) can't fetch models. Read the burned-in captions instead.
 

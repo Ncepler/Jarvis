@@ -1,0 +1,315 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Hype ending, part 2. Every frame is a pure function of its frame number. ALL timings and words come from ../cfg.json
+// (audio.py reads the same file, so picture and sound cannot drift apart).
+// Design units: 720x1280 (9:16, the original's shape); canvas is 1.5x for clean edges, downscaled at assemble time.
+let CFG, FPS, DUR, NF, T_IMP1, T_IMP2, T_DROP, BEAT, T_END, SLAMS, WM, ENDC, CAP;
+const W = 720, H = 1280, CX = 360;
+const c = document.getElementById('c'), x = c.getContext('2d');
+
+// palette — Vilas ink/bone + hot laser ambers (bronze accent pushed to light)
+const INK = '#0c0907', BONE = '#efe9dd', AMBER = [255, 176, 40], ORANGE = [255, 110, 24], HOT = [255, 236, 200], RED = [255, 52, 30];
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+
+// timeline (seconds from the cut)
+
+// helpers
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const eo = (t) => 1 - Math.pow(1 - clamp(t), 3);          // ease-out cubic
+const ei = (t) => Math.pow(clamp(t), 2.2);                // ease-in
+const expo = (t) => (t <= 0 ? 0 : 1 - Math.pow(2, -10 * t));
+function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+
+// static random sets
+const R = rng(7);
+const STARS = Array.from({ length: 260 }, () => ({ a: R() * Math.PI * 2, d: Math.pow(R(), 0.6), z: R(), tw: R() * 6 }));
+const SPARKS = (seed, n) => { const r = rng(seed); return Array.from({ length: n }, () => ({ a: r() * Math.PI * 2, v: 300 + r() * 1100, l: 0.25 + r() * 0.55, w: 1 + r() * 2.5, hot: r() })); };
+const SP1 = SPARKS(11, 110), SP2 = SPARKS(23, 60), SP3 = SPARKS(41, 90);
+
+function font(w, px, fam = 'Space Grotesk') { return `${w} ${px}px "${fam}"`; }
+
+// ---------- lasers
+function beam(x0, y0, ang, len, col, a, core = true) {
+  const x1 = x0 + Math.cos(ang) * len, y1 = y0 + Math.sin(ang) * len;
+  x.save(); x.globalCompositeOperation = 'lighter'; x.lineCap = 'round';
+  const layers = [[34, 0.035], [16, 0.07], [7, 0.16], [2.6, 0.55]];
+  for (const [w, k] of layers) { x.strokeStyle = rgba(col, a * k); x.lineWidth = w; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); }
+  if (core) { x.strokeStyle = rgba(HOT, a * 0.9); x.lineWidth = 1.1; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); }
+  x.restore();
+}
+function glowDot(px, py, r, col, a) {
+  x.save(); x.globalCompositeOperation = 'lighter';
+  const g = x.createRadialGradient(px, py, 0, px, py, r);
+  g.addColorStop(0, rgba(HOT, a)); g.addColorStop(0.25, rgba(col, a * 0.6)); g.addColorStop(1, rgba(col, 0));
+  x.fillStyle = g; x.beginPath(); x.arc(px, py, r, 0, Math.PI * 2); x.fill(); x.restore();
+}
+
+// ---------- wordmark (two lines, ignites per word)
+function wordmark(cx, cy, s, lit1, lit2, flick) {
+  x.save(); x.translate(cx, cy); x.scale(s, s);
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  const lines = [[WM[0], -78, 150, lit1], [WM[1], 70, 112, lit2]];
+  for (const [txt, y, px, lit] of lines) {
+    x.font = font(700, px); x.letterSpacing = '6px';
+    // dim outline always
+    x.lineWidth = 2; x.strokeStyle = `rgba(239,233,221,${0.22 + 0.2 * (1 - lit)})`; x.strokeText(txt, 0, y);
+    if (lit > 0) {
+      const on = lit * (flick ? flick(txt) : 1);
+      x.save(); x.globalCompositeOperation = 'lighter';
+      x.shadowColor = rgba(AMBER, 0.9 * on); x.shadowBlur = 40;
+      x.fillStyle = rgba(ORANGE, 0.55 * on); x.fillText(txt, 0, y);
+      x.shadowBlur = 14; x.fillStyle = rgba(AMBER, 0.6 * on); x.fillText(txt, 0, y);
+      x.restore();
+      x.fillStyle = `rgba(239,233,221,${on})`; x.fillText(txt, 0, y);
+    }
+  }
+  x.restore();
+}
+
+// ---------- caption in the original video's style (white bold, soft shadow, 78% down)
+function caption(txt, a = 1) {
+  x.save(); x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  x.font = font(700, 46, 'Inter'); x.letterSpacing = '0px';
+  x.shadowColor = `rgba(0,0,0,${0.85 * a})`; x.shadowBlur = 10; x.shadowOffsetY = 2;
+  x.fillStyle = `rgba(255,255,255,${a})`; x.fillText(txt, CX, 1015); x.restore();
+}
+
+// ---------- background space (continuity with the original's warp streaks)
+function space(t, zoom) {
+  x.fillStyle = INK; x.fillRect(0, 0, W, H);
+  const g = x.createRadialGradient(CX, 600, 0, CX, 600, 760);
+  g.addColorStop(0, 'rgba(70,40,18,0.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.save(); x.globalCompositeOperation = 'lighter';
+  for (const s of STARS) {
+    const d = (s.d + t * (0.5 + s.z) * zoom) % 1, rr = d * 900, len = 8 + d * d * 160 * zoom;
+    const px = CX + Math.cos(s.a) * rr, py = 600 + Math.sin(s.a) * rr;
+    const a = 0.25 + 0.55 * d;
+    x.strokeStyle = s.z > 0.7 ? rgba(AMBER, a) : `rgba(220,215,205,${a})`; x.lineWidth = 1 + d * 1.6;
+    x.beginPath(); x.moveTo(px, py); x.lineTo(px + Math.cos(s.a) * len, py + Math.sin(s.a) * len); x.stroke();
+  }
+  x.restore();
+}
+
+// ---------- the projectile, seen from behind (matches the original's tungsten round)
+function projectile(px, py, r, t) {
+  // plasma sheath + flames streaming back toward camera
+  x.save(); x.globalCompositeOperation = 'lighter';
+  const fr = rng(Math.floor(t * 48) + 3);
+  for (let i = 0; i < 26; i++) {
+    const a = (i / 26) * Math.PI * 2 + fr() * 0.2, L = r * (1.2 + fr() * 1.6);
+    const g = x.createLinearGradient(px + Math.cos(a) * r * 0.8, py + Math.sin(a) * r * 0.8, px + Math.cos(a) * (r + L), py + Math.sin(a) * (r + L));
+    g.addColorStop(0, rgba(HOT, 0.55)); g.addColorStop(0.3, rgba(ORANGE, 0.35)); g.addColorStop(1, rgba(RED, 0));
+    x.strokeStyle = g; x.lineWidth = r * (0.18 + fr() * 0.22); x.lineCap = 'round';
+    x.beginPath(); x.moveTo(px + Math.cos(a) * r * 0.8, py + Math.sin(a) * r * 0.8); x.lineTo(px + Math.cos(a) * (r + L), py + Math.sin(a) * (r + L)); x.stroke();
+  }
+  glowDot(px, py, r * 2.6, ORANGE, 0.75);
+  x.restore();
+  // metal body: outer ring + recessed disc
+  const g1 = x.createRadialGradient(px - r * 0.3, py - r * 0.35, r * 0.1, px, py, r);
+  g1.addColorStop(0, '#f2f2f2'); g1.addColorStop(0.6, '#9b9b9b'); g1.addColorStop(1, '#3d3d3d');
+  x.fillStyle = g1; x.beginPath(); x.arc(px, py, r, 0, Math.PI * 2); x.fill();
+  x.strokeStyle = 'rgba(20,20,20,0.9)'; x.lineWidth = Math.max(1, r * 0.08); x.beginPath(); x.arc(px, py, r * 0.72, 0, Math.PI * 2); x.stroke();
+  x.fillStyle = '#b9b7b3'; x.beginPath(); x.arc(px, py, r * 0.64, 0, Math.PI * 2); x.fill();
+  const rim = x.createRadialGradient(px, py, r * 0.7, px, py, r * 1.05); rim.addColorStop(0, rgba(ORANGE, 0)); rim.addColorStop(1, rgba(ORANGE, 0.45));
+  x.fillStyle = rim; x.beginPath(); x.arc(px, py, r * 1.05, 0, Math.PI * 2); x.fill();
+}
+
+// ---------- impact FX
+function impact(t, t0, cx, cy, sparks, big) {
+  const d = t - t0; if (d < 0 || d > 1.2) return;
+  // shock rings
+  x.save(); x.globalCompositeOperation = 'lighter';
+  for (let k = 0; k < (big ? 3 : 2); k++) {
+    const dd = d - k * 0.07; if (dd <= 0) continue;
+    const rr = eo(dd / 0.7) * (big ? 980 : 720), a = clamp(1 - dd / 0.7);
+    x.strokeStyle = rgba(k ? ORANGE : AMBER, a * 0.9); x.lineWidth = (big ? 14 : 9) * a + 1;
+    x.beginPath(); x.ellipse(cx, cy, rr, rr * 0.62, 0, 0, Math.PI * 2); x.stroke();
+  }
+  // sparks with trails
+  for (const s of sparks) {
+    const life = d / s.l; if (life > 1) continue;
+    const r0 = s.v * d * (1 - 0.35 * life), r1 = Math.max(0, r0 - 40 - s.v * 0.05);
+    x.strokeStyle = s.hot > 0.5 ? rgba(HOT, 1 - life) : rgba(AMBER, 1 - life); x.lineWidth = s.w;
+    x.beginPath(); x.moveTo(cx + Math.cos(s.a) * r1, cy + Math.sin(s.a) * r1 * 0.8); x.lineTo(cx + Math.cos(s.a) * r0, cy + Math.sin(s.a) * r0 * 0.8); x.stroke();
+  }
+  x.restore();
+  // radial laser burst
+  const n = big ? 18 : 10, la = clamp(1 - d / (big ? 0.5 : 0.35));
+  if (la > 0) for (let i = 0; i < n; i++) beam(cx, cy, (i / n) * Math.PI * 2 + d * 0.8 + (big ? 0 : 0.17), 1400, i % 3 ? AMBER : ORANGE, la);
+  glowDot(cx, cy, (big ? 420 : 280) * (1 - d * 0.6), AMBER, clamp(1 - d / 0.45));
+}
+
+function flash(t, t0, k = 14, max = 1) { const d = t - t0; if (d < 0) return; const a = max * Math.exp(-d * k); if (a < 0.01) return; x.fillStyle = `rgba(255,248,236,${a})`; x.fillRect(0, 0, W, H); }
+function shakeAt(t, hits) { let ox = 0, oy = 0; for (const [t0, amp] of hits) { const d = t - t0; if (d < 0 || d > 0.5) continue; const e = amp * Math.exp(-d * 9); ox += e * Math.sin(d * 97); oy += e * Math.cos(d * 71); } return [ox, oy]; }
+
+// ---------- laser show (post-drop)
+const EMIT = [[-10, 1300], [730, 1300], [CX, -20], [-10, 420], [730, 420]];
+function laserShow(t, energy) {
+  const bi = Math.floor((t - T_DROP) / BEAT), bp = ((t - T_DROP) / BEAT) % 1, pulse = 0.55 + 0.45 * Math.exp(-bp * 5);
+  // haze
+  const g = x.createLinearGradient(0, H, 0, 0);
+  g.addColorStop(0, `rgba(120,60,20,${0.35 * pulse})`); g.addColorStop(0.5, 'rgba(40,20,10,0.15)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  const pat = ((bi % 4) + 4) % 4;
+  for (let e = 0; e < EMIT.length; e++) {
+    const [ex, ey] = EMIT[e];
+    if (e >= 3 && pat % 2 === 0) continue;
+    const base = ey > 1000 ? -Math.PI / 2 : (ey < 0 ? Math.PI / 2 : (ex < 0 ? 0 : Math.PI));
+    const nb = e === 2 ? 9 : 6, spread = e === 2 ? 1.5 : 1.0;
+    for (let i = 0; i < nb; i++) {
+      const f = nb === 1 ? 0 : i / (nb - 1) - 0.5;
+      let ang;
+      if (pat === 0) ang = base + f * spread + Math.sin(t * 3.1 + e) * 0.35;
+      else if (pat === 1) ang = base + f * spread * 0.4 + Math.sin(t * 5.3 + e * 2) * 0.6;
+      else if (pat === 2) ang = base + f * spread * 1.3 * Math.sin(t * 4 + e);
+      else ang = base + Math.sin(t * 7 + i * 0.7 + e) * 0.7;
+      const col = (i + e) % 3 === 0 ? ORANGE : (i % 4 === 0 ? RED : AMBER);
+      beam(ex, ey, ang, 1700, col, 0.85 * pulse * energy);
+    }
+    glowDot(ex, ey, 70, AMBER, 0.8 * pulse * energy);
+  }
+}
+
+// ---------- slam text
+function slam(t, s, next) {
+  const d = t - s.t; if (d < 0 || t >= next) return;
+  const fit = (txt, wmax, px) => { x.font = font(700, px); const m = x.measureText(txt).width; return m > wmax ? px * wmax / m : px; };
+  const px = fit(s.text, 590, 150);
+  const sc = 1 + 0.45 * Math.exp(-d * 26), a = clamp(d / 0.05);
+  const split = 16 * Math.exp(-d * 14) + (s.glitch ? 5 * (Math.sin(t * 90) > 0.6 ? 1 : 0) : 0);
+  x.save(); x.translate(CX, 640); x.scale(sc, sc); x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.font = font(700, px); x.letterSpacing = '2px';
+  // laser scan reveal: a bright line sweeps down across the word during the first 0.12s
+  const scan = clamp(d / 0.12), top = -px * 0.62, bot = px * 0.62, sy = lerp(top, bot, scan);
+  x.save(); x.beginPath(); x.rect(-W, top - 10, W * 2, sy - top + 10); x.clip();
+  x.globalCompositeOperation = 'lighter';
+  x.fillStyle = rgba(RED, 0.75 * a); x.fillText(s.text, -split, 0);
+  x.fillStyle = `rgba(40,200,255,${0.55 * a})`; x.fillText(s.text, split, 0);
+  x.globalCompositeOperation = 'source-over';
+  x.shadowColor = rgba(AMBER, 0.95); x.shadowBlur = 34;
+  if (s.accent) {                                    // one part of the slam in the amber accent (e.g. the price)
+    const ix = s.text.indexOf(s.accent), parts = [s.text.slice(0, ix), s.accent]; const w0 = x.measureText(parts[0]).width, w1 = x.measureText(parts[1]).width, st = -(w0 + w1) / 2;
+    x.textAlign = 'left'; x.fillStyle = `rgba(239,233,221,${a})`; x.fillText(parts[0], st, 0);
+    x.fillStyle = rgba(AMBER, a); x.fillText(parts[1], st + w0, 0);
+  } else { x.fillStyle = `rgba(239,233,221,${a})`; x.fillText(s.text, 0, 0); }
+  x.restore();
+  if (scan < 1) beam(-W, sy, 0, W * 2, AMBER, 1);
+  x.restore();
+  if (s.glitch) {
+    // horizontal slice displacement on a few frames
+    const fr = rng(Math.floor(t * FPS) * 13 + 5);
+    if (fr() < 0.55) for (let k = 0; k < 4; k++) {
+      const yy = 560 + fr() * 160, hh = 6 + fr() * 22, dx = (fr() - 0.5) * 60;
+      const img = x.getImageData(0, yy * 1.5, 1080, hh * 1.5); x.putImageData(img, dx * 1.5, yy * 1.5);
+    }
+  }
+}
+
+// ---------- end card: Vilas / .studio (the site's wordmark treatment)
+function endCard(t) {
+  const d = t - T_END;
+  // converging lasers onto the mark, then splaying
+  const conv = 1 - eo(d / 0.35), sw = eo((d - 0.35) / 1.2);
+  for (let e = 0; e < 3; e++) {
+    const [ex, ey] = EMIT[e];
+    const toC = Math.atan2(610 - ey, CX - ex);
+    for (let i = 0; i < 7; i++) {
+      const f = i / 6 - 0.5;
+      const ang = toC + f * (0.05 + 1.1 * sw * (1 - conv)) + Math.sin(t * 2.4 + i + e) * 0.08 * sw;
+      beam(ex, ey, ang, 1700, i % 2 ? AMBER : ORANGE, 0.75);
+    }
+  }
+  glowDot(CX, 610, 260, ORANGE, 0.22 + 0.2 * Math.exp(-d * 6));
+  const s = 1 + 0.25 * Math.exp(-d * 18), a = clamp(d / 0.06);
+  x.save(); x.translate(CX, 600); x.scale(s, s); x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  x.font = font(500, 196); x.letterSpacing = '-4px';
+  x.shadowColor = rgba(AMBER, 0.9); x.shadowBlur = 46; x.fillStyle = `rgba(239,233,221,${a})`; x.fillText(ENDC.word, 0, 40);
+  x.shadowBlur = 0; x.fillText(ENDC.word, 0, 40);
+  // laser underline draws left to right
+  const u = eo((d - 0.08) / 0.3), uw = 440;
+  if (u > 0) beam(-uw / 2, 74, 0, uw * u, AMBER, 1);
+  x.font = font(700, 66, 'Space Mono'); x.letterSpacing = '2px';
+  const sa = clamp((d - 0.25) / 0.2);
+  x.shadowColor = rgba(AMBER, 0.8); x.shadowBlur = 18; x.fillStyle = rgba(AMBER, sa); x.fillText(ENDC.sub, 0, 160);
+  x.restore();
+  // final small honest line
+  const la = clamp((d - 0.55) / 0.25);
+  x.save(); x.textAlign = 'center'; x.font = font(600, 36, 'Inter'); x.shadowColor = 'rgba(0,0,0,0.9)'; x.shadowBlur = 12; x.fillStyle = `rgba(239,233,221,${0.95 * la})`;
+  ENDC.tagline.forEach((ln, i) => x.fillText(ln, CX, 905 + 46 * i)); x.restore();
+}
+
+// ---------- main
+window.setup = async () => {
+  CFG = await (await fetch('../cfg.json')).json();
+  ({ fps: FPS, duration: DUR, tImp1: T_IMP1, tImp2: T_IMP2, tDrop: T_DROP, beat: BEAT, tEnd: T_END, slams: SLAMS, wordmark: WM, endCard: ENDC, caption: CAP } = CFG);
+  NF = Math.round(DUR * FPS); window.NF = NF; window.CFG_FPS = FPS;
+  await document.fonts.load(font(700, 100)); await document.fonts.load(font(500, 100)); await document.fonts.load(font(700, 40, 'Inter')); await document.fonts.load(font(500, 30, 'Inter')); await document.fonts.load(font(700, 40, 'Space Mono')); await document.fonts.load(font(600, 36, 'Inter')); };
+window.renderFrame = (f) => {
+  const t = f / FPS;
+  x.setTransform(1.5, 0, 0, 1.5, 0, 0);
+  x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.shadowBlur = 0;
+  const [sx, sy] = shakeAt(t, [[T_IMP1, 26], [T_IMP2, 14], [T_DROP, 18], [T_END, 12], ...SLAMS.map((s) => [s.t, 7])]);
+  x.translate(sx, sy);
+
+  if (t < T_DROP) {
+    // A: fall + two impacts on the wordmark
+    const fall = clamp(t / T_IMP1);
+    space(t, t < T_IMP1 ? 1.4 : 0.35);
+    const wmS = t < T_IMP1 ? lerp(0.32, 1.0, ei(fall)) : 1 + 0.06 * eo((t - T_IMP1) / 1.2);
+    // targeting lasers lock on while it falls
+    if (t < T_IMP1 + 0.1) {
+      const lock = eo((t - 0.08) / 0.45), a = clamp((t - 0.05) / 0.15) * clamp((T_IMP1 + 0.1 - t) / 0.1);
+      for (const [ex, ey] of [[-10, 160], [730, 160], [-10, 1250], [730, 1250]]) {
+        const ang = Math.atan2(600 - ey, CX - ex) + (1 - lock) * 0.35 * (ex < 0 ? -1 : 1);
+        beam(ex, ey, ang, 1500, RED, 0.7 * a);
+      }
+      x.save(); x.strokeStyle = rgba(RED, 0.7 * clamp(t / 0.2)); x.lineWidth = 2;
+      const rr = lerp(330, 210, lock) * wmS; x.beginPath(); x.arc(CX, 600, rr, 0, Math.PI * 2); x.stroke();
+      for (let k = 0; k < 4; k++) { const a2 = k * Math.PI / 2 + t * 1.5; x.beginPath(); x.moveTo(CX + Math.cos(a2) * (rr - 22), 600 + Math.sin(a2) * (rr - 22)); x.lineTo(CX + Math.cos(a2) * (rr + 22), 600 + Math.sin(a2) * (rr + 22)); x.stroke(); }
+      x.restore();
+    }
+    // post-impact build lasers from the bottom corners
+    if (t > T_IMP1) {
+      const bu = eo((t - T_IMP2) / 0.6);
+      for (const [ex, ey, dir] of [[-10, 1300, 1], [730, 1300, -1]]) for (let i = 0; i < 2 + Math.floor(bu * 5); i++) {
+        beam(ex, ey, -Math.PI / 2 + dir * (0.15 + i * 0.12 + Math.sin(t * 6 + i) * 0.08), 1700, i % 2 ? AMBER : ORANGE, 0.35 + 0.5 * bu);
+      }
+    }
+    const flick = (txt) => { const dd = t - (txt === WM[0] ? T_IMP1 : T_IMP2); if (dd < 0) return 0; if (dd > 0.14) return 1; return [1, 0.2, 1, 0.45, 1, 1][Math.floor(dd * FPS)] ?? 1; };
+    wordmark(CX, 600, wmS, t >= T_IMP1 ? 1 : 0, t >= T_IMP2 ? 1 : 0, flick);
+    if (t < T_IMP1) {
+      const pr = lerp(165, 16, ei(fall)), py = lerp(640, 600, fall);
+      projectile(CX, py, pr, t);
+    }
+    impact(t, T_IMP1, CX, 520, SP1, true);
+    impact(t, T_IMP2, CX, 670, SP2, false);
+    flash(t, T_IMP1, 11, 1); flash(t, T_IMP2, 16, 0.55);
+    // pre-drop riser strobe
+    if (t > 1.55) { const k = Math.floor((t - 1.55) * FPS); if (k % 2 === 0) { x.fillStyle = 'rgba(255,240,220,0.12)'; x.fillRect(-40, -40, W + 80, H + 80); } }
+  } else {
+    // B: the drop — laser show + slams + end card
+    x.fillStyle = INK; x.fillRect(-40, -40, W + 80, H + 80);
+    const energy = t < T_END ? 1 : 0.0;
+    if (t < T_END) laserShow(t, energy);
+    for (let i = 0; i < SLAMS.length; i++) slam(t, SLAMS[i], i + 1 < SLAMS.length ? SLAMS[i + 1].t : T_END);
+    if (t >= T_END) endCard(t);
+    impact(t, T_DROP, CX, 640, SP3, true);
+    impact(t, T_END, CX, 610, SP2, false);
+    flash(t, T_DROP, 12, 0.95); flash(t, T_END, 12, 0.8);
+    for (const s of SLAMS) flash(t, s.t, 22, 0.28);
+  }
+  x.setTransform(1.5, 0, 0, 1.5, 0, 0);
+  // vignette
+  const v = x.createRadialGradient(CX, 640, 300, CX, 640, 900); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.55)');
+  x.fillStyle = v; x.fillRect(0, 0, W, H);
+  // caption chunk in the original's style while the narrator speaks
+  if (CAP && t < CAP.until) caption(CAP.text, clamp((CAP.until - t) / 0.05));
+};
+</script></body></html>
