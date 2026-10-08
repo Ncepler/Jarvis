@@ -45,9 +45,17 @@ Don't put a black box on it. Rebuild what's behind it. Pick by type:
 |---|---|---|
 | **Title floating over a flat background** (space, sky) | Key the title by its colour, fill with a smooth estimate of the surrounding background, add the scene's own particles/stars, never paint over other bright elements | `scripts/examples/key_title_to_space.py` (blue "ZACK D FILMS" over space, 5.3-8.7s; about 1 s per frame) |
 | **Logo printed on a shaded surface** | Track the logo's box by hand (a box every ~3 frames from gridded crops), rebuild the box from a robust polynomial fit of the non-letter pixels so the surface's gradient continues, add a touch of grain | `scripts/examples/fill_logo_on_surface.py` (grey print on a silver rod, 21.4-22.3s) |
+| **Letters printed on a plate / button** (light-on-dark or dark-on-light, moving, motion-blurred) | Hand-tracked ROTATED box (cx, cy, w, h, angle, open_px, close_px) every 2-4 frames; grey opening removes bright strokes, closing removes dark strokes, the letter area is blurred, the video's own burned-in caption is protected. Oversized boxes are safe (it only removes thin strokes). | `scripts/examples/erase_letters.py` + `example_plate_keys.json` (vehicle reel 2026-10-08: "ZACK D FILMS" plate 10.8-12.6s; the D◀ logo on a key fob 1.9-3.0s) |
 | **Static corner watermark** | Same surface-fill method with one constant box, or ffmpeg `delogo` for a small flat mark. Untested here: look at the result frame by frame | none yet |
 
 Lessons that cost time:
+- **Colour tags (vehicle reel, 2026-10-08):** a BT.709-tagged upload re-encoded from PNGs with ffmpeg's default (BT.601, untagged) shifts
+  the edited GOPs ~5 levels against the copied ones (a flicker at the GOP edges). `assemble.py` now encodes edited GOPs and part 2 with
+  the original's matrix, range and tags. Its checks now compare frames by decode index in Python: ffmpeg's psnr filter pairs frames by
+  timestamp and reported 23 dB "mismatches" on correct frames of a phone upload.
+- **Look for marks the creator printed on props, not just overlays:** the vehicle reel had none floating; they were on the licence plate,
+  the opening tailgate and a key-fob button.
+- **Motion blur flips the look of printed text:** the same plate read as light letters on dark, then (blurred) as dark strokes on light.
 - **Look at every changed frame, zoomed.** Contact sheets at 4x zoom caught: a dark-olive chromatic-aberration copy offset down-right
   of the letters, motion-blurred edges, thin slivers of letters sliding in at the top edge, and the teal gravity rings (which must survive).
 - **Auto-detection of a printed logo failed** on the darker, blurred frames (the mask came back empty). Hand-tracked boxes were reliable and quick. Time-box auto-detect.

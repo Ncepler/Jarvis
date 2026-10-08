@@ -52,3 +52,11 @@ cannot match the last frame, say so and use a plain cut into the drop.
 Design units are 720x1280 (9:16). For another aspect ratio, change `W`, `H`, `CX` and the canvas size in `comp/index.html`.
 
 Verified 2026-10-07: rendering the template from a clean copy reproduces the delivered railgun stills byte for byte. The template's audio is the delivered mix plus the improved ducking above (the delivered reel itself still has the weaker last syllable).
+
+## Variant: "locate" + laser dancers (vehicle reel, 2026-10-08)
+`brag-output-2026-10-08-vehicle/work/ending/` (gitignored, so the notes are here): Section A replaced by a police-light wash + lock-on
+lasers + a laser map pin dropping onto the wordmark (the narrator's last kept word was "locate"); purple/blue/red palette on #020104;
+a perspective laser floor; laser stick-figure dancers (pose table + per-beat snap with eo(bp/0.16), knee dip on the downbeat, two
+motion-trail ghosts, hand beams) - three big ones in the drop, four on the end card, all snapping to arms-up on a final hit `tFinal`;
+the beat runs under the end card. Captions can be a list of chunks (`[{text, until}]`) and their size is calibrated from a measured
+width of an original caption (`captionStyle.widthRef/widthPx`). If Noah wants this again, copy that comp into the template as a second preset.

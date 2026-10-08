@@ -1,4 +1,4 @@
-# HANDOFF — updated 2026-10-02 (reel batches 1–3; site state below is from main, merged in)
+# HANDOFF — updated 2026-10-08 (zach-d reels; reel batches 1–3; site state below is from main, merged in)
 
 ## Marketing — new format (2026-10-06)
 - **Skill `.claude/skills/zach-d-reel/`** (replaces the short-lived `trojan-reel`): Noah uploads a Zack D Films-style story video (part 1).
@@ -11,6 +11,13 @@
   A zip of the folder was sent to Noah to upload as a claude.ai skill (re-send it after any change).
 - **First zach-d reel built: `brag-output-2026-10-07-railgun/`.** A railgun-from-the-Moon video, cut at 33.167s (Noah asked for this cut) so "until it hit Earth" becomes "until it hit Vilas Studio" in a Higgsfield clone of the narrator's voice, then a 5.85s laser drop. Not posted.
   Still to check: listen to whether the clone says "VEE-las". Also: the delivered mix has only ~0.8 dB of voice-over-snare-roll on the last syllable of "Studio" (template's `audio.py` now ducks the roll, 9.0/22.1/10.5 dB); the delivered file is unchanged, offer a re-render. Noah also needs to decide whether to post a clone of the creator's voice at all (see its brag-plan.md).
+- **Second zach-d reel: `brag-output-2026-10-08-vehicle/`.** "If you forgot where you parked" video; cut at frame 916 (30.564s) so
+  "…and the police locate your vehicle" becomes "…locate Vilas Studio" (clone of the narrator, spelled "Veelas"), then a 6.6s
+  purple/blue/red laser drop with laser stick-figure dancers. Covered on Noah's ask: "ZACK D FILMS" licence plate/tailgate
+  (10.8-12.6s) and the D◀ logo on the key fob (1.9-3.0s). Not posted. To check by ear: "VEE-las" and the mix.
+  Skill fixes from it: `assemble.py` now keeps BT.709 colour on re-encoded GOPs (was a ~5-level shift) and checks frames by decode
+  index (the ffmpeg psnr filter mis-paired frames); new `scripts/examples/erase_letters.py` for printed letters on moving props.
+  Higgsfield balance after this reel: 2.66 credits.
 - Gotcha: upload.higgsfield.ai, the Higgsfield CDN and backend.composio.dev are all blocked by the egress proxy. Workaround: send files to Higgsfield via a public raw.githubusercontent URL (`media_import_url`), and bring results back through the Composio workbench as md5-checked base64.
 - Gotcha: Hugging Face model downloads are blocked by the proxy, so local speech-to-text (whisper) can't fetch models. Read the burned-in captions instead.
 

@@ -60,6 +60,27 @@ def psnr(inputs_filter, *inputs):
     return float(m[-1]) if m else None
 
 
+def frames_psnr(video, S, E, src_dir, tmp, vf=None):
+    """Min / mean RGB PSNR of decoded frames S..E of `video` (by decode index, timestamps ignored) against src_dir/f%04d.png
+    (absolute numbering). The ffmpeg psnr filter pairs frames by timestamp, which mis-pairs frames on VFR-ish phone uploads."""
+    import numpy as np
+    from PIL import Image
+    d = os.path.join(tmp, f'chk_{S}_{E}'); os.makedirs(d, exist_ok=True)
+    run(['ffmpeg', '-v', 'error', '-y', '-i', video, '-vf', f"select='between(n,{S},{E})'", '-fps_mode', 'passthrough',
+         '-start_number', str(S), os.path.join(d, 'f%04d.png')])
+    vals = []
+    for f in range(S, E + 1):
+        o, r = os.path.join(d, f'f{f:04d}.png'), os.path.join(src_dir, f'f{f:04d}.png')
+        if not (os.path.exists(o) and os.path.exists(r)):
+            return None, None
+        a = np.asarray(Image.open(o).convert('RGB'), dtype=float); b = np.asarray(Image.open(r).convert('RGB'), dtype=float)
+        if a.shape != b.shape:
+            return None, None
+        vals.append(10 * np.log10(255 ** 2 / max(((a - b) ** 2).mean(), 1e-9)))
+    shutil.rmtree(d, ignore_errors=True)
+    return min(vals), sum(vals) / len(vals)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--orig', required=True); ap.add_argument('--part2', required=True); ap.add_argument('--out', required=True)
@@ -78,6 +99,18 @@ def main():
     if not 0 < N <= T:
         sys.exit(f'--cut-frame must be 1..{T}')
     kset = set(K)
+    # colour: PNGs extracted from a tagged stream are RGB made with ITS matrix (e.g. bt709); re-encode them with the same matrix,
+    # range and tags, or the edited GOPs shift colour (~5 levels) against the stream-copied ones. Untagged = ffmpeg's bt601 default.
+    MAT = {'bt709': 'bt709', 'bt470bg': 'bt601', 'smpte170m': 'bt601', 'bt2020nc': 'bt2020'}.get(v.get('color_space'), 'bt601')
+    RNG = 'pc' if v.get('color_range') == 'pc' else 'tv'
+    TAGS = []
+    for opt, key in (('-colorspace', 'color_space'), ('-color_primaries', 'color_primaries'), ('-color_trc', 'color_transfer'), ('-color_range', 'color_range')):
+        if v.get(key) and v[key] != 'unknown':
+            TAGS += [opt, v[key]]
+    TO_YUV = f'scale=out_color_matrix={MAT}:out_range={RNG},format={PIX}'
+    v2, _, _ = probe_streams(a.part2)
+    MAT2 = {'bt709': 'bt709', 'bt470bg': 'bt601', 'smpte170m': 'bt601', 'bt2020nc': 'bt2020'}.get(v2.get('color_space'), 'bt601')
+    P2_VF = f'scale={W}:{H}:flags=lanczos:in_color_matrix={MAT2}:out_color_matrix={MAT}:out_range={RNG},fps={FPS},format={PIX}'
     fps_f = float(Fraction(FPS))
     reps = []
     for r in a.replace:
@@ -107,7 +140,7 @@ def main():
     def enc_pngs(d, start, count, crf=12):
         out = piece()
         ff('-framerate', FPS, '-start_number', str(start), '-i', os.path.join(d, 'f%04d.png'), '-frames:v', str(count),
-           '-c:v', 'libx264', '-profile:v', PROF, '-pix_fmt', PIX, '-crf', str(crf), '-preset', 'slow',
+           '-vf', TO_YUV, '-c:v', 'libx264', '-profile:v', PROF, '-pix_fmt', PIX, '-crf', str(crf), '-preset', 'slow', *TAGS,
            '-video_track_timescale', str(TB), out)
         return out
 
@@ -139,8 +172,8 @@ def main():
 
     # part 2 video, to the original's exact geometry / fps / pix_fmt
     p2 = piece()
-    ff('-i', a.part2, '-an', '-vf', f'scale={W}:{H}:flags=lanczos,fps={FPS},format={PIX}', '-c:v', 'libx264', '-profile:v', PROF,
-       '-pix_fmt', PIX, '-crf', str(a.crf), '-preset', 'slow', '-video_track_timescale', str(TB), p2)
+    ff('-i', a.part2, '-an', '-vf', P2_VF, '-c:v', 'libx264', '-profile:v', PROF,
+       '-pix_fmt', PIX, '-crf', str(a.crf), '-preset', 'slow', *TAGS, '-video_track_timescale', str(TB), p2)
     pieces.append(p2)
     lst = os.path.join(W_, 'list.txt')
     open(lst, 'w').write(''.join(f"file '{p}'\n" for p in pieces))
@@ -186,19 +219,19 @@ def main():
     print(f'ORIGINAL FRAMES: {N - len(allowed)} of {N} stream-copied and bit-identical; {len(allowed)} re-encoded '
           f'({"; ".join(x for x in plan if not x.startswith("copy")) or "none"})')
     for S, E, d in reps + ([recut] if recut else []):
-        cnt = E - S + 1
-        q = psnr(f"[0:v:0]select='between(n,{S},{E})',setpts=N/FRAME_RATE/TB[a];[1:v]trim=end_frame={cnt},setpts=N/FRAME_RATE/TB,format=yuv420p[b];[a][b]psnr",
-                 ['-i', a.out], ['-framerate', FPS, '-start_number', str(S), '-i', os.path.join(d, 'f%04d.png')])
+        q, qm = frames_psnr(a.out, S, E, d, W_)
         tag = 'unedited recut' if (S, E, d) == recut else 'edited'
-        print(f'  frames {S}-{E} ({tag}) decode vs source: PSNR {q} dB')
+        print(f'  frames {S}-{E} ({tag}) decode vs source: min {q if q is None else round(q, 1)} dB, mean {qm if qm is None else round(qm, 1)} dB (RGB, per frame)')
         if q is None or q < 38:
-            fails.append(f'frames {S}-{E} do not match their source (PSNR {q})')
-    q2 = psnr(f"[0:v:0]trim=start_frame={N},setpts=N/FRAME_RATE/TB,scale={W}:{H},format=yuv420p[a];"
-              f"[1:v]scale={W}:{H}:flags=lanczos,fps={FPS},format=yuv420p,setpts=N/FRAME_RATE/TB[b];[a][b]psnr=stats_file=/dev/null",
-              ['-i', a.out], ['-i', a.part2])
-    print(f'PART 2 as joined vs your render: PSNR {q2} dB')
-    if q2 is None or q2 < 35:
-        fails.append(f'part 2 does not match your render (PSNR {q2})')
+            fails.append(f'frames {S}-{E} do not match their source (min PSNR {q})')
+    # part 2: the render brought to the original's geometry/colour exactly as it was encoded, then compared frame by frame
+    p2ref = os.path.join(W_, 'p2ref'); os.makedirs(p2ref, exist_ok=True)
+    run(['ffmpeg', '-v', 'error', '-y', '-i', a.part2, '-vf', P2_VF, '-fps_mode', 'passthrough', '-start_number', str(N), os.path.join(p2ref, 'f%04d.png')])
+    n2 = len(os.listdir(p2ref))
+    q2, q2m = frames_psnr(a.out, N, N + n2 - 1, p2ref, W_)
+    print(f'PART 2 as joined vs your render: min {q2 if q2 is None else round(q2, 1)} dB, mean {q2m if q2m is None else round(q2m, 1)} dB ({n2} frames)')
+    if q2 is None or q2 < 32:
+        fails.append(f'part 2 does not match your render (min PSNR {q2})')
     if au:
         try:
             import numpy as np
