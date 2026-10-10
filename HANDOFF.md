@@ -17,7 +17,8 @@
   (10.8-12.6s) and the D◀ logo on the key fob (1.9-3.0s). Not posted. To check by ear: "VEE-las" and the mix.
   Skill fixes from it: `assemble.py` now keeps BT.709 colour on re-encoded GOPs (was a ~5-level shift) and checks frames by decode
   index (the ffmpeg psnr filter mis-paired frames); new `scripts/examples/erase_letters.py` for printed letters on moving props.
-  Higgsfield balance after this reel: 2.66 credits.
+  Higgsfield balance after this reel: 2.66 credits. Skill updated 2026-10-10 with the lessons (worked-example-vehicle.md, presets/locate-dancers,
+  grid.py / compare_cover.py / pitch.py); re-send the skill zip to Noah after any further change.
 - Gotcha: upload.higgsfield.ai, the Higgsfield CDN and backend.composio.dev are all blocked by the egress proxy. Workaround: send files to Higgsfield via a public raw.githubusercontent URL (`media_import_url`), and bring results back through the Composio workbench as md5-checked base64.
 - Gotcha: Hugging Face model downloads are blocked by the proxy, so local speech-to-text (whisper) can't fetch models. Read the burned-in captions instead.
 

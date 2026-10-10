@@ -10,13 +10,17 @@ When Noah says "keep the voice the same", part 2's line is cloned from the origi
    Workaround that worked: commit `ref.mp3` to the (public) repo, `media_import_url` with the raw.githubusercontent URL pinned to that
    commit's SHA, then delete the file in the next commit. It stays in git history, so tell Noah. If a direct upload works in the
    current environment, use that instead.
-3. **Generate** with `generate_audio_batch`: model `seed_audio`, `medias: [{value: <media_id>, role: "audio_references"}]`,
+3. **Spell the brand phonetically in the prompt:** "Veelas Studio!" (vehicle) pushes VEE-las; "Vilas" may come out VY-las.
+   **Generate** with `generate_audio_batch`: model `seed_audio`, `medias: [{value: <media_id>, role: "audio_references"}]`,
    `format: wav`, `sample_rate: 44100`, `use_unlim: false`. Three variants is enough: the bare phrase with a full stop, with "!" and
    `speech_rate: 10`, and the phrase with a lead-in word. Poll with `jobs_wait`.
 4. **Fetch the result.** The Higgsfield CDN (`*.cloudfront.net`) and Composio's file links (`backend.composio.dev`) are blocked from
    the build box. What worked: download inside the Composio workbench (`COMPOSIO_REMOTE_BASH_TOOL`, plain `curl`), trim the silence
    and encode each take to opus 48k (a 2s take is ~12 KB), `base64 -w0`, write it locally, and **verify with md5** (print md5 of
    the opus and of each 2000-char chunk remotely, compare after decoding here). If the environment can download directly, just do that.
+   **Choose and trim the take remotely first** (print a 20 ms RMS envelope in the workbench with numpy): on vehicle take 0 had 0.7s of
+   junk before the word, take 1 was clean. Bring back only the trimmed winner (1.5s at opus 40k = ~11 KB of base64, written with the
+   Write tool and md5-checked). Moving every take costs ~30 KB of text each.
 5. **Compare to the original** before using it: pitch range of narrator vs clone (autocorrelation F0; railgun: clone 109-241 Hz,
    narrator 117-271 Hz = same register) and loudness (clone ran about 2 dB hotter, normalise).
 6. **Condition it:** high-pass 80 Hz, normalise, `atempo` to the narrator's pace (1.08 on railgun), cut to only the replacement

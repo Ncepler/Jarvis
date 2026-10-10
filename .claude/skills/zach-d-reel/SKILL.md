@@ -9,6 +9,7 @@ Noah uploads **part 1**, a video that already works on its own: a 3D "what if", 
 
 Read first (once per session): `references/vilas.md` (facts, allowed claims, assets) and `references/teardowns.md` (three real ads taken apart). Then, as needed:
 - `references/worked-example-railgun.md`: a whole job from brief to delivery, including the mistakes. Read it before your first job.
+- `references/worked-example-vehicle.md`: the second job (29.97 fps, BT.709, marks printed on props, laser dancers). Its mistakes list is short and all of it applies.
 - `references/editing-the-original.md`: cutting at a word, covering the creator's marks, the verified re-encode.
 - `references/voice-clone.md`: same narrator voice in part 2 (Higgsfield).
 - `references/hype-ending.md`: the laser-drop ending and its template in `assets/hype-ending/`.
@@ -25,7 +26,7 @@ Part 1 goes out exactly as uploaded. Unless Noah explicitly asks for it in this 
 
 **What Noah has asked for so far**, and so what to offer: cut at a word and put "Vilas Studio" in the narrator's own voice; cover the creator's title/logo so it looks like the background; remove a doubled word at the seam. His standing line is "change nothing else about the original". Do exactly the edits listed, with the protocol in `references/editing-the-original.md`: only the GOPs containing an edit are re-encoded, everything else is stream-copied, and `scripts/assemble.py` proves it.
 
-**Offer, don't assume.** If you see the creator's name, logo or watermark anywhere in the video, or another brand's ad at the end, list each with its timestamps and offer to cover or cut it. Do it only on his yes. Scan the **whole** video first: on railgun the second mark (printed on an object) was missed until Noah pointed it out.
+**Offer, don't assume.** If you see the creator's name, logo or watermark anywhere in the video, or another brand's ad at the end, list each with its timestamps and offer to cover or cut it. Do it only on his yes. Scan the **whole** video first: on railgun the second mark (printed on an object) was missed until Noah pointed it out; on vehicle every mark was on a prop (a licence plate, an opening tailgate, a key-fob button). Look at plates, screens, buttons, badges and labels, not just overlays.
 
 Default (append-only): the original's frames are stream-copied whole, and its soundtrack is re-encoded once at 320k because TikTok/IG downloads use HE-AACv2, which can't be joined losslessly. The sound itself is unchanged and the script checks that. Say this in one line when you deliver.
 
@@ -87,11 +88,11 @@ How to write it:
 - **Talk like the narrator.** Same pace (±10% words/sec), same register. Short sentences, contractions, sentence case. No hype words (elevate, solutions, unleash, empower, cutting-edge), no emoji, no stacked exclamation marks.
 - **Every claim has to be true.** Only use claims from the message bank. Do the arithmetic for any number and show it in the plan. No fake clients, reviews, stats, "#1", or guaranteed rankings or leads. Demos are always labelled "demo" on screen.
 - **Write 3 versions of the hinge + turn** and pick one. The first idea is rarely the funny one.
-- **Hype mode.** When Noah says "hype", "lasers", "~5 seconds": the story's last object smashes into the brand name, the name explodes into a laser show, 3-5 message-bank words slam in on the beat, end card. Everything is in `references/hype-ending.md` and the template `assets/hype-ending/`.
+- **Hype mode.** When Noah says "hype", "lasers", "~5 seconds": the story's last object smashes into the brand name, the name explodes into a laser show, 3-5 message-bank words slam in on the beat, end card. Everything is in `references/hype-ending.md` and the template `assets/hype-ending/`. "More lasers / dancing laser stick figures / purple-blue-red" = the `presets/locate-dancers/` preset. Build the opening beat from a prop in the original's last shot (railgun: the round; vehicle: police lights + a map pin for "locate").
 
 ### 5. Build part 2
 - **Format:** render any size with the original's aspect ratio (1080×1920 for 9:16) at the original's **fps**; `assemble.py` scales it to the original's exact size and pix_fmt. Never upscale the original to match yours.
-- **Captions:** copy part 1's caption style exactly (position, chunk size, weight, shadow) for the whole of part 2. Copying the caption style was the main reason the Local Area Burger ad felt seamless. In a word swap, the first caption can repeat the kept word ("hit Vilas Studio"): the viewer is reading the original's last word too.
+- **Captions:** copy part 1's caption style exactly (position, chunk size, weight, shadow) for the whole of part 2. Measure, don't eyeball: the pixel width of one original caption chunk and its baseline on a frame, then size the font so the same words render that wide (`captionStyle` in the preset's cfg). Copying the caption style was the main reason the Local Area Burger ad felt seamless. In a word swap, the first caption can repeat the kept word ("hit Vilas Studio"): the viewer is reading the original's last word too.
 - **Voice:** if part 1 has narration, part 2 has narration too. Same voice → `references/voice-clone.md` (clone the narrator; you can't hear it, so tell Noah what to listen for). Otherwise TTS via HyperFrames `/media-use`. Mix part 2 within ±1 LU of `loudness_tail.txt`; voice ≥ 7 dB above everything else in 300–4000 Hz; never a silent gap at the seam.
 - **Visuals, best to cheapest:**
   1. **A bridge shot from the last frame** (momentum and shape hinges): image-to-video with `last_frame.png` as the start frame (Higgsfield). Get Noah's OK before spending credits, and keep it to 3–5s.
@@ -106,7 +107,7 @@ python3 scripts/assemble.py --orig upload.mp4 --part2 part2.mp4 [--audio2 part2.
         [--cut-frame N --audio-cut SEC]            # word swap: keep frames 0..N-1 and the audio up to SEC
         [--replace S:E:DIR ...]                    # covered-watermark GOPs (frames from `scripts/gop.py extract`)
 ```
-It stream-copies every untouched original frame and verifies them bit-identical, re-encodes only the edited GOPs (and the last partial GOP of a non-keyframe cut), proves every re-encoded range decodes to its source (PSNR), checks part 2 as joined, and checks the original audio's SNR. It prints `ALL CHECKS PASSED` or `FAIL` with the reason: **don't ship on FAIL**. It stops if the original isn't H.264 (ask Noah before re-encoding all of it). Covering marks and cutting: `references/editing-the-original.md`.
+It stream-copies every untouched original frame and verifies them bit-identical, re-encodes only the edited GOPs (and the last partial GOP of a non-keyframe cut), proves every re-encoded range decodes to its source (PSNR), checks part 2 as joined, and checks the original audio's SNR. It prints `ALL CHECKS PASSED` or `FAIL` with the reason: **don't ship on FAIL**, but if a FAIL looks wrong, verify by hand before "fixing" the video (on vehicle the old timestamp-based PSNR check failed correct frames; that check is now per frame). It carries the original's colour matrix and tags onto re-encoded GOPs and part 2. It stops if the original isn't H.264 (ask Noah before re-encoding all of it). Covering marks and cutting: `references/editing-the-original.md`.
 
 ### 7. QA (all must pass)
 - [ ] `assemble.py` says ALL CHECKS PASSED (and for edits: the list of changed frame ranges equals the edit list, nothing else).
@@ -114,7 +115,7 @@ It stream-copies every untouched original frame and verifies them bit-identical,
 - [ ] The brand name lands within the first 2s of part 2 (first second for a word swap).
 - [ ] Part 2 is within Noah's length, or ≤ 40% of the runtime and 6–15s by default.
 - [ ] Every claim is in the message bank. Every number has its working in the plan. Demos are labelled.
-- [ ] **Every covered mark:** contact-sheet the changed ranges zoomed 4× (letters, glow, aberration copies, slivers at the frame edge, protected elements intact), then **re-scan the final video** for any creator name left anywhere.
+- [ ] **Every covered mark:** before/after sheets of EVERY changed frame (`scripts/compare_cover.py`), then contact-sheet the changed ranges zoomed 4× (letters, glow, aberration copies, slivers at the frame edge, protected elements intact), then **re-scan the final video** for any creator name left anywhere.
 - [ ] Hype audio: `audio.py` prints a voice margin ≥ 7 dB in every third of the line.
 - [ ] **The cold-watch test:** read the whole thing as a stranger: contact sheet, the script with timings, the seam strip. Does the hinge get at least an exhale-laugh? If it's "huh?" or "ugh, an ad", rewrite the hinge before polishing anything else.
 
@@ -122,6 +123,7 @@ It stream-copies every untouched original frame and verifies them bit-identical,
 - `final.mp4`, `plan.md` (the ending read, hinge candidates and scores, the edit list, the part 2 script with timings, sources for any number, the asset list) and `caption.txt`.
 - **The caption is about Vilas** (Noah's call on railgun: "almost entirely Vilas related"). House style, like the other reel captions: one hook line that nods at the video, then 2-3 plain sentences using only message-bank claims (what Vilas builds, the niches that have a demo, "from $300", anywhere in the US), a "See the work and start a project at vilas.studio." line, a "Send this to…" line, and 4 hashtags (#webdesign #smallbusiness #localbusiness #websitedesign). No emoji, no #longisland. Suggest a pinned comment ("the railgun was a bit. the websites are real → vilas.studio"). Credit the creator only if Noah asks.
 - In the Jarvis repo, outputs go in `brag-output-YYYY-MM-DD-<slug>/` (final as `brag.mp4`, poster `brag.jpg` = a frame from part 1, never the end card; `work/` is gitignored). Anywhere else, put them in the outputs folder.
+- `SendUserFile` caps at 30 MiB: if `brag.mp4` is bigger, send a crf-21 preview from the scratchpad and say the full file is in the repo.
 - Tell Noah in a few lines: which hinge you used and why; **exactly which ranges of the original were edited** (or that it is verified untouched); that you can't hear audio and what to listen for (the brand's pronunciation, "VEE-las"); and, if you cloned the narrator, the endorsement risk, once.
 
 ## When the upload is unusual

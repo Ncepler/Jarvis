@@ -31,6 +31,9 @@ His standing wording: "change nothing else about the original video." So: do exa
   loud (RMS 8-14k), gaps are 1-4k. Cut in the gap *after the last word you keep and before the first word you drop*, 30 ms
   fade-out (assemble.py does it with `--audio-cut`). Captions don't line up with the speech: here the audio cut (33.42s) was
   0.25s after the video cut (33.1667s), because the narrator's "hit" (kept) ended 33.32s and "Earth" began 33.52s.
+- **Captions lead the speech by ~0.03-0.08s, and words have dips inside them.** On vehicle the RMS dip at 30.26-30.29s was the "k" in
+  "lo-cate", not a word gap; the real gap was 30.52-30.59s, just before the caption flip at 30.564s. Anchor the audio cut to the gap
+  nearest AFTER the caption flip of the word you keep and BEFORE the flip of the word you drop.
 - **Never repeat a word the kept audio already says.** The first version had the clone say "hit Vilas Studio" after the original's
   "…until it hit", giving "hit hit". Write down, from the envelope, the exact words the kept audio ends on, and generate only the
   *replacement* words ("Vilas Studio"). The on-screen caption can still read "hit Vilas Studio" for the first second, because the
@@ -75,3 +78,9 @@ python3 scripts/assemble.py --orig upload.mp4 --part2 part2.mp4 --audio2 audio.w
 `assemble.py` prints `ORIGINAL FRAMES: n of N stream-copied and bit-identical`, the PSNR of each re-encoded range, the PSNR of
 part 2 as joined, the original audio's SNR (30 dB typical; the audio is re-encoded once because TikTok/IG uploads are HE-AACv2),
 and `ALL CHECKS PASSED`, else `FAIL` with the reason. Don't ship on FAIL.
+
+## Inspection helpers (`scripts/`)
+- `grid.py <frames_dir> <f,f,f> x0 y0 x1 y1 out.png [scale] [cols]`: crops with an absolute-coordinate grid, for placing boxes by hand.
+- `compare_cover.py <orig_dir> <new_dir> <keys.json> f0 f1 out.png [cw ch scale cols]`: before|after crops of every frame, centred
+  on the tracked box. Look at every frame of every cover with this before assembling.
+- `pitch.py <upload> <clone.wav>`: narrator vs clone F0 percentiles (p10/50/90) for the "same register" check.

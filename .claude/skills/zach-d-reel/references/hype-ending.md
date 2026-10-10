@@ -59,4 +59,8 @@ lasers + a laser map pin dropping onto the wordmark (the narrator's last kept wo
 a perspective laser floor; laser stick-figure dancers (pose table + per-beat snap with eo(bp/0.16), knee dip on the downbeat, two
 motion-trail ghosts, hand beams) - three big ones in the drop, four on the end card, all snapping to arms-up on a final hit `tFinal`;
 the beat runs under the end card. Captions can be a list of chunks (`[{text, until}]`) and their size is calibrated from a measured
-width of an original caption (`captionStyle.widthRef/widthPx`). If Noah wants this again, copy that comp into the template as a second preset.
+width of an original caption (`captionStyle.widthRef/widthPx`). It is saved as a preset: `assets/hype-ending/presets/locate-dancers/` (`index.html`, `cfg.json`, `audio.py`). Use it with
+`cp presets/locate-dancers/index.html comp/index.html && cp presets/locate-dancers/{cfg.json,audio.py} .` from a copy of the template,
+then edit cfg (times, words, caption chunks, `captionStyle`, voice). Section A there is the pin drop; rewrite it to match a new
+story's last frame, keep the rest. Render at the original's fps (29.97 works). Use `assemble.py --crf 10`: thin laser lines on black
+lose detail at crf 14.

@@ -1,0 +1,413 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Part 2 for the "locate your vehicle" reel: "...letting you and the police locate | VILAS STUDIO" -> laser drop with laser stick-figure dancers.
+// Every frame is a pure function of its frame number. Timings and words come from ../cfg.json (audio.py reads the same file).
+// Design units 720x1280 (9:16), canvas 1.5x.
+let CFG, FPS, DUR, NF, T_IMP1, T_IMP2, T_DROP, BEAT, T_END, T_FINAL, SLAMS, WM, ENDC, CAPS, CAP_PX = 48;
+const W = 720, H = 1280, CX = 360, WY = 600;
+const c = document.getElementById('c'), x = c.getContext('2d');
+
+// palette: police red/blue pushed into purple laser light, on near-black
+const BG = '#020104', BONE = [239, 233, 221];
+const PURPLE = [176, 72, 255], VIOLET = [122, 86, 255], BLUE = [44, 128, 255], RED = [255, 38, 78], PINK = [255, 70, 190], HOT = [246, 238, 255];
+const LASER = [PURPLE, BLUE, RED, VIOLET, PINK];
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const eo = (t) => 1 - Math.pow(1 - clamp(t), 3);
+const ei = (t) => Math.pow(clamp(t), 2.2);
+function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const SPARKS = (seed, n) => { const r = rng(seed); return Array.from({ length: n }, () => ({ a: r() * Math.PI * 2, v: 300 + r() * 1100, l: 0.25 + r() * 0.55, w: 1 + r() * 2.5, hot: r(), c: Math.floor(r() * 3) })); };
+const SP1 = SPARKS(11, 120), SP2 = SPARKS(23, 70), SP3 = SPARKS(41, 110), SP4 = SPARKS(57, 90);
+const DUST = (() => { const r = rng(5); return Array.from({ length: 90 }, () => ({ x: r() * W, y: r() * H, z: r(), s: r() })); })();
+function font(w, px, fam = 'Space Grotesk') { return `${w} ${px}px "${fam}"`; }
+
+// ---------- light primitives (additive)
+const LAYERS = [[34, 0.035], [16, 0.075], [7, 0.17], [2.6, 0.6]];
+function beam(x0, y0, ang, len, col, a, core = true) {
+  const x1 = x0 + Math.cos(ang) * len, y1 = y0 + Math.sin(ang) * len;
+  line(x0, y0, x1, y1, col, a, core);
+}
+function line(x0, y0, x1, y1, col, a, core = true, wk = 1) {
+  if (a <= 0.003) return;
+  x.save(); x.globalCompositeOperation = 'lighter'; x.lineCap = 'round';
+  for (const [w, k] of LAYERS) { x.strokeStyle = rgba(col, a * k); x.lineWidth = w * wk; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); }
+  if (core) { x.strokeStyle = rgba(HOT, a * 0.9); x.lineWidth = 1.1 * wk; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); }
+  x.restore();
+}
+function neonPath(build, col, a, wk = 1) {           // any path (polyline, arc) drawn as a laser tube
+  if (a <= 0.003) return;
+  x.save(); x.globalCompositeOperation = 'lighter'; x.lineCap = 'round'; x.lineJoin = 'round';
+  for (const [w, k] of [[26, 0.05], [12, 0.12], [5.5, 0.32], [2.4, 0.85]]) { x.strokeStyle = rgba(col, a * k); x.lineWidth = w * wk; x.beginPath(); build(); x.stroke(); }
+  x.strokeStyle = rgba(HOT, a * 0.85); x.lineWidth = 1.1 * wk; x.beginPath(); build(); x.stroke();
+  x.restore();
+}
+function glowDot(px, py, r, col, a) {
+  if (a <= 0.003) return;
+  x.save(); x.globalCompositeOperation = 'lighter';
+  const g = x.createRadialGradient(px, py, 0, px, py, r);
+  g.addColorStop(0, rgba(HOT, a)); g.addColorStop(0.25, rgba(col, a * 0.6)); g.addColorStop(1, rgba(col, 0));
+  x.fillStyle = g; x.beginPath(); x.arc(px, py, r, 0, Math.PI * 2); x.fill(); x.restore();
+}
+
+// ---------- laser stick-figure dancers
+// a pose is absolute limb angles (0 = straight down, +pi/2 = screen right, pi = up), torso lean, hip dip
+const P = {
+  V:      { lean: 0,     dip: 0,  la: [-2.55, -2.75], ra: [2.55, 2.75],  ll: [-0.22, -0.08], rl: [0.22, 0.08] },
+  pointR: { lean: 0.14,  dip: 4,  la: [-0.75, 0.55],  ra: [2.35, 2.45],  ll: [-0.32, 0.02],  rl: [0.12, 0.05] },
+  pointL: { lean: -0.14, dip: 4,  la: [-2.35, -2.45], ra: [0.75, -0.55], ll: [-0.12, -0.05], rl: [0.32, -0.02] },
+  squat:  { lean: 0,     dip: 26, la: [-1.62, -1.5],  ra: [1.62, 1.5],   ll: [-1.0, 0.25],   rl: [1.0, -0.25] },
+  run:    { lean: -0.08, dip: 8,  la: [-0.85, -2.3],  ra: [0.55, -0.35], ll: [-0.62, 0.25],  rl: [0.35, 1.05] },
+  runB:   { lean: 0.08,  dip: 8,  la: [-0.55, 0.35],  ra: [0.85, 2.3],   ll: [-0.35, -1.05], rl: [0.62, -0.25] },
+  robot:  { lean: 0,     dip: 2,  la: [-1.57, -3.05], ra: [1.57, 0.05],  ll: [-0.15, -0.1],  rl: [0.3, 0.1] },
+  robotB: { lean: 0,     dip: 2,  la: [-1.57, -0.05], ra: [1.57, 3.05],  ll: [-0.3, -0.1],   rl: [0.15, 0.1] },
+  idle:   { lean: 0,     dip: 0,  la: [-0.18, -0.08], ra: [0.18, 0.08],  ll: [-0.12, -0.04], rl: [0.12, 0.04] },
+  crouch: { lean: 0.2,   dip: 30, la: [-0.5, 0.4],    ra: [0.5, -0.4],   ll: [-0.85, 0.35],  rl: [0.85, -0.35] },
+};
+const ROUTINES = [
+  ['V', 'squat', 'pointR', 'pointL', 'run', 'runB', 'robot', 'robotB'],
+  ['pointL', 'pointR', 'squat', 'V', 'robotB', 'robot', 'runB', 'run'],
+  ['robot', 'robotB', 'V', 'squat', 'pointR', 'pointL', 'run', 'runB'],
+];
+const mixPose = (a, b, u) => { const o = {}; for (const k of Object.keys(a)) o[k] = Array.isArray(a[k]) ? a[k].map((v, i) => lerp(v, b[k][i], u)) : lerp(a[k], b[k], u); return o; };
+function poseAt(t, routine, phase = 0) {
+  if (t < T_DROP) return P.crouch;
+  if (t >= T_FINAL) return mixPose(P.squat, P.V, eo((t - T_FINAL) / 0.09));       // everyone hits the V on the last hit
+  const bt = (t - T_DROP) / BEAT + phase, bi = Math.floor(bt), bp = bt - bi;
+  const R = ROUTINES[routine % ROUTINES.length];
+  const prev = P[R[((bi - 1) % R.length + R.length) % R.length]], cur = P[R[((bi % R.length) + R.length) % R.length]];
+  const p = mixPose(prev, cur, eo(bp / 0.16));                                      // snap onto each beat
+  p.dip += 9 * Math.exp(-bp * 7);                                                   // knees give on the downbeat
+  return p;
+}
+const vec = (a, l) => [Math.sin(a) * l, Math.cos(a) * l];
+function skeleton(p) {   // local coords, unit = 1 at scale 1 (figure ~ 230 tall), returns points with feet on y=0
+  const TH = 52, SH = 50, UA = 44, FA = 42, TOR = 74, HEAD = 17;
+  const hip = [0, 0];
+  const lk = [hip[0] + vec(p.ll[0], TH)[0], hip[1] + vec(p.ll[0], TH)[1]], lf = [lk[0] + vec(p.ll[1], SH)[0], lk[1] + vec(p.ll[1], SH)[1]];
+  const rk = [hip[0] + vec(p.rl[0], TH)[0], hip[1] + vec(p.rl[0], TH)[1]], rf = [rk[0] + vec(p.rl[1], SH)[0], rk[1] + vec(p.rl[1], SH)[1]];
+  const neck = [hip[0] + Math.sin(p.lean) * TOR, hip[1] - Math.cos(p.lean) * TOR];
+  const le = [neck[0] + vec(p.la[0], UA)[0], neck[1] + vec(p.la[0], UA)[1]], lh = [le[0] + vec(p.la[1], FA)[0], le[1] + vec(p.la[1], FA)[1]];
+  const re = [neck[0] + vec(p.ra[0], UA)[0], neck[1] + vec(p.ra[0], UA)[1]], rh = [re[0] + vec(p.ra[1], FA)[0], re[1] + vec(p.ra[1], FA)[1]];
+  const head = [neck[0] + Math.sin(p.lean) * (HEAD + 6), neck[1] - Math.cos(p.lean) * (HEAD + 6)];
+  const foot = Math.max(lf[1], rf[1]);
+  const off = -foot + p.dip * 0.35 * 0;                                             // feet on the floor
+  const sh = (q) => [q[0], q[1] + off];
+  return { hip: sh(hip), lk: sh(lk), lf: sh(lf), rk: sh(rk), rf: sh(rf), neck: sh(neck), le: sh(le), lh: sh(lh), re: sh(re), rh: sh(rh), head: sh(head), HEAD };
+}
+function dancer(cx, gy, s, p, col, a, col2 = null) {
+  const k = skeleton(p), X = (q) => cx + q[0] * s, Y = (q) => gy + q[1] * s;
+  const wk = Math.max(0.6, s * 0.95);
+  neonPath(() => { x.moveTo(X(k.lf), Y(k.lf)); x.lineTo(X(k.lk), Y(k.lk)); x.lineTo(X(k.hip), Y(k.hip)); x.lineTo(X(k.rk), Y(k.rk)); x.lineTo(X(k.rf), Y(k.rf)); }, col, a, wk);
+  neonPath(() => { x.moveTo(X(k.hip), Y(k.hip)); x.lineTo(X(k.neck), Y(k.neck)); }, col, a, wk);
+  neonPath(() => { x.moveTo(X(k.lh), Y(k.lh)); x.lineTo(X(k.le), Y(k.le)); x.lineTo(X(k.neck), Y(k.neck)); x.lineTo(X(k.re), Y(k.re)); x.lineTo(X(k.rh), Y(k.rh)); }, col2 || col, a, wk);
+  neonPath(() => { x.arc(X(k.head), Y(k.head), k.HEAD * s, 0, Math.PI * 2); }, col, a, wk);
+  // fingertip lasers: each hand fires a thin beam along the forearm on the beat
+  return k;
+}
+function dancerTrail(cx, gy, s, t, routine, phase, col, a, col2) {
+  for (const [dt, k] of [[0.066, 0.18], [0.033, 0.35]]) dancer(cx, gy, s, poseAt(t - dt, routine, phase), col, a * k, col2);
+  return dancer(cx, gy, s, poseAt(t, routine, phase), col, a, col2);
+}
+function handBeams(cx, gy, s, t, routine, phase, col, a) {
+  const p = poseAt(t, routine, phase), k = skeleton(p);
+  for (const [e, h] of [[k.le, k.lh], [k.re, k.rh]]) {
+    const ang = Math.atan2(h[1] - e[1], h[0] - e[0]);
+    beam(cx + h[0] * s, gy + h[1] * s, ang, 1400, col, a, true);
+  }
+}
+
+// ---------- laser floor (perspective grid)
+function floor(t, a, horizon = 905) {
+  const vpY = horizon - 160, bp = T_DROP < t ? ((t - T_DROP) / BEAT) % 1 : 0;
+  x.save(); x.beginPath(); x.rect(0, horizon, W, H - horizon); x.clip();
+  for (let i = -9; i <= 9; i++) line(CX + i * 18, vpY, CX + i * 160, H + 40, i % 3 === 0 ? PURPLE : BLUE, a * 0.32, false, 0.5);
+  const scroll = (t * 0.9) % 1;
+  for (let j = 0; j < 9; j++) {
+    const z = (j + scroll) / 9, y = horizon + Math.pow(z, 2.1) * (H - horizon + 30);
+    line(-20, y, W + 20, y, j % 2 ? VIOLET : PURPLE, a * (0.18 + 0.4 * z) * (0.7 + 0.3 * Math.exp(-bp * 5)), false, 0.4 + z * 0.6);
+  }
+  x.restore();
+  line(-20, horizon, W + 20, horizon, PURPLE, a * 0.7, true, 0.8);
+}
+
+// ---------- wordmark (two lines, ignites per word)
+function wordmark(cx, cy, s, lit1, lit2, flick) {
+  x.save(); x.translate(cx, cy); x.scale(s, s);
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  const lines = [[WM[0], -78, 150, lit1, PURPLE], [WM[1], 70, 112, lit2, BLUE]];
+  for (const [txt, y, px, lit, col] of lines) {
+    x.font = font(700, px); x.letterSpacing = '6px';
+    x.lineWidth = 2; x.strokeStyle = `rgba(200,180,255,${0.16 + 0.18 * (1 - lit)})`; x.strokeText(txt, 0, y);
+    if (lit > 0) {
+      const on = lit * (flick ? flick(txt) : 1);
+      x.save(); x.globalCompositeOperation = 'lighter';
+      x.shadowColor = rgba(col, 0.95 * on); x.shadowBlur = 44;
+      x.fillStyle = rgba(col, 0.6 * on); x.fillText(txt, 0, y);
+      x.shadowBlur = 14; x.fillStyle = rgba(RED, 0.25 * on); x.fillText(txt, 0, y);
+      x.restore();
+      x.fillStyle = `rgba(${BONE},${on})`; x.fillText(txt, 0, y);
+    }
+  }
+  x.restore();
+}
+
+// ---------- caption in the original video's style (white bold, dark edge + soft shadow, baseline 1017)
+function caption(txt, a = 1) {
+  x.save(); x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  x.font = font(800, CAP_PX, 'Inter'); x.letterSpacing = '0px'; x.lineJoin = 'round';
+  x.shadowColor = `rgba(0,0,0,${0.8 * a})`; x.shadowBlur = 9; x.shadowOffsetY = 2;
+  x.strokeStyle = `rgba(0,0,0,${0.75 * a})`; x.lineWidth = 3.2; x.strokeText(txt, CX, CFG.captionStyle.baseline);
+  x.shadowBlur = 0; x.shadowOffsetY = 0;
+  x.fillStyle = `rgba(255,255,255,${a})`; x.fillText(txt, CX, CFG.captionStyle.baseline); x.restore();
+}
+
+// ---------- location pin (the "locate" beat), drawn as a laser outline
+function pin(px, py, r, a, col = RED) {   // (px,py) = the pin's tip
+  const cy = py - r * 2.25;
+  neonPath(() => {
+    x.moveTo(px, py);
+    x.bezierCurveTo(px - r * 0.35, py - r * 0.75, px - r * 1.0, cy + r * 0.62, px - r * 1.0, cy);
+    x.arc(px, cy, r, Math.PI, 0, false);
+    x.bezierCurveTo(px + r * 1.0, cy + r * 0.62, px + r * 0.35, py - r * 0.75, px, py);
+  }, col, a, Math.max(0.8, r / 40));
+  neonPath(() => { x.arc(px, cy, r * 0.38, 0, Math.PI * 2); }, PURPLE, a, Math.max(0.7, r / 50));
+}
+function ping(t, t0, px, py, a) {          // radar rings out of the pin's tip
+  for (let k = 0; k < 4; k++) {
+    const d = (t - t0 - k * 0.22); if (d < 0) continue;
+    const u = (d % 0.88) / 0.88, rr = 20 + u * 300;
+    neonPath(() => { x.ellipse(px, py, rr, rr * 0.32, 0, 0, Math.PI * 2); }, k % 2 ? BLUE : RED, a * (1 - u) * 0.8, 0.6);
+  }
+}
+
+// ---------- impact FX
+function impact(t, t0, cx, cy, sparks, big, cols = [PURPLE, BLUE, RED]) {
+  const d = t - t0; if (d < 0 || d > 1.2) return;
+  x.save(); x.globalCompositeOperation = 'lighter';
+  for (let k = 0; k < (big ? 3 : 2); k++) {
+    const dd = d - k * 0.07; if (dd <= 0) continue;
+    const rr = eo(dd / 0.7) * (big ? 980 : 720), a = clamp(1 - dd / 0.7);
+    x.strokeStyle = rgba(cols[k % 3], a * 0.9); x.lineWidth = (big ? 14 : 9) * a + 1;
+    x.beginPath(); x.ellipse(cx, cy, rr, rr * 0.62, 0, 0, Math.PI * 2); x.stroke();
+  }
+  for (const s of sparks) {
+    const life = d / s.l; if (life > 1) continue;
+    const r0 = s.v * d * (1 - 0.35 * life), r1 = Math.max(0, r0 - 40 - s.v * 0.05);
+    x.strokeStyle = s.hot > 0.6 ? rgba(HOT, 1 - life) : rgba(cols[s.c], 1 - life); x.lineWidth = s.w;
+    x.beginPath(); x.moveTo(cx + Math.cos(s.a) * r1, cy + Math.sin(s.a) * r1 * 0.8); x.lineTo(cx + Math.cos(s.a) * r0, cy + Math.sin(s.a) * r0 * 0.8); x.stroke();
+  }
+  x.restore();
+  const n = big ? 20 : 12, la = clamp(1 - d / (big ? 0.5 : 0.35));
+  if (la > 0) for (let i = 0; i < n; i++) beam(cx, cy, (i / n) * Math.PI * 2 + d * 0.8 + (big ? 0 : 0.17), 1400, cols[i % 3], la);
+  glowDot(cx, cy, (big ? 420 : 280) * (1 - d * 0.6), cols[0], clamp(1 - d / 0.45));
+}
+function flash(t, t0, k = 14, max = 1, col = [250, 244, 255]) { const d = t - t0; if (d < 0) return; const a = max * Math.exp(-d * k); if (a < 0.01) return; x.fillStyle = rgba(col, a); x.fillRect(-60, -60, W + 120, H + 120); }
+function shakeAt(t, hits) { let ox = 0, oy = 0; for (const [t0, amp] of hits) { const d = t - t0; if (d < 0 || d > 0.5) continue; const e = amp * Math.exp(-d * 9); ox += e * Math.sin(d * 97); oy += e * Math.cos(d * 71); } return [ox, oy]; }
+
+// police-light wash (red left / blue right, alternating), the continuity from the original's last shot
+function policeWash(t, a) {
+  const k = Math.floor(t * FPS / 2) % 2;
+  for (const [side, col] of [[0, RED], [1, BLUE]]) {
+    const on = (k === side ? 1 : 0.22) * a, gx = side ? W + 60 : -60;
+    const g = x.createRadialGradient(gx, 380, 0, gx, 380, 820); g.addColorStop(0, rgba(col, 0.55 * on)); g.addColorStop(1, rgba(col, 0));
+    x.save(); x.globalCompositeOperation = 'lighter'; x.fillStyle = g; x.fillRect(0, 0, W, H); x.restore();
+  }
+}
+
+// ---------- laser show (post-drop)
+const EMIT = [[-10, 1300], [730, 1300], [CX, -20], [-10, 380], [730, 380], [CX, 1300]];
+function laserShow(t, energy) {
+  const bi = Math.floor((t - T_DROP) / BEAT), bp = ((t - T_DROP) / BEAT) % 1, pulse = 0.55 + 0.45 * Math.exp(-bp * 5);
+  const g = x.createLinearGradient(0, H, 0, 0);
+  g.addColorStop(0, `rgba(70,20,120,${0.4 * pulse})`); g.addColorStop(0.5, 'rgba(20,10,50,0.16)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  const pat = ((bi % 4) + 4) % 4;
+  for (let e = 0; e < EMIT.length; e++) {
+    const [ex, ey] = EMIT[e];
+    if (e >= 3 && e < 5 && pat % 2 === 0) continue;
+    if (e === 5 && pat % 2 === 1) continue;
+    const base = ey > 1000 ? -Math.PI / 2 : (ey < 0 ? Math.PI / 2 : (ex < 0 ? 0 : Math.PI));
+    const nb = e === 2 ? 10 : (e === 5 ? 8 : 7), spread = e === 2 ? 1.6 : (e === 5 ? 1.4 : 1.05);
+    for (let i = 0; i < nb; i++) {
+      const f = i / (nb - 1) - 0.5;
+      let ang;
+      if (pat === 0) ang = base + f * spread + Math.sin(t * 3.1 + e) * 0.35;
+      else if (pat === 1) ang = base + f * spread * 0.4 + Math.sin(t * 5.3 + e * 2) * 0.6;
+      else if (pat === 2) ang = base + f * spread * 1.3 * Math.sin(t * 4 + e);
+      else ang = base + Math.sin(t * 7 + i * 0.7 + e) * 0.7;
+      beam(ex, ey, ang, 1700, LASER[(i + e * 2) % 3], 0.8 * pulse * energy);
+    }
+    glowDot(ex, ey, 70, LASER[e % 3], 0.8 * pulse * energy);
+  }
+  // scanning horizontal sheet every other bar
+  if (pat === 3) { const sy = lerp(200, 1100, bp); line(-20, sy, W + 20, sy, RED, 0.7 * energy); }
+}
+
+// ---------- slam text
+function slam(t, s, next, cy) {
+  const d = t - s.t; if (d < 0 || t >= next) return;
+  const fit = (txt, wmax, px) => { x.font = font(700, px); const m = x.measureText(txt).width; return m > wmax ? px * wmax / m : px; };
+  const px = fit(s.text, 600, 150);
+  const sc = 1 + 0.45 * Math.exp(-d * 26), a = clamp(d / 0.05);
+  const split = 16 * Math.exp(-d * 14) + (s.glitch ? 5 * (Math.sin(t * 90) > 0.6 ? 1 : 0) : 0);
+  x.save(); x.translate(CX, cy); x.scale(sc, sc); x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.font = font(700, px); x.letterSpacing = '2px';
+  const scan = clamp(d / 0.12), top = -px * 0.62, bot = px * 0.62, sy = lerp(top, bot, scan);
+  x.save(); x.beginPath(); x.rect(-W, top - 10, W * 2, sy - top + 10); x.clip();
+  x.globalCompositeOperation = 'lighter';
+  x.fillStyle = rgba(RED, 0.75 * a); x.fillText(s.text, -split, 0);
+  x.fillStyle = rgba(BLUE, 0.7 * a); x.fillText(s.text, split, 0);
+  x.globalCompositeOperation = 'source-over';
+  x.shadowColor = rgba(PURPLE, 0.95); x.shadowBlur = 36;
+  if (s.accent) {
+    const ix = s.text.indexOf(s.accent), parts = [s.text.slice(0, ix), s.accent]; const w0 = x.measureText(parts[0]).width, w1 = x.measureText(parts[1]).width, st = -(w0 + w1) / 2;
+    x.textAlign = 'left'; x.fillStyle = `rgba(${BONE},${a})`; x.fillText(parts[0], st, 0);
+    x.shadowColor = rgba(RED, 1); x.fillStyle = `rgba(255,92,128,${a})`; x.fillText(parts[1], st + w0, 0);
+  } else { x.fillStyle = `rgba(${BONE},${a})`; x.fillText(s.text, 0, 0); }
+  x.restore();
+  if (scan < 1) beam(-W, sy, 0, W * 2, PURPLE, 1);
+  x.restore();
+  if (s.glitch) {
+    const fr = rng(Math.floor(t * FPS) * 13 + 5);
+    if (fr() < 0.55) for (let k = 0; k < 4; k++) {
+      const yy = cy - 80 + fr() * 160, hh = 6 + fr() * 22, dx = (fr() - 0.5) * 60;
+      const img = x.getImageData(0, yy * 1.5, 1080, hh * 1.5); x.putImageData(img, dx * 1.5, yy * 1.5);
+    }
+  }
+}
+
+// ---------- end card: Vilas / .studio
+function endCard(t) {
+  const d = t - T_END, bp = ((t - T_DROP) / BEAT) % 1, pulse = 0.6 + 0.4 * Math.exp(-bp * 5);
+  const conv = 1 - eo(d / 0.35), sw = eo((d - 0.35) / 1.2);
+  for (let e = 0; e < 3; e++) {
+    const [ex, ey] = EMIT[e];
+    const toC = Math.atan2(470 - ey, CX - ex);
+    for (let i = 0; i < 8; i++) {
+      const f = i / 7 - 0.5;
+      const ang = toC + f * (0.05 + 1.15 * sw * (1 - conv)) + Math.sin(t * 2.4 + i + e) * 0.1 * sw;
+      beam(ex, ey, ang, 1700, LASER[(i + e) % 3], 0.6 * pulse);
+    }
+  }
+  glowDot(CX, 470, 280, PURPLE, 0.22 + 0.2 * Math.exp(-d * 6));
+  const s = 1 + 0.25 * Math.exp(-d * 18), a = clamp(d / 0.06);
+  x.save(); x.translate(CX, 440); x.scale(s, s); x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  x.font = font(500, 196); x.letterSpacing = '-4px';
+  x.shadowColor = rgba(PURPLE, 0.95); x.shadowBlur = 50; x.fillStyle = `rgba(${BONE},${a})`; x.fillText(ENDC.word, 0, 40);
+  x.shadowBlur = 0; x.fillText(ENDC.word, 0, 40);
+  const u = eo((d - 0.08) / 0.3), uw = 440;
+  if (u > 0) { beam(-uw / 2, 74, 0, uw * u, RED, 1); beam(uw / 2, 80, Math.PI, uw * u, BLUE, 0.8); }
+  x.font = font(700, 66, 'Space Mono'); x.letterSpacing = '2px';
+  const sa = clamp((d - 0.25) / 0.2);
+  x.shadowColor = rgba(BLUE, 0.9); x.shadowBlur = 20; x.fillStyle = `rgba(170,200,255,${sa})`; x.fillText(ENDC.sub, 0, 160);
+  x.restore();
+  const la = clamp((d - 0.55) / 0.25);
+  x.save(); x.textAlign = 'center'; x.font = font(600, 34, 'Inter'); x.shadowColor = 'rgba(0,0,0,0.95)'; x.shadowBlur = 12; x.fillStyle = `rgba(${BONE},${0.95 * la})`;
+  ENDC.tagline.forEach((ln, i) => x.fillText(ln, CX, 735 + 44 * i)); x.restore();
+}
+
+// dancer troupe: big trio in the drop, a row of five on the end card
+function troupe(t, mode, a) {
+  if (mode === 'drop') {
+    const gy = 1238;
+    [[CX - 232, 0, PURPLE, BLUE, 0], [CX, 1, RED, PURPLE, 0.0], [CX + 232, 2, BLUE, RED, 0]].forEach(([cx, r, c1, c2, ph]) => {
+      if (t > T_DROP) handBeams(cx, gy, 1.5, t, r, ph, c2, 0.45 * a * Math.exp(-(((t - T_DROP) / BEAT) % 1) * 3));
+      dancerTrail(cx, gy, 1.5, t, r, ph, c1, a, c2);
+    });
+  } else {
+    const gy = 1245, s = 1.12;
+    [[CX - 258, 1, BLUE, PURPLE], [CX - 86, 0, RED, BLUE], [CX + 86, 2, PURPLE, RED], [CX + 258, 1, BLUE, RED]].forEach(([cx, r, c1, c2], i) => {
+      dancerTrail(cx, gy, s, t, r, i % 2 ? 0.5 : 0, c1, a, c2);
+    });
+    if (t >= T_FINAL) for (const cx of [CX - 258, CX - 86, CX + 86, CX + 258]) handBeams(cx, gy, s, t, 0, 0, PURPLE, 0.5 * Math.exp(-(t - T_FINAL) * 2.5));
+  }
+}
+
+// ---------- main
+window.setup = async () => {
+  CFG = await (await fetch('../cfg.json')).json();
+  ({ fps: FPS, duration: DUR, tImp1: T_IMP1, tImp2: T_IMP2, tDrop: T_DROP, beat: BEAT, tEnd: T_END, tFinal: T_FINAL, slams: SLAMS, wordmark: WM, endCard: ENDC, caption: CAPS } = CFG);
+  NF = Math.round(DUR * FPS); window.NF = NF; window.CFG_FPS = FPS;
+  await document.fonts.load(font(700, 100)); await document.fonts.load(font(500, 100)); await document.fonts.load(font(800, 40, 'Inter')); await document.fonts.load(font(700, 40, 'Inter'));
+  await document.fonts.load(font(700, 40, 'Space Mono')); await document.fonts.load(font(600, 36, 'Inter'));
+  x.font = font(800, 100, 'Inter'); CAP_PX = 100 * CFG.captionStyle.widthPx / x.measureText(CFG.captionStyle.widthRef).width; window.CAP_PX = CAP_PX;
+};
+window.renderFrame = (f) => {
+  const t = f / FPS;
+  x.setTransform(1.5, 0, 0, 1.5, 0, 0);
+  x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.shadowBlur = 0;
+  x.fillStyle = BG; x.fillRect(0, 0, W, H);
+  const [sx, sy] = shakeAt(t, [[T_IMP1, 26], [T_IMP2, 16], [T_DROP, 20], [T_END, 14], [T_FINAL, 18], ...SLAMS.map((s) => [s.t, 8])]);
+  x.translate(sx, sy);
+  x.fillStyle = BG; x.fillRect(-60, -60, W + 120, H + 120);
+
+  if (t < T_DROP) {
+    // A: locate -> the pin drops onto the wordmark, two impacts on the spoken name
+    policeWash(t, t < T_IMP1 ? 1 : clamp(1 - (t - T_IMP1) / 0.5) * 0.6);
+    // dust motes
+    x.save(); x.globalCompositeOperation = 'lighter';
+    for (const p of DUST) { const yy = (p.y + t * 40 * (0.3 + p.z)) % H; x.fillStyle = rgba(p.s > 0.5 ? PURPLE : BLUE, 0.25 + 0.3 * p.z); x.fillRect(p.x, yy, 1.2 + p.z, 1.2 + p.z); }
+    x.restore();
+    floor(t, clamp((t - 0.05) / 0.4) * 0.8);
+    const wmS = t < T_IMP1 ? lerp(0.9, 1.0, eo(t / T_IMP1)) : 1 + 0.05 * eo((t - T_IMP1) / 1.4);
+    // lock-on: four lasers sweep in from the corners and converge on the mark
+    if (t < T_IMP1 + 0.12) {
+      const lock = eo(t / (T_IMP1 * 0.85)), a = clamp(t / 0.06 + 0.4) * clamp((T_IMP1 + 0.12 - t) / 0.12);
+      [[-10, 120, RED], [730, 120, BLUE], [-10, 1260, BLUE], [730, 1260, RED]].forEach(([ex, ey, col]) => {
+        const ang = Math.atan2(WY - ey, CX - ex) + (1 - lock) * 0.5 * (ex < 0 ? -1 : 1) * (ey < 600 ? 1 : -1);
+        beam(ex, ey, ang, 1500, col, 0.85 * a);
+      });
+      x.save(); x.globalCompositeOperation = 'lighter'; x.strokeStyle = rgba(RED, 0.8 * a); x.lineWidth = 2;
+      const rr = lerp(340, 205, lock) * wmS; x.beginPath(); x.arc(CX, WY, rr, 0, Math.PI * 2); x.stroke();
+      for (let k = 0; k < 4; k++) { const a2 = k * Math.PI / 2 + t * 2.2; x.beginPath(); x.moveTo(CX + Math.cos(a2) * (rr - 24), WY + Math.sin(a2) * (rr - 24)); x.lineTo(CX + Math.cos(a2) * (rr + 24), WY + Math.sin(a2) * (rr + 24)); x.stroke(); }
+      x.restore();
+    }
+    // build lasers from the bottom corners after impact 1
+    if (t > T_IMP1) {
+      const bu = eo((t - T_IMP2) / 0.7);
+      for (const [ex, ey, dir] of [[-10, 1300, 1], [730, 1300, -1]]) for (let i = 0; i < 2 + Math.floor(bu * 6); i++) {
+        beam(ex, ey, -Math.PI / 2 + dir * (0.15 + i * 0.11 + Math.sin(t * 6 + i) * 0.08), 1700, LASER[i % 3], 0.3 + 0.5 * bu);
+      }
+    }
+    // dancers wait in the dark, crouched, flickering on with the riser
+    const pre = t > 1.15 ? clamp((t - 1.15) / 0.55) : 0;
+    if (pre > 0) troupe(t, 'drop', 0.18 * pre * (Math.floor(t * FPS) % 3 ? 1 : 0.5));
+    const flick = (txt) => { const dd = t - (txt === WM[0] ? T_IMP1 : T_IMP2); if (dd < 0) return 0; if (dd > 0.14) return 1; return [1, 0.2, 1, 0.45, 1, 1][Math.floor(dd * FPS)] ?? 1; };
+    wordmark(CX, WY, wmS, t >= T_IMP1 ? 1 : 0, t >= T_IMP2 ? 1 : 0, flick);
+    // the pin: falls onto the top of VILAS, lands on impact 1, then pings
+    const tipY = WY - 78 - 92;
+    if (t < T_IMP1) { const u = ei(t / T_IMP1); pin(CX, lerp(-40, tipY, u), lerp(60, 34, u), 1, RED); }
+    else { const d = t - T_IMP1, sq = 1 + 0.25 * Math.exp(-d * 18); pin(CX, tipY, 34 * sq, clamp(1 - (t - 1.45) / 0.3), RED); ping(t, T_IMP1, CX, tipY, clamp(1 - (t - 1.45) / 0.3)); }
+    impact(t, T_IMP1, CX, tipY + 40, SP1, true, [RED, PURPLE, BLUE]);
+    impact(t, T_IMP2, CX, 670, SP2, false, [BLUE, PURPLE, RED]);
+    flash(t, T_IMP1, 11, 1); flash(t, T_IMP2, 16, 0.55, [220, 230, 255]);
+    if (t > 1.5) { const k = Math.floor((t - 1.5) * FPS); if (k % 2 === 0) { x.fillStyle = rgba(k % 4 ? PURPLE : RED, 0.13); x.fillRect(-60, -60, W + 120, H + 120); } }
+  } else {
+    // B: the drop — laser show, laser dancers, slams, end card
+    const inEnd = t >= T_END;
+    laserShow(t, inEnd ? 0.45 : 1);
+    floor(t, inEnd ? 0.75 : 1, inEnd ? 960 : 905);
+    troupe(t, inEnd ? 'end' : 'drop', 1);
+    for (let i = 0; i < SLAMS.length; i++) slam(t, SLAMS[i], i + 1 < SLAMS.length ? SLAMS[i + 1].t : T_END, 470);
+    if (inEnd) endCard(t);
+    impact(t, T_DROP, CX, 560, SP3, true);
+    impact(t, T_END, CX, 470, SP2, false, [RED, PURPLE, BLUE]);
+    impact(t, T_FINAL, CX, 470, SP4, true, [BLUE, RED, PURPLE]);
+    flash(t, T_DROP, 12, 0.95); flash(t, T_END, 12, 0.8); flash(t, T_FINAL, 10, 0.7, [235, 220, 255]);
+    for (const s of SLAMS) flash(t, s.t, 22, 0.25, [230, 210, 255]);
+  }
+  x.setTransform(1.5, 0, 0, 1.5, 0, 0);
+  const v = x.createRadialGradient(CX, 640, 300, CX, 640, 900); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.6)');
+  x.fillStyle = v; x.fillRect(0, 0, W, H);
+  // caption chunks in the original's style while the narrator speaks
+  let from = 0;
+  for (const cp of CAPS) { if (t >= from && t < cp.until) caption(cp.text, cp === CAPS[CAPS.length - 1] ? clamp((cp.until - t) / 0.05) : 1); from = cp.until; }
+};
+</script></body></html>
