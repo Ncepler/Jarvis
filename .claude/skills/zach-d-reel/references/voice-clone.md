@@ -1,6 +1,13 @@
 # Same voice in part 2 (Higgsfield voice clone)
 
-When Noah says "keep the voice the same", part 2's line is cloned from the original narrator. Railgun: 3 takes, 0.2 credits each
+**Autopilot rule (2026-10-10): clone the narrator or use NO voice. Never a stock/TTS voice.** (The sloth reel's TTS had a pitch spread of 14 Hz vs the narrator's
+69 Hz and sounded like Stephen Hawking.) The clone says only "Veelas Studio!" on impact 1; with no clone, part 2 is voiceless. Gate every clone with
+`python3 -I scripts/qa.py final.mp4 --cut SEC --voice-file voice.wav`: the median pitch must be within 30% of the narrator's and, for a voice >= 2 s, its spread >= 50% of the
+narrator's. Measure on the **isolated voice file**, not the mix (music under the voice wrecks the pitch estimate). Budget and fallbacks: `autopilot.md` §6.
+For the reference upload, prefer a direct `media_upload`; when the cloud proxy blocks it, push `ref.mp3` to a **throwaway branch** (`tmp-voice-ref-<date>`), import its pinned raw URL, and delete the branch
+(`VOICE_REF_VIA_REPO = true` in `autopilot.md`), rather than committing it to main as the first two reels did.
+
+Part 2's line is cloned from the original narrator (always, in autopilot; a clone fixed the sloth reel's robot voice problem). Railgun: 3 takes, 0.2 credits each
 (Higgsfield `seed_audio`). Check the balance (`balance`) and the price (`get_cost: true`) before generating; he runs on a starter plan.
 
 ## Recipe

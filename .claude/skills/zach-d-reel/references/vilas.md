@@ -32,8 +32,9 @@ Clients we don't have, testimonials, review counts, star ratings, "trusted by", 
 - Motion: ease `cubic-bezier(0.16,1,0.3,1)`, no bounce, fades and slides only.
 - The hinge and turn beats wear **part 1's** look (its captions, its energy). Only the offer beats and the end card switch to the Vilas look.
 
-## Assets part 2 needs
-Have these before building. In the Jarvis repo, capture them with Playwright from the live site. Anywhere else, ask Noah to upload screen recordings (phone or desktop, vertical if possible):
+## Assets a LONG-FORM part 2 needs (not the hype ending)
+The default hype ending needs none of these (it draws everything itself). Only a long-form, spoken ad (SKILL.md appendix) needs them. Never substitute a placeholder box for any of them: if you lack them, build the hype ending.
+Have these before building a long-form ad. In the Jarvis repo, capture them with Playwright from the live site. Anywhere else, ask Noah to upload screen recordings (phone or desktop, vertical if possible):
 1. vilas.studio hero, with the wordmark reveal playing (3–4s)
 2. Scrolling the gallery, then a demo card opening (4–6s)
 3. A smooth scroll through one demo that fits the story's niche (food story → bakery demo, cars → auto body, water/cleaning → power washing, outdoors → landscaping or lawn care, haircut/style → barber, flowers/gifts → florist, building/house → renovation)

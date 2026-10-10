@@ -41,21 +41,29 @@ def supersaw(m_, dur, cutoff=1800):
     return lp(s, cutoff) * env(len(t), a=0.004, r=0.04, hold=dur - 0.04)
 
 T_FINAL = CFG.get('tFinal', DUR)
-# --- A: "locate" -> siren yelp + lock-on beeps + the pin dropping, into impact 1
-t = tt(T_IMP1 + 0.05); f = 1050 + 450 * np.sign(np.sin(2 * np.pi * 7.5 * t)) * 0 + 420 * np.sin(2 * np.pi * 7.5 * t)
-yelp = np.sin(2 * np.pi * np.cumsum(f) / SR) * env(len(t), a=0.004, r=0.03)
-m.add('fx', lp(np.tanh(yelp * 2.2), 3500), 0.0, gain=0.22, pan=-0.3, send=0.25)
-for k, t0 in enumerate((0.02, 0.12, 0.2, 0.26)):
-    bt = tt(0.05); m.add('fx', np.sin(2 * np.pi * (1900 + 300 * k) * bt) * np.exp(-bt / 0.018), t0, gain=0.22, pan=(-0.5, 0.5)[k % 2], send=0.2)
+OPEN = CFG.get('opening', 'pin')
+if OPEN == 'orb':
+    # the cut itself is an event: thump + click on the very first frame, so the hard cut to the new screen is HEARD (never a silent cut)
+    m.add('fx', boom(0.9, 0.5), 0.0, gain=0.8, send=0.2)
+    m.add('fx', kick(0.3, 170, 46), 0.0, gain=0.85)
+    m.add('fx', zap(0.12, 6200, 900), 0.0, gain=0.3, pan=0.2)
+else:
+    # --- A: "locate" -> siren yelp + lock-on beeps + the pin dropping, into impact 1
+    t = tt(T_IMP1 + 0.05); f = 1050 + 450 * np.sign(np.sin(2 * np.pi * 7.5 * t)) * 0 + 420 * np.sin(2 * np.pi * 7.5 * t)
+    yelp = np.sin(2 * np.pi * np.cumsum(f) / SR) * env(len(t), a=0.004, r=0.03)
+    m.add('fx', lp(np.tanh(yelp * 2.2), 3500), 0.0, gain=0.22, pan=-0.3, send=0.25)
+    for k, t0 in enumerate((0.02, 0.12, 0.2, 0.26)):
+        bt = tt(0.05); m.add('fx', np.sin(2 * np.pi * (1900 + 300 * k) * bt) * np.exp(-bt / 0.018), t0, gain=0.22, pan=(-0.5, 0.5)[k % 2], send=0.2)
 w, t = sweep(2400, 600, T_IMP1)
 m.add('fx', w * np.linspace(0.1, 0.6, len(t)) ** 1.5, 0.0, gain=0.35, send=0.2)
 m.add('fx', whoosh(T_IMP1 + 0.04, 250, 8000, peak=0.9), 0.0, gain=1.0, send=0.2)
 m.add('fx', boom(1.8, 1.2), T_IMP1, gain=1.0, send=0.35)
 m.add('fx', kick(0.5, 180, 40), T_IMP1, gain=0.9)
 for k, pan in enumerate((-0.6, 0.6)): m.add('fx', zap(0.25, 5200, 300), T_IMP1 + 0.01 * k, pan=pan, gain=0.35, send=0.1)
-# radar pings from the landed pin
-for k in range(3):
-    bt = tt(0.5); m.add('fx', np.sin(2 * np.pi * 1320 * bt) * np.exp(-bt / 0.12), T_IMP1 + 0.22 + 0.22 * k, gain=0.12, pan=(-0.4, 0.4, 0)[k], send=0.5)
+if OPEN != 'orb':
+    # radar pings from the landed pin
+    for k in range(3):
+        bt = tt(0.5); m.add('fx', np.sin(2 * np.pi * 1320 * bt) * np.exp(-bt / 0.12), T_IMP1 + 0.22 + 0.22 * k, gain=0.12, pan=(-0.4, 0.4, 0)[k], send=0.5)
 # impact 2 on "Studio"
 m.add('fx', boom(1.0, 0.6), T_IMP2, gain=0.7, send=0.3)
 m.add('fx', kick(0.4, 160, 45), T_IMP2, gain=0.7)

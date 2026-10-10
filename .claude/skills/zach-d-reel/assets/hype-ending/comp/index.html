@@ -8,7 +8,7 @@
 // Hype ending, part 2. Every frame is a pure function of its frame number. ALL timings and words come from ../cfg.json
 // (audio.py reads the same file, so picture and sound cannot drift apart).
 // Design units: 720x1280 (9:16, the original's shape); canvas is 1.5x for clean edges, downscaled at assemble time.
-let CFG, FPS, DUR, NF, T_IMP1, T_IMP2, T_DROP, BEAT, T_END, SLAMS, WM, ENDC, CAP;
+let CFG, FPS, DUR, NF, T_IMP1, T_IMP2, T_DROP, BEAT, T_END, SLAMS, WM, ENDC, CAP, OPEN;
 const W = 720, H = 1280, CX = 360;
 const c = document.getElementById('c'), x = c.getContext('2d');
 
@@ -82,7 +82,7 @@ function caption(txt, a = 1) {
 
 // ---------- background space (continuity with the original's warp streaks)
 function space(t, zoom) {
-  x.fillStyle = INK; x.fillRect(0, 0, W, H);
+  x.fillStyle = INK; x.fillRect(-40, -40, W + 80, H + 80);   // oversized so the screen shake never exposes an edge
   const g = x.createRadialGradient(CX, 600, 0, CX, 600, 760);
   g.addColorStop(0, 'rgba(70,40,18,0.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
   x.fillStyle = g; x.fillRect(0, 0, W, H);
@@ -119,6 +119,23 @@ function projectile(px, py, r, t) {
   x.fillStyle = '#b9b7b3'; x.beginPath(); x.arc(px, py, r * 0.64, 0, Math.PI * 2); x.fill();
   const rim = x.createRadialGradient(px, py, r * 0.7, px, py, r * 1.05); rim.addColorStop(0, rgba(ORANGE, 0)); rim.addColorStop(1, rgba(ORANGE, 0.45));
   x.fillStyle = rim; x.beginPath(); x.arc(px, py, r * 1.05, 0, Math.PI * 2); x.fill();
+}
+
+
+// ---------- generic opening object: a white-hot plasma orb (no metal body, so it needs no matching last frame)
+function orb(px, py, r, t) {
+  x.save(); x.globalCompositeOperation = 'lighter';
+  const fr = rng(Math.floor(t * 48) + 3);
+  for (let i = 0; i < 30; i++) {
+    const a = (i / 30) * Math.PI * 2 + fr() * 0.2, L = r * (1.4 + fr() * 2.2);
+    const g = x.createLinearGradient(px + Math.cos(a) * r * 0.7, py + Math.sin(a) * r * 0.7, px + Math.cos(a) * (r + L), py + Math.sin(a) * (r + L));
+    g.addColorStop(0, rgba(HOT, 0.6)); g.addColorStop(0.3, rgba(ORANGE, 0.4)); g.addColorStop(1, rgba(RED, 0));
+    x.strokeStyle = g; x.lineWidth = r * (0.16 + fr() * 0.2); x.lineCap = 'round';
+    x.beginPath(); x.moveTo(px + Math.cos(a) * r * 0.7, py + Math.sin(a) * r * 0.7); x.lineTo(px + Math.cos(a) * (r + L), py + Math.sin(a) * (r + L)); x.stroke();
+  }
+  glowDot(px, py, r * 3.4, ORANGE, 0.8); glowDot(px, py, r * 1.6, HOT, 0.95);
+  x.restore();
+  x.fillStyle = rgba(HOT, 1); x.beginPath(); x.arc(px, py, r * 0.62, 0, Math.PI * 2); x.fill();
 }
 
 // ---------- impact FX
@@ -249,13 +266,14 @@ function endCard(t) {
 window.setup = async () => {
   CFG = await (await fetch('../cfg.json')).json();
   ({ fps: FPS, duration: DUR, tImp1: T_IMP1, tImp2: T_IMP2, tDrop: T_DROP, beat: BEAT, tEnd: T_END, slams: SLAMS, wordmark: WM, endCard: ENDC, caption: CAP } = CFG);
+  OPEN = CFG.opening || 'round';   // 'round' = the railgun round falls into the name; 'orb' = generic: hard cut to a new screen, a white-hot orb falls in
   NF = Math.round(DUR * FPS); window.NF = NF; window.CFG_FPS = FPS;
   await document.fonts.load(font(700, 100)); await document.fonts.load(font(500, 100)); await document.fonts.load(font(700, 40, 'Inter')); await document.fonts.load(font(500, 30, 'Inter')); await document.fonts.load(font(700, 40, 'Space Mono')); await document.fonts.load(font(600, 36, 'Inter')); };
 window.renderFrame = (f) => {
   const t = f / FPS;
   x.setTransform(1.5, 0, 0, 1.5, 0, 0);
   x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.shadowBlur = 0;
-  const [sx, sy] = shakeAt(t, [[T_IMP1, 26], [T_IMP2, 14], [T_DROP, 18], [T_END, 12], ...SLAMS.map((s) => [s.t, 7])]);
+  const [sx, sy] = shakeAt(t, [...(OPEN === 'orb' ? [[0, 20]] : []), [T_IMP1, 26], [T_IMP2, 14], [T_DROP, 18], [T_END, 12], ...SLAMS.map((s) => [s.t, 7])]);
   x.translate(sx, sy);
 
   if (t < T_DROP) {
@@ -286,11 +304,12 @@ window.renderFrame = (f) => {
     wordmark(CX, 600, wmS, t >= T_IMP1 ? 1 : 0, t >= T_IMP2 ? 1 : 0, flick);
     if (t < T_IMP1) {
       const pr = lerp(165, 16, ei(fall)), py = lerp(640, 600, fall);
-      projectile(CX, py, pr, t);
+      if (OPEN === 'orb') orb(CX, py, pr * 0.8, t); else projectile(CX, py, pr, t);
     }
     impact(t, T_IMP1, CX, 520, SP1, true);
     impact(t, T_IMP2, CX, 670, SP2, false);
     flash(t, T_IMP1, 11, 1); flash(t, T_IMP2, 16, 0.55);
+    if (OPEN === 'orb') flash(t, 0, 20, 0.9);   // the cut itself lands as a hit: white frame decaying over ~3 frames, with the thump in audio.py
     // pre-drop riser strobe
     if (t > 1.55) { const k = Math.floor((t - 1.55) * FPS); if (k % 2 === 0) { x.fillStyle = 'rgba(255,240,220,0.12)'; x.fillRect(-40, -40, W + 80, H + 80); } }
   } else {

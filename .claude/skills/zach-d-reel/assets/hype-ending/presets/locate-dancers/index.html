@@ -8,7 +8,7 @@
 // Part 2 for the "locate your vehicle" reel: "...letting you and the police locate | VILAS STUDIO" -> laser drop with laser stick-figure dancers.
 // Every frame is a pure function of its frame number. Timings and words come from ../cfg.json (audio.py reads the same file).
 // Design units 720x1280 (9:16), canvas 1.5x.
-let CFG, FPS, DUR, NF, T_IMP1, T_IMP2, T_DROP, BEAT, T_END, T_FINAL, SLAMS, WM, ENDC, CAPS, CAP_PX = 48;
+let CFG, FPS, DUR, NF, T_IMP1, T_IMP2, T_DROP, BEAT, T_END, T_FINAL, SLAMS, WM, ENDC, CAPS, OPEN, CAP_PX = 48;
 const W = 720, H = 1280, CX = 360, WY = 600;
 const c = document.getElementById('c'), x = c.getContext('2d');
 
@@ -187,6 +187,22 @@ function ping(t, t0, px, py, a) {          // radar rings out of the pin's tip
   }
 }
 
+// ---------- generic opening object: a laser orb (purple core, blue/red flames) - needs no matching last frame
+function orb(px, py, r, t) {
+  x.save(); x.globalCompositeOperation = 'lighter';
+  const fr = rng(Math.floor(t * 48) + 3);
+  for (let i = 0; i < 30; i++) {
+    const a = (i / 30) * Math.PI * 2 + fr() * 0.2, L = r * (1.4 + fr() * 2.2), col = [BLUE, PURPLE, RED][i % 3];
+    const g = x.createLinearGradient(px + Math.cos(a) * r * 0.7, py + Math.sin(a) * r * 0.7, px + Math.cos(a) * (r + L), py + Math.sin(a) * (r + L));
+    g.addColorStop(0, rgba(HOT, 0.6)); g.addColorStop(0.3, rgba(col, 0.45)); g.addColorStop(1, rgba(col, 0));
+    x.strokeStyle = g; x.lineWidth = r * (0.16 + fr() * 0.2); x.lineCap = 'round';
+    x.beginPath(); x.moveTo(px + Math.cos(a) * r * 0.7, py + Math.sin(a) * r * 0.7); x.lineTo(px + Math.cos(a) * (r + L), py + Math.sin(a) * (r + L)); x.stroke();
+  }
+  glowDot(px, py, r * 3.4, PURPLE, 0.8); glowDot(px, py, r * 1.6, HOT, 0.95);
+  x.restore();
+  x.fillStyle = rgba(HOT, 1); x.beginPath(); x.arc(px, py, r * 0.62, 0, Math.PI * 2); x.fill();
+}
+
 // ---------- impact FX
 function impact(t, t0, cx, cy, sparks, big, cols = [PURPLE, BLUE, RED]) {
   const d = t - t0; if (d < 0 || d > 1.2) return;
@@ -334,23 +350,25 @@ function troupe(t, mode, a) {
 window.setup = async () => {
   CFG = await (await fetch('../cfg.json')).json();
   ({ fps: FPS, duration: DUR, tImp1: T_IMP1, tImp2: T_IMP2, tDrop: T_DROP, beat: BEAT, tEnd: T_END, tFinal: T_FINAL, slams: SLAMS, wordmark: WM, endCard: ENDC, caption: CAPS } = CFG);
+  OPEN = CFG.opening || 'pin';   // 'pin' = the locate map pin drops in (vehicle reel); 'orb' = generic: hard cut to a new screen, a laser orb falls in
+  CAPS = CAPS || [];
   NF = Math.round(DUR * FPS); window.NF = NF; window.CFG_FPS = FPS;
   await document.fonts.load(font(700, 100)); await document.fonts.load(font(500, 100)); await document.fonts.load(font(800, 40, 'Inter')); await document.fonts.load(font(700, 40, 'Inter'));
   await document.fonts.load(font(700, 40, 'Space Mono')); await document.fonts.load(font(600, 36, 'Inter'));
-  x.font = font(800, 100, 'Inter'); CAP_PX = 100 * CFG.captionStyle.widthPx / x.measureText(CFG.captionStyle.widthRef).width; window.CAP_PX = CAP_PX;
+  if (CFG.captionStyle) { x.font = font(800, 100, 'Inter'); CAP_PX = 100 * CFG.captionStyle.widthPx / x.measureText(CFG.captionStyle.widthRef).width; window.CAP_PX = CAP_PX; }
 };
 window.renderFrame = (f) => {
   const t = f / FPS;
   x.setTransform(1.5, 0, 0, 1.5, 0, 0);
   x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.shadowBlur = 0;
   x.fillStyle = BG; x.fillRect(0, 0, W, H);
-  const [sx, sy] = shakeAt(t, [[T_IMP1, 26], [T_IMP2, 16], [T_DROP, 20], [T_END, 14], [T_FINAL, 18], ...SLAMS.map((s) => [s.t, 8])]);
+  const [sx, sy] = shakeAt(t, [...(OPEN === 'orb' ? [[0, 20]] : []), [T_IMP1, 26], [T_IMP2, 16], [T_DROP, 20], [T_END, 14], [T_FINAL, 18], ...SLAMS.map((s) => [s.t, 8])]);
   x.translate(sx, sy);
   x.fillStyle = BG; x.fillRect(-60, -60, W + 120, H + 120);
 
   if (t < T_DROP) {
     // A: locate -> the pin drops onto the wordmark, two impacts on the spoken name
-    policeWash(t, t < T_IMP1 ? 1 : clamp(1 - (t - T_IMP1) / 0.5) * 0.6);
+    if (OPEN !== 'orb') policeWash(t, t < T_IMP1 ? 1 : clamp(1 - (t - T_IMP1) / 0.5) * 0.6);
     // dust motes
     x.save(); x.globalCompositeOperation = 'lighter';
     for (const p of DUST) { const yy = (p.y + t * 40 * (0.3 + p.z)) % H; x.fillStyle = rgba(p.s > 0.5 ? PURPLE : BLUE, 0.25 + 0.3 * p.z); x.fillRect(p.x, yy, 1.2 + p.z, 1.2 + p.z); }
@@ -381,13 +399,15 @@ window.renderFrame = (f) => {
     if (pre > 0) troupe(t, 'drop', 0.18 * pre * (Math.floor(t * FPS) % 3 ? 1 : 0.5));
     const flick = (txt) => { const dd = t - (txt === WM[0] ? T_IMP1 : T_IMP2); if (dd < 0) return 0; if (dd > 0.14) return 1; return [1, 0.2, 1, 0.45, 1, 1][Math.floor(dd * FPS)] ?? 1; };
     wordmark(CX, WY, wmS, t >= T_IMP1 ? 1 : 0, t >= T_IMP2 ? 1 : 0, flick);
-    // the pin: falls onto the top of VILAS, lands on impact 1, then pings
+    // the object: falls onto the top of VILAS and lands on impact 1 (a pin for "locate"; a laser orb in the generic opening)
     const tipY = WY - 78 - 92;
-    if (t < T_IMP1) { const u = ei(t / T_IMP1); pin(CX, lerp(-40, tipY, u), lerp(60, 34, u), 1, RED); }
+    if (OPEN === 'orb') { if (t < T_IMP1) { const u = ei(t / T_IMP1); orb(CX, lerp(-40, tipY + 20, u), lerp(120, 14, u), t); } }
+    else if (t < T_IMP1) { const u = ei(t / T_IMP1); pin(CX, lerp(-40, tipY, u), lerp(60, 34, u), 1, RED); }
     else { const d = t - T_IMP1, sq = 1 + 0.25 * Math.exp(-d * 18); pin(CX, tipY, 34 * sq, clamp(1 - (t - 1.45) / 0.3), RED); ping(t, T_IMP1, CX, tipY, clamp(1 - (t - 1.45) / 0.3)); }
     impact(t, T_IMP1, CX, tipY + 40, SP1, true, [RED, PURPLE, BLUE]);
     impact(t, T_IMP2, CX, 670, SP2, false, [BLUE, PURPLE, RED]);
     flash(t, T_IMP1, 11, 1); flash(t, T_IMP2, 16, 0.55, [220, 230, 255]);
+    if (OPEN === 'orb') flash(t, 0, 20, 0.9);   // the cut lands as a hit (white frame decaying over ~3 frames; thump in audio.py)
     if (t > 1.5) { const k = Math.floor((t - 1.5) * FPS); if (k % 2 === 0) { x.fillStyle = rgba(k % 4 ? PURPLE : RED, 0.13); x.fillRect(-60, -60, W + 120, H + 120); } }
   } else {
     // B: the drop — laser show, laser dancers, slams, end card

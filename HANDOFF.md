@@ -1,4 +1,4 @@
-# HANDOFF — updated 2026-10-08 (zach-d reels; reel batches 1–3; site state below is from main, merged in)
+# HANDOFF — updated 2026-10-10 (zach-d autopilot; reel batches 1–3; site state below is from main, merged in)
 
 ## Marketing — new format (2026-10-06)
 - **Skill `.claude/skills/zach-d-reel/`** (replaces the short-lived `trojan-reel`): Noah uploads a Zack D Films-style story video (part 1).
@@ -9,6 +9,15 @@
   checks the audio; replaces `join.sh`), `strip.sh` and `envelope.py` (frame/audio timing). `references/` has the teardowns, `vilas.md`,
   `editing-the-original.md`, `voice-clone.md`, `hype-ending.md`, `environment.md` and `worked-example-railgun.md`.
   A zip of the folder was sent to Noah to upload as a claude.ai skill (re-send it after any change).
+- **2026-10-10: zach-d-reel is now autopilot ("make N videos" is the whole order).** Cause: Noah's unattended sloth run shipped a silent
+  non-cut (part 2 began on the original's footage under a caption band), a hollow "VILAS.studio" box, a flat TTS voice (pitch spread 14 Hz vs
+  the narrator's 69 Hz: "Stephen Hawking"), 1.66 s of dead air, and left "ZACK D FILMS" uncovered at ~16-18 s. The laser drop, the clone and the mark
+  covers had all been opt-in, and every fallback said "ask Noah". Now: `references/autopilot.md` holds every answer (source from @zackdfilms92, Snaptik,
+  TikTok-watermark removal, cover all creator marks, hype laser-drop default, clone-or-no-voice, style rotation, copy sets, delivery);
+  `assets/hype-ending` + the dancers preset take `"opening": "orb"` (hard cut to a whole new screen, hit on frame 0) and run voiceless;
+  new `scripts/qa.py` gate (hard cut / 30-80 Hz thump / dead air / loudness / length / voice pitch), calibrated: railgun + vehicle PASS, sloth FAILS;
+  `references/worked-example-sloth-failure.md` is the negative example. Not verified by ear: nothing here can hear. The claude.ai-uploaded copy of the
+  skill is a separate zip and must be re-uploaded after this change (zip re-sent to Noah).
 - **First zach-d reel built: `brag-output-2026-10-07-railgun/`.** A railgun-from-the-Moon video, cut at 33.167s (Noah asked for this cut) so "until it hit Earth" becomes "until it hit Vilas Studio" in a Higgsfield clone of the narrator's voice, then a 5.85s laser drop. Not posted.
   Still to check: listen to whether the clone says "VEE-las". Also: the delivered mix has only ~0.8 dB of voice-over-snare-roll on the last syllable of "Studio" (template's `audio.py` now ducks the roll, 9.0/22.1/10.5 dB); the delivered file is unchanged, offer a re-render. Noah also needs to decide whether to post a clone of the creator's voice at all (see its brag-plan.md).
 - **Second zach-d reel: `brag-output-2026-10-08-vehicle/`.** "If you forgot where you parked" video; cut at frame 916 (30.564s) so

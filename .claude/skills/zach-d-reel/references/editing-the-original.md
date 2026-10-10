@@ -1,6 +1,6 @@
-# Editing the original (only what Noah asks for)
+# Editing the original (the standing edits only)
 
-SKILL.md's Rule zero stands: the upload is untouched unless Noah asks. This is how to do the edits he asks for with the smallest
+SKILL.md's Rule zero stands: the upload is untouched except for the **standing edits** (TikTok watermark removal, covering creator marks, the word-swap cut, a doubled word at the seam), which Noah approved for every job; anything else needs his explicit ask. This is how to do the edits he asks for with the smallest
 possible footprint. Everything here was done and verified on the railgun reel (see `worked-example-railgun.md`).
 
 Edits Noah has asked for so far (2026-10-07, railgun):
@@ -12,10 +12,10 @@ His standing wording: "change nothing else about the original video." So: do exa
 
 ## Protocol
 1. **Write the edit list first** (what, where in time, how) in `plan.md`, and send Noah the one-line version if anything is ambiguous.
-2. **Scan the WHOLE video for the creator's marks before the first delivery.** On railgun the title card was found and covered,
+2. **Scan the WHOLE video for the creator's marks before the first delivery** (`autopilot.md` §4 has the exact 20 s / 4 fps scan). On railgun the title card was found and covered,
    and Noah had to point out a second mark printed on the bullet at 22s. Check every contact sheet (use `strip.sh` at 4-6 fps
    over the full length, cropped to where marks have appeared) for any creator name, logo, handle or watermark, list all of them
-   with times, and cover the lot or ask. Don't cover marks nobody asked about: **flag them and offer** (Rule zero).
+   with times, and cover the lot or ask. Cover every creator mark (the standing order). Don't cover anything that isn't the creator's name/logo: never a burned-in caption, never a brand that belongs to the story.
 3. **Re-encode only the GOPs that contain an edit.** `gop.py extract` returns the GOP-aligned range and its frames; `assemble.py`
    re-encodes only those, stream-copies everything else, and proves it (frames outside the edits are bit-identical; re-encoded
    ranges decode to their sources at >= 38 dB PSNR, normally 50+).
@@ -50,6 +50,7 @@ Don't put a black box on it. Rebuild what's behind it. Pick by type:
 | **Logo printed on a shaded surface** | Track the logo's box by hand (a box every ~3 frames from gridded crops), rebuild the box from a robust polynomial fit of the non-letter pixels so the surface's gradient continues, add a touch of grain | `scripts/examples/fill_logo_on_surface.py` (grey print on a silver rod, 21.4-22.3s) |
 | **Letters printed on a plate / button** (light-on-dark or dark-on-light, moving, motion-blurred) | Hand-tracked ROTATED box (cx, cy, w, h, angle, open_px, close_px) every 2-4 frames; grey opening removes bright strokes, closing removes dark strokes, the letter area is blurred, the video's own burned-in caption is protected. Oversized boxes are safe (it only removes thin strokes). | `scripts/examples/erase_letters.py` + `example_plate_keys.json` (vehicle reel 2026-10-08: "ZACK D FILMS" plate 10.8-12.6s; the D◀ logo on a key fob 1.9-3.0s) |
 | **Static corner watermark** | Same surface-fill method with one constant box, or ffmpeg `delogo` for a small flat mark. Untested here: look at the result frame by frame | none yet |
+| **A mark you can't cover cleanly in 40 min** | Tier 2: ffmpeg `delogo=x:y:w:h:enable='between(t,a,b)'` with the tracked box. Tier 3: a feathered fill sampled from the surface around it. Tier 4 (last resort): a feathered dark patch. Always 4× zoom the result; record the tier in `plan.md` and name it when delivering | sloth reel (dung pile, 16.0-18.1 s): was never covered, the reason for this row |
 
 Lessons that cost time:
 - **Colour tags (vehicle reel, 2026-10-08):** a BT.709-tagged upload re-encoded from PNGs with ffmpeg's default (BT.601, untagged) shifts

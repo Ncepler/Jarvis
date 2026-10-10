@@ -15,6 +15,7 @@ DUR = CFG['duration']
 T_IMP1, T_IMP2, T_DROP, BEAT, T_END = CFG['tImp1'], CFG['tImp2'], CFG['tDrop'], CFG['beat'], CFG['tEnd']
 SLAMS = [s['t'] for s in CFG['slams']]
 LUFS = float(sys.argv[1]) if len(sys.argv) > 1 else -10.5
+OPEN = CFG.get('opening', 'round')
 m = Mix(DUR)
 r = np.random.default_rng(5)
 
@@ -41,6 +42,11 @@ def supersaw(m_, dur, cutoff=1800):
     return lp(s, cutoff) * env(len(t), a=0.004, r=0.04, hold=dur - 0.04)
 
 # --- A: falling whistle into impact 1
+if OPEN == 'orb':
+    # the cut itself is an event: a thump + click on the very first frame, so the hard cut to the new screen is HEARD (never a silent cut)
+    m.add('fx', boom(0.9, 0.5), 0.0, gain=0.8, send=0.2)
+    m.add('fx', kick(0.3, 170, 46), 0.0, gain=0.85)
+    m.add('fx', zap(0.12, 6200, 900), 0.0, gain=0.3, pan=0.2)
 w, t = sweep(2600, 520, T_IMP1)
 m.add('fx', w * np.linspace(0.05, 0.5, len(t)) ** 1.5, 0.0, gain=0.5, send=0.2)
 m.add('fx', whoosh(T_IMP1 + 0.05, 200, 7000, peak=0.92), 0.0, gain=1.1, send=0.2)
