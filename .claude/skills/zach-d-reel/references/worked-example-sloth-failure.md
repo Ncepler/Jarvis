@@ -39,3 +39,16 @@ re-derives it. Part 1: a Zack D Films 3D video, "a sloth's fur is infested with 
 ## How to check a video against this
 `python3 -I scripts/qa.py sloth.mp4 --cut 33.9 --voice 34 41 --narrator 1 28` FAILs `audio_hit`, `dead_air` and `voice`; with
 `--cut 31.25` it also FAILs `hard_cut` (4/255). The two good reels pass: railgun (`--cut 33.1667`) and vehicle (`--cut 30.564`).
+
+---
+# v2 (2026-10-10, same day): "kinda working", but "a clip slapped on top"
+After v1's fixes the autopilot produced two reels (sloth and a cookiecutter-shark video) that **passed the v1 QA gate** and that Noah still called weak:
+- **No transition:** part 2 began after the original's LAST frame with a white flash and an orb, then lasers/dancers on black. Nothing in part 1 was used.
+- **No voice:** the v1 rule "clone or silence" resolved to silence (the clone needs Higgsfield credits and an upload workaround): a silent cut.
+- **Sound identical every time:** one fixed synthesised drop; the two Vilas sound beds matched at 0.999 spectral similarity.
+- **Hook too late:** at 31.2 s of 37.1 s (sloth) and 27.7 s of 34.3 s (shark). Most scrollers are gone.
+- **Quality:** thin laser lines on black and flat text read synthetic; the real demo sites (photographic, editorial) were never shown.
+The shark video had a perfect transition at 18.0 s (a perfectly round bite hole, a finished sentence, silence) that autopilot never looked for.
+**v3 fixes:** transition-first picking + `find_transitions.py` + scorecard; trim at the transition point (hook by 20 s); `assets/bridge` transitions onto real demo footage; voice required with a ladder (clone, preset, Kokoro, reasoned silence);
+real licensed SFX + a seeded mood bed; QA gains `transition`, `hook_time`, `voice` (required), `sound_variety`. Measured: the shark video rebuilt this way is 24.5 s (was 34.3 s) with the hook at 18.0 s. Re-running the gate on the two v2 reels: `hook_time` FAIL (31.2 s / 27.7 s) and `voice` FAIL (none).
+Lesson: a gate that checks mechanics (a cut exists, a thump exists) passes bad videos. Look at the stills.

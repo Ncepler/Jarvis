@@ -1,0 +1,191 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// BRIDGE ending, part 2: a REAL transition out of part 1's last frame, then real Vilas site footage, then the bone end card.
+// Every frame is a pure function of its frame number. Everything comes from ../cfg.json (audio.py reads the same file).
+// Inputs next to cfg.json:  in/last.png  = part 1's frame at the cut (the transition starts ON this exact picture, so there is no visible cut)
+//                           in/site/f0001.jpg ...  = frames of the site clip (extracted at cfg.site.fps)
+// Design units 720x1280, canvas 1.5x. Transitions: zoom | iris | whip | shatter | doors | glitch  (cfg.transition.type)
+const W = 720, H = 1280, CX = 360;
+const c = document.getElementById('c'), x = c.getContext('2d');
+let CFG, FPS, DUR, NF, TR, T_END, I, T, SITE = [], SITE_FPS, CH = null;
+const BONE = '#efe9dd', INK = '#1f1a14', MUTED = '#5f574a', BRONZE = '#8a5a2b';
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const eo = (t) => 1 - Math.pow(1 - clamp(t), 3), ei = (t) => Math.pow(clamp(t), 2.4), eio = (t) => { t = clamp(t); return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const font = (w, px, fam = 'Inter') => `${w} ${px}px "${fam}"`;
+const loadImg = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('missing ' + src)); im.src = src; });
+
+// draw an image (720x1280 source) scaled by s about (cx,cy), shifted by (ox,oy)
+function drawFit(img, s = 1, cx = CX, cy = H / 2, ox = 0, oy = 0, a = 1) {
+  x.save(); x.globalAlpha *= a; x.translate(cx + ox, cy + oy); x.scale(s, s); x.translate(-cx, -cy); x.drawImage(img, 0, 0, W, H); x.restore();
+}
+function flashAt(u, u0, k = 9, max = 0.7, col = '255,250,240') { const d = u - u0; if (d < 0) return; const a = max * Math.exp(-d * k * 3); if (a > 0.01) { x.fillStyle = `rgba(${col},${a})`; x.fillRect(-60, -60, W + 120, H + 120); } }
+function multiBlurDraw(img, off, L, s = 1) {      // horizontal motion blur by averaging N offset copies (alpha 1/(k+1) = equal weights)
+  const N = L < 6 ? 1 : 16;
+  for (let k = 0; k < N; k++) { x.save(); x.globalAlpha = 1 / (k + 1); x.drawImage(img, off + (N === 1 ? 0 : (k / (N - 1) - 0.5) * L), 0, W, H); x.restore(); }
+}
+
+// ------------------------------------------------------------------------------------------------------------------------------ transitions
+// u runs 0..1 over cfg.transition.dur. u=0 is exactly I (part 1's last frame); u=1 is exactly T (the first site frame).
+function trZoom(u, tr) {          // fall into the picture: camera dives at the focal point, radial blur, arrives inside the site
+  const fx = tr.focus[0] * W, fy = tr.focus[1] * H, a = clamp(u / 0.62), S = 1 + 9 * Math.pow(a, 2.4);
+  x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+  drawFit(I, S, fx, fy);
+  for (let k = 1; k <= 7; k++) drawFit(I, S * (1 + 0.035 * k * a), fx, fy, 0, 0, 0.2);
+  const b = clamp((u - 0.5) / 0.5);
+  if (b > 0) {
+    const S2 = 1 + 1.6 * (1 - eo(b));
+    drawFit(T, S2, fx, fy, 0, 0, eo(b));
+    for (let k = 1; k <= 5; k++) drawFit(T, S2 * (1 + 0.04 * k * (1 - b)), fx, fy, 0, 0, 0.18 * (1 - b));
+  }
+  flashAt(u, 0.5, 6, 0.55);
+}
+function trIris(u, tr) {          // match-cut through a round shape: push into the circle, the circle opens like an iris onto the site
+  const ci = tr.circle, cx = ci.cx * W, cy = ci.cy * H, r0 = ci.r * W;
+  const S = 1 + 0.5 * eio(clamp(u / 0.55)) + 0.3 * clamp((u - 0.55) / 0.45);
+  drawFit(I, S, cx, cy);
+  const diag = Math.hypot(W, H) * 1.1;
+  const pop = eo(u / 0.2), R = r0 * S * pop + Math.pow(clamp((u - 0.2) / 0.8), 2.2) * diag;
+  x.fillStyle = `rgba(0,0,0,${0.35 * clamp(u / 0.4) * (1 - clamp((u - 0.7) / 0.3))})`; x.fillRect(-60, -60, W + 120, H + 120);
+  const prog = eo(clamp((u - 0.1) / 0.9)), ox = (cx - CX) * (1 - prog), oy = (cy - H / 2) * (1 - prog), sT = 1 + 0.55 * (1 - prog);
+  x.save(); x.beginPath(); x.arc(cx, cy, Math.max(0.01, R), 0, Math.PI * 2); x.clip();
+  drawFit(T, sT, CX, H / 2, ox, oy); x.restore();
+  if (R < diag * 0.98) {
+    x.save(); x.lineWidth = 3 + 5 * (1 - u); x.strokeStyle = 'rgba(255,248,235,0.95)'; x.shadowColor = 'rgba(255,230,200,0.9)'; x.shadowBlur = 24;
+    x.beginPath(); x.arc(cx, cy, R, 0, Math.PI * 2); x.stroke(); x.restore();
+  }
+}
+function multiBlurDrawV(img, off, L) {            // vertical motion blur (falls, launches, climbs)
+  const N = L < 6 ? 1 : 16;
+  for (let k = 0; k < N; k++) { x.save(); x.globalAlpha = 1 / (k + 1); x.drawImage(img, 0, off + (N === 1 ? 0 : (k / (N - 1) - 0.5) * L), W, H); x.restore(); }
+}
+function trWhip(u, tr) {          // whip-pan: part 1 is flung away under heavy motion blur, the site whips in right behind it. dir: left|right (sideways) or up|down (continues a fall/launch/climb)
+  const dirn = tr.dir || 'left', e = eio(u), vertical = dirn === 'up' || dirn === 'down', S = vertical ? H : W;
+  const L = (vertical ? 300 : 260) * Math.sin(Math.PI * clamp(u)) + 4, D = e * S * 1.15, sign = (dirn === 'right' || dirn === 'down') ? 1 : -1;
+  const tPos = sign > 0 ? -Math.max(0, S - D) : Math.max(0, S - D);
+  if (vertical) { multiBlurDrawV(T, tPos, L); multiBlurDrawV(I, sign * D, L); } else { multiBlurDraw(T, tPos, L); multiBlurDraw(I, sign * D, L); }
+  flashAt(u, 0.5, 4, 0.2);
+}
+// shatter geometry: a 6x10 grid, each cell split into 2 triangles, each flung away from the impact point
+let SHARDS = null;
+function buildShards(tr) {
+  const R = rng(5), cols = 6, rows = 10, cw = W / cols, rh = H / rows, ix = tr.impact[0] * W, iy = tr.impact[1] * H; SHARDS = [];
+  for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
+    const x0 = q * cw, y0 = r * rh, x1 = x0 + cw, y1 = y0 + rh;
+    for (const pts of [[[x0, y0], [x1, y0], [x0, y1]], [[x1, y0], [x1, y1], [x0, y1]]]) {
+      const cxs = (pts[0][0] + pts[1][0] + pts[2][0]) / 3, cys = (pts[0][1] + pts[1][1] + pts[2][1]) / 3, dx = cxs - ix, dy = cys - iy, d = Math.hypot(dx, dy) + 1;
+      SHARDS.push({ pts, cx: cxs, cy: cys, dx: dx / d, dy: dy / d, v: (700 + R() * 900) / (1 + d / 700), w: (R() - 0.5) * 7, delay: d * 0.0007 + R() * 0.03 });
+    }
+  }
+}
+function trShatter(u, tr, dur) {  // part 1 cracks (first 0.1 s, picture still whole), then breaks into shards that fly at the camera onto the site
+  const t = u * dur, ix = tr.impact[0] * W, iy = tr.impact[1] * H;
+  if (t < 0.1) {
+    drawFit(I);
+    const k = clamp(t / 0.08), R = rng(9); x.save(); x.strokeStyle = 'rgba(255,255,255,0.9)'; x.lineWidth = 2; x.shadowColor = '#fff'; x.shadowBlur = 12;
+    for (let i = 0; i < 14; i++) { const an = R() * Math.PI * 2, len = (120 + R() * 360) * k; x.beginPath(); x.moveTo(ix, iy); x.lineTo(ix + Math.cos(an) * len, iy + Math.sin(an) * len); x.stroke(); } x.restore();
+    return;
+  }
+  drawFit(T, 1 + 0.14 * (1 - eo(u)));
+  x.fillStyle = `rgba(0,0,0,${0.5 * (1 - eo(u * 1.4))})`; x.fillRect(0, 0, W, H);
+  for (const s of SHARDS) {
+    const tau = Math.max(0, t - 0.1 - s.delay), g = 1500;
+    const px = s.dx * s.v * tau, py = s.dy * s.v * tau + 0.5 * g * tau * tau, rot = s.w * tau, sc = 1 + 0.9 * tau, a = clamp(1 - tau / (dur * 0.9 - 0.1));
+    if (a <= 0.01) continue;
+    x.save(); x.globalAlpha = a; x.translate(s.cx + px, s.cy + py); x.rotate(rot); x.scale(sc, sc); x.translate(-s.cx, -s.cy);
+    x.beginPath(); x.moveTo(s.pts[0][0], s.pts[0][1]); x.lineTo(s.pts[1][0], s.pts[1][1]); x.lineTo(s.pts[2][0], s.pts[2][1]); x.closePath();
+    x.clip(); x.drawImage(I, 0, 0, W, H); x.strokeStyle = 'rgba(255,255,255,0.55)'; x.lineWidth = 1.2; x.stroke(); x.restore();
+  }
+  flashAt(u, 0.1 / dur, 5, 0.35);
+}
+function trDoors(u, tr) {         // elevator doors: part 1 is split down the middle and slides apart onto the site, with light spilling through
+  const hold = 0.14, e = eio(clamp((u - hold) / (1 - hold))), gap = e * (W / 2 + 14);
+  drawFit(T, 1 + 0.07 * (1 - e), CX, H / 2);
+  if (gap > 1) { const g = x.createLinearGradient(CX - gap, 0, CX + gap, 0); g.addColorStop(0, 'rgba(255,244,225,0.0)'); g.addColorStop(0.5, `rgba(255,244,225,${0.5 * (1 - e)})`); g.addColorStop(1, 'rgba(255,244,225,0.0)');
+    x.fillStyle = g; x.fillRect(CX - gap, 0, gap * 2, H); }
+  x.save(); x.translate(-gap, 0); x.beginPath(); x.rect(0, 0, CX, H); x.clip(); x.drawImage(I, 0, 0, W, H); x.restore();      // left door: left half of part 1, sliding left
+  x.save(); x.translate(gap, 0); x.beginPath(); x.rect(CX, 0, W - CX, H); x.clip(); x.drawImage(I, 0, 0, W, H); x.restore();  // right door
+  if (gap > 1) for (const sx of [CX - gap, CX + gap]) { const g2 = x.createLinearGradient(sx - 18, 0, sx + 18, 0); g2.addColorStop(0, 'rgba(0,0,0,0)'); g2.addColorStop(0.5, 'rgba(0,0,0,0.5)'); g2.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g2; x.fillRect(sx - 18, 0, 36, H); }
+}
+// glitch needs per-channel copies of both images
+function makeChannels(img) {
+  const out = [];
+  for (const ch of [0, 1, 2]) {
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d'); g.drawImage(img, 0, 0, W, H);
+    const d = g.getImageData(0, 0, W, H); for (let i = 0; i < d.data.length; i += 4) { for (let k = 0; k < 3; k++) if (k !== ch) d.data[i + k] = 0; } g.putImageData(d, 0, 0); out.push(cv);
+  }
+  return out;
+}
+function trGlitch(u, tr, dur, f) {  // digital tear: RGB split and sliced bands escalate on part 1, a few black flicker frames, the site snaps in and settles
+  const src = u < 0.55 ? 0 : 1, intensity = u < 0.55 ? clamp(u / 0.5) : 1 - clamp((u - 0.62) / 0.38), R = rng(f * 31 + 7);
+  const chans = CH[src], split = 22 * intensity * intensity;
+  x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+  if (intensity < 0.02) { x.drawImage(src ? T : I, 0, 0, W, H); return; }
+  x.save(); x.globalCompositeOperation = 'lighter';
+  [[-1, 0], [0, 0], [1, 0]].forEach(([dx], i) => x.drawImage(chans[i], dx * split, 0, W, H)); x.restore();
+  const n = Math.floor(4 + 18 * intensity);
+  for (let k = 0; k < n; k++) { const yy = R() * H, hh = 6 + R() * 50 * intensity, dx = (R() - 0.5) * 220 * intensity; x.drawImage(src ? T : I, 0, yy, W, hh, dx, yy, W, hh); }
+  x.fillStyle = 'rgba(0,0,0,0.22)'; for (let y = 0; y < H; y += 4) x.fillRect(0, y, W, 1.4);
+  if (u > 0.5 && u < 0.62 && Math.floor(f) % 3 === 0) { x.fillStyle = '#000'; x.fillRect(0, 0, W, H); }
+}
+
+// ------------------------------------------------------------------------------------------------------------------------------ site + overlays
+function drawSite(t) {
+  const k = Math.min(SITE.length - 1, Math.max(0, Math.floor((t - TR) * SITE_FPS)));
+  drawFit(SITE[k], 1 + 0.035 * clamp((t - TR) / Math.max(0.1, T_END - TR)));
+}
+function caption(txt, a = 1) {
+  const cs = CFG.captionStyle || {}; x.save(); x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  x.font = font(cs.weight || 700, cs.px || 46, cs.font || 'Inter'); x.letterSpacing = '0px';
+  x.shadowColor = `rgba(0,0,0,${0.85 * a})`; x.shadowBlur = 10; x.shadowOffsetY = 2; x.fillStyle = `rgba(255,255,255,${a})`; x.fillText(txt, CX, cs.y || 1015); x.restore();
+}
+function endCard(t) {
+  const d = t - T_END, a = clamp(d / 0.08), E = CFG.endCard;
+  x.fillStyle = BONE; x.fillRect(-60, -60, W + 120, H + 120);
+  const s = 1 + 0.06 * Math.exp(-d * 9);
+  x.save(); x.translate(CX, 600); x.scale(s, s); x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.globalAlpha = a;
+  x.font = font(500, 214, 'Space Grotesk'); x.letterSpacing = '-4px'; x.fillStyle = INK; x.fillText(E.word, 0, 40);
+  const u = eo((d - 0.1) / 0.35); if (u > 0) { x.strokeStyle = BRONZE; x.lineWidth = 3; x.beginPath(); x.moveTo(-230, 78); x.lineTo(-230 + 460 * u, 78); x.stroke(); }
+  x.font = font(700, 62, 'Space Mono'); x.letterSpacing = '2px'; x.globalAlpha = a * clamp((d - 0.22) / 0.2); x.fillStyle = BRONZE; x.fillText(E.sub, 0, 158); x.restore();
+  const la = clamp((d - 0.5) / 0.3); x.save(); x.textAlign = 'center'; x.font = font(600, 36, 'Inter'); x.fillStyle = `rgba(95,87,74,${la})`;
+  E.tagline.forEach((ln, i) => x.fillText(ln, CX, 905 + 46 * i)); x.restore();
+}
+const PANEL_TOP = H * 0.745;
+function panel(t) {            // a clean ink panel at the bottom where part 1's captions sit: captions never fight the site's own text; the demo chip lives here too
+  const k = eo((t - TR) / 0.25); if (k <= 0) return; const top = lerp(H, PANEL_TOP, k);
+  x.fillStyle = '#0c0907'; x.fillRect(-40, top, W + 80, H - top + 40); x.fillStyle = 'rgba(138,90,43,0.95)'; x.fillRect(-40, top, W + 80, 2);
+  if (CFG.siteLabel && k > 0.6) { x.save(); x.globalAlpha = clamp((k - 0.6) / 0.4) * 0.8; x.font = font(700, 17, 'Space Mono'); x.letterSpacing = '1px'; x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.fillStyle = '#efe9dd'; x.fillText(CFG.siteLabel, CX, H - 44); x.restore(); }
+}
+// ------------------------------------------------------------------------------------------------------------------------------ main
+window.setup = async () => {
+  CFG = await (await fetch('../cfg.json')).json();
+  FPS = CFG.fps; DUR = CFG.duration; TR = CFG.transition.dur; T_END = CFG.tEnd; SITE_FPS = CFG.site.fps || 30;
+  NF = Math.round(DUR * FPS); window.NF = NF; window.CFG_FPS = FPS;
+  I = await loadImg('../in/last.png');
+  for (let i = 1; i <= CFG.site.count; i++) SITE.push(await loadImg(`../${CFG.site.dir}/f${String(i).padStart(4, '0')}.jpg`));
+  T = SITE[0];
+  if (CFG.transition.type === 'shatter') buildShards(CFG.transition);
+  if (CFG.transition.type === 'glitch') CH = [makeChannels(I), makeChannels(T)];
+  for (const w of [400, 500, 600, 700]) { await document.fonts.load(font(w, 40)); } await document.fonts.load(font(500, 100, 'Space Grotesk')); await document.fonts.load(font(700, 40, 'Space Mono'));
+};
+window.renderFrame = (f) => {
+  const t = f / FPS, tr = CFG.transition;
+  x.setTransform(1.5, 0, 0, 1.5, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.shadowBlur = 0; x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+  if (t >= T_END) { endCard(t); return; }
+  if (t < TR) {
+    const u = clamp(t / TR);
+    ({ zoom: trZoom, iris: trIris, whip: trWhip, doors: trDoors })[tr.type]?.(u, tr);
+    if (tr.type === 'shatter') trShatter(u, tr, TR);
+    if (tr.type === 'glitch') trGlitch(u, tr, TR, f);
+    if (f === 0 && !['shatter', 'glitch', 'whip'].includes(tr.type)) { /* u=0 is exactly I by construction */ }
+  } else drawSite(t);
+  panel(t);
+  for (const L of CFG.lines || []) if (t >= L.t && t < L.until) caption(L.text, clamp((t - L.t) / 0.06) * clamp((L.until - t) / 0.06));
+};
+</script></body></html>

@@ -1,4 +1,4 @@
-# Hype ending (the DEFAULT part 2 for every video; Noah no longer has to say "hype", "lasers" or "~5 seconds")
+# Hype ending (the LASER DROP: v3 uses it for at most 1 video in 3, for impact/energy/spectacle stories; the default is the bridge transition, `transitions.md`)
 
 Default length 5.5-7 s (railgun 5.85 s, vehicle 6.6 s); a number from Noah wins. A hype ending is
 **one idea, big and fast**: the story's last object smashes into the brand name, the name explodes into a laser show, three or four words slam in on the

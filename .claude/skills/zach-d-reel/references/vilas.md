@@ -32,8 +32,9 @@ Clients we don't have, testimonials, review counts, star ratings, "trusted by", 
 - Motion: ease `cubic-bezier(0.16,1,0.3,1)`, no bounce, fades and slides only.
 - The hinge and turn beats wear **part 1's** look (its captions, its energy). Only the offer beats and the end card switch to the Vilas look.
 
-## Assets a LONG-FORM part 2 needs (not the hype ending)
-The default hype ending needs none of these (it draws everything itself). Only a long-form, spoken ad (SKILL.md appendix) needs them. Never substitute a placeholder box for any of them: if you lack them, build the hype ending.
+## Assets: real footage of the demo sites is in `assets/vilas-site/`
+The bridge ending (default) uses these 4 s, 720x1280 clips of the nine demo sites (hero + scroll, demo toolbar hidden, the demo's own "DEMO BUILD" label and our chip "A VILAS.STUDIO DEMO" visible). The laser template needs none of this.
+Regenerate with `scripts/capture_site.mjs` when the demos change. The list below is for a LONG-FORM spoken ad only. Only a long-form, spoken ad (SKILL.md appendix) needs them. Never substitute a placeholder box for any of them: if you lack them, build the hype ending.
 Have these before building a long-form ad. In the Jarvis repo, capture them with Playwright from the live site. Anywhere else, ask Noah to upload screen recordings (phone or desktop, vertical if possible):
 1. vilas.studio hero, with the wordmark reveal playing (3–4s)
 2. Scrolling the gallery, then a demo card opening (4–6s)

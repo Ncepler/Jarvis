@@ -1,9 +1,9 @@
 # Same voice in part 2 (Higgsfield voice clone)
 
-**Autopilot rule (2026-10-10): clone the narrator or use NO voice. Never a stock/TTS voice.** (The sloth reel's TTS had a pitch spread of 14 Hz vs the narrator's
-69 Hz and sounded like Stephen Hawking.) The clone says only "Veelas Studio!" on impact 1; with no clone, part 2 is voiceless. Gate every clone with
-`python3 -I scripts/qa.py final.mp4 --cut SEC --voice-file voice.wav`: the median pitch must be within 30% of the narrator's and, for a voice >= 2 s, its spread >= 50% of the
-narrator's. Measure on the **isolated voice file**, not the mix (music under the voice wrecks the pitch estimate). Budget and fallbacks: `autopilot.md` §6.
+**Voice ladder (v3, 2026-10-10): a voice is REQUIRED (Noah: "there's no added voice, it's just a cut" is a defect). Clone the narrator; if you can't, a Higgsfield preset voice; then Kokoro neural TTS (`scripts/tts_kokoro.py`); only with a written reason, none. NEVER the old robot TTS.** Full ladder, line and budget: `autopilot.md` §6. (The sloth reel's TTS had a pitch spread of 14 Hz vs the narrator's
+69 Hz and sounded like Stephen Hawking.) The clone says the line "Veelas Studio. Websites that look expensive. They weren't." starting at the landing (laser template: only "Veelas Studio!" on impact 1); with no clone, climb the ladder (preset voice, Kokoro); voiceless only with a written reason. Gate every clone with
+`python3 -I scripts/qa.py final.mp4 --cut SEC --voice-file voice.wav`: the median pitch must be within 30% of the narrator's and, for a voice >= 2 s, its spread >= 30% of the
+narrator's (a clone ~95%, Kokoro 33-40%, the old robot 20%). Measure on the **isolated voice file**, not the mix (music under the voice wrecks the pitch estimate). Budget and fallbacks: `autopilot.md` §6.
 For the reference upload, prefer a direct `media_upload`; when the cloud proxy blocks it, push `ref.mp3` to a **throwaway branch** (`tmp-voice-ref-<date>`), import its pinned raw URL, and delete the branch
 (`VOICE_REF_VIA_REPO = true` in `autopilot.md`), rather than committing it to main as the first two reels did.
 

@@ -1,0 +1,110 @@
+[
+ {
+  "slug": "demo-barber",
+  "niche": "barber",
+  "file": "demo-barber.mp4",
+  "seconds": 4,
+  "fps": 30,
+  "meanRGB": [
+   37,
+   28,
+   24
+  ]
+ },
+ {
+  "slug": "demo-bakery",
+  "niche": "bakery",
+  "file": "demo-bakery.mp4",
+  "seconds": 4,
+  "fps": 30,
+  "meanRGB": [
+   191,
+   166,
+   147
+  ]
+ },
+ {
+  "slug": "demo-florist",
+  "niche": "florist",
+  "file": "demo-florist.mp4",
+  "seconds": 4,
+  "fps": 30,
+  "meanRGB": [
+   178,
+   152,
+   148
+  ]
+ },
+ {
+  "slug": "demo-renovation",
+  "niche": "renovation",
+  "file": "demo-renovation.mp4",
+  "seconds": 4,
+  "fps": 30,
+  "meanRGB": [
+   94,
+   92,
+   91
+  ]
+ },
+ {
+  "slug": "demo-landscaping",
+  "niche": "landscaping",
+  "file": "demo-landscaping.mp4",
+  "seconds": 4,
+  "fps": 30,
+  "meanRGB": [
+   63,
+   53,
+   31
+  ]
+ },
+ {
+  "slug": "demo-powerwash",
+  "niche": "power washing",
+  "file": "demo-powerwash.mp4",
+  "seconds": 4,
+  "fps": 30,
+  "meanRGB": [
+   184,
+   189,
+   198
+  ]
+ },
+ {
+  "slug": "demo-lawncare",
+  "niche": "lawn care",
+  "file": "demo-lawncare.mp4",
+  "seconds": 4,
+  "fps": 30,
+  "meanRGB": [
+   172,
+   170,
+   153
+  ]
+ },
+ {
+  "slug": "demo-autobody",
+  "niche": "auto body",
+  "file": "demo-autobody.mp4",
+  "seconds": 4,
+  "fps": 30,
+  "meanRGB": [
+   24,
+   20,
+   21
+  ]
+ },
+ {
+  "slug": "demo-magician",
+  "niche": "magician",
+  "file": "demo-magician.mp4",
+  "seconds": 4,
+  "fps": 30,
+  "meanRGB": [
+   22,
+   18,
+   21
+  ]
+ }
+]

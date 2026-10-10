@@ -1,4 +1,4 @@
-# HANDOFF — updated 2026-10-10 (zach-d autopilot; reel batches 1–3; site state below is from main, merged in)
+# HANDOFF — updated 2026-10-10 (zach-d-reel v3 transition-first; reel batches 1–3; site state below is from main, merged in)
 
 ## Marketing — new format (2026-10-06)
 - **Skill `.claude/skills/zach-d-reel/`** (replaces the short-lived `trojan-reel`): Noah uploads a Zack D Films-style story video (part 1).
@@ -9,6 +9,11 @@
   checks the audio; replaces `join.sh`), `strip.sh` and `envelope.py` (frame/audio timing). `references/` has the teardowns, `vilas.md`,
   `editing-the-original.md`, `voice-clone.md`, `hype-ending.md`, `environment.md` and `worked-example-railgun.md`.
   A zip of the folder was sent to Noah to upload as a claude.ai skill (re-send it after any change).
+- **2026-10-10 (later): zach-d-reel v3 = transition-first.** Noah's v2 autopilot reels (sloth, shark) were "a clip slapped on top": a flash + lasers after the last frame, no voice, the same sound bed (0.999 spectral match), hook at 31 s / 27.7 s. v3 (see `VERSION`, `references/autopilot.md`, `transitions.md`, `sound.md`, `reel-lab-notes.md`):
+  `scripts/find_transitions.py` + a 5-line scorecard pick videos FOR a transition and the cut point (hook by 20 s; the original is trimmed there = standing edit); `assets/bridge` renders 6 real transitions (iris, zoom, whip incl. vertical, shatter, doors, glitch) on part 1's last frame onto REAL Vilas demo footage
+  (`assets/vilas-site/*.mp4`, captured with `scripts/capture_site.mjs`); sound = 19 licensed Pixabay SFX via `scripts/fetch_sound.py` (npm tarball of hyperframes; HyperFrames itself NOT used) + a mood/seed-generated bed; voice REQUIRED: clone > Higgsfield preset > Kokoro (`scripts/tts_kokoro.py`) > reasoned silence;
+  `qa.py` gains `transition`, `hook_time`, `voice` (required), `sound_variety` (`--mode bridge`). Laser drop kept for <= 1 video in 3. Proven on the shark video (cut at the whale's bite hole, 18.0 s; total 24.5 s). NOT verified by ear (nothing here can hear): the Kokoro voice, the beds, the SFX mix. Not built (spec in transitions.md): blackout/neon, phone-in-world, camera snap, cloche.
+  Originality risk (reel-lab + Instagram 2026 policy) is spelled out in `reel-lab-notes.md` §4: this format can cost the account recommendation eligibility if it's most of the feed. Zip for claude.ai: `zach-d-reel-v3-transition-first.zip` (re-upload after any change).
 - **2026-10-10: zach-d-reel is now autopilot ("make N videos" is the whole order).** Cause: Noah's unattended sloth run shipped a silent
   non-cut (part 2 began on the original's footage under a caption band), a hollow "VILAS.studio" box, a flat TTS voice (pitch spread 14 Hz vs
   the narrator's 69 Hz: "Stephen Hawking"), 1.66 s of dead air, and left "ZACK D FILMS" uncovered at ~16-18 s. The laser drop, the clone and the mark

@@ -2,12 +2,19 @@
 """Final-cut gate for a zach-d-reel. Run it on EVERY final.mp4 before delivering. Prints PASS/FAIL per check and exits 1 on any FAIL.
 You cannot hear the video; these are the checks that stand in for ears. Each one exists because a real reel failed it.
 
-usage: python3 -I qa.py final.mp4 --cut SEC [--narrator A B] [--voice-file voice.wav | --voice A B] [--max-part2 SEC] [--no-voice]
+usage: python3 -I qa.py final.mp4 --cut SEC [--mode hard|bridge] [--transition-dur SEC] [--narrator A B] [--voice-file voice.wav | --voice A B | --no-voice-reason "why"]
+                        [--max-part2 SEC] [--max-hook SEC] [--ledger sound_ledger.json --others other1.json other2.json]
   --cut SEC      the second where part 2 begins (the hard cut). Word swap: the audio-cut time. Append: the original's duration.
   --narrator A B window (seconds) of the ORIGINAL narrator talking (default 1 .. min(cut-1, 28))
   --voice-file F the ISOLATED voice take (the voice.wav that audio.py mixes). Preferred: pitch cannot be judged under music.
   --voice A B    window of the final where part 2's voice speaks ALONE (no music under it), e.g. a TTS line. Omit when part 2 has no voice.
-  --no-voice     part 2 must contain no voice at all (asserts you did not ship a TTS by accident); checks nothing else extra.
+  --no-voice-reason  part 2 has no voice and here is WHY (what you tried). A voice is REQUIRED (Noah: a silent cut is a defect): without --voice-file/--voice
+                 or this reason the voice check FAILS. A stated reason passes with a NOTE that must be repeated in the delivery message.
+  --no-voice     old flag, kept for the laser template: same as a reason of "voiceless by choice" (prints a NOTE).
+  --mode bridge  part 2 is a real TRANSITION out of part 1's last frame (assets/bridge): `hard_cut` is replaced by `transition` (continuous at the cut, completely
+                 changed by --transition-dur + 0.15 s) and the thump may land at the landing (cut + transition-dur) instead of frame 0.
+  --max-hook S   the Vilas hook must start by S seconds (default 24; <= 20 is the target): viewers leave, most never see a hook at 31 s.
+  --ledger L --others A B   sound_ledger.json of this build and of the other videos in the batch: FAILS if another video used the same transition + mood or the same bed key/tempo.
 
 Checks
   hard_cut    the picture changes completely across the cut (mean abs diff of 90x160 gray frames >= 25 of 255; railgun 42, vehicle 101, sloth continuing = 4). A smaller jump means part 2
@@ -18,17 +25,19 @@ Checks
   dead_air    part 2 never goes digitally silent (< -60 dBFS) for more than 0.30 s, and its last 1.0 s is alive (> -40 dBFS).      [sloth: FAIL]
   loudness    part 2 integrated loudness within 3 LU of the original's.
   length      part 2 <= --max-part2 (default 15 s) and <= 40% of the whole video (Noah's own number overrides: pass it).
-  voice       (only with --voice) median pitch within 30% of the narrator's AND pitch spread (std) >= 50% of the narrator's. A flat
-              monotone voice is a robot voice.                                                                                     [sloth: FAIL]
+  voice       (only with --voice) median pitch within 30% of the narrator's AND pitch spread (std) >= 30% of the narrator's. A flat
+              monotone voice is a robot voice (measured: the robot 20%, Kokoro neural TTS 33-40%, a clone ~95%).                                                                                     [sloth: FAIL]
 """
-import argparse, re, subprocess, sys
+import argparse, json, os, re, subprocess, sys
 import numpy as np
 from scipy.signal import butter, sosfilt
 
 ap = argparse.ArgumentParser()
 ap.add_argument('video'); ap.add_argument('--cut', type=float, required=True)
 ap.add_argument('--narrator', type=float, nargs=2); ap.add_argument('--voice', type=float, nargs=2); ap.add_argument('--voice-file')
-ap.add_argument('--max-part2', type=float, default=15.0); ap.add_argument('--no-voice', action='store_true')
+ap.add_argument('--max-part2', type=float, default=15.0); ap.add_argument('--no-voice', action='store_true'); ap.add_argument('--no-voice-reason')
+ap.add_argument('--mode', default='hard', choices=['hard', 'bridge']); ap.add_argument('--transition-dur', type=float, default=1.0); ap.add_argument('--max-hook', type=float, default=24.0)
+ap.add_argument('--ledger'); ap.add_argument('--others', nargs='*', default=[])
 a = ap.parse_args()
 V, CUT = a.video, a.cut
 SR = 16000
@@ -47,17 +56,27 @@ def gray(t):
     d = sh(['ffmpeg', '-v', 'error', '-ss', f'{max(0, t):.4f}', '-i', V, '-frames:v', '1', '-vf', 'scale=90:160,format=gray', '-f', 'rawvideo', '-'])
     return np.frombuffer(d.stdout, np.uint8).astype(float)
 
-# hard_cut: last frame before the cut vs first frame at the cut
+# hard_cut (laser template) or transition (bridge template)
 fa, fb = gray(CUT - 1.5 / fps), gray(CUT + 0.5 / fps)
 d = np.abs(fa - fb).mean() if len(fa) == len(fb) and len(fa) else 0
-rec('hard_cut', d >= 25, f'frame jump across the cut = {d:.0f}/255 (need >= 25). '
-    + ('' if d >= 25 else 'Part 2 does not start on a whole new screen: it continues the original\'s footage. Cut to the template\'s screen on frame 0.'))
+if a.mode == 'hard':
+    rec('hard_cut', d >= 25, f'frame jump across the cut = {d:.0f}/255 (need >= 25). '
+        + ('' if d >= 25 else 'Part 2 does not start on a whole new screen: it continues the original\'s footage. Cut to the template\'s screen on frame 0.'))
+else:
+    fend = gray(CUT + a.transition_dur + 0.15)
+    d_end = np.abs(fa - fend).mean() if len(fa) == len(fend) and len(fa) else 0
+    ok_t = d <= 30 and d_end >= 40
+    rec('transition', ok_t, f'continuity at the cut = {d:.0f}/255 (need <= 30: the transition starts ON part 1\'s last frame); picture {a.transition_dur + 0.15:.2f}s later differs by {d_end:.0f}/255 (need >= 40: it really arrived somewhere new). '
+        + ('' if ok_t else 'Not a transition: either a visible pop at the cut, or part 2 is still part 1\'s picture.'))
+hook_ok = CUT <= a.max_hook
+rec('hook_time', hook_ok, f'the Vilas hook starts at {CUT:.1f}s (target <= 20 s, limit {a.max_hook:.0f} s). ' + ('' if hook_ok else 'Too late: most viewers are gone. Cut at an earlier transition point (find_transitions.py) or pick a shorter video.')
+    + (' NOTE: over the 20 s target.' if hook_ok and CUT > 20 else ''))
 
 # audio_hit: sub-bass thump (30-80 Hz) right after the cut
 sub = sosfilt(butter(4, [30, 80], 'bandpass', fs=SR, output='sos'), pcm)
 def sdb(t0, t1): return db(sub[max(0, int(t0 * SR)):int(t1 * SR)])
 pre = max(sdb(CUT - 1.5 + 0.12 * k, CUT - 1.5 + 0.12 * (k + 1)) for k in range(12))
-posts = [sdb(CUT + 0.02 * k, CUT + 0.02 * k + 0.12) for k in range(44)]
+posts = [sdb(CUT + 0.02 * k, CUT + 0.02 * k + 0.12) for k in range(int((0.88 if a.mode == 'hard' else a.transition_dur + 0.4) / 0.02))]
 post = max(posts); at = CUT + 0.02 * int(np.argmax(posts))
 ok = post >= -26 and post - pre >= 4
 rec('audio_hit', ok, f'30-80 Hz thump after the cut = {post:.1f} dBFS (at +{at - CUT:.2f}s), {post - pre:+.1f} dB vs before (need >= -26 dBFS and +4 dB). '
@@ -110,10 +129,18 @@ if a.voice or a.voice_file:
     else:
         mn, mv, sn, sv = np.median(fn), np.median(fv), fn.std(), fv.std()
         long_ = (vwin[1] - vwin[0]) >= 2.0
-        ok = abs(mv / mn - 1) <= 0.30 and (sv >= 0.5 * sn or not long_)
+        ok = abs(mv / mn - 1) <= 0.30 and (sv >= 0.30 * sn or not long_)
         rec('voice', ok, f'narrator median {mn:.0f} Hz (spread {sn:.0f}), part 2 voice median {mv:.0f} Hz (spread {sv:.0f}). '
-            + ('' if ok else 'The voice is not the narrator (flat/robotic or wrong register). Drop it: ship part 2 with no voice rather than a robot.'))
-elif a.no_voice:
-    rec('voice', True, 'part 2 declared voiceless (impacts + beat only)')
+            + ('' if ok else 'The voice is flat/robotic or in the wrong register. Replace it: clone the narrator (Higgsfield) or use scripts/tts_kokoro.py (bm_george). Never ship a robot voice.'))
+elif a.no_voice_reason or a.no_voice:
+    rec('voice', True, 'NOTE voiceless: ' + (a.no_voice_reason or 'voiceless by choice (laser template)') + '. Repeat this in the delivery message.')
+else:
+    rec('voice', False, 'no voice and no reason given. A voice is required (the narrator\'s clone). Add --voice-file voice.wav, or --no-voice-reason "what you tried and why it failed".')
+# sound variety inside a batch
+if a.ledger and a.others:
+    mine = json.load(open(a.ledger)); mine_bed = [g for g in mine.get('generated', []) if g.startswith('bed:')]
+    def key(L): bed = [g for g in L.get('generated', []) if g.startswith('bed:')]; return (L.get('transition'), bed[0].split('seed=')[0] if bed else '')
+    clash = [o for o in a.others if os.path.exists(o) and key(json.load(open(o))) == key(mine)]
+    rec('sound_variety', not clash, 'the sound/transition combination is unique in this batch' if not clash else f'same transition + mood as {clash}: change the mood, seed or transition')
 print('\nALL QA CHECKS PASSED' if all(res) else '\nQA FAILED: do not deliver; fix the FAIL lines first')
 sys.exit(0 if all(res) else 1)
