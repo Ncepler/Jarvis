@@ -1,0 +1,63 @@
+{
+ "fps": 30,
+ "duration": 5.4,
+ "transition": {
+  "type": "shatter",
+  "dur": 1.0,
+  "impact": [
+   0.45,
+   0.6
+  ]
+ },
+ "site": {
+  "dir": "in/site",
+  "count": 120,
+  "fps": 30
+ },
+ "siteLabel": "A VILAS.STUDIO DEMO \u00b7 RENOVATION",
+ "lines": [
+  {
+   "text": "Vilas Studio.",
+   "t": 1.0,
+   "until": 1.66
+  },
+  {
+   "text": "Websites that look expensive.",
+   "t": 1.68,
+   "until": 3.3
+  },
+  {
+   "text": "They weren't.",
+   "t": 3.38,
+   "until": 4.0
+  }
+ ],
+ "captionStyle": {
+  "px": 50,
+  "y": 1085,
+  "weight": 700,
+  "font": "Inter"
+ },
+ "tEnd": 4.0,
+ "endCard": {
+  "word": "Vilas",
+  "sub": ".studio",
+  "tagline": [
+   "websites that look expensive.",
+   "they weren't."
+  ]
+ },
+ "sound": {
+  "mood": "playful",
+  "seed": 41,
+  "bpm": null,
+  "root": null,
+  "bed_gain": 0.5
+ },
+ "voice": {
+  "file": "voice.wav",
+  "at": 0.65,
+  "trimStart": 0.0,
+  "onsetInClip": 0.03
+ }
+}

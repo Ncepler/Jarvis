@@ -1,0 +1,37 @@
+{
+ "real": [
+  {
+   "file": "impact-bass-1.mp3",
+   "license": "Pixabay Content License (commercial use OK, no attribution)",
+   "source": "hyperframes media-use bundled SFX"
+  },
+  {
+   "file": "whoosh-cinematic.mp3",
+   "license": "Pixabay Content License (commercial use OK, no attribution)",
+   "source": "hyperframes media-use bundled SFX"
+  },
+  {
+   "file": "impact-bass-1.mp3",
+   "license": "Pixabay Content License (commercial use OK, no attribution)",
+   "source": "hyperframes media-use bundled SFX"
+  },
+  {
+   "file": "chime.mp3",
+   "license": "Pixabay Content License (commercial use OK, no attribution)",
+   "source": "hyperframes media-use bundled SFX"
+  },
+  {
+   "file": "sparkle.mp3",
+   "license": "Pixabay Content License (commercial use OK, no attribution)",
+   "source": "hyperframes media-use bundled SFX"
+  }
+ ],
+ "generated": [
+  "glass_crack (synth)",
+  "shatter (synth)",
+  "bed: mood=playful seed=41 bpm=119 root=64 scale=maj_pent lead=marimba drums=offbeat"
+ ],
+ "transition": "shatter",
+ "mood": "playful",
+ "seed": 41
+}
