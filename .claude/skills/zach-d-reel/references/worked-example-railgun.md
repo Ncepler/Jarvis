@@ -1,4 +1,6 @@
-# Worked example: "railgun from the Moon" (2026-10-07)
+# Worked example: "railgun from the Moon" (2026-10-07): THE MODEL for v4 (Noah, 2026-10-12: "that's the type of transition that's good")
+
+v4 keeps everything that made it work (the narrator's own sentence turning into the brand, the clone on the impact, the over-the-top laser drop) and changes one thing: new reels open with `"opening": "bridge"` (part 1's last frame physically moves into the scene) instead of this reel's hard cut to a re-drawn round.
 
 Source: a Zack D Films-style 3D "what if you shot a railgun from the Moon at Earth" (36.8s, 720x1280, 24 fps, HE-AACv2, narrated, burned-in captions).
 Output: `brag-output-2026-10-07-railgun/` in the Jarvis repo (`brag.mp4`, 39.0s). Read this once to see the whole job end to end.
@@ -40,7 +42,7 @@ of narration, 3 takes x 0.2 credits (3.86 → ~3.26).
 2. The clone repeated a word the original audio already said. Write down the kept audio's last words first.
 3. Mixed the voice by the effects bus only; the drum roll masked the last syllable (0.8 dB margin). `audio.py` now measures against everything.
 4. Auto-detecting the printed logo wasted a pass. Hand-track the box.
-5. Never confirmed the pronunciation: nobody here can hear. Ask Noah to listen for "VEE-las".
+5. Never confirmed the pronunciation: nobody here can hear. Ask Noah to listen for "VEE-lahs" (v4 spells it `Veelahs Studio` for the voice model).
 6. Tool detours cost the most time: Higgsfield uploads/CDN and Composio links are blocked (see `environment.md`). Plan the voice transfer first.
 
 ## Cost

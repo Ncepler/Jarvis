@@ -1,22 +1,73 @@
 {
-  "fps": 29.97,
-  "duration": 6.6,
-  "tImp1": 0.30,
-  "tImp2": 0.95,
-  "tDrop": 1.75,
-  "beat": 0.4,
-  "tEnd": 4.55,
-  "tFinal": 6.15,
-  "wordmark": ["VILAS", "STUDIO"],
-  "slams": [
-    {"t": 1.75, "text": "WEBSITES"},
-    {"t": 2.15, "text": "THAT LOOK"},
-    {"t": 2.55, "text": "EXPENSIVE."},
-    {"t": 2.95, "text": "IT WASN'T.", "glitch": true},
-    {"t": 3.75, "text": "FROM $300", "accent": "$300"}
-  ],
-  "endCard": {"word": "Vilas", "sub": ".studio", "tagline": ["websites that look expensive.", "they weren’t."]},
-  "caption": [{"text": "locate", "until": 0.30}, {"text": "Vilas Studio", "until": 1.70}],
-  "captionStyle": {"widthRef": "your vehicle", "widthPx": 302, "baseline": 1017},
-  "voice": {"file": "voice.wav", "trimStart": 0.0, "onsetInClip": 0.032, "landsOn": "tImp1"}
+ "fps": 29.97,
+ "duration": 6.95,
+ "tImp1": 0.9,
+ "tImp2": 1.55,
+ "tDrop": 2.35,
+ "beat": 0.4,
+ "tEnd": 5.15,
+ "tFinal": 6.5,
+ "wordmark": [
+  "VILAS",
+  "STUDIO"
+ ],
+ "slams": [
+  {
+   "t": 2.35,
+   "text": "WEBSITES"
+  },
+  {
+   "t": 2.75,
+   "text": "THAT LOOK"
+  },
+  {
+   "t": 3.15,
+   "text": "EXPENSIVE."
+  },
+  {
+   "t": 3.55,
+   "text": "IT WASN'T.",
+   "glitch": true
+  },
+  {
+   "t": 4.35,
+   "text": "FROM $300",
+   "accent": "$300"
+  }
+ ],
+ "endCard": {
+  "word": "Vilas",
+  "sub": ".studio",
+  "tagline": [
+   "websites that look expensive.",
+   "they weren’t."
+  ]
+ },
+ "caption": [
+  {
+   "text": "locate Vilas Studio",
+   "until": 2.3
+  }
+ ],
+ "captionStyle": {
+  "widthRef": "your vehicle",
+  "widthPx": 302,
+  "baseline": 1017
+ },
+ "voice": {
+  "file": "voice.wav",
+  "trimStart": 0.0,
+  "onsetInClip": 0.032,
+  "landsOn": "tImp1"
+ },
+ "opening": "bridge",
+ "bridge": {
+  "type": "whip",
+  "dir": "down"
+ },
+ "music": {
+  "riff": 2,
+  "root": 3
+ },
+ "look": "photoreal"
 }

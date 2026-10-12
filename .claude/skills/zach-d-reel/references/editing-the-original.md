@@ -1,6 +1,6 @@
-# Editing the original (the standing edits only; v3 adds the trim at the transition point)
+# Editing the original (the standing edits only; v4: every reel is cut at the sentence slot)
 
-SKILL.md's Rule zero stands: the upload is untouched except for the **standing edits** (TikTok watermark removal, covering creator marks, the word-swap cut, a doubled word at the seam), which Noah approved for every job; anything else needs his explicit ask. This is how to do the edits he asks for with the smallest
+SKILL.md's Rule zero stands: the upload is untouched except for the **standing edits** (TikTok watermark removal, covering creator marks, the cut at the sentence slot, a doubled word at the seam), which Noah approved for every job; anything else needs his explicit ask. This is how to do the edits he asks for with the smallest
 possible footprint. Everything here was done and verified on the railgun reel (see `worked-example-railgun.md`).
 
 Edits Noah has asked for so far (2026-10-07, railgun):
@@ -22,10 +22,11 @@ His standing wording: "change nothing else about the original video." So: do exa
 4. **Report exactly what changed** in one line when delivering ("0-8.75s and 20.4-25.8s were re-encoded to cover the title;
    everything else is identical to your upload").
 
-## Trimming at the transition point (v3 standing edit)
-The bridge ending needs the original cut where a transition exists, usually mid-video (so the Vilas hook lands by ~20 s). Same machinery as a word-swap cut: `assemble.py --cut-frame N --audio-cut SEC` keeps frames 0..N-1 and the audio up to SEC; only the last partial
-GOP is re-encoded (unedited), the rest is bit-identical. N is the first frame whose caption shows the NEXT words (so the last kept frame N-1 still shows the last kept words); SEC is inside the narrator's silence after the last kept word (`envelope.py`).
-For a bridge, part 2 frame 0 is frame N-1's picture (`prep_bridge.sh` extracts it). Marks in the dropped tail are never seen: a cut that drops a marked stretch saves the cover work.
+## Cutting at the sentence slot (v4: every reel)
+The cut goes inside a narrator sentence, immediately before the words the clone replaces (`transitions.md` §1): "...until it hit | Earth" -> keep through "hit", the clone says "Veelahs Studio".
+It is the same machinery as the word swap below: `assemble.py --cut-frame N --audio-cut SEC` keeps frames 0..N-1 and the audio up to SEC; only the last partial GOP is re-encoded (unedited), the rest is bit-identical.
+N = the first frame whose caption shows the dropped word(s); SEC = inside the gap after the last kept word. Part 2's frame 0 is frame N-1's picture (`prep_spectacle.sh` writes it to `in/last.png`).
+Everything after the cut is never seen: marks in the dropped tail cost nothing.
 
 ## Cutting at a word
 - **Find the video cut:** `strip.sh <v> <t0> <dur> 24 out.png` around the word. The cut frame N is the first frame whose caption

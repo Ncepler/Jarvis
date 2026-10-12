@@ -4,13 +4,14 @@
 <style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
 </head><body>
 <canvas id="c" width="1080" height="1920"></canvas>
+<script src="bridge.js"></script>
 <script>
 // Part 2 for the "locate your vehicle" reel: "...letting you and the police locate | VILAS STUDIO" -> laser drop with laser stick-figure dancers.
 // Every frame is a pure function of its frame number. Timings and words come from ../cfg.json (audio.py reads the same file).
 // Design units 720x1280 (9:16), canvas 1.5x.
 let CFG, FPS, DUR, NF, T_IMP1, T_IMP2, T_DROP, BEAT, T_END, T_FINAL, SLAMS, WM, ENDC, CAPS, OPEN, CAP_PX = 48;
 const W = 720, H = 1280, CX = 360, WY = 600;
-const c = document.getElementById('c'), x = c.getContext('2d');
+const c = document.getElementById('c'); let x = c.getContext('2d');   // `let`: the bridge opening renders the scene offscreen by swapping x
 
 // palette: police red/blue pushed into purple laser light, on near-black
 const BG = '#020104', BONE = [239, 233, 221];
@@ -137,22 +138,35 @@ function floor(t, a, horizon = 905) {
   line(-20, horizon, W + 20, horizon, PURPLE, a * 0.7, true, 0.8);
 }
 
-// ---------- wordmark (two lines, ignites per word)
-function wordmark(cx, cy, s, lit1, lit2, flick) {
+// ---------- wordmark (two lines, ignites per word). A physical object: extruded dark-steel sides, a chrome face whose reflections drift,
+// lit from inside once it ignites (cfg.look "flat" = the old outline-only look)
+function chromeFace(y, px, t, lit) {
+  const k = 0.3 + 0.7 * lit, d = 0.08 * Math.sin(t * 1.7), gr = x.createLinearGradient(-px, y - px * 0.55, px * 0.6, y + px * 0.55);
+  const c = (r, g, b) => `rgb(${Math.round(r * k)},${Math.round(g * k)},${Math.round(b * k)})`;
+  gr.addColorStop(0, c(250, 246, 255)); gr.addColorStop(clamp(0.38 + d), c(178, 170, 205)); gr.addColorStop(clamp(0.5 + d), c(70, 62, 96));
+  gr.addColorStop(clamp(0.62 + d), c(222, 214, 246)); gr.addColorStop(1, c(132, 124, 160)); return gr;
+}
+function extruded(txt, y, px, t, lit, depth = 12) {
+  for (let k = depth; k >= 1; k--) { const s = 1 - k / depth; x.fillStyle = `rgb(${Math.round(8 + 26 * s * (0.4 + 0.6 * lit))},${Math.round(6 + 18 * s)},${Math.round(14 + 40 * s * (0.4 + 0.6 * lit))})`; x.fillText(txt, k * 0.45, y + k * 0.85); }
+  x.fillStyle = chromeFace(y, px, t, lit); x.fillText(txt, 0, y);
+  x.lineWidth = 1.2; x.strokeStyle = `rgba(225,210,255,${0.25 + 0.45 * lit})`; x.strokeText(txt, 0, y);
+}
+function wordmark(cx, cy, s, lit1, lit2, flick, t = 0) {
   x.save(); x.translate(cx, cy); x.scale(s, s);
   x.textAlign = 'center'; x.textBaseline = 'middle';
-  const lines = [[WM[0], -78, 150, lit1, PURPLE], [WM[1], 70, 112, lit2, BLUE]];
+  const lines = [[WM[0], -78, 150, lit1, PURPLE], [WM[1], 70, 112, lit2, BLUE]], flat = CFG.look === 'flat';
   for (const [txt, y, px, lit, col] of lines) {
     x.font = font(700, px); x.letterSpacing = '6px';
-    x.lineWidth = 2; x.strokeStyle = `rgba(200,180,255,${0.16 + 0.18 * (1 - lit)})`; x.strokeText(txt, 0, y);
-    if (lit > 0) {
-      const on = lit * (flick ? flick(txt) : 1);
+    const on = lit > 0 ? lit * (flick ? flick(txt) : 1) : 0;
+    if (flat) { x.lineWidth = 2; x.strokeStyle = `rgba(200,180,255,${0.16 + 0.18 * (1 - lit)})`; x.strokeText(txt, 0, y); }
+    else extruded(txt, y, px, t, on);
+    if (on > 0) {
       x.save(); x.globalCompositeOperation = 'lighter';
       x.shadowColor = rgba(col, 0.95 * on); x.shadowBlur = 44;
-      x.fillStyle = rgba(col, 0.6 * on); x.fillText(txt, 0, y);
-      x.shadowBlur = 14; x.fillStyle = rgba(RED, 0.25 * on); x.fillText(txt, 0, y);
+      x.fillStyle = rgba(col, (flat ? 0.6 : 0.34) * on); x.fillText(txt, 0, y);
+      x.shadowBlur = 14; x.fillStyle = rgba(RED, (flat ? 0.25 : 0.12) * on); x.fillText(txt, 0, y);
       x.restore();
-      x.fillStyle = `rgba(${BONE},${on})`; x.fillText(txt, 0, y);
+      if (flat) { x.fillStyle = `rgba(${BONE},${on})`; x.fillText(txt, 0, y); }
     }
   }
   x.restore();
@@ -350,14 +364,43 @@ function troupe(t, mode, a) {
 window.setup = async () => {
   CFG = await (await fetch('../cfg.json')).json();
   ({ fps: FPS, duration: DUR, tImp1: T_IMP1, tImp2: T_IMP2, tDrop: T_DROP, beat: BEAT, tEnd: T_END, tFinal: T_FINAL, slams: SLAMS, wordmark: WM, endCard: ENDC, caption: CAPS } = CFG);
-  OPEN = CFG.opening || 'pin';   // 'pin' = the locate map pin drops in (vehicle reel); 'orb' = generic: hard cut to a new screen, a laser orb falls in
+  OPEN = CFG.opening || 'pin';   // 'bridge' (DEFAULT for new reels) = part 1's last frame physically moves INTO this scene (comp/bridge.js, cfg.bridge);
+                                 // 'pin' = the locate map pin drops in (vehicle reel); 'orb' = legacy hard cut to a new screen, a laser orb falls in
   CAPS = CAPS || [];
   NF = Math.round(DUR * FPS); window.NF = NF; window.CFG_FPS = FPS;
+  if (OPEN === 'bridge') { await BRIDGE.setup(CFG); SC = document.createElement('canvas'); SC.width = 1080; SC.height = 1920; SCX = SC.getContext('2d'); }
+  postSetup();
   await document.fonts.load(font(700, 100)); await document.fonts.load(font(500, 100)); await document.fonts.load(font(800, 40, 'Inter')); await document.fonts.load(font(700, 40, 'Inter'));
   await document.fonts.load(font(700, 40, 'Space Mono')); await document.fonts.load(font(600, 36, 'Inter'));
   if (CFG.captionStyle) { x.font = font(800, 100, 'Inter'); CAP_PX = 100 * CFG.captionStyle.widthPx / x.measureText(CFG.captionStyle.widthRef).width; window.CAP_PX = CAP_PX; }
 };
+// ---------- photoreal finish (cfg.look, default "photoreal"; "flat" = the old look): bloom + film grain on the Vilas scene only (never on part 1's frame)
+let SC = null, SCX = null, SMALL, SMALLX, NOISE;
+function postSetup() {
+  SMALL = document.createElement('canvas'); SMALL.width = 270; SMALL.height = 480; SMALLX = SMALL.getContext('2d');
+  NOISE = document.createElement('canvas'); NOISE.width = NOISE.height = 256; const nx = NOISE.getContext('2d'), d = nx.createImageData(256, 256), r = rng(99);
+  for (let i = 0; i < d.data.length; i += 4) { const v = 128 + (r() + r() + r() - 1.5) * 120; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } nx.putImageData(d, 0, 0);
+}
+function post(f) {
+  if (CFG.look === 'flat') return;
+  x.save(); x.setTransform(1, 0, 0, 1, 0, 0);
+  SMALLX.clearRect(0, 0, 270, 480); SMALLX.filter = 'blur(5px)'; SMALLX.drawImage(x.canvas, 0, 0, 270, 480); SMALLX.filter = 'none';
+  x.globalCompositeOperation = 'screen'; x.globalAlpha = 0.42; x.drawImage(SMALL, 0, 0, 1080, 1920);
+  const r = rng(f * 7919 + 3); x.globalCompositeOperation = 'overlay'; x.globalAlpha = 0.16; x.fillStyle = x.createPattern(NOISE, 'repeat');
+  x.translate(-Math.floor(r() * 256), -Math.floor(r() * 256)); x.fillRect(0, 0, 1080 + 256, 1920 + 256);
+  x.restore();
+}
 window.renderFrame = (f) => {
+  const t = f / FPS;
+  if (OPEN === 'bridge' && t < T_IMP1) {
+    const real = x; x = SCX; drawScene(f, true); x = real;
+    x.setTransform(1.5, 0, 0, 1.5, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.shadowBlur = 0; x.filter = 'none';
+    BRIDGE.draw(x, t / T_IMP1, f, SC, CFG);   // no overlay caption during the move: part 1's own caption is still in the picture
+    return;
+  }
+  drawScene(f, false);
+};
+function drawScene(f, noCap) {
   const t = f / FPS;
   x.setTransform(1.5, 0, 0, 1.5, 0, 0);
   x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.shadowBlur = 0;
@@ -368,7 +411,7 @@ window.renderFrame = (f) => {
 
   if (t < T_DROP) {
     // A: locate -> the pin drops onto the wordmark, two impacts on the spoken name
-    if (OPEN !== 'orb') policeWash(t, t < T_IMP1 ? 1 : clamp(1 - (t - T_IMP1) / 0.5) * 0.6);
+    if (OPEN === 'pin') policeWash(t, t < T_IMP1 ? 1 : clamp(1 - (t - T_IMP1) / 0.5) * 0.6);
     // dust motes
     x.save(); x.globalCompositeOperation = 'lighter';
     for (const p of DUST) { const yy = (p.y + t * 40 * (0.3 + p.z)) % H; x.fillStyle = rgba(p.s > 0.5 ? PURPLE : BLUE, 0.25 + 0.3 * p.z); x.fillRect(p.x, yy, 1.2 + p.z, 1.2 + p.z); }
@@ -398,10 +441,11 @@ window.renderFrame = (f) => {
     const pre = t > 1.15 ? clamp((t - 1.15) / 0.55) : 0;
     if (pre > 0) troupe(t, 'drop', 0.18 * pre * (Math.floor(t * FPS) % 3 ? 1 : 0.5));
     const flick = (txt) => { const dd = t - (txt === WM[0] ? T_IMP1 : T_IMP2); if (dd < 0) return 0; if (dd > 0.14) return 1; return [1, 0.2, 1, 0.45, 1, 1][Math.floor(dd * FPS)] ?? 1; };
-    wordmark(CX, WY, wmS, t >= T_IMP1 ? 1 : 0, t >= T_IMP2 ? 1 : 0, flick);
+    wordmark(CX, WY, wmS, t >= T_IMP1 ? 1 : 0, t >= T_IMP2 ? 1 : 0, flick, t);
     // the object: falls onto the top of VILAS and lands on impact 1 (a pin for "locate"; a laser orb in the generic opening)
     const tipY = WY - 78 - 92;
     if (OPEN === 'orb') { if (t < T_IMP1) { const u = ei(t / T_IMP1); orb(CX, lerp(-40, tipY + 20, u), lerp(120, 14, u), t); } }
+    else if (OPEN !== 'pin') { /* bridge: nothing falls in, the story's own motion carried us here */ }
     else if (t < T_IMP1) { const u = ei(t / T_IMP1); pin(CX, lerp(-40, tipY, u), lerp(60, 34, u), 1, RED); }
     else { const d = t - T_IMP1, sq = 1 + 0.25 * Math.exp(-d * 18); pin(CX, tipY, 34 * sq, clamp(1 - (t - 1.45) / 0.3), RED); ping(t, T_IMP1, CX, tipY, clamp(1 - (t - 1.45) / 0.3)); }
     impact(t, T_IMP1, CX, tipY + 40, SP1, true, [RED, PURPLE, BLUE]);
@@ -426,8 +470,11 @@ window.renderFrame = (f) => {
   x.setTransform(1.5, 0, 0, 1.5, 0, 0);
   const v = x.createRadialGradient(CX, 640, 300, CX, 640, 900); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.6)');
   x.fillStyle = v; x.fillRect(0, 0, W, H);
-  // caption chunks in the original's style while the narrator speaks
-  let from = 0;
+  post(f);
+  x.setTransform(1.5, 0, 0, 1.5, 0, 0);
+  // caption chunks in the original's style while the narrator speaks (bridge: from the landing, with the narrator's brand word)
+  if (noCap) return;
+  let from = OPEN === 'bridge' ? T_IMP1 - 0.03 : 0;
   for (const cp of CAPS) { if (t >= from && t < cp.until) caption(cp.text, cp === CAPS[CAPS.length - 1] ? clamp((cp.until - t) / 0.05) : 1); from = cp.until; }
-};
+}
 </script></body></html>

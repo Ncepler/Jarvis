@@ -12,7 +12,7 @@ Providers, in order of preference:
   openverse   api.openverse.org audio search, filtered to CC0 + public domain only. Needs an open internet (blocked in the cloud session).
   freesound   freesound.org API v2, filtered to the CC0 licence. Needs FREESOUND_API_KEY (free key) and an open internet.
 Music beds: do NOT bake a commercial track into the file. Business accounts can only use cleared audio and Meta fingerprints burned-in audio anyway
-(see references/sound.md). Generate the bed (assets/bridge/audio.py) and/or give Noah a music cue sheet to add in the Instagram editor.
+(see references/sound.md). Optional extra SFX for the hype template; give Noah a music cue sheet to add in the Instagram editor.
 """
 import argparse, glob, json, os, shutil, subprocess, sys, tarfile, tempfile, urllib.parse, urllib.request
 

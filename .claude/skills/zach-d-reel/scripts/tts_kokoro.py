@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Offline neural TTS (Kokoro, Apache-2.0 model) as the FALLBACK voice when the narrator can't be cloned. A voice that isn't the narrator weakens the trick, but a silent cut is
 a bigger defect (Noah, 2026-10-10), and this is far livelier than the old robot voice (pitch spread ~26 Hz vs the robot's 14; the real narrator is ~73).
-  python3 -I tts_kokoro.py "Veelas Studio. Websites that look expensive. They weren't." --voice bm_george --speed 1.08 --out voice.wav
-Spell the brand "Veelas" (VEE-las). Closest male register to a young explainer: bm_george (median ratio .81), then am_michael/am_adam (.70). Gate the result with
+  python3 -I tts_kokoro.py "Veelahs Studio." --voice bm_george --speed 1.08 --out voice.wav
+Spell the brand "Veelahs" (spoken VEE-lahs; never "Vilas" or a hyphenated form: SKILL.md). Closest male register to a young explainer: bm_george (median ratio .81), then am_michael/am_adam (.70). Gate the result with
 qa.py --voice-file voice.wav. First run downloads the 354 MB voice pack from the lemo-opuscar GitHub release (MIT) into ~/.cache/zach-d-reel/kokoro and pip-installs
 kokoro-onnx (Python 3.11-3.13). YOU CANNOT HEAR IT: say so in the delivery."""
 import argparse, os, subprocess, sys, tarfile, urllib.request

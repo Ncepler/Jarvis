@@ -52,3 +52,5 @@ The shark video had a perfect transition at 18.0 s (a perfectly round bite hole,
 **v3 fixes:** transition-first picking + `find_transitions.py` + scorecard; trim at the transition point (hook by 20 s); `assets/bridge` transitions onto real demo footage; voice required with a ladder (clone, preset, Kokoro, reasoned silence);
 real licensed SFX + a seeded mood bed; QA gains `transition`, `hook_time`, `voice` (required), `sound_variety`. Measured: the shark video rebuilt this way is 24.5 s (was 34.3 s) with the hook at 18.0 s. Re-running the gate on the two v2 reels: `hook_time` FAIL (31.2 s / 27.7 s) and `voice` FAIL (none).
 Lesson: a gate that checks mechanics (a cut exists, a thump exists) passes bad videos. Look at the stills.
+
+**v4 note (2026-10-12):** the v3 fixes above produced the next failure (`worked-example-2026-10-12-failures.md`): transition-first picking cut at shapes instead of sentence slots, and the demo footage put a website in part 2. v4 picks the SENTENCE SLOT first and lands on the Vilas spectacle; the demo footage is deleted.

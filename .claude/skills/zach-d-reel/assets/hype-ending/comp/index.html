@@ -4,13 +4,14 @@
 <style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
 </head><body>
 <canvas id="c" width="1080" height="1920"></canvas>
+<script src="bridge.js"></script>
 <script>
 // Hype ending, part 2. Every frame is a pure function of its frame number. ALL timings and words come from ../cfg.json
 // (audio.py reads the same file, so picture and sound cannot drift apart).
 // Design units: 720x1280 (9:16, the original's shape); canvas is 1.5x for clean edges, downscaled at assemble time.
 let CFG, FPS, DUR, NF, T_IMP1, T_IMP2, T_DROP, BEAT, T_END, SLAMS, WM, ENDC, CAP, OPEN;
 const W = 720, H = 1280, CX = 360;
-const c = document.getElementById('c'), x = c.getContext('2d');
+const c = document.getElementById('c'); let x = c.getContext('2d');   // `let`: the bridge opening renders the scene into an offscreen canvas by swapping x
 
 // palette — Vilas ink/bone + hot laser ambers (bronze accent pushed to light)
 const INK = '#0c0907', BONE = '#efe9dd', AMBER = [255, 176, 40], ORANGE = [255, 110, 24], HOT = [255, 236, 200], RED = [255, 52, 30];
@@ -50,23 +51,36 @@ function glowDot(px, py, r, col, a) {
   x.fillStyle = g; x.beginPath(); x.arc(px, py, r, 0, Math.PI * 2); x.fill(); x.restore();
 }
 
-// ---------- wordmark (two lines, ignites per word)
-function wordmark(cx, cy, s, lit1, lit2, flick) {
+// ---------- wordmark (two lines, ignites per word). A physical object, not flat type: extruded dark-bronze sides, a brushed-metal
+// face whose reflections drift (metalFace), and an emissive glow only once it is lit.
+function metalFace(y, px, t, lit) {
+  const k = 0.32 + 0.68 * lit, d = 0.08 * Math.sin(t * 1.7), gr = x.createLinearGradient(-px, y - px * 0.55, px * 0.6, y + px * 0.55);
+  const c = (r, g, b) => `rgb(${Math.round(r * k)},${Math.round(g * k)},${Math.round(b * k)})`;
+  gr.addColorStop(0, c(255, 248, 232)); gr.addColorStop(clamp(0.38 + d), c(196, 184, 162)); gr.addColorStop(clamp(0.5 + d), c(96, 86, 72));
+  gr.addColorStop(clamp(0.62 + d), c(232, 220, 196)); gr.addColorStop(1, c(150, 138, 118)); return gr;
+}
+function extruded(txt, y, px, t, lit, depth = 12) {
+  for (let k = depth; k >= 1; k--) { const s = 1 - k / depth; x.fillStyle = `rgb(${Math.round(14 + 40 * s * (0.4 + 0.6 * lit))},${Math.round(9 + 26 * s * (0.4 + 0.6 * lit))},${Math.round(6 + 14 * s)})`; x.fillText(txt, k * 0.45, y + k * 0.85); }
+  x.fillStyle = metalFace(y, px, t, lit); x.fillText(txt, 0, y);
+  x.lineWidth = 1.2; x.strokeStyle = `rgba(255,236,200,${0.25 + 0.45 * lit})`; x.strokeText(txt, 0, y);   // rim light
+}
+function wordmark(cx, cy, s, lit1, lit2, flick, t = 0) {
   x.save(); x.translate(cx, cy); x.scale(s, s);
   x.textAlign = 'center'; x.textBaseline = 'middle';
   const lines = [[WM[0], -78, 150, lit1], [WM[1], 70, 112, lit2]];
   for (const [txt, y, px, lit] of lines) {
     x.font = font(700, px); x.letterSpacing = '6px';
-    // dim outline always
-    x.lineWidth = 2; x.strokeStyle = `rgba(239,233,221,${0.22 + 0.2 * (1 - lit)})`; x.strokeText(txt, 0, y);
-    if (lit > 0) {
-      const on = lit * (flick ? flick(txt) : 1);
+    const on = lit > 0 ? lit * (flick ? flick(txt) : 1) : 0;
+    if (CFG.look === 'flat') {
+      x.lineWidth = 2; x.strokeStyle = `rgba(239,233,221,${0.22 + 0.2 * (1 - lit)})`; x.strokeText(txt, 0, y);
+    } else extruded(txt, y, px, t, on);
+    if (on > 0) {
       x.save(); x.globalCompositeOperation = 'lighter';
       x.shadowColor = rgba(AMBER, 0.9 * on); x.shadowBlur = 40;
-      x.fillStyle = rgba(ORANGE, 0.55 * on); x.fillText(txt, 0, y);
-      x.shadowBlur = 14; x.fillStyle = rgba(AMBER, 0.6 * on); x.fillText(txt, 0, y);
+      x.fillStyle = rgba(ORANGE, (CFG.look === 'flat' ? 0.55 : 0.32) * on); x.fillText(txt, 0, y);
+      x.shadowBlur = 14; x.fillStyle = rgba(AMBER, (CFG.look === 'flat' ? 0.6 : 0.22) * on); x.fillText(txt, 0, y);
       x.restore();
-      x.fillStyle = `rgba(239,233,221,${on})`; x.fillText(txt, 0, y);
+      if (CFG.look === 'flat') { x.fillStyle = `rgba(239,233,221,${on})`; x.fillText(txt, 0, y); }
     }
   }
   x.restore();
@@ -75,9 +89,10 @@ function wordmark(cx, cy, s, lit1, lit2, flick) {
 // ---------- caption in the original video's style (white bold, soft shadow, 78% down)
 function caption(txt, a = 1) {
   x.save(); x.textAlign = 'center'; x.textBaseline = 'alphabetic';
-  x.font = font(700, 46, 'Inter'); x.letterSpacing = '0px';
+  const cs = CFG.captionStyle || {};   // measure part 1's caption on a frame: {px: cap height-based font size, y: baseline in 720x1280 units, weight, font}
+  x.font = font(cs.weight || 700, cs.px || 46, cs.font || 'Inter'); x.letterSpacing = '0px';
   x.shadowColor = `rgba(0,0,0,${0.85 * a})`; x.shadowBlur = 10; x.shadowOffsetY = 2;
-  x.fillStyle = `rgba(255,255,255,${a})`; x.fillText(txt, CX, 1015); x.restore();
+  x.fillStyle = `rgba(255,255,255,${a})`; x.fillText(txt, CX, cs.y || 1015); x.restore();
 }
 
 // ---------- background space (continuity with the original's warp streaks)
@@ -161,6 +176,12 @@ function impact(t, t0, cx, cy, sparks, big) {
   const n = big ? 18 : 10, la = clamp(1 - d / (big ? 0.5 : 0.35));
   if (la > 0) for (let i = 0; i < n; i++) beam(cx, cy, (i / n) * Math.PI * 2 + d * 0.8 + (big ? 0 : 0.17), 1400, i % 3 ? AMBER : ORANGE, la);
   glowDot(cx, cy, (big ? 420 : 280) * (1 - d * 0.6), AMBER, clamp(1 - d / 0.45));
+  if (CFG.look !== 'flat') streak(cx, cy, clamp(1 - d / 0.4) * (big ? 1 : 0.7));
+}
+function streak(cx, cy, a) {      // anamorphic lens streak: a real lens smears a hot point into a horizontal line
+  if (a <= 0.01) return; x.save(); x.globalCompositeOperation = 'lighter';
+  const g = x.createLinearGradient(cx - 620, 0, cx + 620, 0); g.addColorStop(0, rgba(ORANGE, 0)); g.addColorStop(0.5, rgba(HOT, 0.85 * a)); g.addColorStop(1, rgba(ORANGE, 0));
+  x.fillStyle = g; x.fillRect(cx - 620, cy - 2.5, 1240, 5); x.globalAlpha = 0.35; x.fillRect(cx - 620, cy - 9, 1240, 18); x.restore();
 }
 
 function flash(t, t0, k = 14, max = 1) { const d = t - t0; if (d < 0) return; const a = max * Math.exp(-d * k); if (a < 0.01) return; x.fillStyle = `rgba(255,248,236,${a})`; x.fillRect(0, 0, W, H); }
@@ -248,7 +269,7 @@ function endCard(t) {
   x.save(); x.translate(CX, 600); x.scale(s, s); x.textAlign = 'center'; x.textBaseline = 'alphabetic';
   x.font = font(500, 196); x.letterSpacing = '-4px';
   x.shadowColor = rgba(AMBER, 0.9); x.shadowBlur = 46; x.fillStyle = `rgba(239,233,221,${a})`; x.fillText(ENDC.word, 0, 40);
-  x.shadowBlur = 0; x.fillText(ENDC.word, 0, 40);
+  x.shadowBlur = 0; if (CFG.look === 'flat') x.fillText(ENDC.word, 0, 40); else { x.globalAlpha = a; extruded(ENDC.word, 40, 196, t, 1, 14); x.globalAlpha = 1; }
   // laser underline draws left to right
   const u = eo((d - 0.08) / 0.3), uw = 440;
   if (u > 0) beam(-uw / 2, 74, 0, uw * u, AMBER, 1);
@@ -266,10 +287,57 @@ function endCard(t) {
 window.setup = async () => {
   CFG = await (await fetch('../cfg.json')).json();
   ({ fps: FPS, duration: DUR, tImp1: T_IMP1, tImp2: T_IMP2, tDrop: T_DROP, beat: BEAT, tEnd: T_END, slams: SLAMS, wordmark: WM, endCard: ENDC, caption: CAP } = CFG);
-  OPEN = CFG.opening || 'round';   // 'round' = the railgun round falls into the name; 'orb' = generic: hard cut to a new screen, a white-hot orb falls in
+  OPEN = CFG.opening || 'round';   // 'bridge' (DEFAULT for new reels) = part 1's last frame physically moves INTO this scene (comp/bridge.js, cfg.bridge);
+                                    // 'round' = the railgun round falls into the name; 'orb' = legacy hard cut to a new screen, a white-hot orb falls in
   NF = Math.round(DUR * FPS); window.NF = NF; window.CFG_FPS = FPS;
+  if (OPEN === 'bridge') { await BRIDGE.setup(CFG); SC = document.createElement('canvas'); SC.width = 1080; SC.height = 1920; SCX = SC.getContext('2d'); }
+  lookSetup();
   await document.fonts.load(font(700, 100)); await document.fonts.load(font(500, 100)); await document.fonts.load(font(700, 40, 'Inter')); await document.fonts.load(font(500, 30, 'Inter')); await document.fonts.load(font(700, 40, 'Space Mono')); await document.fonts.load(font(600, 36, 'Inter')); };
+// ---------- photoreal finish (cfg.look, default "photoreal"; "flat" = the old look). Applied to the Vilas scene only, never to part 1's
+// frame, so frame 0 of a bridge is still exactly part 1's picture. Glossy floor that reflects the lasers, dust in the beams, bloom, film grain.
+let SC = null, SCX = null, TMP, TMPX, SMALL, SMALLX, NOISE, MOTES;
+function lookSetup() {
+  TMP = document.createElement('canvas'); TMP.width = 1080; TMP.height = 1920; TMPX = TMP.getContext('2d');
+  SMALL = document.createElement('canvas'); SMALL.width = 270; SMALL.height = 480; SMALLX = SMALL.getContext('2d');
+  NOISE = document.createElement('canvas'); NOISE.width = NOISE.height = 256; const nx = NOISE.getContext('2d'), d = nx.createImageData(256, 256), r = rng(99);
+  for (let i = 0; i < d.data.length; i += 4) { const v = 128 + (r() + r() + r() - 1.5) * 120; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } nx.putImageData(d, 0, 0);
+  const rm = rng(31); MOTES = Array.from({ length: 140 }, () => ({ x: rm() * W, y: rm() * H, z: 0.3 + rm() * 0.7, ph: rm() * 6.28 }));
+}
+function look(t, f) {
+  if (CFG.look === 'flat') return;
+  // dust motes hanging in the air, lit by the lasers (drawn in design units before the post passes, so bloom catches them)
+  x.save(); x.setTransform(1.5, 0, 0, 1.5, 0, 0); x.globalCompositeOperation = 'lighter';
+  for (const m of MOTES) { const px = (m.x + t * 9 * m.z) % W, py = (m.y - t * 14 * m.z + H) % H, a = (0.12 + 0.25 * (0.5 + 0.5 * Math.sin(t * 2 + m.ph))) * m.z;
+    x.fillStyle = `rgba(255,214,160,${a})`; x.beginPath(); x.arc(px, py, 0.6 + 1.3 * m.z, 0, 6.283); x.fill(); }
+  x.restore();
+  x.save(); x.setTransform(1, 0, 0, 1, 0, 0);
+  // glossy floor: everything below the horizon is a dark polished stage that mirrors what is above it (blurred, fading with distance)
+  const HY = 1470; TMPX.clearRect(0, 0, 1080, 1920); TMPX.drawImage(x.canvas, 0, 0);
+  x.fillStyle = 'rgba(6,4,3,0.55)'; x.fillRect(0, HY, 1080, 1920 - HY);
+  x.save(); x.beginPath(); x.rect(0, HY, 1080, 1920 - HY); x.clip(); x.filter = 'blur(4px)'; x.globalAlpha = 0.42; x.translate(0, 2 * HY); x.scale(1, -1); x.drawImage(TMP, 0, 0); x.restore();
+  x.filter = 'none'; const fg = x.createLinearGradient(0, HY, 0, 1920); fg.addColorStop(0, 'rgba(6,4,3,0)'); fg.addColorStop(1, 'rgba(6,4,3,0.75)'); x.fillStyle = fg; x.fillRect(0, HY, 1080, 1920 - HY);
+  x.fillStyle = 'rgba(255,200,140,0.10)'; x.fillRect(0, HY - 1, 1080, 2);   // the floor's front edge catches a little light
+  // bloom: a quarter-size blurred copy screened back on top (bright things glow into the air around them)
+  SMALLX.clearRect(0, 0, 270, 480); SMALLX.filter = 'blur(5px)'; SMALLX.drawImage(x.canvas, 0, 0, 270, 480); SMALLX.filter = 'none';
+  x.globalCompositeOperation = 'screen'; x.globalAlpha = 0.42; x.drawImage(SMALL, 0, 0, 1080, 1920);
+  // film grain, a new pattern position every frame (seeded by the frame number, so renders stay deterministic)
+  const r = rng(f * 7919 + 3); x.globalCompositeOperation = 'overlay'; x.globalAlpha = 0.16; x.fillStyle = x.createPattern(NOISE, 'repeat');
+  x.translate(-Math.floor(r() * 256), -Math.floor(r() * 256)); x.fillRect(0, 0, 1080 + 256, 1920 + 256);
+  x.restore();
+}
+
 window.renderFrame = (f) => {
+  const t = f / FPS;
+  if (OPEN === 'bridge' && t < T_IMP1) {
+    // the physical move: render the live scene offscreen (no caption), then carry part 1's last frame into it
+    const real = x; x = SCX; drawScene(f, true); x = real;
+    x.setTransform(1.5, 0, 0, 1.5, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.shadowBlur = 0; x.filter = 'none';
+    BRIDGE.draw(x, t / T_IMP1, f, SC, CFG);   // no overlay caption during the move: part 1's own burned-in caption is still in the picture
+    return;
+  }
+  drawScene(f, false);
+};
+function drawScene(f, noCap) {
   const t = f / FPS;
   x.setTransform(1.5, 0, 0, 1.5, 0, 0);
   x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.shadowBlur = 0;
@@ -301,10 +369,10 @@ window.renderFrame = (f) => {
       }
     }
     const flick = (txt) => { const dd = t - (txt === WM[0] ? T_IMP1 : T_IMP2); if (dd < 0) return 0; if (dd > 0.14) return 1; return [1, 0.2, 1, 0.45, 1, 1][Math.floor(dd * FPS)] ?? 1; };
-    wordmark(CX, 600, wmS, t >= T_IMP1 ? 1 : 0, t >= T_IMP2 ? 1 : 0, flick);
+    wordmark(CX, 600, wmS, t >= T_IMP1 ? 1 : 0, t >= T_IMP2 ? 1 : 0, flick, t);
     if (t < T_IMP1) {
       const pr = lerp(165, 16, ei(fall)), py = lerp(640, 600, fall);
-      if (OPEN === 'orb') orb(CX, py, pr * 0.8, t); else projectile(CX, py, pr, t);
+      if (OPEN === 'orb') orb(CX, py, pr * 0.8, t); else if (OPEN === 'round') projectile(CX, py, pr, t);   // bridge: nothing falls in, the story's own motion carried us here
     }
     impact(t, T_IMP1, CX, 520, SP1, true);
     impact(t, T_IMP2, CX, 670, SP2, false);
@@ -328,7 +396,10 @@ window.renderFrame = (f) => {
   // vignette
   const v = x.createRadialGradient(CX, 640, 300, CX, 640, 900); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.55)');
   x.fillStyle = v; x.fillRect(0, 0, W, H);
+  look(t, f);
   // caption chunk in the original's style while the narrator speaks
-  if (CAP && t < CAP.until) caption(CAP.text, clamp((CAP.until - t) / 0.05));
-};
+  // (bridge: it appears at the landing, with the narrator's brand word; cfg.caption.from overrides)
+  const capFrom = CAP ? (CAP.from ?? (OPEN === 'bridge' ? T_IMP1 - 0.03 : 0)) : 0;
+  if (!noCap && CAP && t >= capFrom && t < CAP.until) { x.setTransform(1.5, 0, 0, 1.5, 0, 0); caption(CAP.text, clamp((t - capFrom) / 0.05) * clamp((CAP.until - t) / 0.05)); }
+}
 </script></body></html>

@@ -15,6 +15,13 @@ DUR = CFG['duration']
 T_IMP1, T_IMP2, T_DROP, BEAT, T_END = CFG['tImp1'], CFG['tImp2'], CFG['tDrop'], CFG['beat'], CFG['tEnd']
 SLAMS = [s['t'] for s in CFG['slams']]
 LUFS = float(sys.argv[1]) if len(sys.argv) > 1 else -10.5
+
+def load_voice(path):
+    """Decode the voice with ffmpeg to mono float32 at the mix rate, whatever its format, bit depth or sample rate."""
+    import subprocess
+    raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', path, '-ac', '1', '-ar', str(SR), '-f', 'f32le', '-'], capture_output=True, check=True).stdout
+    return np.frombuffer(raw, np.float32).astype(float)
+
 m = Mix(DUR)
 r = np.random.default_rng(5)
 
@@ -47,6 +54,19 @@ if OPEN == 'orb':
     m.add('fx', boom(0.9, 0.5), 0.0, gain=0.8, send=0.2)
     m.add('fx', kick(0.3, 170, 46), 0.0, gain=0.85)
     m.add('fx', zap(0.12, 6200, 900), 0.0, gain=0.3, pan=0.2)
+elif OPEN == 'bridge':
+    # the physical move out of part 1 (comp/bridge.js): no hit on frame 0, a rising whoosh across the move, a texture for its type; the big hit lands at tImp1
+    BT = CFG.get('bridge', {}).get('type', 'zoom')
+    w, t = sweep(220, 1800, T_IMP1)
+    m.add('fx', lp(np.sign(w) * 0.4, 3000) * np.linspace(0, 1, len(t)) ** 2.5, 0.0, gain=0.22, send=0.2)
+    if BT == 'shatter':
+        for k in range(5): m.add('fx', hp(r.standard_normal(int(0.25 * SR)), 2500 + 900 * k) * np.exp(-tt(0.25) / (0.03 + 0.02 * k)), 0.08 + 0.025 * k, gain=0.32, pan=(-0.6, 0.6, -0.2, 0.3, 0)[k], send=0.3)
+    elif BT == 'glitch':
+        for k in range(7): m.add('fx', zap(0.07, 7000 - 600 * k, 1200), 0.06 * k, pan=(-1) ** k * 0.5, gain=0.2)
+    elif BT == 'iris':
+        bt = tt(0.18); m.add('fx', np.sin(2 * np.pi * (260 + 900 * bt / 0.18) * bt) * np.exp(-bt / 0.05), 0.0, gain=0.35, send=0.3)
+    elif BT == 'doors':
+        bt = tt(1.2); m.add('fx', (np.sin(2 * np.pi * 1318.5 * bt) + 0.6 * np.sin(2 * np.pi * 1046.5 * bt)) * np.exp(-bt / 0.5), 0.0, gain=0.25, send=0.5)
 else:
     # --- A: "locate" -> siren yelp + lock-on beeps + the pin dropping, into impact 1
     t = tt(T_IMP1 + 0.05); f = 1050 + 450 * np.sign(np.sin(2 * np.pi * 7.5 * t)) * 0 + 420 * np.sin(2 * np.pi * 7.5 * t)
@@ -54,13 +74,14 @@ else:
     m.add('fx', lp(np.tanh(yelp * 2.2), 3500), 0.0, gain=0.22, pan=-0.3, send=0.25)
     for k, t0 in enumerate((0.02, 0.12, 0.2, 0.26)):
         bt = tt(0.05); m.add('fx', np.sin(2 * np.pi * (1900 + 300 * k) * bt) * np.exp(-bt / 0.018), t0, gain=0.22, pan=(-0.5, 0.5)[k % 2], send=0.2)
-w, t = sweep(2400, 600, T_IMP1)
-m.add('fx', w * np.linspace(0.1, 0.6, len(t)) ** 1.5, 0.0, gain=0.35, send=0.2)
+if OPEN != 'bridge':   # falling sweep (something drops into the name)
+    w, t = sweep(2400, 600, T_IMP1)
+    m.add('fx', w * np.linspace(0.1, 0.6, len(t)) ** 1.5, 0.0, gain=0.35, send=0.2)
 m.add('fx', whoosh(T_IMP1 + 0.04, 250, 8000, peak=0.9), 0.0, gain=1.0, send=0.2)
 m.add('fx', boom(1.8, 1.2), T_IMP1, gain=1.0, send=0.35)
 m.add('fx', kick(0.5, 180, 40), T_IMP1, gain=0.9)
 for k, pan in enumerate((-0.6, 0.6)): m.add('fx', zap(0.25, 5200, 300), T_IMP1 + 0.01 * k, pan=pan, gain=0.35, send=0.1)
-if OPEN != 'orb':
+if OPEN == 'pin':
     # radar pings from the landed pin
     for k in range(3):
         bt = tt(0.5); m.add('fx', np.sin(2 * np.pi * 1320 * bt) * np.exp(-bt / 0.12), T_IMP1 + 0.22 + 0.22 * k, gain=0.12, pan=(-0.4, 0.4, 0)[k], send=0.5)
@@ -81,7 +102,10 @@ while tt_ < T_DROP - 0.02:
 # --- B: the drop (150 bpm), runs through the end card until the final hit
 m.add('fx', boom(1.4, 1.0), T_DROP, gain=0.9, send=0.35)
 m.add('fx', hp(r.standard_normal(int(1.2 * SR)), 3000) * np.exp(-tt(1.2) / 0.35), T_DROP, gain=0.35, send=0.4)
-bass_notes = [40, 40, 43, 38, 40, 40, 47, 45, 40, 40, 43, 38]
+# the drop's riff varies per video (cfg.music: riff 0-3, root = semitones, any integer -5..+6): no two reels in a batch share riff+root+beat
+MU = CFG.get('music', {}); RIFFS = [[40, 40, 43, 38, 40, 40, 47, 45, 40, 40, 43, 38], [40, 43, 45, 40, 47, 45, 43, 38, 40, 43, 45, 50],
+                                    [40, 40, 40, 43, 40, 40, 38, 36, 40, 40, 43, 45], [40, 47, 40, 45, 40, 43, 40, 38, 40, 47, 50, 47]]
+bass_notes = [n + int(MU.get('root', 0)) for n in RIFFS[int(MU.get('riff', 0)) % 4]]
 b = 0
 while T_DROP + b * BEAT < T_FINAL - 0.01:
     t0 = T_DROP + b * BEAT
@@ -120,8 +144,7 @@ for k in range(4): m.add('fx', zap(0.3, 5600 - k * 900, 200), T_FINAL + 0.04 + 0
 # word starts inside the (trimmed) clip, and voice.landsOn to the cfg time it must hit.
 VC = CFG.get('voice')
 if VC and os.path.exists(os.path.join(HERE, VC['file'])):
-    sr_v, v = wavfile.read(os.path.join(HERE, VC['file'])); v = v.astype(float) / 32768
-    if v.ndim > 1: v = v.mean(1)
+    v = load_voice(os.path.join(HERE, VC['file']))   # any format/rate -> mono float at SR (a 44.1 kHz clone mixed raw at 48 kHz plays 9% fast and ~1.5 semitones high: the vehicle reel's bug)
     v = hp(v, 80); v = v / np.max(np.abs(v)) * 0.9
     CUT = int(VC.get('trimStart', 0) * SR); v = v[CUT:]; k = min(480, len(v)); v[:k] *= np.linspace(0, 1, k)   # 10 ms fade-in
     V_AT = CFG[VC['landsOn']] - VC.get('onsetInClip', 0)
@@ -142,4 +165,7 @@ if VC and os.path.exists(os.path.join(HERE, VC['file'])):
           + ('' if min(margins) >= 7 else '   <-- BELOW 7 dB: raise the voice gain or deepen the duck'))
 
 ir = reverb_ir(1.8, 0.015, 5000)
+# ledger for qa.py sound_variety (same format as the old bridge ledger): transition + the drop's identity
+json.dump({'transition': CFG.get('bridge', {}).get('type', OPEN), 'generated': [f"bed: style=dancers riff={int(MU.get('riff', 0)) % 4} root={int(MU.get('root', 0))} beat={BEAT} seed=0"],
+           'licensed': []}, open(os.path.join(HERE, 'sound_ledger.json'), 'w'), indent=1)
 m.master(os.path.join(HERE, 'audio.wav'), ir=ir, wet=0.22, lufs=LUFS, wrap_tail=False, edge=0.003)

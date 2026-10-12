@@ -1,5 +1,7 @@
 # Three reference ads, taken apart
 
+> **v4 (2026-10-12):** any idea below that ends on a phone, laptop, screen or website showing vilas.studio or a demo is BANNED for reels (SKILL.md law 3). Keep the hinge (the sentence that continues into the brand); land on the Vilas spectacle instead.
+
 All three are TikTok downloads (576×~1024, 30fps, HE-AACv2 audio). Each one is a Zack D Films-style 3D story video with a brand ad added to the end. I watched them as 2 fps contact sheets plus a close-up of the seam, with ffmpeg cut detection and an audio-level profile. The dialogue comes from the burned-in captions. Video 2's part 2 has no captions and couldn't be transcribed here, so its words are unknown.
 
 Across the three:

@@ -46,3 +46,5 @@ A Toyota badge, a HYBRID badge and police livery are not creator marks; leave th
 Edited: GOP 0-108 and 274-523; recut 782-915 (non-keyframe cut). 423 frames bit-identical. Re-encoded frames ≥ 42 dB RGB vs source.
 Part 2 6.6s, joined at ≥ 34 dB (laser lines are hard to compress; use `--crf 10`). Voice margin 11.2/10.7/10.9 dB. Master −10.6 LUFS.
 Higgsfield: 0.6 credits (3 takes), 3.26 → 2.66.
+
+**2026-10-12 finding:** this reel's clone (44.1 kHz) was mixed raw at 48 kHz by the old laser `audio.py`, so the shipped voice plays ~9% fast and ~1.5 semitones high (`qa.py voice_in_mix` correlation 0.13 as filed, 0.90 when read at 48 kHz). `audio.py` now resamples with ffmpeg. The spelling in use since 2026-10-12 is `Veelahs Studio` (SKILL.md).

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Find the best places to CUT a story video into a Vilas ending, and say which transition each place supports.
+"""v4 (2026-10-12): this tool NEVER chooses the cut or the video. The cut is the SENTENCE SLOT (references/transitions.md §1-2), read from the captions.
+Use this only to see which MOVE the footage offers near the slot's time (run it with --min-t/--max-t around the slot) and to get its params (circle, focus, motion).
+Its "gap" score (narrator silence) and its VERDICT lines are legacy v3 heuristics: ignore them for picking.
+
+(legacy description) Find the best places to CUT a story video into a Vilas ending, and say which transition each place supports.
 
 This is the "does this video even have a good transition?" check. Run it on every candidate BEFORE picking it, and again on the picked video to choose
 the cut. It looks for the things a transition can grab (see references/transitions.md): a round shape to iris through, a dark/bright focal point to
@@ -22,7 +26,7 @@ import numpy as np, cv2
 
 ap = argparse.ArgumentParser()
 ap.add_argument('video'); ap.add_argument('--out', required=True)
-ap.add_argument('--max-t', type=float, default=24.0, help='latest cut time to consider (the Vilas hook should land by ~20-24 s)')
+ap.add_argument('--max-t', type=float, default=35.0, help='latest time to consider (set it around the sentence slot)')
 ap.add_argument('--min-t', type=float, default=6.0, help='earliest cut time (the story must have paid off a little)')
 ap.add_argument('--top', type=int, default=8)
 a = ap.parse_args()
@@ -156,6 +160,6 @@ for c in keep: print(f"{c['t']:6.1f} {c['kind']:8} {c['total']:5.2f} {c['transit
 print('contact sheet:', os.path.join(a.out, 'candidates.png'))
 best = keep[0] if keep else None
 if not best or best['total'] < 0.45:
-    print('VERDICT: weak. No strong transition point before %.0f s: pick a different video, or accept the universal fallback (doors/glitch) and say so.' % a.max_t)
+    print('MOVES: nothing strong before %.0f s: at the slot use whip (any motion) or doors (calm). The sentence slot, not this tool, decides whether the video is used.' % a.max_t)
 else:
-    print(f"VERDICT: best cut {best['t']:.1f}s -> {best['kind']} (score {best['total']:.2f}). Verify on the sheet that the story has paid off by then.")
+    print(f"MOVES: strongest move candidate {best['t']:.1f}s -> {best['kind']} (score {best['total']:.2f}). Use it only if it is AT the sentence slot; the slot decides the cut.")

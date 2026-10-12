@@ -6,14 +6,14 @@ so these reel-lab rules apply here. Read reel-lab's `references/post.md` and `so
 ## 1. The laws, applied to this format
 | reel-lab law | Applied here |
 |---|---|
-| **Duh test** (if the first thought is "duh", rewrite) | Applies to the Vilas voice line and the echo words. "Websites that look expensive. They weren't." is the safe line; an echo like "Clean cut." only if it isn't a restatement of the last line. Kill any line that merely repeats part 1. |
+| **Duh test** (if the first thought is "duh", rewrite) | Applies to the seam sentence and the slams. "...until it hit Vilas Studio" passes because the brand replaces the payoff the viewer expected. A standalone "Vilas Studio." after a finished line fails. |
 | **Send test** (who sends this, what do they type?) | Write it in `plan.md`. Honest answer for this format: a small-business owner's friend sends it with "you need this", or someone who liked the video sends the twist ("lol the ad at the end"). If the plan has no answer, the transition isn't surprising enough: pick a better one. |
-| **Short and looping beats long and finished** | Total watch time incl. replays is the ranking signal. Shorter is better: this skill now cuts the original at the transition point (a 34 s reel became 24.5 s) and requires the hook by 20 s. Never end on a fade to black; the end card holds >= 1.4 s with the sting. |
-| **Must work on mute** | Captions carry every spoken word, in part 1's caption style, from the landing; the brand is on screen (chip + first line) at landing. |
-| **Specific beats general** | The echo words reuse a noun from this video's last line. The voice line may name the niche of the demo footage ("barbers", "bakeries") only if a demo exists. |
+| **Short and looping beats long and finished** | Total watch time incl. replays is the ranking signal. The cut at the slot drops the original's tail; part 2 is 5.5-7 s. Never end on a fade to black; the end card holds >= 1.4 s with its hit. |
+| **Must work on mute** | The caption chunk after the landing ("hit Vilas Studio") in part 1's caption style, the igniting wordmark and the slams carry it without sound. |
+| **Specific beats general** | The seam reuses THIS video's own sentence and payoff noun; the move continues THIS video's motion. Nothing generic gets pasted on. |
 | **Law 6: why before what** | The story is the belief (the viewer agrees with the fact); the ad is the reveal. The transition IS the turn from belief to product. Don't put the offer before the transition. |
 | **Law 7: never bake a CTA into a generation** | No CTA inside the transition footage. The CTA is the end card + the caption's send/comment prompt. |
-| **Rotate hook families** | The transition type is this format's "family". No two in a row; the QA `sound_variety` gate enforces unique transition + mood inside a batch. |
+| **Rotate hook families** | The move + style is this format's "family". No two in a row; `qa.py sound_variety` enforces a unique move + music inside a batch. |
 
 ## 2. Account gate (ask once, default Business)
 Reel-lab: Personal/Creator accounts can use Instagram's full music library; a **Business account** (@vilaswebdesign, client-facing) is limited to the Meta Sound Collection, commercial tracks get muted/region-blocked and the

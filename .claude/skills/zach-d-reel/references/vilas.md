@@ -3,7 +3,7 @@
 Last checked against the Jarvis repo (`lib/site.ts`, `lib/pricing.ts`) on 2026-10-06. If you have the repo or the web, re-check prices on vilas.studio before quoting any. If you can't, use "from $300".
 
 ## Facts
-- **Name:** Vilas (VEE-las). Wordmark "Vilas Studio". Domain **vilas.studio**.
+- **Name:** Vilas (spoken VEE-lahs, stress on VEE; spelled `Veelahs` in any text sent to a voice model, never on screen). Wordmark "Vilas Studio". Domain **vilas.studio**.
 - **What it does:** websites for local small businesses that look like they cost 10× more than they did.
 - **Tagline:** "A website that looks expensive. It wasn't."
 - **Where:** fully remote, working with businesses anywhere in the US. Don't make it a Long Island-only pitch, and skip #longisland.
@@ -32,13 +32,7 @@ Clients we don't have, testimonials, review counts, star ratings, "trusted by", 
 - Motion: ease `cubic-bezier(0.16,1,0.3,1)`, no bounce, fades and slides only.
 - The hinge and turn beats wear **part 1's** look (its captions, its energy). Only the offer beats and the end card switch to the Vilas look.
 
-## Assets: real footage of the demo sites is in `assets/vilas-site/`
-The bridge ending (default) uses these 4 s, 720x1280 clips of the nine demo sites (hero + scroll, demo toolbar hidden, the demo's own "DEMO BUILD" label and our chip "A VILAS.STUDIO DEMO" visible). The laser template needs none of this.
-Regenerate with `scripts/capture_site.mjs` when the demos change. The list below is for a LONG-FORM spoken ad only. Only a long-form, spoken ad (SKILL.md appendix) needs them. Never substitute a placeholder box for any of them: if you lack them, build the hype ending.
-Have these before building a long-form ad. In the Jarvis repo, capture them with Playwright from the live site. Anywhere else, ask Noah to upload screen recordings (phone or desktop, vertical if possible):
-1. vilas.studio hero, with the wordmark reveal playing (3–4s)
-2. Scrolling the gallery, then a demo card opening (4–6s)
-3. A smooth scroll through one demo that fits the story's niche (food story → bakery demo, cars → auto body, water/cleaning → power washing, outdoors → landscaping or lawn care, haircut/style → barber, flowers/gifts → florist, building/house → renovation)
-4. Optional: a phone in a hand showing the site (real footage Noah films), which is the strongest "screen in the world" landing shot
-
-Cropping or reframing **these** is fine. They're our assets, not the original.
+## Assets for a reel: none. No website, ever (2026-10-12)
+Part 2 of a reel never shows a website, a demo site, a browser, a phone or laptop screen, a UI or a "demo" chip (SKILL.md law 3; Noah: "not showing a demo website, that's a no-no").
+The Vilas part is the spectacle in `assets/hype-ending` (metal wordmark, lasers, slams, end card). The demo-site footage and its capture script were deleted from this skill on 2026-10-12.
+The demo niches above matter only for the wording of a message-bank line in the post caption ("Built for barbers, bakeries, florists...").

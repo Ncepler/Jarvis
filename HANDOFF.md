@@ -1,6 +1,10 @@
 # HANDOFF — updated 2026-10-11 (zach-d-reel v3 transition-first; reel batches 1–3; site state below is from main, merged in)
 
 ## Marketing — new format (2026-10-06)
+- **2026-10-12: zach-d-reel v4 = "the seam is a sentence"** (skill only, no reels made). Noah's three v3 reels (sea lion, car/brain, brain) were "well edited" moves placed where nothing flows, landing on a scrolling demo website, with no voice (measured: no speech energy in part 2; `qa.py voice_in_mix` 0.03-0.16). His model is the railgun ("until it hit | Vilas Studio" + laser drop).
+  v4: pick videos for a SENTENCE SLOT (the narrator's sentence finishes with "Vilas Studio"; scorecard in `references/transitions.md`); part 1's last frame moves (new `assets/hype-ending/comp/bridge.js`, `"opening": "bridge"`, `scripts/prep_spectacle.sh`) into the photoreal-ish Vilas spectacle (extruded metal wordmark, floor reflections, bloom, grain) then the laser drop; NEVER a website (assets/bridge + assets/vilas-site + capture/prep scripts deleted).
+  Voice required: `qa.py` adds `voice_in_mix` (waveform found in the final at the landing) and has no voiceless pass; laser `audio.py` now resamples the voice (the vehicle reel's 44.1 kHz clone had shipped 9% fast). Brand spelled `Veelahs Studio` for voice models (never on screen). snaptik.app approved; Higgsfield = audio only.
+  Test build (scratch only) passed every gate. **Noah must re-upload `zach-d-reel-v4.zip` as the claude.ai skill** (replaces v3.1) for the other chat to get it.
 - **Skill `.claude/skills/zach-d-reel/`** (replaces the short-lived `trojan-reel`): Noah uploads a Zack D Films-style story video (part 1).
   We append a part 2 that hooks the video's last line/last image and lands it on vilas.studio. **The original is never edited unless Noah asks.**
   Updated 2026-10-07 with everything learned on the railgun reel: word-swap hinge, voice clone recipe (Higgsfield), covering the creator's marks,
