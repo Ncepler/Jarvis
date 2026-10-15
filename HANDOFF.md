@@ -1,4 +1,13 @@
-# HANDOFF — updated 2026-10-06 (chat add-on finished + mobile toggle fix)
+# HANDOFF — updated 2026-10-15 (Ilios 3D concept added; site itself unchanged)
+
+## Side work on branch `claude/manimgx-solar-system-3d-l1ud71` (2026-10-15)
+- `ilios-3d/` = client concept for **Ilios Froyo** (Roslyn): photoreal 3D froyo cup
+  + soft-serve machine (GLB, meshopt + Draco), Cycles renders, and a plain-HTML
+  scroll hero ("pull the handle → pour → swirl builds in the cup"). Built from
+  code with Blender-as-a-module; see `ilios-3d/README.md`.
+- Self-contained, NOT part of the Next build (no imports from `app/`; tsconfig
+  only includes .ts/.tsx). Per CLAUDE.md "no client sites in this repo": move it
+  to its own repo once Noah approves the concept.
 
 ## Current state
 - **Fixed a real mobile bug in `VilasDemoBar`'s tier toggle**
