@@ -34,3 +34,8 @@ assemble.py: ALL CHECKS PASSED. Voice margin over everything else (audio.py): 15
 
 ## Risks (said once)
 1. Rights/originality: the 8.1 s of picture and sound design are another studio's ad (FYD Studios). No FYD logo, name or URL is in the kept part, but it is their footage. 2. The voice is a stock preset, not a clone: nothing in this reel is the "narrator". 3. See reel-lab-notes.md §4 (reposted-footage reels can cost recommendation eligibility).
+
+## Posted
+https://www.instagram.com/reel/DekGUFwk5jl/  (media id 17914119906471433, container 18114589220012004, 2026-10-16 17:44 UTC), Reel + shared to feed, cover frame thumb_offset 1400 ms.
+Caption verified as posted (hashtags are literal "#", not "%23": the 2026-10-10 shark defect did not recur when `#` is sent unencoded).
+Method: brag.mp4 committed at a13812d (public repo), posted from the pinned raw.githubusercontent URL, then removed from the branch; still reachable in git history at a13812d.
