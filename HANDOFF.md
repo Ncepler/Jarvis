@@ -1,4 +1,4 @@
-# HANDOFF — updated 2026-10-15 (Ilios 3D concept added; site itself unchanged)
+# HANDOFF — updated 2026-10-16 (Ilios 3D: froyo is now a simulated yield-stress paste; site itself unchanged)
 
 ## Side work on branch `claude/manimgx-solar-system-3d-l1ud71` (2026-10-15)
 - `ilios-3d/` = client concept for **Ilios Froyo** (Roslyn): photoreal 3D froyo cup
