@@ -38,15 +38,39 @@ function TypingDots() {
   );
 }
 
+// A small blinking caret at the end of the reply bubble while it's still
+// streaming in — reinforces that the text arriving word by word is live,
+// not a typo. Reduced motion gets a steady caret instead of a blink.
+function Caret() {
+  const reduced = useReducedMotion();
+  return (
+    <motion.span
+      aria-hidden="true"
+      className="ml-0.5 inline-block h-3.5 w-[2px] translate-y-[2px] bg-current align-middle"
+      animate={reduced ? { opacity: 1 } : { opacity: [1, 1, 0, 0] }}
+      transition={reduced ? undefined : { duration: 0.9, repeat: Infinity, times: [0, 0.5, 0.5, 1] }}
+    />
+  );
+}
+
+type StreamEvent =
+  | { type: "chunk"; text: string }
+  | { type: "done"; remaining: number }
+  | { type: "error"; error: string };
+
 function useChat({ siteSlug, apiUrl = "/api/chat" }: { siteSlug: string; apiUrl?: string }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // pending = waiting on the first chunk (shows the typing dots). streaming
+  // = the reply bubble exists and is still growing (the dots have handed
+  // off to the text itself arriving word by word).
   const [pending, setPending] = useState(false);
+  const [streaming, setStreaming] = useState(false);
   const [limited, setLimited] = useState<Limited>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
 
   async function send(text: string) {
     const trimmed = text.trim();
-    if (!trimmed || pending || limited) return;
+    if (!trimmed || pending || streaming || limited) return;
     const next = [...messages, { role: "user" as const, content: trimmed }];
     setMessages(next);
     setPending(true);
@@ -61,21 +85,64 @@ function useChat({ siteSlug, apiUrl = "/api/chat" }: { siteSlug: string; apiUrl?
         setLimited(data.limited === "site" ? "site" : "visitor");
         return;
       }
-      if (!res.ok) {
+      if (!res.ok || !res.body) {
         setLimited("error");
         return;
       }
-      const data = (await res.json()) as { reply: string; remaining: number };
-      setMessages((cur) => [...cur, { role: "assistant", content: data.reply }]);
-      setRemaining(data.remaining);
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let started = false;
+      let gotError = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          let event: StreamEvent;
+          try {
+            event = JSON.parse(line) as StreamEvent;
+          } catch {
+            continue;
+          }
+          if (event.type === "chunk") {
+            if (!started) {
+              started = true;
+              setPending(false);
+              setStreaming(true);
+              setMessages((cur) => [...cur, { role: "assistant", content: "" }]);
+            }
+            setMessages((cur) => {
+              const copy = cur.slice();
+              const last = copy[copy.length - 1];
+              copy[copy.length - 1] = { ...last, content: last.content + event.text };
+              return copy;
+            });
+          } else if (event.type === "done") {
+            setRemaining(event.remaining);
+          } else if (event.type === "error") {
+            gotError = true;
+          }
+        }
+      }
+
+      if (gotError && !started) {
+        setLimited("error");
+      }
     } catch {
       setLimited("error");
     } finally {
       setPending(false);
+      setStreaming(false);
     }
   }
 
-  return { messages, pending, limited, remaining, send };
+  return { messages, pending, streaming, limited, remaining, send };
 }
 
 // iMessage-style bubble: fully rounded, no border, a small round tail
@@ -130,14 +197,18 @@ function ChatBody({
   apiUrl,
   panel,
 }: ChatAssistantProps & { panel?: boolean }) {
-  const { messages, pending, limited, remaining, send } = useChat({ siteSlug, apiUrl });
+  const { messages, pending, streaming, limited, remaining, send } = useChat({
+    siteSlug,
+    apiUrl,
+  });
   const [draft, setDraft] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const busy = pending || streaming;
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
-  }, [messages, pending]);
+  }, [messages, pending, streaming]);
 
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -176,9 +247,11 @@ function ChatBody({
           const grouped = i > 0 && messages[i - 1].role === m.role;
           const tail = i === messages.length - 1 || messages[i + 1].role !== m.role;
           const spacing = i === 0 ? "none" : grouped ? "tight" : "loose";
+          const isLive = streaming && i === messages.length - 1 && m.role === "assistant";
           return (
             <Bubble key={i} role={m.role} tail={tail} spacing={spacing}>
               {m.content}
+              {isLive && <Caret />}
             </Bubble>
           );
         })}
@@ -217,7 +290,7 @@ function ChatBody({
               />
               <button
                 type="submit"
-                disabled={pending || !draft.trim()}
+                disabled={busy || !draft.trim()}
                 aria-label="Send"
                 className="press flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-bg disabled:opacity-40"
               >

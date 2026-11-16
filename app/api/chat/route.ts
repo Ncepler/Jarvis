@@ -14,6 +14,9 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const CHAT_MODEL = process.env.CHAT_MODEL;
 const DAILY_MESSAGE_LIMIT = Number(process.env.CHAT_DAILY_MESSAGE_LIMIT ?? "10");
 const SITE_DAILY_LIMIT = Number(process.env.CHAT_SITE_DAILY_LIMIT ?? "400");
+// How many prior turns ride along as context — OpenAI's window is far bigger
+// than this, so there's no reason to starve it the way a smaller slice did.
+const CONTEXT_MESSAGE_LIMIT = Number(process.env.CHAT_CONTEXT_MESSAGES ?? "20");
 const IP_HASH_SALT = process.env.IP_HASH_SALT;
 const ALLOWED_ORIGINS = (process.env.CHAT_ALLOWED_ORIGINS ?? "")
   .split(",")
@@ -223,11 +226,13 @@ export async function POST(req: Request) {
     process.env[`OPENAI_API_KEY_${siteSlug.toUpperCase().replace(/-/g, "_")}`];
   const apiKey = perClientKey || OPENAI_API_KEY;
 
-  // f. Call OpenAI — plain fetch, non-streaming, last 6 messages + system.
-  const recent = messages.slice(-6);
-  let reply: string;
+  // f. Call OpenAI with streaming on, so the client can render the reply as
+  // it's generated instead of waiting for the whole thing. Last
+  // CONTEXT_MESSAGE_LIMIT messages + system prompt.
+  const recent = messages.slice(-CONTEXT_MESSAGE_LIMIT);
+  let openaiRes: Response;
   try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -235,36 +240,84 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         model: CHAT_MODEL,
-        max_tokens: 250,
+        max_tokens: 350,
+        stream: true,
         messages: [
           { role: "system", content: systemPrompt(facts) },
           ...recent.map((m) => ({ role: m.role, content: m.content })),
         ],
       }),
     });
-    if (!res.ok) throw new Error("openai error");
-    const data = await res.json();
-    reply = data?.choices?.[0]?.message?.content;
-    if (typeof reply !== "string" || !reply) throw new Error("empty reply");
   } catch {
-    // Never a stack trace, never the model name, never the key. A failed
-    // call doesn't burn one of the visitor's messages — return before the
-    // counters below are touched.
-    return bad(
-      { error: "Chat is unavailable right now." },
-      502,
-      origin,
-    );
+    return bad({ error: "Chat is unavailable right now." }, 502, origin);
+  }
+  // A failure here happens before any bytes go to the client, so it can
+  // still be a normal JSON error — never a stack trace, the model name, or
+  // the key. A failed call doesn't burn one of the visitor's messages.
+  if (!openaiRes.ok || !openaiRes.body) {
+    return bad({ error: "Chat is unavailable right now." }, 502, origin);
   }
 
-  // g. Only increment after a successful response.
-  await Promise.all([
-    bumpCount("chat_usage", "visitor_hash", vHash, day, visitorCount),
-    bumpCount("chat_site_usage", "site_slug", siteSlug, day, siteCount),
-  ]);
+  // g. Re-parse OpenAI's SSE stream and forward it to the client as
+  // newline-delimited JSON events ({type:"chunk"|"done"|"error"}). The
+  // per-visitor/per-site counters only increment once the reply actually
+  // came through, same rule as before — just checked after the stream ends
+  // instead of after one big response.
+  const encoder = new TextEncoder();
+  const upstream = openaiRes.body;
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const send = (event: Record<string, unknown>) =>
+        controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+      const reader = upstream.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let full = "";
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith("data:")) continue;
+            const data = trimmed.slice(5).trim();
+            if (!data || data === "[DONE]") continue;
+            let delta: unknown;
+            try {
+              delta = JSON.parse(data)?.choices?.[0]?.delta?.content;
+            } catch {
+              continue;
+            }
+            if (typeof delta === "string" && delta) {
+              full += delta;
+              send({ type: "chunk", text: delta });
+            }
+          }
+        }
+      } catch {
+        // fall through — handled by the `!full` check below
+      }
 
-  return NextResponse.json(
-    { reply, remaining: Math.max(0, DAILY_MESSAGE_LIMIT - visitorCount - 1) },
-    { headers: corsHeaders(origin) },
-  );
+      if (!full) {
+        send({ type: "error", error: "Chat is unavailable right now." });
+        controller.close();
+        return;
+      }
+
+      await Promise.all([
+        bumpCount("chat_usage", "visitor_hash", vHash, day, visitorCount),
+        bumpCount("chat_site_usage", "site_slug", siteSlug, day, siteCount),
+      ]);
+      send({ type: "done", remaining: Math.max(0, DAILY_MESSAGE_LIMIT - visitorCount - 1) });
+      controller.close();
+    },
+  });
+
+  return new Response(stream, {
+    status: 200,
+    headers: { ...corsHeaders(origin), "Content-Type": "application/x-ndjson" },
+  });
 }
